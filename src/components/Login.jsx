@@ -1,27 +1,92 @@
-Login · JSX
-Copiar
-
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../supabaseClient'
- 
+
+/**
+ * ============================================================
+ * CONFIGURACIÓN OBLIGATORIA EN SUPABASE ANTES DE USAR ESTO
+ * ============================================================
+ *
+ * 1. Authentication → Rate Limits → subir TODOS estos valores:
+ *    - "Send emails"                    → 60 per hour  (default: 3 — absurdamente bajo)
+ *    - "Token refreshes"                → 360 per hour
+ *    - "Sign ups"                       → 60 per hour  (default: 3)
+ *    - "Password reset"                 → 60 per hour  (default: 3)
+ *    - "Magic link"                     → 60 per hour
+ *
+ * 2. Authentication → Attack Protection → HCaptcha:
+ *    - Si está habilitado, asegurate de tener el sitekey correcto en el frontend.
+ *    - Si no necesitás captcha, podés desactivarlo.
+ *
+ * 3. Authentication → URL Configuration → Site URL:
+ *    → https://tudominio.com
+ *
+ * 4. Authentication → URL Configuration → Redirect URLs (agregar TODAS):
+ *    → https://tudominio.com/admin
+ *    → https://tudominio.com/actualizar-clave
+ *
+ * 5. Authentication → Providers → Google → Authorized redirect URI en Google Cloud:
+ *    → https://<tu-proyecto>.supabase.co/auth/v1/callback
+ * ============================================================
+ */
+
+// Tiempo de cooldown en segundos que se aplica client-side después de un rate limit.
+// Esto evita que el usuario reintente y acumule más bloqueos en Supabase.
+const COOLDOWN_SEGUNDOS = 60
+
 export default function Login() {
   // --- ESTADOS DEL FORMULARIO Y NAVEGACIÓN ---
   const [mode, setMode] = useState('login') // 'login' | 'registro' | 'recuperar'
- 
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
- 
+
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
- 
+
   // --- ESTADOS DE ALERTAS Y SEGURIDAD ---
   const [mensaje, setMensaje] = useState(null)
   const [passwordStrength, setPasswordStrength] = useState(0)
- 
+
+  // --- RATE LIMIT: COOLDOWN CLIENT-SIDE ---
+  // Cuando Supabase devuelve rate limit, activamos un countdown visible.
+  // El botón queda deshabilitado durante el cooldown para evitar reintentos
+  // que acumularían más bloqueos en el servidor.
+  const [cooldown, setCooldown] = useState(0) // segundos restantes
+  const cooldownRef = useRef(null)
+
   /**
-   * EFECTO: Limpieza de seguridad al cambiar de modo
+   * Activa el cooldown client-side por N segundos.
+   * Muestra cuenta regresiva en la UI y libera el botón al terminar.
+   */
+  const activarCooldown = useCallback((segundos = COOLDOWN_SEGUNDOS) => {
+    setCooldown(segundos)
+    if (cooldownRef.current) clearInterval(cooldownRef.current)
+
+    cooldownRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current)
+          cooldownRef.current = null
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }, [])
+
+  // Limpiar el interval al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current)
+    }
+  }, [])
+
+  /**
+   * EFECTO: Limpieza de seguridad al cambiar de modo.
+   * No cancelamos el cooldown al cambiar de modo: si Supabase bloqueó,
+   * el bloqueo aplica al mismo email independientemente del modo.
    */
   useEffect(() => {
     setMensaje(null)
@@ -30,10 +95,10 @@ export default function Login() {
     setAcceptTerms(false)
     setPasswordStrength(0)
   }, [mode])
- 
+
   /**
-   * EFECTO: Evaluar fuerza de la contraseña en tiempo real
-   * Se ejecuta solo cuando el modo es 'registro' para evitar renders innecesarios
+   * EFECTO: Evaluar fuerza de la contraseña en tiempo real.
+   * Solo corre en modo 'registro' para evitar renders innecesarios.
    */
   useEffect(() => {
     if (mode !== 'registro' || !password) {
@@ -47,107 +112,123 @@ export default function Login() {
     if (/[^A-Za-z0-9]/.test(password)) score += 1
     setPasswordStrength(score)
   }, [password, mode])
- 
+
   /**
-   * FIX #1 - PERFORMANCE: Validación de email memoizada para evitar recreación en cada render
+   * UTILIDAD: Validación de email memoizada.
    */
   const isValidEmail = useCallback((email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }, [])
- 
+
   /**
-   * UTILIDAD: Diccionario de errores de Supabase
+   * UTILIDAD: Detecta si un error de Supabase es de tipo rate limit.
+   * Supabase puede devolver el rate limit con varios mensajes distintos.
+   */
+  const esRateLimit = useCallback((msg) => {
+    const lower = msg.toLowerCase()
+    return (
+      lower.includes('rate limit') ||
+      lower.includes('too many requests') ||
+      lower.includes('over_email_send_rate_limit') ||
+      lower.includes('email rate limit exceeded') ||
+      lower.includes('for security purposes') ||
+      lower.includes('you can only request this')
+    )
+  }, [])
+
+  /**
+   * UTILIDAD: Extrae el tiempo de espera sugerido del mensaje de error de Supabase.
+   * Algunos mensajes incluyen "after X seconds". Si no encuentra nada, usa COOLDOWN_SEGUNDOS.
+   */
+  const extraerSegundosDeEspera = useCallback((msg) => {
+    const match = msg.match(/after (\d+) second/i)
+    if (match) return Math.max(parseInt(match[1], 10), COOLDOWN_SEGUNDOS)
+    return COOLDOWN_SEGUNDOS
+  }, [])
+
+  /**
+   * UTILIDAD: Diccionario de errores de Supabase → mensajes en español.
    */
   const traducirError = useCallback((errorMsg) => {
     const msg = errorMsg.toLowerCase()
-    if (msg.includes('invalid login credentials')) return 'Credenciales incorrectas. Verifica tu correo y contraseña.'
+    if (esRateLimit(errorMsg)) {
+      return `Demasiados intentos. Esperá ${COOLDOWN_SEGUNDOS} segundos antes de volver a intentarlo.`
+    }
+    if (msg.includes('invalid login credentials')) return 'Credenciales incorrectas. Verificá tu correo y contraseña.'
     if (msg.includes('user already registered')) return 'El correo electrónico ya posee una cuenta activa.'
-    if (msg.includes('rate limit')) return 'Tráfico inusual detectado. Por favor, espera 60 segundos.'
-    if (msg.includes('email link is invalid') || msg.includes('token has expired')) return 'El token de seguridad ha expirado. Solicita un nuevo enlace.'
-    if (msg.includes('not confirmed')) return 'Debes verificar tu correo electrónico antes de iniciar sesión.'
-    if (msg.includes('email not confirmed')) return 'Tu correo no está confirmado. Revisa tu bandeja de entrada.'
+    if (msg.includes('email link is invalid') || msg.includes('token has expired')) return 'El token de seguridad ha expirado. Solicitá un nuevo enlace.'
+    if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return 'Debés confirmar tu correo electrónico antes de iniciar sesión.'
     if (msg.includes('signup disabled')) return 'El registro está deshabilitado temporalmente.'
     if (msg.includes('weak password')) return 'La contraseña es demasiado débil según las políticas del servidor.'
+    if (msg.includes('redirect') || msg.includes('not allowed')) return 'URL de redirección no permitida. Revisá la configuración de Supabase.'
     return `Error: ${errorMsg}`
-  }, [])
- 
+  }, [esRateLimit])
+
   /**
-   * FIX #4 - GOOGLE OAUTH: Se fuerza cierre de sesión activa antes del login social
-   * y se agrega queryParams con prompt: 'select_account' para que Google
-   * siempre muestre el selector de cuentas y no reutilice una sesión en caché.
-   * Esto impide que el usuario sea enviado a una cuenta distinta.
+   * MANEJO DE LOGIN SOCIAL (GOOGLE / GITHUB).
+   * Fix: Se cierra sesión activa previa y se fuerza prompt: 'select_account'
+   * en Google para evitar que reutilice una sesión cacheada del navegador.
    */
   const handleSocialLogin = async (provider) => {
+    if (cooldown > 0) return
     setLoading(true)
     setMensaje(null)
- 
+
     try {
-      // Cerrar cualquier sesión activa primero para evitar conflicto de cuentas
       const { data: sessionData } = await supabase.auth.getSession()
       if (sessionData?.session) {
         await supabase.auth.signOut()
       }
- 
-      const oauthOptions = {
-        provider: provider,
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
         options: {
           redirectTo: `${window.location.origin}/admin`,
-          // FIX: Forzar selector de cuenta en Google para no reutilizar sesiones cacheadas
           ...(provider === 'google' && {
             queryParams: {
               access_type: 'offline',
-              prompt: 'select_account', // Siempre muestra el selector de cuenta de Google
+              prompt: 'select_account',
             },
           }),
         },
-      }
- 
-      const { error } = await supabase.auth.signInWithOAuth(oauthOptions)
- 
+      })
+
       if (error) {
         setMensaje({ tipo: 'error', texto: `Error en pasarela ${provider}: ${error.message}` })
         setLoading(false)
       }
-      // Si no hay error, el navegador redirige a Google/GitHub y loading queda en true (correcto)
     } catch (err) {
       setMensaje({ tipo: 'error', texto: `Error inesperado: ${err.message}` })
       setLoading(false)
     }
   }
- 
+
   /**
-   * FIX #2 - RECUPERAR CONTRASEÑA: Se corrige el redirectTo para que apunte
-   * a la URL exacta donde Supabase enviará el token OTP.
-   * El problema original: la URL '/actualizar-clave' podría no existir o 
-   * no estar registrada en Supabase como URL permitida (Site URL / Redirect URLs).
-   *
-   * IMPORTANTE: Debes agregar esta URL en tu panel de Supabase:
-   * Authentication > URL Configuration > Redirect URLs:
-   * - http://localhost:5173/actualizar-clave  (desarrollo)
-   * - https://tudominio.com/actualizar-clave  (producción)
-   *
-   * FIX #3 - REGISTRO: Se agrega manejo correcto de todos los estados posibles
-   * al registrar un usuario (email confirmado, no confirmado, ya existente).
+   * MOTOR PRINCIPAL DE AUTENTICACIÓN.
    */
   const handleAuth = async (e) => {
     e.preventDefault()
+
+    // Bloqueo duro client-side si hay cooldown activo
+    if (cooldown > 0) return
+
     setMensaje(null)
- 
+
     const cleanEmail = email.trim().toLowerCase()
- 
+
+    // --- Validaciones pre-request (sin tocar la red) ---
     if (!cleanEmail) {
       return setMensaje({ tipo: 'error', texto: 'Se requiere una dirección de correo electrónico.' })
     }
     if (!isValidEmail(cleanEmail)) {
       return setMensaje({ tipo: 'error', texto: 'El formato del correo ingresado no es válido.' })
     }
- 
     if (mode === 'registro') {
       if (password.length === 0) {
-        return setMensaje({ tipo: 'error', texto: 'Debes ingresar una contraseña.' })
+        return setMensaje({ tipo: 'error', texto: 'Debés ingresar una contraseña.' })
       }
       if (passwordStrength < 3) {
-        return setMensaje({ tipo: 'error', texto: 'La clave es demasiado débil. Usa letras mayúsculas, números y símbolos.' })
+        return setMensaje({ tipo: 'error', texto: 'La clave es demasiado débil. Usá letras mayúsculas, números y símbolos.' })
       }
       if (password !== confirmPassword) {
         return setMensaje({ tipo: 'error', texto: 'Las contraseñas de seguridad no coinciden.' })
@@ -156,135 +237,141 @@ export default function Login() {
         return setMensaje({ tipo: 'error', texto: 'Es obligatorio aceptar los Términos y Condiciones.' })
       }
     }
- 
     if (mode === 'login' && password.length === 0) {
-      return setMensaje({ tipo: 'error', texto: 'Debes ingresar tu contraseña de acceso.' })
+      return setMensaje({ tipo: 'error', texto: 'Debés ingresar tu contraseña de acceso.' })
     }
- 
+
     setLoading(true)
- 
+
     try {
+      // ─────────────────────────────────────────────
+      // MODO: REGISTRO
+      // ─────────────────────────────────────────────
       if (mode === 'registro') {
-        // FIX #3: Registro correcto con manejo de todos los casos de Supabase
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
-          password: password,
+          password,
           options: {
-            // emailRedirectTo se usa para el link de confirmación de email
             emailRedirectTo: `${window.location.origin}/admin`,
           },
         })
- 
+
         if (error) {
-          // Caso especial: usuario ya registrado pero no confirmado
-          // Supabase a veces retorna un usuario fantasma en lugar de error
-          if (error.message.toLowerCase().includes('user already registered')) {
-            throw new Error('user already registered')
+          if (esRateLimit(error.message)) {
+            const segundos = extraerSegundosDeEspera(error.message)
+            activarCooldown(segundos)
+            return setMensaje({
+              tipo: 'error',
+              texto: `Límite de registros alcanzado. Esperá ${segundos} segundos antes de intentar nuevamente.`,
+            })
           }
           throw error
         }
- 
-        // Caso 1: Supabase tiene "Confirm email" HABILITADO
-        // data.user existe pero data.session es null → hay que confirmar email
-        if (data?.user && !data.session) {
-          // Verificar si es un usuario "fantasma" (identities vacías = ya existe)
-          if (data.user.identities && data.user.identities.length === 0) {
-            setMensaje({
-              tipo: 'error',
-              texto: 'El correo electrónico ya posee una cuenta activa.',
-            })
-          } else {
-            setMensaje({
-              tipo: 'exito',
-              texto: '¡Registro exitoso! Revisa tu bandeja de entrada (o spam) para activar tu cuenta.',
-            })
-            setMode('login')
-          }
-          return
+
+        // Usuario fantasma: email ya existe pero Supabase devuelve user con identities vacías
+        if (data?.user && data.user.identities && data.user.identities.length === 0) {
+          return setMensaje({
+            tipo: 'error',
+            texto: 'El correo electrónico ya posee una cuenta activa.',
+          })
         }
- 
-        // Caso 2: Supabase tiene "Confirm email" DESHABILITADO
-        // data.session existe → el usuario ya está logueado automáticamente
-        if (data?.session) {
-          // La sesión se creó automáticamente, no hace falta hacer nada más.
-          // El listener de auth en tu app debería detectar el cambio de sesión
-          // y redirigir al panel /admin.
+
+        // Caso A: Confirm email = ON → sesión null, hay que confirmar email
+        if (data?.user && !data.session) {
           setMensaje({
             tipo: 'exito',
-            texto: '¡Cuenta creada! Redirigiendo...',
+            texto: '¡Registro exitoso! Revisá tu bandeja de entrada (o spam) para confirmar tu cuenta.',
           })
+          setMode('login')
           return
         }
- 
-        // Caso inesperado
-        setMensaje({
-          tipo: 'error',
-          texto: 'Respuesta inesperada del servidor. Intenta nuevamente.',
-        })
- 
+
+        // Caso B: Confirm email = OFF → sesión activa automáticamente
+        if (data?.session) {
+          setMensaje({ tipo: 'exito', texto: '¡Cuenta creada! Redirigiendo...' })
+          return
+        }
+
+        setMensaje({ tipo: 'error', texto: 'Respuesta inesperada del servidor. Intentá nuevamente.' })
+
+      // ─────────────────────────────────────────────
+      // MODO: LOGIN
+      // ─────────────────────────────────────────────
       } else if (mode === 'login') {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
-          password: password,
+          password,
         })
-        if (error) throw error
- 
-        // Si el login fue exitoso pero no hay sesión (raro, pero contemplado)
-        if (!data.session) {
-          throw new Error('No se pudo iniciar sesión. Verifica tus credenciales.')
-        }
-        // El listener de auth de tu app detectará la sesión y redirigirá
- 
-      } else if (mode === 'recuperar') {
-        // FIX #2: El redirectTo debe estar registrado en Supabase
-        // Panel Supabase → Authentication → URL Configuration → Redirect URLs
-        // Agrega: http://localhost:5173/actualizar-clave (dev) y tu dominio (prod)
-        const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-          redirectTo: `${window.location.origin}/actualizar-clave`,
-        })
- 
+
         if (error) {
-          // Supabase a veces devuelve éxito aunque el email no exista (por seguridad)
-          // Solo propagamos errores reales de configuración
-          if (
-            error.message.toLowerCase().includes('redirect') ||
-            error.message.toLowerCase().includes('not allowed') ||
-            error.message.toLowerCase().includes('invalid')
-          ) {
-            throw new Error(
-              'URL de redirección no permitida. Revisa la configuración de Supabase (Authentication → URL Configuration).'
-            )
+          if (esRateLimit(error.message)) {
+            const segundos = extraerSegundosDeEspera(error.message)
+            activarCooldown(segundos)
+            return setMensaje({
+              tipo: 'error',
+              texto: `Demasiados intentos de login. Esperá ${segundos} segundos.`,
+            })
           }
           throw error
         }
- 
+
+        if (!data.session) {
+          throw new Error('No se pudo establecer sesión. Verificá tus credenciales.')
+        }
+
+      // ─────────────────────────────────────────────
+      // MODO: RECUPERAR CONTRASEÑA
+      // ─────────────────────────────────────────────
+      } else if (mode === 'recuperar') {
+        const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+          redirectTo: `${window.location.origin}/actualizar-clave`,
+        })
+
+        if (error) {
+          if (esRateLimit(error.message)) {
+            const segundos = extraerSegundosDeEspera(error.message)
+            activarCooldown(segundos)
+            return setMensaje({
+              tipo: 'error',
+              texto: `Demasiados intentos de recuperación. Esperá ${segundos} segundos antes de volver a solicitar el enlace.`,
+            })
+          }
+          if (
+            error.message.toLowerCase().includes('redirect') ||
+            error.message.toLowerCase().includes('not allowed')
+          ) {
+            throw new Error('URL de redirección no permitida. Revisá Authentication → URL Configuration en Supabase.')
+          }
+          throw error
+        }
+
+        // Supabase siempre responde "éxito" aunque el email no exista (seguridad anti-enumeration)
         setMensaje({
           tipo: 'exito',
-          texto: 'Si el correo existe en nuestro sistema, recibirás las instrucciones para restablecer tu contraseña.',
+          texto: 'Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.',
         })
+        // Cooldown suave de 30s para que no pueda spammear el botón
+        activarCooldown(30)
         setMode('login')
       }
+
     } catch (error) {
       setMensaje({ tipo: 'error', texto: traducirError(error.message) })
     } finally {
       setLoading(false)
     }
   }
- 
-  // FIX #1 - PERFORMANCE: Objeto de config UI fuera del render (no se recrea en cada ciclo)
+
   const configUI = {
-    login: { titulo: 'Bienvenido', subtitulo: 'Accedé al panel de Non Sistemas.', btn: 'Entrar al entorno' },
-    registro: { titulo: 'Crear Cuenta', subtitulo: 'Desplegá tu infraestructura hoy.', btn: 'Aprovisionar servidor' },
-    recuperar: { titulo: 'Recuperar Acceso', subtitulo: 'Ingresa tu correo para restablecer.', btn: 'Enviar protocolo' },
+    login:     { titulo: 'Bienvenido',       subtitulo: 'Accedé al panel de Non Sistemas.',    btn: 'Entrar al entorno'    },
+    registro:  { titulo: 'Crear Cuenta',     subtitulo: 'Desplegá tu infraestructura hoy.',    btn: 'Aprovisionar servidor'},
+    recuperar: { titulo: 'Recuperar Acceso', subtitulo: 'Ingresá tu correo para restablecer.', btn: 'Enviar protocolo'     },
   }
- 
-  // FIX #1 - PERFORMANCE: renderPasswordMeter como función pura sin recreación innecesaria
+
   const renderPasswordMeter = () => {
     if (mode !== 'registro' || !password) return null
- 
     const colors = ['bg-red-500', 'bg-orange-400', 'bg-blue-400', 'bg-emerald-500']
     const labels = ['Muy débil', 'Débil', 'Aceptable', 'Fuerte']
- 
     return (
       <div className="mt-2 md:mt-3 animate-in fade-in duration-300">
         <div className="flex gap-1 md:gap-1.5 h-1 md:h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
@@ -294,45 +381,65 @@ export default function Login() {
               className={`h-full flex-1 transition-all duration-500 ${
                 passwordStrength >= level ? colors[passwordStrength - 1] : 'bg-transparent'
               }`}
-            ></div>
+            />
           ))}
         </div>
-        <p
-          className={`text-[8px] md:text-[9px] font-bold uppercase tracking-widest mt-1 md:mt-1.5 text-right transition-colors ${
-            passwordStrength < 3 ? 'text-white/40' : 'text-emerald-400'
-          }`}
-        >
+        <p className={`text-[8px] md:text-[9px] font-bold uppercase tracking-widest mt-1 md:mt-1.5 text-right transition-colors ${
+          passwordStrength < 3 ? 'text-white/40' : 'text-emerald-400'
+        }`}>
           Nivel: {labels[Math.max(0, passwordStrength - 1)]}
         </p>
       </div>
     )
   }
- 
+
+  // El botón está deshabilitado si: hay loading, hay cooldown activo,
+  // o las validaciones de registro no están completas.
+  const botonDeshabilitado =
+    loading ||
+    cooldown > 0 ||
+    (mode === 'registro' && (!acceptTerms || password !== confirmPassword || passwordStrength < 3))
+
+  // Texto del botón según estado
+  const renderBotonTexto = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center gap-2 md:gap-3">
+          <div className="ns-spinner-sm" style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: 'white' }} />
+          <span>Procesando...</span>
+        </div>
+      )
+    }
+    if (cooldown > 0) {
+      return (
+        <div className="flex items-center justify-center gap-2">
+          <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <circle cx="12" cy="12" r="10" /><path strokeLinecap="round" d="M12 6v6l4 2" />
+          </svg>
+          <span>Esperá {cooldown}s para reintentar</span>
+        </div>
+      )
+    }
+    return <span>{configUI[mode].btn}</span>
+  }
+
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 md:p-6 relative overflow-hidden ns-animated-bg">
- 
-      {/* ANIMATED BACKGROUND ORBS
-          FIX #1 - PERFORMANCE: Se remueve el inline style animationDelay de los orbs secundarios
-          ya que se puede manejar con clases CSS definidas en el stylesheet global.
-          Los orbs no deben tener will-change ni transform3d si no es estrictamente necesario. */}
-      <div className="ns-orb w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-600/30 -top-[5%] -left-[10%]"></div>
-      <div className="ns-orb w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-cyan-400/20 -bottom-[5%] -right-[10%]" style={{ animationDelay: '3s' }}></div>
-      <div className="ns-orb w-[150px] h-[150px] md:w-[250px] md:h-[250px] bg-indigo-500/20 top-[50%] left-[60%]" style={{ animationDelay: '6s' }}></div>
- 
-      {/* Grid sutil */}
+
+      {/* ANIMATED BACKGROUND ORBS */}
+      <div className="ns-orb w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-600/30 -top-[5%] -left-[10%]" />
+      <div className="ns-orb w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-cyan-400/20 -bottom-[5%] -right-[10%]" style={{ animationDelay: '3s' }} />
+      <div className="ns-orb w-[150px] h-[150px] md:w-[250px] md:h-[250px] bg-indigo-500/20 top-[50%] left-[60%]" style={{ animationDelay: '6s' }} />
+
       <div
         className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      ></div>
- 
+        style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)', backgroundSize: '32px 32px' }}
+      />
+
       <div className="w-full max-w-[440px] z-10 ns-fade-up">
- 
-        {/* TARJETA PRINCIPAL */}
+
         <div className="ns-glass-dark rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] transition-all duration-500 relative overflow-hidden border border-white/5">
- 
+
           {/* LOGO Y TÍTULO */}
           <div className="text-center mb-6 md:mb-8 relative z-10">
             <div
@@ -340,44 +447,50 @@ export default function Login() {
               style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}
             >
               <span className="text-white font-black text-xl md:text-3xl italic tracking-tighter relative z-10">NS</span>
-              <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
             </div>
-            <h1
-              className="text-2xl md:text-3xl font-black text-white tracking-tight"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-            >
+            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               {configUI[mode].titulo}
             </h1>
             <p className="text-white/40 mt-1 md:mt-2 font-medium text-[11px] md:text-sm transition-opacity duration-300">
               {configUI[mode].subtitulo}
             </p>
           </div>
- 
+
           {/* CAJA DE MENSAJES DINÁMICOS */}
           {mensaje && (
-            <div
-              className={`p-3 md:p-4 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-[10px] md:text-xs font-bold text-center ns-fade-down relative z-10 ${
-                mensaje.tipo === 'error'
-                  ? 'bg-red-500/10 text-red-300 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
-                  : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
-              }`}
-            >
+            <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-[10px] md:text-xs font-bold text-center ns-fade-down relative z-10 ${
+              mensaje.tipo === 'error'
+                ? 'bg-red-500/10 text-red-300 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
+                : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+            }`}>
               {mensaje.texto}
+
+              {/* Barra de progreso del cooldown integrada en el mensaje */}
+              {cooldown > 0 && mensaje.tipo === 'error' && (
+                <div className="mt-2.5">
+                  <div className="h-0.5 w-full bg-red-500/20 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-red-400/60 rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
- 
+
           {/* OAUTH: BOTONES SOCIALES */}
           {mode !== 'recuperar' && (
             <div className="animate-in fade-in duration-500 relative z-10">
               <div className="grid grid-cols-2 gap-2.5 md:gap-3 mb-4 md:mb-6">
                 <button
                   onClick={() => handleSocialLogin('google')}
-                  disabled={loading}
+                  disabled={loading || cooldown > 0}
                   type="button"
-                  className="flex items-center justify-center gap-2 md:gap-3 py-3 md:py-3.5 px-3 md:px-4 bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-white/80 text-xs md:text-sm active:scale-95 disabled:opacity-50 backdrop-blur-sm group"
+                  className="flex items-center justify-center gap-2 md:gap-3 py-3 md:py-3.5 px-3 md:px-4 bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-white/80 text-xs md:text-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm group"
                 >
-                  {/* FIX #1 - PERFORMANCE: SVG inline en lugar de imagen externa para Google → cero latencia de red */}
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
@@ -387,22 +500,21 @@ export default function Login() {
                 </button>
                 <button
                   onClick={() => handleSocialLogin('github')}
-                  disabled={loading}
+                  disabled={loading || cooldown > 0}
                   type="button"
-                  className="flex items-center justify-center gap-2 md:gap-3 py-3 md:py-3.5 px-3 md:px-4 bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-white/80 text-xs md:text-sm active:scale-95 disabled:opacity-50 backdrop-blur-sm group"
+                  className="flex items-center justify-center gap-2 md:gap-3 py-3 md:py-3.5 px-3 md:px-4 bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-white/80 text-xs md:text-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm group"
                 >
-                  {/* FIX #1 - PERFORMANCE: SVG inline en lugar de imagen externa para GitHub → cero latencia de red */}
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 invert group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 invert group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
                   </svg>
                   <span>GitHub</span>
                 </button>
               </div>
- 
+
               {/* DIVISOR */}
               <div className="relative mb-4 md:mb-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/10"></span>
+                  <span className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-white/30">
                   <span className="px-3 md:px-4" style={{ background: 'rgba(15, 10, 30, 0.8)' }}>
@@ -412,10 +524,10 @@ export default function Login() {
               </div>
             </div>
           )}
- 
+
           {/* FORMULARIO PRINCIPAL */}
           <form onSubmit={handleAuth} className="space-y-3 md:space-y-4 relative z-10">
- 
+
             {/* EMAIL */}
             <div>
               <label className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase ml-1 tracking-widest mb-1 md:mb-1.5 block">
@@ -434,12 +546,12 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 md:px-5 py-3 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-[1.2rem] focus:border-[#6c5ce7] focus:bg-white/10 outline-none transition-all font-semibold text-white placeholder:text-white/20 focus:shadow-[0_0_0_4px_rgba(108,92,231,0.15)] text-xs md:text-sm pl-11 md:pl-14"
                   placeholder="admin@empresa.com"
-                  disabled={loading}
+                  disabled={loading || cooldown > 0}
                   autoComplete="email"
                 />
               </div>
             </div>
- 
+
             {/* CONTRASEÑA */}
             {mode !== 'recuperar' && (
               <div className="relative animate-in fade-in zoom-in-[0.98] duration-300">
@@ -470,7 +582,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 md:px-5 py-3 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-[1.2rem] focus:border-[#6c5ce7] focus:bg-white/10 outline-none transition-all font-semibold text-white placeholder:text-white/20 focus:shadow-[0_0_0_4px_rgba(108,92,231,0.15)] text-xs md:text-sm pl-11 md:pl-14"
                     placeholder="••••••••••••"
-                    disabled={loading}
+                    disabled={loading || cooldown > 0}
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   />
                   <button
@@ -493,7 +605,7 @@ export default function Login() {
                 {renderPasswordMeter()}
               </div>
             )}
- 
+
             {/* CONFIRMAR CONTRASEÑA */}
             {mode === 'registro' && (
               <div className="relative animate-in slide-in-from-top-4 fade-in duration-500 pt-1 md:pt-0">
@@ -517,13 +629,13 @@ export default function Login() {
                         : 'border-white/10 focus:border-[#6c5ce7] focus:bg-white/10 focus:shadow-[0_0_0_4px_rgba(108,92,231,0.15)]'
                     }`}
                     placeholder="Repetir clave exacta"
-                    disabled={loading}
+                    disabled={loading || cooldown > 0}
                     autoComplete="new-password"
                   />
                 </div>
               </div>
             )}
- 
+
             {/* CHECKBOX LEGAL */}
             {mode === 'registro' && (
               <div className="flex items-start gap-2.5 md:gap-3 mt-3 md:mt-4 animate-in fade-in duration-500">
@@ -534,55 +646,33 @@ export default function Login() {
                     checked={acceptTerms}
                     onChange={(e) => setAcceptTerms(e.target.checked)}
                     className="peer appearance-none w-3.5 h-3.5 md:w-4 md:h-4 border border-white/20 rounded bg-white/5 checked:bg-[#6c5ce7] checked:border-[#6c5ce7] transition-all cursor-pointer"
+                    disabled={cooldown > 0}
                   />
-                  <svg
-                    className="absolute w-2.5 h-2.5 md:w-3 md:h-3 text-white left-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="absolute w-2.5 h-2.5 md:w-3 md:h-3 text-white left-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <label htmlFor="terms" className="text-[9px] md:text-[10px] font-medium text-white/50 leading-tight cursor-pointer select-none">
                   Entiendo y acepto los{' '}
-                  <a href="#" className="text-[#a29bfe] hover:underline">
-                    Términos de Servicio
-                  </a>{' '}
+                  <a href="#" className="text-[#a29bfe] hover:underline">Términos de Servicio</a>{' '}
                   y la{' '}
-                  <a href="#" className="text-[#a29bfe] hover:underline">
-                    Política de Privacidad
-                  </a>{' '}
+                  <a href="#" className="text-[#a29bfe] hover:underline">Política de Privacidad</a>{' '}
                   respecto al tratamiento de datos.
                 </label>
               </div>
             )}
- 
+
             {/* BOTÓN PRINCIPAL */}
             <button
               type="submit"
-              disabled={
-                loading ||
-                (mode === 'registro' && (!acceptTerms || password !== confirmPassword || passwordStrength < 3))
-              }
+              disabled={botonDeshabilitado}
               className="ns-shimmer-btn w-full text-white font-black py-3.5 md:py-4 rounded-xl md:rounded-[1.2rem] shadow-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] text-[10px] md:text-[11px] uppercase tracking-[0.2em] mt-4 md:mt-6 hover:shadow-[0_12px_40px_rgba(108,92,231,0.3)]"
               style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}
             >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2 md:gap-3">
-                  <div
-                    className="ns-spinner-sm"
-                    style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: 'white' }}
-                  ></div>
-                  <span>Procesando...</span>
-                </div>
-              ) : (
-                <span>{configUI[mode].btn}</span>
-              )}
+              {renderBotonTexto()}
             </button>
           </form>
- 
+
           {/* NAVEGACIÓN INFERIOR */}
           <div className="mt-6 md:mt-8 text-center relative z-10 border-t border-white/5 pt-4 md:pt-6">
             {mode === 'recuperar' ? (
@@ -604,7 +694,7 @@ export default function Login() {
             )}
           </div>
         </div>
- 
+
         {/* PIE DE PÁGINA */}
         <div className="mt-6 md:mt-10 flex flex-col items-center gap-2 opacity-30 relative z-10 pb-4 md:pb-8">
           <p className="text-[8px] md:text-[9px] font-black text-white/60 uppercase tracking-[0.4em]">
@@ -615,4 +705,3 @@ export default function Login() {
     </div>
   )
 }
- 
