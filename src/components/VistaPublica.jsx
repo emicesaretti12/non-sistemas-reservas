@@ -97,6 +97,12 @@ export default function VistaPublica() {
     const daysName = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
     const config = negocio.horarios?.[daysName[dateObj.getDay()]]
 
+    if (!config || !config.abierto || !config.inicio || !config.fin) {
+      setHorasDisponibles({ mañana: [], tarde: [], noche: [] })
+      setBuscandoHoras(false)
+      return
+    }
+
     const slots = []
     let cursor = config.inicio
     while (cursor < config.fin) {
@@ -326,7 +332,7 @@ export default function VistaPublica() {
                            </div>
                            <div>
                               <p className="font-bold text-zinc-900 text-[15px] tracking-tight leading-none transition-colors">{s.nombre}</p>
-                              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mt-1.5">{s.duracion} min</p>
+                              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mt-1.5">{s.duracion_minutos} min</p>
                            </div>
                         </div>
                         <div className="flex items-center gap-2.5">

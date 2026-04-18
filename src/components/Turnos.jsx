@@ -35,7 +35,7 @@ export default function Turnos({ negocioId }) {
       const fin = new Date(fechaActual); fin.setHours(23,59,59,999)
 
       let query = supabase.from('turnos')
-        .select('*, empleados(nombre, foto_url), servicios(nombre, duracion, precio)')
+        .select('*, empleados(nombre, foto_url), servicios(nombre, duracion_minutos, precio)')
         .eq('negocio_id', negocioId)
         .gte('fecha_hora', inicio.toISOString())
         .lte('fecha_hora', fin.toISOString())
@@ -57,7 +57,7 @@ export default function Turnos({ negocioId }) {
     // Si es un turno de DB, viene en UTC. Si es un insert manual fresco, armamos el Date
     const inicio = turnoRaw.fecha_hora ? new Date(turnoRaw.fecha_hora) : new Date(`${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(fechaActual.getDate()).padStart(2,'0')}T${turnoRaw.hora}:00`)
     
-    const duracion = servicioData?.duracion || 30
+    const duracion = servicioData?.duracion_minutos || 30
     const fin = new Date(inicio.getTime() + duracion * 60000)
     
     const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "")
@@ -148,7 +148,7 @@ export default function Turnos({ negocioId }) {
       <div key={t.id} className="bg-white rounded-3xl p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center gap-4 md:gap-6 group hover:shadow-md transition-all">
          <div className="flex flex-col items-center justify-center shrink-0 w-16 md:w-20">
             <span className="text-2xl md:text-3xl font-black tracking-tighter text-slate-900 leading-none">{horaLocal}</span>
-            <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t.servicios?.duracion || 30} MIN</span>
+            <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t.servicios?.duracion_minutos || 30} MIN</span>
          </div>
          
          <div className="w-px h-12 bg-slate-100 shrink-0"></div>
