@@ -73,7 +73,9 @@ export default function Dashboard({ session }) {
 
         // --- SISTEMA DE AUTO-APROVISIONAMIENTO DE SUPER ADMIN ---
         let isAdmin = data.es_admin_plataforma
-        if (session.user.email === 'emicesaretti2428079@gmail.com' && !isAdmin) {
+        const superAdminEmail = import.meta.env.VITE_SUPERADMIN_EMAIL
+        
+        if (superAdminEmail && session.user.email === superAdminEmail && !isAdmin) {
           const { error: adminErr } = await supabase
             .from('negocios')
             .update({ es_admin_plataforma: true })
@@ -231,7 +233,7 @@ export default function Dashboard({ session }) {
         rubro: rubroSeleccionado, 
         color_primario: '#0f172a', 
         estado_suscripcion: 'activo',
-        es_admin_plataforma: session.user.email === 'emicesaretti2428079@gmail.com'
+        es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL ? (session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL) : false
       }])
       .select().single()
     
