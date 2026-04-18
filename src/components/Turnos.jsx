@@ -79,13 +79,54 @@ export default function Turnos({ negocioId }) {
     window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${intervalo}&details=${detalles}&sf=true&output=xml`, '_blank')
   }
 
-  const obtenerRangoDias = () => {
-    const dias = []
-    for (let i = -7; i <= 30; i++) {
-      const d = new Date(); d.setDate(d.getDate() + i)
-      dias.push(d)
-    }
-    return dias
+  const renderCalendarioCompleto = () => {
+    const year = fechaActual.getFullYear()
+    const month = fechaActual.getMonth()
+    const primerDia = new Date(year, month, 1).getDay()
+    const diasEnMes = new Date(year, month + 1, 0).getDate()
+    
+    const nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    const blanks = Array.from({ length: primerDia }).map((_, i) => <div key={`b-${i}`} className="p-1"></div>)
+    
+    const days = Array.from({ length: diasEnMes }).map((_, i) => {
+      const dayNum = i + 1
+      const d = new Date(year, month, dayNum)
+      const isSelected = d.toDateString() === fechaActual.toDateString()
+      const isToday = d.toDateString() === new Date().toDateString()
+      
+      return (
+        <button 
+          key={dayNum} 
+          onClick={() => setFechaActual(d)}
+          className={`aspect-square flex items-center justify-center rounded-xl transition-all text-xs md:text-sm ${isSelected ? 'bg-slate-900 text-white shadow-md font-bold' : 'bg-slate-50 text-slate-600 hover:bg-slate-200'} ${isToday && !isSelected ? 'border-2 border-blue-400 text-blue-600 font-black' : 'font-medium'}`}
+        >
+          {dayNum}
+        </button>
+      )
+    })
+
+    return (
+      <div className="bg-white border border-slate-100 rounded-3xl p-4 shadow-sm w-full animate-in fade-in zoom-in-95 duration-500">
+        <div className="flex justify-between items-center mb-4 px-2">
+           <button onClick={() => setFechaActual(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-500 rounded-full hover:bg-slate-900 hover:text-white transition-all">
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+           </button>
+           <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs md:text-sm">
+              {new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+           </h3>
+           <button onClick={() => setFechaActual(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-500 rounded-full hover:bg-slate-900 hover:text-white transition-all">
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+           </button>
+        </div>
+        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2 text-center">
+           {nombresDias.map(n => <div key={n} className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{n}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-1 md:gap-2">
+           {blanks}
+           {days}
+        </div>
+      </div>
+    )
   }
 
   async function handleGuardarTurno(e) {
@@ -213,24 +254,8 @@ export default function Turnos({ negocioId }) {
             </button>
          </div>
 
-         <div className="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-2">
-            {obtenerRangoDias().map((d, i) => {
-               const isSelected = d.toDateString() === fechaActual.toDateString()
-               const isToday = d.toDateString() === new Date().toDateString()
-               return (
-                  <button key={i} onClick={() => setFechaActual(d)} className={`snap-center shrink-0 w-16 md:w-20 py-3 md:py-4 rounded-[1.2rem] flex flex-col items-center transition-all border ${isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-xl scale-[1.05] z-10' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:bg-slate-50'}`}>
-                     <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 ${isSelected ? 'text-white/60' : 'text-slate-300'}`}>
-                        {d.toLocaleDateString('es-ES', { month: 'short' }).replace('.','')}
-                     </span>
-                     <span className={`text-2xl md:text-3xl font-black tracking-tighter leading-none my-1 ${isToday && !isSelected ? 'text-blue-500' : ''}`}>
-                        {d.getDate()}
-                     </span>
-                     <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${isSelected ? 'text-white/90' : 'text-slate-400'}`}>
-                        {d.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.','')}
-                     </span>
-                  </button>
-               )
-            })}
+         <div className="mb-4">
+            {renderCalendarioCompleto()}
          </div>
 
          <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1">
