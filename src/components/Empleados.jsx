@@ -9,7 +9,7 @@ export default function Empleados({ negocioId }) {
   const [modalAbierto, setModalAbierto] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [subiendoFoto, setSubiendoFoto] = useState(false)
-  const [modoEdicion, setModoEdicion] = useState(null) // null = Crear, ID = Editar
+  const [modoEdicion, setModoEdicion] = useState(null)
   
   const [form, setForm] = useState({
     nombre: '',
@@ -60,7 +60,6 @@ export default function Empleados({ negocioId }) {
       const data = await res.json()
       
       if (data.secure_url) {
-        // Aplicamos transformación de Cloudinary para que la imagen sea cuadrada y optimizada
         const urlOptimizada = data.secure_url.replace('/upload/', '/upload/w_400,h_400,c_fill,g_face,q_auto,f_auto/')
         setForm({ ...form, foto_url: urlOptimizada })
       }
@@ -71,7 +70,6 @@ export default function Empleados({ negocioId }) {
     }
   }
 
-  // --- ACCIONES DE MODAL ---
   const abrirModalCrear = () => {
     setModoEdicion(null)
     setForm({ nombre: '', especialidad: '', foto_url: '' })
@@ -88,48 +86,80 @@ export default function Empleados({ negocioId }) {
     setModalAbierto(true)
   }
 
-  // --- LÓGICA DE PERSISTENCIA ---
+  // --- MOTOR DE PERSISTENCIA (BLINDADO CONTRA ERROR 400 Y 403) ---
   async function guardarEspecialista(e) {
     e.preventDefault()
     setGuardando(true)
     
     try {
+      // 1. OBTENEMOS EL ID EXACTO DE LA SESIÓN PARA EVITAR EL ERROR 400
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !authData?.user) {
+        alert("Tu sesión caducó. Por favor, refrescá la página e iniciá sesión nuevamente.")
+        setGuardando(false)
+        return
+      }
+
+      const userIdExacto = authData.user.id
+
+      // 2. ARMAMOS EL PAYLOAD 
       const payload = {
-        negocio_id: negocioId,
-        nombre: form.nombre,
-        especialidad: form.especialidad,
+        negocio_id: userIdExacto,
+        nombre: form.nombre.trim(),
+        especialidad: form.especialidad.trim(),
         foto_url: form.foto_url
       }
 
+      // 3. ENVIAMOS A SUPABASE
       if (modoEdicion) {
         const { error } = await supabase
           .from('empleados')
           .update(payload)
           .eq('id', modoEdicion)
+          .eq('negocio_id', userIdExacto)
+          
         if (error) throw error
       } else {
         const { error } = await supabase
           .from('empleados')
           .insert([payload])
+          
         if (error) throw error
       }
 
       setModalAbierto(false)
-      cargarEspecialistas()
+      // Recargamos forzando el ID validado
+      const { data: newData } = await supabase.from('empleados').select('*').eq('negocio_id', userIdExacto).order('creado_en', { ascending: true })
+      setEspecialistas(newData || [])
+
     } catch (error) {
-      alert("Error al guardar. Verifique los datos del especialista.")
+      console.error("Payload rechazado por Supabase:", error)
+      if (error.code === '42501' || error.message.includes('403')) {
+        alert("Error 403: La base de datos bloqueó la acción. Ejecutá el script SQL de sincronización.")
+      } else {
+        alert(`Error del servidor: ${error.message}`)
+      }
     } finally {
       setGuardando(false)
     }
   }
 
   async function eliminarEspecialista(id) {
-    if (confirm('¿Desea dar de baja a este especialista/recurso? Esto no borrará los turnos pasados pero ya no estará disponible para nuevas citas.')) {
-      const { error } = await supabase.from('empleados').delete().eq('id', id)
+    if (confirm('¿Desea dar de baja a este especialista/recurso?')) {
+      const { data: authData } = await supabase.auth.getUser()
+      if (!authData?.user) return
+
+      const { error } = await supabase
+        .from('empleados')
+        .delete()
+        .eq('id', id)
+        .eq('negocio_id', authData.user.id)
+
       if (!error) {
-        cargarEspecialistas()
+        setEspecialistas(especialistas.filter(e => e.id !== id))
       } else {
-        alert("No se puede eliminar un recurso que tiene agendas activas. Intente desactivarlo primero.")
+        alert("No se puede eliminar un recurso con agendas activas.")
       }
     }
   }
@@ -147,7 +177,7 @@ export default function Empleados({ negocioId }) {
          </div>
          <button 
            onClick={abrirModalCrear}
-           className="w-10 h-10 md:w-auto md:px-6 md:py-3 rounded-full md:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all gap-2"
+           className="w-10 h-10 md:w-auto md:px-6 md:py-3 rounded-full md:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all gap-2 hover:bg-slate-800"
          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
             <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">Nuevo Registro</span>
@@ -165,7 +195,7 @@ export default function Empleados({ negocioId }) {
               <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
               <h3 className="text-sm font-bold text-slate-900">Sin Staff</h3>
               <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[200px]">
-                Debes agregar al menos un especialista o recurso para que el sistema de reservas pueda funcionar.
+                Debes agregar al menos un especialista o recurso para recibir reservas.
               </p>
            </div>
          ) : (
@@ -202,7 +232,7 @@ export default function Empleados({ negocioId }) {
          )}
       </div>
 
-      {/* --- MODAL: CREAR / EDITAR (iOS BOTTOM SHEET) --- */}
+      {/* --- MODAL: CREAR / EDITAR --- */}
       {modalAbierto && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-6 md:p-8 animate-in slide-in-from-bottom-full duration-500 border border-slate-100">
@@ -239,7 +269,6 @@ export default function Empleados({ negocioId }) {
                           <input type="file" accept="image/*" className="hidden" onChange={manejarSubidaFoto} />
                        </label>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-4">Foto de Perfil</p>
                  </div>
 
                  <div className="space-y-1.5">
@@ -267,7 +296,7 @@ export default function Empleados({ negocioId }) {
                  <button 
                     disabled={guardando || subiendoFoto} 
                     type="submit" 
-                    className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 disabled:opacity-50"
+                    className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 disabled:opacity-50 hover:bg-slate-800"
                  >
                     {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Actualizar Registro' : 'Confirmar Especialista')}
                  </button>
