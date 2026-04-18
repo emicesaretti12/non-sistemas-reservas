@@ -8,11 +8,11 @@ export default function Servicios({ negocioId }) {
   // --- ESTADOS DEL MODAL Y FORMULARIO ---
   const [modalAbierto, setModalAbierto] = useState(false)
   const [guardando, setGuardando] = useState(false)
-  const [modoEdicion, setModoEdicion] = useState(null) // null = Crear, ID = Editar
+  const [modoEdicion, setModoEdicion] = useState(null)
   
   const [form, setForm] = useState({
     nombre: '',
-    duracion: 30,
+    duracion: '',
     precio: ''
   })
 
@@ -34,77 +34,103 @@ export default function Servicios({ negocioId }) {
       if (error) throw error
       setServicios(data || [])
     } catch (error) {
-      console.error("Error al cargar actividades:", error.message)
+      console.error("Error al cargar la grilla de servicios:", error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  // --- GESTIÓN DE MODAL ---
   const abrirModalCrear = () => {
     setModoEdicion(null)
-    setForm({ nombre: '', duracion: 60, precio: '' }) // Por defecto 1 hora para multi-rubro
+    setForm({ nombre: '', duracion: '', precio: '' })
     setModalAbierto(true)
   }
 
-  const abrirModalEditar = (servicio) => {
-    setModoEdicion(servicio.id)
+  const abrirModalEditar = (srv) => {
+    setModoEdicion(srv.id)
     setForm({ 
-      nombre: servicio.nombre, 
-      duracion: servicio.duracion, 
-      precio: servicio.precio 
+      nombre: srv.nombre, 
+      duracion: srv.duracion || '', 
+      precio: srv.precio || '' 
     })
     setModalAbierto(true)
   }
 
-  // --- LÓGICA DE BASE DE DATOS (CRUD) ---
+  // --- MOTOR DE PERSISTENCIA (BLINDADO CONTRA ERROR 403) ---
   async function guardarServicio(e) {
     e.preventDefault()
     setGuardando(true)
     
     try {
+      // 1. OBTENEMOS LA IDENTIDAD REAL DESDE EL MOTOR DE AUTH
+      // Esto evita el Error 403 garantizando que el ID enviado es exactamente el del token
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !authData?.user) {
+        alert("Tu sesión de seguridad caducó. Por favor, refrescá la página e iniciá sesión nuevamente.")
+        setGuardando(false)
+        return
+      }
+
+      const userIdExacto = authData.user.id
+
+      // 2. ARMAMOS EL PAYLOAD CON EL ID ABSOLUTO
+      const payload = {
+        negocio_id: userIdExacto, 
+        nombre: form.nombre.trim(),
+        duracion: Number(form.duracion),
+        precio: Number(form.precio)
+      }
+
+      // 3. ENVIAMOS A SUPABASE
       if (modoEdicion) {
-        // ACTUALIZAR
         const { error } = await supabase
           .from('servicios')
-          .update({
-            nombre: form.nombre,
-            duracion: parseInt(form.duracion),
-            precio: parseFloat(form.precio)
-          })
+          .update(payload)
           .eq('id', modoEdicion)
-          
+          .eq('negocio_id', userIdExacto) 
+        
         if (error) throw error
       } else {
-        // CREAR NUEVO
         const { error } = await supabase
           .from('servicios')
-          .insert([{
-            negocio_id: negocioId,
-            nombre: form.nombre,
-            duracion: parseInt(form.duracion),
-            precio: parseFloat(form.precio)
-          }])
-          
+          .insert([payload])
+        
         if (error) throw error
       }
 
       setModalAbierto(false)
-      cargarServicios()
+      // Recargamos forzando usar el ID exacto
+      const { data: newData } = await supabase.from('servicios').select('*').eq('negocio_id', userIdExacto).order('creado_en', { ascending: true })
+      setServicios(newData || [])
+
     } catch (error) {
-      alert("Error al guardar la actividad. Verifique los datos.")
+      console.error("Supabase Error:", error)
+      if (error.code === '42501' || error.message.includes('403')) {
+        alert("Error de Permisos (403): La base de datos bloqueó la acción. Asegúrate de haber ejecutado el script SQL de políticas de seguridad.")
+      } else {
+        alert(`Error del servidor: ${error.message}`)
+      }
     } finally {
       setGuardando(false)
     }
   }
 
   async function eliminarServicio(id) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta actividad del catálogo público?')) {
-      const { error } = await supabase.from('servicios').delete().eq('id', id)
-      if (!error) {
-        cargarServicios()
+    if (confirm('¿Desea eliminar este servicio? Ya no estará disponible para nuevas reservas.')) {
+      const { data: authData } = await supabase.auth.getUser()
+      if (!authData?.user) return
+      
+      const { error } = await supabase
+        .from('servicios')
+        .delete()
+        .eq('id', id)
+        .eq('negocio_id', authData.user.id)
+
+      if (error) {
+        alert(`Error al eliminar: ${error.message}`)
       } else {
-        alert("No se pudo eliminar. Es posible que tenga turnos históricos asociados a este servicio.")
+        setServicios(servicios.filter(s => s.id !== id))
       }
     }
   }
@@ -115,21 +141,21 @@ export default function Servicios({ negocioId }) {
       {/* --- HEADER COMPACTO --- */}
       <header className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0">
          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Catálogo</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Catálogo de Servicios</h2>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1.5">
-               {servicios.length} Actividades activas
+               {servicios.length} Actividades configuradas
             </p>
          </div>
          <button 
            onClick={abrirModalCrear}
-           className="w-10 h-10 md:w-auto md:px-6 md:py-3 rounded-full md:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all gap-2"
+           className="w-10 h-10 md:w-auto md:px-6 md:py-3 rounded-full md:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all gap-2 hover:bg-slate-800"
          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
-            <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">Nueva Actividad</span>
+            <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">Nuevo Servicio</span>
          </button>
       </header>
 
-      {/* --- CATÁLOGO DE SERVICIOS / ACTIVIDADES --- */}
+      {/* --- GRILLA DE SERVICIOS --- */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
          {loading ? (
            <div className="flex justify-center items-center h-40">
@@ -137,43 +163,42 @@ export default function Servicios({ negocioId }) {
            </div>
          ) : servicios.length === 0 ? (
            <div className="bg-white rounded-[2rem] border border-dashed border-slate-300 p-12 flex flex-col items-center text-center">
-              <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              <h3 className="text-sm font-bold text-slate-900">Catálogo Vacío</h3>
-              <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[200px]">
-                Aún no has creado ninguna actividad. Añade opciones para que tus clientes puedan reservar.
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                 <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" /></svg>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Sin Actividades</h3>
+              <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[250px]">
+                Debes crear al menos un servicio para recibir reservas.
               </p>
            </div>
          ) : (
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-              {servicios.map((s) => (
-                <div key={s.id} className="bg-white rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-slate-100 flex flex-col justify-between group hover:border-slate-300 transition-colors">
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+              {servicios.map((srv) => (
+                <div key={srv.id} className="bg-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-slate-100 flex flex-col justify-between gap-4 group hover:border-slate-300 transition-all">
                    
-                   <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-100 shrink-0">
-                            {/* Icono más universal (Estrella/Destello) */}
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                   <div className="flex justify-between items-start">
+                      <div>
+                         <h4 className="font-bold text-lg text-slate-900 leading-tight">{srv.nombre}</h4>
+                         <div className="flex items-center gap-2 mt-2">
+                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 text-[10px] font-bold text-slate-500 tracking-widest uppercase border border-slate-100">
+                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                             {srv.duracion} min
+                           </span>
                          </div>
-                         <div>
-                            <h4 className="font-bold text-base md:text-lg tracking-tight text-slate-900 leading-tight">{s.nombre}</h4>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                              {s.duracion >= 60 ? `${s.duracion / 60} HORAS` : `${s.duracion} MIN`}
-                            </p>
-                         </div>
+                      </div>
+                      
+                      <div className="text-right">
+                         <span className="text-lg font-black text-slate-900 tracking-tighter">${srv.precio}</span>
                       </div>
                    </div>
 
-                   <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
-                      <span className="font-black text-2xl tracking-tighter text-slate-900">${s.precio}</span>
-                      
-                      <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                         <button onClick={() => abrirModalEditar(s)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-200 hover:text-slate-900 transition-colors" title="Editar">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                         </button>
-                         <button onClick={() => eliminarServicio(s.id)} className="w-8 h-8 rounded-lg bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors" title="Eliminar">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                         </button>
-                      </div>
+                   <div className="flex items-center gap-2 pt-4 border-t border-slate-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-2 rounded-xl bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                         Editar
+                      </button>
+                      <button onClick={() => eliminarServicio(srv.id)} className="w-10 h-10 rounded-xl bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0">
+                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg>
+                      </button>
                    </div>
                 </div>
               ))}
@@ -181,15 +206,15 @@ export default function Servicios({ negocioId }) {
          )}
       </div>
 
-      {/* --- MODAL: CREAR / EDITAR (iOS BOTTOM SHEET) --- */}
+      {/* --- MODAL: CREAR / EDITAR --- */}
       {modalAbierto && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-6 md:p-8 animate-in slide-in-from-bottom-full duration-500 border border-slate-100">
               
               <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h2 className="text-2xl font-bold tracking-tighter text-slate-900">{modoEdicion ? 'Modificar Datos' : 'Nueva Actividad'}</h2>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Catálogo Público</p>
+                    <h2 className="text-2xl font-bold tracking-tighter text-slate-900">{modoEdicion ? 'Modificar Actividad' : 'Nueva Actividad'}</h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Configuración del catálogo</p>
                  </div>
                  <button onClick={() => setModalAbierto(false)} className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg>
@@ -199,12 +224,11 @@ export default function Servicios({ negocioId }) {
               <form onSubmit={guardarServicio} className="space-y-4">
                  
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre de la Actividad / Servicio</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre del Servicio</label>
                     <input 
                       required 
-                      autoFocus
                       className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
-                      placeholder="Ej: Consulta Médica, Alquiler Cancha, etc." 
+                      placeholder="Ej: Corte Clásico, Alquiler Cancha F5" 
                       value={form.nombre} 
                       onChange={e => setForm({...form, nombre: e.target.value})} 
                     />
@@ -212,52 +236,39 @@ export default function Servicios({ negocioId }) {
 
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Bloque de Tiempo</label>
-                       <div className="relative flex items-center">
-                          <select 
-                            required 
-                            className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none transition-all text-sm cursor-pointer pr-10" 
-                            value={form.duracion} 
-                            onChange={e => setForm({...form, duracion: e.target.value})}
-                          >
-                             <option value="15">15 minutos</option>
-                             <option value="30">30 minutos</option>
-                             <option value="45">45 minutos</option>
-                             <option value="60">1 Hora</option>
-                             <option value="90">1.5 Horas</option>
-                             <option value="120">2 Horas</option>
-                             <option value="180">3 Horas</option>
-                             <option value="240">4 Horas</option>
-                             <option value="360">6 Horas</option>
-                          </select>
-                          <svg className="w-4 h-4 text-slate-400 absolute right-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                       </div>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Duración (Mins)</label>
+                       <input 
+                         required 
+                         type="number"
+                         min="1"
+                         className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
+                         placeholder="Ej: 30" 
+                         value={form.duracion} 
+                         onChange={e => setForm({...form, duracion: e.target.value})} 
+                       />
                     </div>
-                    
+
                     <div className="space-y-1.5">
-                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Costo ($)</label>
-                       <div className="relative flex items-center">
-                          <div className="absolute left-4 font-bold text-slate-400 pointer-events-none">$</div>
-                          <input 
-                            required 
-                            type="number" 
-                            step="any"
-                            min="0"
-                            className="w-full p-4 pl-8 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
-                            placeholder="0.00" 
-                            value={form.precio} 
-                            onChange={e => setForm({...form, precio: e.target.value})} 
-                          />
-                       </div>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Precio Total ($)</label>
+                       <input 
+                         required 
+                         type="number"
+                         min="0"
+                         step="0.01"
+                         className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
+                         placeholder="Ej: 5000" 
+                         value={form.precio} 
+                         onChange={e => setForm({...form, precio: e.target.value})} 
+                       />
                     </div>
                  </div>
 
                  <button 
                     disabled={guardando} 
                     type="submit" 
-                    className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-6"
+                    className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-6 hover:bg-slate-800 disabled:opacity-50"
                  >
-                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Actualizar Datos' : 'Guardar y Publicar')}
+                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Actualizar Servicio' : 'Confirmar y Guardar')}
                  </button>
               </form>
            </div>
