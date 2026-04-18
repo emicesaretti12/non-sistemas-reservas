@@ -57,7 +57,7 @@ export default function Dashboard({ session }) {
         .from('negocios')
         .select('*')
         .eq('owner_id', session.user.id)
-        .order('creado_en', { ascending: true })
+        .order('creado_en', { ascending: false })
         .limit(1)
         .maybeSingle()
 
