@@ -5,6 +5,7 @@ export default function Turnos({ negocioId }) {
   const [loading, setLoading] = useState(true)
   const [fechaActual, setFechaActual] = useState(new Date())
   const [turnos, setTurnos] = useState([])
+  const [todosLosTurnos, setTodosLosTurnos] = useState([])
   const [empleados, setEmpleados] = useState([])
   const [servicios, setServicios] = useState([])
   const [filtroEmpleado, setFiltroEmpleado] = useState('todos')
@@ -30,14 +31,15 @@ export default function Turnos({ negocioId }) {
       if (resEmp.data) setEmpleados(resEmp.data)
       if (resServ.data) setServicios(resServ.data)
 
-      // BUNDLE FETCH: Eludimos los filtros precisos de Postgres para prevenir bugs de Timezoneless strings
-      const limiteTemporal = new Date()
-      limiteTemporal.setDate(limiteTemporal.getDate() - 10) // Traemos de los últimos 10 días en adelante
+      // BUNDLE FETCH DINÁMICO: Ampliamos los bordes visuales del mes cargado, sin perder el filtro local milimétrico.
+      const inicioVentana = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 1, 1)
+      const finVentana = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 2, 0)
 
       let query = supabase.from('turnos')
         .select('*, empleados(nombre, foto_url), servicios(nombre, duracion_minutos, precio)')
         .eq('negocio_id', negocioId)
-        .gte('fecha_hora', limiteTemporal.toISOString())
+        .gte('fecha_hora', inicioVentana.toISOString())
+        .lte('fecha_hora', finVentana.toISOString())
         .order('fecha_hora', { ascending: true })
 
       if (filtroEmpleado !== 'todos') query = query.eq('empleado_id', filtroEmpleado)
@@ -55,6 +57,7 @@ export default function Turnos({ negocioId }) {
                 tDate.getDate() === fechaActual.getDate()
       })
 
+      setTodosLosTurnos(data || [])
       setTurnos(turnosDeHoy)
     } catch (e) {
       console.error("Smart Agenda Error:", e.message)
@@ -94,13 +97,34 @@ export default function Turnos({ negocioId }) {
       const isSelected = d.toDateString() === fechaActual.toDateString()
       const isToday = d.toDateString() === new Date().toDateString()
       
+      // Contar turnos interactivos en base a la lista blindada global del mes
+      const turnosEseDia = todosLosTurnos.filter(t => {
+         const rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
+         const tDate = new Date(rawDate)
+         if (isNaN(tDate.getTime())) return false
+         return tDate.getFullYear() === year &&
+                tDate.getMonth() === month &&
+                tDate.getDate() === dayNum
+      })
+      const contador = turnosEseDia.length
+      
       return (
         <button 
           key={dayNum} 
           onClick={() => setFechaActual(d)}
-          className={`aspect-square flex items-center justify-center rounded-xl transition-all text-xs md:text-sm ${isSelected ? 'bg-slate-900 text-white shadow-md font-bold' : 'bg-slate-50 text-slate-600 hover:bg-slate-200'} ${isToday && !isSelected ? 'border-2 border-blue-400 text-blue-600 font-black' : 'font-medium'}`}
+          className={`aspect-square flex flex-col items-center justify-center rounded-[1rem] md:rounded-2xl transition-all relative overflow-hidden ${isSelected ? 'bg-slate-900 text-white shadow-xl scale-110 z-10' : 'bg-slate-50 hover:bg-slate-200'} ${isToday && !isSelected ? 'border-2 border-blue-400' : 'border border-transparent'}`}
         >
-          {dayNum}
+          <span className={`text-[13px] md:text-base ${isSelected ? 'font-black' : 'font-bold text-slate-700'} mb-2 md:mb-1.5`}>{dayNum}</span>
+          
+          {contador > 0 && (
+             <div className="absolute bottom-1 md:bottom-2 left-1/2 -translate-x-1/2 flex gap-0.5 md:gap-1 items-center">
+                {contador < 4 ? 
+                   Array.from({length: contador}).map((_, idx) => <div key={idx} className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`}></div>)
+                   :
+                   <div className={`text-[8px] md:text-[9px] font-black ${isSelected ? 'text-white' : 'text-blue-500'}`}>+{contador}</div>
+                }
+             </div>
+          )}
         </button>
       )
     })
