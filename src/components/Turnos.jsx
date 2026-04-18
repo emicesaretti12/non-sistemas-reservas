@@ -218,9 +218,16 @@ export default function Turnos({ negocioId }) {
                const isSelected = d.toDateString() === fechaActual.toDateString()
                const isToday = d.toDateString() === new Date().toDateString()
                return (
-                  <button key={i} onClick={() => setFechaActual(d)} className={`snap-center shrink-0 w-14 md:w-16 py-3 md:py-4 rounded-2xl flex flex-col items-center transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg scale-[1.02]' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                     <span className="text-[9px] font-bold uppercase tracking-widest mb-1">{d.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.','')}</span>
-                     <span className={`text-xl font-bold tracking-tighter ${isToday && !isSelected ? 'text-blue-500' : ''}`}>{d.getDate()}</span>
+                  <button key={i} onClick={() => setFechaActual(d)} className={`snap-center shrink-0 w-16 md:w-20 py-3 md:py-4 rounded-[1.2rem] flex flex-col items-center transition-all border ${isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-xl scale-[1.05] z-10' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:bg-slate-50'}`}>
+                     <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 ${isSelected ? 'text-white/60' : 'text-slate-300'}`}>
+                        {d.toLocaleDateString('es-ES', { month: 'short' }).replace('.','')}
+                     </span>
+                     <span className={`text-2xl md:text-3xl font-black tracking-tighter leading-none my-1 ${isToday && !isSelected ? 'text-blue-500' : ''}`}>
+                        {d.getDate()}
+                     </span>
+                     <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${isSelected ? 'text-white/90' : 'text-slate-400'}`}>
+                        {d.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.','')}
+                     </span>
                   </button>
                )
             })}
