@@ -50,39 +50,37 @@ export default function Servicios({ negocioId }) {
     setModoEdicion(srv.id)
     setForm({ 
       nombre: srv.nombre, 
-      duracion: srv.duracion || '', 
+      // Aquí mapeamos la columna exacta de la BD al estado local
+      duracion: srv.duracion_minutos || '', 
       precio: srv.precio || '' 
     })
     setModalAbierto(true)
   }
 
-  // --- MOTOR DE PERSISTENCIA (BLINDADO CONTRA ERROR 403) ---
+  // --- MOTOR DE PERSISTENCIA ---
   async function guardarServicio(e) {
     e.preventDefault()
     setGuardando(true)
     
     try {
-      // 1. OBTENEMOS LA IDENTIDAD REAL DESDE EL MOTOR DE AUTH
-      // Esto evita el Error 403 garantizando que el ID enviado es exactamente el del token
       const { data: authData, error: authError } = await supabase.auth.getUser()
       
       if (authError || !authData?.user) {
-        alert("Tu sesión de seguridad caducó. Por favor, refrescá la página e iniciá sesión nuevamente.")
+        alert("Tu sesión caducó. Por favor, refrescá la página e iniciá sesión nuevamente.")
         setGuardando(false)
         return
       }
 
       const userIdExacto = authData.user.id
 
-      // 2. ARMAMOS EL PAYLOAD CON EL ID ABSOLUTO
+      // 2. ARMAMOS EL PAYLOAD (CORREGIDO PARA QUE COINCIDA CON TU BD)
       const payload = {
         negocio_id: userIdExacto, 
         nombre: form.nombre.trim(),
-        duracion: Number(form.duracion),
+        duracion_minutos: Number(form.duracion), // <--- EL FIX ESTÁ ACÁ
         precio: Number(form.precio)
       }
 
-      // 3. ENVIAMOS A SUPABASE
       if (modoEdicion) {
         const { error } = await supabase
           .from('servicios')
@@ -100,14 +98,13 @@ export default function Servicios({ negocioId }) {
       }
 
       setModalAbierto(false)
-      // Recargamos forzando usar el ID exacto
       const { data: newData } = await supabase.from('servicios').select('*').eq('negocio_id', userIdExacto).order('creado_en', { ascending: true })
       setServicios(newData || [])
 
     } catch (error) {
       console.error("Supabase Error:", error)
       if (error.code === '42501' || error.message.includes('403')) {
-        alert("Error de Permisos (403): La base de datos bloqueó la acción. Asegúrate de haber ejecutado el script SQL de políticas de seguridad.")
+        alert("Error de Permisos (403): La base de datos bloqueó la acción.")
       } else {
         alert(`Error del servidor: ${error.message}`)
       }
@@ -182,7 +179,8 @@ export default function Servicios({ negocioId }) {
                          <div className="flex items-center gap-2 mt-2">
                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 text-[10px] font-bold text-slate-500 tracking-widest uppercase border border-slate-100">
                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                             {srv.duracion} min
+                             {/* Mostramos el dato usando el nombre correcto de la columna */}
+                             {srv.duracion_minutos} min
                            </span>
                          </div>
                       </div>
