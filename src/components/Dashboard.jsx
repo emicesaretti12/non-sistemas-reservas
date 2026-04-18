@@ -70,8 +70,22 @@ export default function Dashboard({ session }) {
         setLogoUrl(data.logo_url || '')
         setPortadaUrl(data.portada_url || '')
         setInstagram(data.instagram || '')
+
+        // --- SISTEMA DE AUTO-APROVISIONAMIENTO DE SUPER ADMIN ---
+        let isAdmin = data.es_admin_plataforma
+        if (session.user.email === 'emicesaretti2428079@gmail.com' && !isAdmin) {
+          const { error: adminErr } = await supabase
+            .from('negocios')
+            .update({ es_admin_plataforma: true })
+            .eq('id', data.id)
+          
+          if (!adminErr) {
+             isAdmin = true
+             console.log("Nucleus Security: Permisos de Super Admin concedidos dinámicamente al Owner Master.")
+          }
+        }
         
-        if (data.es_admin_plataforma) {
+        if (isAdmin) {
           await cargarConsolaMaestra()
         } else {
           await cargarMetricasNegocio(data.id)
@@ -216,7 +230,8 @@ export default function Dashboard({ session }) {
         nombre: nombreNegocio, 
         rubro: rubroSeleccionado, 
         color_primario: '#0f172a', 
-        estado_suscripcion: 'activo' 
+        estado_suscripcion: 'activo',
+        es_admin_plataforma: session.user.email === 'emicesaretti2428079@gmail.com'
       }])
       .select().single()
     
