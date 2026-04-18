@@ -59,12 +59,13 @@ export default function Login() {
     }
   }, [])
 
-  useEffect(() => {
+  const cambiarModo = (nuevoModo) => {
+    setMode(nuevoModo)
     setMensaje(null)
     setPassword('')
     setConfirmPassword('')
     setAcceptTerms(false)
-  }, [mode])
+  }
 
   /**
    * OPTIMIZACIÓN: Evaluar fuerza de la contraseña con useMemo (Evita re-renders).
@@ -183,6 +184,8 @@ export default function Login() {
 
     setLoading(true)
 
+    let hasRedirected = false;
+
     try {
       // ANTI-ERRORES: CAPA 2 - Destruimos token en memoria justo antes de actuar.
       await supabase.auth.signOut()
@@ -225,11 +228,14 @@ export default function Login() {
             texto: '¡Registro exitoso! Revisá tu bandeja de entrada (o spam) para confirmar tu cuenta.',
           })
           setMode('login')
+          setPassword('')
+          setConfirmPassword('')
           return
         }
 
         if (data?.session) {
           setMensaje({ tipo: 'exito', texto: '¡Cuenta creada! Preparando entorno...' })
+          hasRedirected = true;
           // ANTI-ERRORES: CAPA 3 - Redirección dura. Evita que listeners globales se mareen.
           setTimeout(() => {
             window.location.href = '/admin'
@@ -265,6 +271,7 @@ export default function Login() {
         }
 
         setMensaje({ tipo: 'exito', texto: 'Credenciales validadas. Entrando...' })
+        hasRedirected = true;
         // ANTI-ERRORES: CAPA 3 - Redirección dura.
         setTimeout(() => {
           window.location.href = '/admin'
@@ -302,13 +309,13 @@ export default function Login() {
         })
         activarCooldown(30)
         setMode('login')
+        setPassword('')
       }
 
     } catch (error) {
       setMensaje({ tipo: 'error', texto: traducirError(error.message) })
     } finally {
-      // Si estamos redirigiendo no cortamos el loading visual
-      if (!(mode === 'login' && setMensaje?.tipo === 'exito') && !(mode === 'registro' && setMensaje?.tipo === 'exito' && acceptTerms)) {
+      if (!hasRedirected) {
         setLoading(false)
       }
     }
@@ -498,7 +505,7 @@ export default function Login() {
                   {mode === 'login' && (
                     <button
                       type="button"
-                      onClick={() => setMode('recuperar')}
+                      onClick={() => cambiarModo('recuperar')}
                       className="text-[9px] md:text-[10px] font-black text-[#a29bfe] hover:text-white transition-colors"
                     >
                       ¿Perdiste tu llave?
@@ -611,7 +618,7 @@ export default function Login() {
             {mode === 'recuperar' ? (
               <button
                 type="button"
-                onClick={() => setMode('login')}
+                onClick={() => cambiarModo('login')}
                 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
               >
                 Volver a la consola
@@ -619,7 +626,7 @@ export default function Login() {
             ) : (
               <button
                 type="button"
-                onClick={() => setMode(mode === 'login' ? 'registro' : 'login')}
+                onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
                 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
               >
                 {mode === 'login' ? 'Aprovisionar un nuevo entorno' : '¿Ya posees una cuenta? Iniciar Sesión'}
