@@ -146,9 +146,6 @@ export default function Dashboard({ session }) {
   async function cargarMetricasNegocio(negocioId) {
     const hoyInicio = new Date()
     hoyInicio.setHours(0, 0, 0, 0)
-    
-    const hoyFin = new Date()
-    hoyFin.setHours(23, 59, 59, 999)
 
     const { data: turnos, error } = await supabase
       .from('turnos')
@@ -156,7 +153,6 @@ export default function Dashboard({ session }) {
       .eq('negocio_id', negocioId)
       .eq('estado', 'confirmado')
       .gte('fecha_hora', hoyInicio.toISOString())
-      .lte('fecha_hora', hoyFin.toISOString())
 
     if (error) {
       console.error('Error obteniendo métricas:', error.message)
@@ -425,18 +421,18 @@ export default function Dashboard({ session }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-1000">
                     
                     <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group">
-                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Turnos de Hoy</p>
+                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Turnos Próximos</p>
                       <h3 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left mt-2 md:mt-0">{stats.hoy}</h3>
                       <div className="flex items-center gap-2 mt-4 text-[9px] md:text-[10px] font-bold text-blue-500 uppercase tracking-widest">
                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
-                         En línea
+                         En agenda global
                       </div>
                     </div>
 
                     <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group">
-                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Proyectados</p>
+                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Proyectados Futuros</p>
                       <h3 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left mt-2 md:mt-0 text-[#34C759]">${stats.ingresos}</h3>
-                      <p className="text-[9px] md:text-[10px] font-medium text-slate-400 mt-4 leading-tight italic">Basado en agenda confirmada.</p>
+                      <p className="text-[9px] md:text-[10px] font-medium text-slate-400 mt-4 leading-tight italic">Cotización de reservas activas.</p>
                     </div>
 
                     {/* MARKETING WIDGET */}
