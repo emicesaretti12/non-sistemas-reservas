@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 
-export default function Servicios({ negocioId }) {
+export default function Servicios() {
   const [loading, setLoading] = useState(true)
   const [servicios, setServicios] = useState([])
   
@@ -16,19 +16,30 @@ export default function Servicios({ negocioId }) {
     precio: ''
   })
 
+  // Al montar el componente o refrescar, cargamos directamente desde Auth
   useEffect(() => {
-    if (negocioId) {
-      cargarServicios()
-    }
-  }, [negocioId])
+    cargarServicios()
+  }, [])
 
+  // --- MOTOR DE LECTURA (AUTÓNOMO Y ANTI-REFRESH) ---
   async function cargarServicios() {
     setLoading(true)
     try {
+      // Pedimos la identidad directamente al motor de seguridad
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      
+      // Si el usuario no está logueado aún (ej: en medio de un refresh), no hacemos nada
+      if (authError || !authData?.user) {
+        setLoading(false)
+        return 
+      }
+
+      const userIdExacto = authData.user.id
+
       const { data, error } = await supabase
         .from('servicios')
         .select('*')
-        .eq('negocio_id', negocioId)
+        .eq('negocio_id', userIdExacto)
         .order('creado_en', { ascending: true })
 
       if (error) throw error
@@ -40,6 +51,7 @@ export default function Servicios({ negocioId }) {
     }
   }
 
+  // --- ACCIONES DE MODAL ---
   const abrirModalCrear = () => {
     setModoEdicion(null)
     setForm({ nombre: '', duracion: '', precio: '' })
@@ -50,14 +62,14 @@ export default function Servicios({ negocioId }) {
     setModoEdicion(srv.id)
     setForm({ 
       nombre: srv.nombre, 
-      // Aquí mapeamos la columna exacta de la BD al estado local
+      // Mapeo exacto a la base de datos
       duracion: srv.duracion_minutos || '', 
       precio: srv.precio || '' 
     })
     setModalAbierto(true)
   }
 
-  // --- MOTOR DE PERSISTENCIA ---
+  // --- MOTOR DE PERSISTENCIA (BLINDADO) ---
   async function guardarServicio(e) {
     e.preventDefault()
     setGuardando(true)
@@ -73,11 +85,11 @@ export default function Servicios({ negocioId }) {
 
       const userIdExacto = authData.user.id
 
-      // 2. ARMAMOS EL PAYLOAD (CORREGIDO PARA QUE COINCIDA CON TU BD)
+      // PAYLOAD EXACTO: duracion_minutos coincide con tu SQL
       const payload = {
         negocio_id: userIdExacto, 
         nombre: form.nombre.trim(),
-        duracion_minutos: Number(form.duracion), // <--- EL FIX ESTÁ ACÁ
+        duracion_minutos: Number(form.duracion), 
         precio: Number(form.precio)
       }
 
@@ -98,16 +110,12 @@ export default function Servicios({ negocioId }) {
       }
 
       setModalAbierto(false)
-      const { data: newData } = await supabase.from('servicios').select('*').eq('negocio_id', userIdExacto).order('creado_en', { ascending: true })
-      setServicios(newData || [])
+      // Recargamos forzando la lectura directa
+      cargarServicios()
 
     } catch (error) {
       console.error("Supabase Error:", error)
-      if (error.code === '42501' || error.message.includes('403')) {
-        alert("Error de Permisos (403): La base de datos bloqueó la acción.")
-      } else {
-        alert(`Error del servidor: ${error.message}`)
-      }
+      alert(`Error del servidor: ${error.message}`)
     } finally {
       setGuardando(false)
     }
@@ -135,7 +143,6 @@ export default function Servicios({ negocioId }) {
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
       
-      {/* --- HEADER COMPACTO --- */}
       <header className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0">
          <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Catálogo de Servicios</h2>
@@ -152,7 +159,6 @@ export default function Servicios({ negocioId }) {
          </button>
       </header>
 
-      {/* --- GRILLA DE SERVICIOS --- */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
          {loading ? (
            <div className="flex justify-center items-center h-40">
@@ -179,7 +185,6 @@ export default function Servicios({ negocioId }) {
                          <div className="flex items-center gap-2 mt-2">
                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 text-[10px] font-bold text-slate-500 tracking-widest uppercase border border-slate-100">
                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                             {/* Mostramos el dato usando el nombre correcto de la columna */}
                              {srv.duracion_minutos} min
                            </span>
                          </div>
@@ -204,7 +209,6 @@ export default function Servicios({ negocioId }) {
          )}
       </div>
 
-      {/* --- MODAL: CREAR / EDITAR --- */}
       {modalAbierto && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-6 md:p-8 animate-in slide-in-from-bottom-full duration-500 border border-slate-100">
