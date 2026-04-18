@@ -16,9 +16,31 @@ export default function Turnos({ negocioId }) {
     cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00'
   })
 
+  // Unificamos el parseo ultra robusto de los strings de Supabase para toda la vista
+  const safeParseDate = (dbString) => {
+     let rawDate = dbString ? dbString.replace(' ', 'T') : ''
+     if (!rawDate.endsWith('Z') && !rawDate.includes('+') && rawDate.split('-').length <= 3) {
+        rawDate += 'Z'
+     }
+     const d = new Date(rawDate)
+     return isNaN(d.getTime()) ? null : d
+  }
+
   useEffect(() => {
     if (negocioId) bootSmartAgenda()
-  }, [negocioId, fechaActual, filtroEmpleado])
+  }, [negocioId, filtroEmpleado])
+
+  // Derivación sincrónica e inmediata: Los puntitos y la lista de abajo mirarán la misma fuente de verdad
+  useEffect(() => {
+    const filtradosDeHoy = todosLosTurnos.filter(t => {
+       const tDate = safeParseDate(t.fecha_hora)
+       if (!tDate) return false
+       return tDate.getFullYear() === fechaActual.getFullYear() &&
+              tDate.getMonth() === fechaActual.getMonth() &&
+              tDate.getDate() === fechaActual.getDate()
+    })
+    setTurnos(filtradosDeHoy)
+  }, [fechaActual, todosLosTurnos])
 
   async function bootSmartAgenda() {
     setLoading(true)
@@ -31,15 +53,13 @@ export default function Turnos({ negocioId }) {
       if (resEmp.data) setEmpleados(resEmp.data)
       if (resServ.data) setServicios(resServ.data)
 
-      // BUNDLE FETCH DINÁMICO: Ampliamos los bordes visuales del mes cargado, sin perder el filtro local milimétrico.
-      const inicioVentana = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 1, 1)
-      const finVentana = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 2, 0)
+      // Traer turnos muy amplios para que el administrador pueda navegar históricamente
+      const limiteTemporal = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 2, 1)
 
       let query = supabase.from('turnos')
         .select('*, empleados(nombre, foto_url), servicios(nombre, duracion_minutos, precio)')
         .eq('negocio_id', negocioId)
-        .gte('fecha_hora', inicioVentana.toISOString())
-        .lte('fecha_hora', finVentana.toISOString())
+        .gte('fecha_hora', limiteTemporal.toISOString())
         .order('fecha_hora', { ascending: true })
 
       if (filtroEmpleado !== 'todos') query = query.eq('empleado_id', filtroEmpleado)
@@ -47,18 +67,7 @@ export default function Turnos({ negocioId }) {
       const { data, error } = await query
       if (error) throw error
 
-      // CORE MATCH: JavaScript parsea con precisión milimétrica la fecha local del navegador coincidente
-      const turnosDeHoy = (data || []).filter(t => {
-         const rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
-         const tDate = new Date(rawDate)
-         if (isNaN(tDate.getTime())) return false
-         return tDate.getFullYear() === fechaActual.getFullYear() &&
-                tDate.getMonth() === fechaActual.getMonth() &&
-                tDate.getDate() === fechaActual.getDate()
-      })
-
       setTodosLosTurnos(data || [])
-      setTurnos(turnosDeHoy)
     } catch (e) {
       console.error("Smart Agenda Error:", e.message)
     } finally {
@@ -97,11 +106,10 @@ export default function Turnos({ negocioId }) {
       const isSelected = d.toDateString() === fechaActual.toDateString()
       const isToday = d.toDateString() === new Date().toDateString()
       
-      // Contar turnos interactivos en base a la lista blindada global del mes
+      // Contar turnos interactivos sincronizados con Parseo Exacto Multi-Navegador
       const turnosEseDia = todosLosTurnos.filter(t => {
-         const rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
-         const tDate = new Date(rawDate)
-         if (isNaN(tDate.getTime())) return false
+         const tDate = safeParseDate(t.fecha_hora)
+         if (!tDate) return false
          return tDate.getFullYear() === year &&
                 tDate.getMonth() === month &&
                 tDate.getDate() === dayNum
@@ -210,9 +218,8 @@ export default function Turnos({ negocioId }) {
   }
 
   const extraeHoraSegura = (fechaString) => {
-     const rawDate = fechaString ? fechaString.replace(' ', 'T') : ''
-     const d = new Date(rawDate)
-     return isNaN(d.getTime()) ? 0 : d.getHours()
+     const tDate = safeParseDate(fechaString)
+     return tDate ? tDate.getHours() : 0
   }
 
   const turnosMañana = turnos.filter(t => extraeHoraSegura(t.fecha_hora) < 12)
