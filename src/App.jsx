@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import VistaPublica from './components/VistaPublica'
+import ActualizarClave from './components/ActualizarClave'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -53,6 +54,9 @@ function App() {
       <Routes>
         {/* RUTA PÚBLICA: Debe estar arriba para que no la atrape el "*" */}
         <Route path="/app/:id" element={<VistaPublica />} />
+
+        {/* RECUPERAR CLAVE */}
+        <Route path="/actualizar-clave" element={<ActualizarClave />} />
 
         {/* LOGIN: Si hay sesión, te manda al admin automáticamente */}
         <Route 

@@ -56,7 +56,9 @@ export default function Dashboard({ session }) {
       const { data, error } = await supabase
         .from('negocios')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('owner_id', session.user.id)
+        .order('creado_en', { ascending: true })
+        .limit(1)
         .maybeSingle()
 
       if (error && error.code !== 'PGRST116') throw error
