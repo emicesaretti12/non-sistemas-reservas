@@ -14,7 +14,10 @@ function App() {
     // Consultar sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      setLoading(false) // 2. Ya sabemos si hay sesión o no
+      setLoading(false)
+    }).catch((e) => {
+      console.warn("Supabase Session Background Worker:", e.message)
+      setLoading(false)
     })
 
     // Escuchar cambios en la autenticación
