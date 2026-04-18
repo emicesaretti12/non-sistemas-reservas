@@ -30,22 +30,32 @@ export default function Turnos({ negocioId }) {
       if (resEmp.data) setEmpleados(resEmp.data)
       if (resServ.data) setServicios(resServ.data)
 
-      // Timezone Safe Database Call
-      const inicio = new Date(fechaActual); inicio.setHours(0,0,0,0)
-      const fin = new Date(fechaActual); fin.setHours(23,59,59,999)
+      // BUNDLE FETCH: Eludimos los filtros precisos de Postgres para prevenir bugs de Timezoneless strings
+      const limiteTemporal = new Date()
+      limiteTemporal.setDate(limiteTemporal.getDate() - 10) // Traemos de los últimos 10 días en adelante
 
       let query = supabase.from('turnos')
         .select('*, empleados(nombre, foto_url), servicios(nombre, duracion_minutos, precio)')
         .eq('negocio_id', negocioId)
-        .gte('fecha_hora', inicio.toISOString())
-        .lte('fecha_hora', fin.toISOString())
+        .gte('fecha_hora', limiteTemporal.toISOString())
         .order('fecha_hora', { ascending: true })
 
       if (filtroEmpleado !== 'todos') query = query.eq('empleado_id', filtroEmpleado)
 
       const { data, error } = await query
       if (error) throw error
-      setTurnos(data || [])
+
+      // CORE MATCH: JavaScript parsea con precisión milimétrica la fecha local del navegador coincidente
+      const turnosDeHoy = (data || []).filter(t => {
+         const rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
+         const tDate = new Date(rawDate)
+         if (isNaN(tDate.getTime())) return false
+         return tDate.getFullYear() === fechaActual.getFullYear() &&
+                tDate.getMonth() === fechaActual.getMonth() &&
+                tDate.getDate() === fechaActual.getDate()
+      })
+
+      setTurnos(turnosDeHoy)
     } catch (e) {
       console.error("Smart Agenda Error:", e.message)
     } finally {
@@ -134,12 +144,18 @@ export default function Turnos({ negocioId }) {
     }
   }
 
-  const turnosMañana = turnos.filter(t => new Date(t.fecha_hora).getHours() < 12)
+  const extraeHoraSegura = (fechaString) => {
+     const rawDate = fechaString ? fechaString.replace(' ', 'T') : ''
+     const d = new Date(rawDate)
+     return isNaN(d.getTime()) ? 0 : d.getHours()
+  }
+
+  const turnosMañana = turnos.filter(t => extraeHoraSegura(t.fecha_hora) < 12)
   const turnosTarde = turnos.filter(t => {
-    const h = new Date(t.fecha_hora).getHours()
+    const h = extraeHoraSegura(t.fecha_hora)
     return h >= 12 && h < 18
   })
-  const turnosNoche = turnos.filter(t => new Date(t.fecha_hora).getHours() >= 18)
+  const turnosNoche = turnos.filter(t => extraeHoraSegura(t.fecha_hora) >= 18)
 
   const renderTurnoCard = (t) => {
     // Convierte el UTC de la DB a la hora local para mostrarlo bien
