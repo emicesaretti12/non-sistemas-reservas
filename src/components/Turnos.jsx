@@ -43,6 +43,21 @@ export default function Turnos({ negocioId }) {
     setTurnos(filtradosDeHoy)
   }, [fechaActual, todosLosTurnos])
 
+  // Scroll Lock nativo para móviles: evita que el fondo rebote o se mueva cuando el modal está abierto
+  useEffect(() => {
+    if (modalDiaAbierto || modalAbierto) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none' // Previene tirones en iOS
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [modalDiaAbierto, modalAbierto])
+
   async function bootSmartAgenda() {
     setLoading(true)
     try {
