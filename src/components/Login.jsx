@@ -1,36 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
 
-/**
- * ============================================================
- * CONFIGURACIÓN OBLIGATORIA EN SUPABASE ANTES DE USAR ESTO
- * ============================================================
- *
- * 1. Authentication → Rate Limits → subir TODOS estos valores:
- *    - "Send emails"                    → 60 per hour  (default: 3 — absurdamente bajo)
- *    - "Token refreshes"                → 360 per hour
- *    - "Sign ups"                       → 60 per hour  (default: 3)
- *    - "Password reset"                 → 60 per hour  (default: 3)
- *    - "Magic link"                     → 60 per hour
- *
- * 2. Authentication → Attack Protection → HCaptcha:
- *    - Si está habilitado, asegurate de tener el sitekey correcto en el frontend.
- *    - Si no necesitás captcha, podés desactivarlo.
- *
- * 3. Authentication → URL Configuration → Site URL:
- *    → https://tudominio.com
- *
- * 4. Authentication → URL Configuration → Redirect URLs (agregar TODAS):
- *    → https://tudominio.com/admin
- *    → https://tudominio.com/actualizar-clave
- *
- * 5. Authentication → Providers → Google → Authorized redirect URI en Google Cloud:
- *    → https://<tu-proyecto>.supabase.co/auth/v1/callback
- * ============================================================
- */
-
-// Tiempo de cooldown en segundos que se aplica client-side después de un rate limit.
-// Esto evita que el usuario reintente y acumule más bloqueos en Supabase.
 const COOLDOWN_SEGUNDOS = 60
 
 export default function Login() {
@@ -47,18 +17,25 @@ export default function Login() {
 
   // --- ESTADOS DE ALERTAS Y SEGURIDAD ---
   const [mensaje, setMensaje] = useState(null)
-  const [passwordStrength, setPasswordStrength] = useState(0)
 
   // --- RATE LIMIT: COOLDOWN CLIENT-SIDE ---
-  // Cuando Supabase devuelve rate limit, activamos un countdown visible.
-  // El botón queda deshabilitado durante el cooldown para evitar reintentos
-  // que acumularían más bloqueos en el servidor.
   const [cooldown, setCooldown] = useState(0) // segundos restantes
   const cooldownRef = useRef(null)
 
   /**
+   * ANTI-ERRORES: CAPA 1 - Limpieza de caché al montar la vista.
+   * Destruye cualquier token residual en localStorage para asegurar 
+   * que un registro nuevo no se cruce con una cuenta anterior.
+   */
+  useEffect(() => {
+    const purgarSesionesFantasma = async () => {
+      await supabase.auth.signOut()
+    }
+    purgarSesionesFantasma()
+  }, [])
+
+  /**
    * Activa el cooldown client-side por N segundos.
-   * Muestra cuenta regresiva en la UI y libera el botón al terminar.
    */
   const activarCooldown = useCallback((segundos = COOLDOWN_SEGUNDOS) => {
     setCooldown(segundos)
@@ -76,54 +53,36 @@ export default function Login() {
     }, 1000)
   }, [])
 
-  // Limpiar el interval al desmontar el componente
   useEffect(() => {
     return () => {
       if (cooldownRef.current) clearInterval(cooldownRef.current)
     }
   }, [])
 
-  /**
-   * EFECTO: Limpieza de seguridad al cambiar de modo.
-   * No cancelamos el cooldown al cambiar de modo: si Supabase bloqueó,
-   * el bloqueo aplica al mismo email independientemente del modo.
-   */
   useEffect(() => {
     setMensaje(null)
     setPassword('')
     setConfirmPassword('')
     setAcceptTerms(false)
-    setPasswordStrength(0)
   }, [mode])
 
   /**
-   * EFECTO: Evaluar fuerza de la contraseña en tiempo real.
-   * Solo corre en modo 'registro' para evitar renders innecesarios.
+   * OPTIMIZACIÓN: Evaluar fuerza de la contraseña con useMemo (Evita re-renders).
    */
-  useEffect(() => {
-    if (mode !== 'registro' || !password) {
-      setPasswordStrength(0)
-      return
-    }
+  const passwordStrength = useMemo(() => {
+    if (mode !== 'registro' || !password) return 0
     let score = 0
     if (password.length >= 8) score += 1
     if (/[A-Z]/.test(password)) score += 1
     if (/[0-9]/.test(password)) score += 1
     if (/[^A-Za-z0-9]/.test(password)) score += 1
-    setPasswordStrength(score)
+    return score
   }, [password, mode])
 
-  /**
-   * UTILIDAD: Validación de email memoizada.
-   */
   const isValidEmail = useCallback((email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }, [])
 
-  /**
-   * UTILIDAD: Detecta si un error de Supabase es de tipo rate limit.
-   * Supabase puede devolver el rate limit con varios mensajes distintos.
-   */
   const esRateLimit = useCallback((msg) => {
     const lower = msg.toLowerCase()
     return (
@@ -136,19 +95,12 @@ export default function Login() {
     )
   }, [])
 
-  /**
-   * UTILIDAD: Extrae el tiempo de espera sugerido del mensaje de error de Supabase.
-   * Algunos mensajes incluyen "after X seconds". Si no encuentra nada, usa COOLDOWN_SEGUNDOS.
-   */
   const extraerSegundosDeEspera = useCallback((msg) => {
     const match = msg.match(/after (\d+) second/i)
     if (match) return Math.max(parseInt(match[1], 10), COOLDOWN_SEGUNDOS)
     return COOLDOWN_SEGUNDOS
   }, [])
 
-  /**
-   * UTILIDAD: Diccionario de errores de Supabase → mensajes en español.
-   */
   const traducirError = useCallback((errorMsg) => {
     const msg = errorMsg.toLowerCase()
     if (esRateLimit(errorMsg)) {
@@ -164,21 +116,14 @@ export default function Login() {
     return `Error: ${errorMsg}`
   }, [esRateLimit])
 
-  /**
-   * MANEJO DE LOGIN SOCIAL (GOOGLE / GITHUB).
-   * Fix: Se cierra sesión activa previa y se fuerza prompt: 'select_account'
-   * en Google para evitar que reutilice una sesión cacheada del navegador.
-   */
   const handleSocialLogin = async (provider) => {
     if (cooldown > 0) return
     setLoading(true)
     setMensaje(null)
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      if (sessionData?.session) {
-        await supabase.auth.signOut()
-      }
+      // ANTI-ERRORES: CAPA 2 - Limpieza forzada antes del auth
+      await supabase.auth.signOut()
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -203,20 +148,15 @@ export default function Login() {
     }
   }
 
-  /**
-   * MOTOR PRINCIPAL DE AUTENTICACIÓN.
-   */
   const handleAuth = async (e) => {
     e.preventDefault()
 
-    // Bloqueo duro client-side si hay cooldown activo
     if (cooldown > 0) return
 
     setMensaje(null)
 
     const cleanEmail = email.trim().toLowerCase()
 
-    // --- Validaciones pre-request (sin tocar la red) ---
     if (!cleanEmail) {
       return setMensaje({ tipo: 'error', texto: 'Se requiere una dirección de correo electrónico.' })
     }
@@ -244,6 +184,9 @@ export default function Login() {
     setLoading(true)
 
     try {
+      // ANTI-ERRORES: CAPA 2 - Destruimos token en memoria justo antes de actuar.
+      await supabase.auth.signOut()
+
       // ─────────────────────────────────────────────
       // MODO: REGISTRO
       // ─────────────────────────────────────────────
@@ -268,7 +211,7 @@ export default function Login() {
           throw error
         }
 
-        // Usuario fantasma: email ya existe pero Supabase devuelve user con identities vacías
+        // Usuario fantasma (identities vacío)
         if (data?.user && data.user.identities && data.user.identities.length === 0) {
           return setMensaje({
             tipo: 'error',
@@ -276,7 +219,6 @@ export default function Login() {
           })
         }
 
-        // Caso A: Confirm email = ON → sesión null, hay que confirmar email
         if (data?.user && !data.session) {
           setMensaje({
             tipo: 'exito',
@@ -286,9 +228,12 @@ export default function Login() {
           return
         }
 
-        // Caso B: Confirm email = OFF → sesión activa automáticamente
         if (data?.session) {
-          setMensaje({ tipo: 'exito', texto: '¡Cuenta creada! Redirigiendo...' })
+          setMensaje({ tipo: 'exito', texto: '¡Cuenta creada! Preparando entorno...' })
+          // ANTI-ERRORES: CAPA 3 - Redirección dura. Evita que listeners globales se mareen.
+          setTimeout(() => {
+            window.location.href = '/admin'
+          }, 800)
           return
         }
 
@@ -319,6 +264,12 @@ export default function Login() {
           throw new Error('No se pudo establecer sesión. Verificá tus credenciales.')
         }
 
+        setMensaje({ tipo: 'exito', texto: 'Credenciales validadas. Entrando...' })
+        // ANTI-ERRORES: CAPA 3 - Redirección dura.
+        setTimeout(() => {
+          window.location.href = '/admin'
+        }, 500)
+
       // ─────────────────────────────────────────────
       // MODO: RECUPERAR CONTRASEÑA
       // ─────────────────────────────────────────────
@@ -333,7 +284,7 @@ export default function Login() {
             activarCooldown(segundos)
             return setMensaje({
               tipo: 'error',
-              texto: `Demasiados intentos de recuperación. Esperá ${segundos} segundos antes de volver a solicitar el enlace.`,
+              texto: `Demasiados intentos de recuperación. Esperá ${segundos} segundos antes de solicitar el enlace.`,
             })
           }
           if (
@@ -345,12 +296,10 @@ export default function Login() {
           throw error
         }
 
-        // Supabase siempre responde "éxito" aunque el email no exista (seguridad anti-enumeration)
         setMensaje({
           tipo: 'exito',
           texto: 'Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.',
         })
-        // Cooldown suave de 30s para que no pueda spammear el botón
         activarCooldown(30)
         setMode('login')
       }
@@ -358,12 +307,15 @@ export default function Login() {
     } catch (error) {
       setMensaje({ tipo: 'error', texto: traducirError(error.message) })
     } finally {
-      setLoading(false)
+      // Si estamos redirigiendo no cortamos el loading visual
+      if (!(mode === 'login' && setMensaje?.tipo === 'exito') && !(mode === 'registro' && setMensaje?.tipo === 'exito' && acceptTerms)) {
+        setLoading(false)
+      }
     }
   }
 
   const configUI = {
-    login:     { titulo: 'Bienvenido',       subtitulo: 'Accedé al panel de Non Sistemas.',    btn: 'Entrar al entorno'    },
+    login:     { titulo: 'Bienvenido',     subtitulo: 'Accedé al panel de Non Sistemas.',    btn: 'Entrar al entorno'    },
     registro:  { titulo: 'Crear Cuenta',     subtitulo: 'Desplegá tu infraestructura hoy.',    btn: 'Aprovisionar servidor'},
     recuperar: { titulo: 'Recuperar Acceso', subtitulo: 'Ingresá tu correo para restablecer.', btn: 'Enviar protocolo'     },
   }
@@ -393,14 +345,11 @@ export default function Login() {
     )
   }
 
-  // El botón está deshabilitado si: hay loading, hay cooldown activo,
-  // o las validaciones de registro no están completas.
   const botonDeshabilitado =
     loading ||
     cooldown > 0 ||
     (mode === 'registro' && (!acceptTerms || password !== confirmPassword || passwordStrength < 3))
 
-  // Texto del botón según estado
   const renderBotonTexto = () => {
     if (loading) {
       return (
@@ -425,8 +374,6 @@ export default function Login() {
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 md:p-6 relative overflow-hidden ns-animated-bg">
-
-      {/* ANIMATED BACKGROUND ORBS */}
       <div className="ns-orb w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-600/30 -top-[5%] -left-[10%]" />
       <div className="ns-orb w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-cyan-400/20 -bottom-[5%] -right-[10%]" style={{ animationDelay: '3s' }} />
       <div className="ns-orb w-[150px] h-[150px] md:w-[250px] md:h-[250px] bg-indigo-500/20 top-[50%] left-[60%]" style={{ animationDelay: '6s' }} />
@@ -437,10 +384,8 @@ export default function Login() {
       />
 
       <div className="w-full max-w-[440px] z-10 ns-fade-up">
-
         <div className="ns-glass-dark rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] transition-all duration-500 relative overflow-hidden border border-white/5">
 
-          {/* LOGO Y TÍTULO */}
           <div className="text-center mb-6 md:mb-8 relative z-10">
             <div
               className="inline-flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-[1.8rem] mb-4 md:mb-6 ns-float relative overflow-hidden shadow-2xl"
@@ -457,7 +402,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* CAJA DE MENSAJES DINÁMICOS */}
           {mensaje && (
             <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-[10px] md:text-xs font-bold text-center ns-fade-down relative z-10 ${
               mensaje.tipo === 'error'
@@ -465,8 +409,6 @@ export default function Login() {
                 : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
             }`}>
               {mensaje.texto}
-
-              {/* Barra de progreso del cooldown integrada en el mensaje */}
               {cooldown > 0 && mensaje.tipo === 'error' && (
                 <div className="mt-2.5">
                   <div className="h-0.5 w-full bg-red-500/20 rounded-full overflow-hidden">
@@ -480,7 +422,6 @@ export default function Login() {
             </div>
           )}
 
-          {/* OAUTH: BOTONES SOCIALES */}
           {mode !== 'recuperar' && (
             <div className="animate-in fade-in duration-500 relative z-10">
               <div className="grid grid-cols-2 gap-2.5 md:gap-3 mb-4 md:mb-6">
@@ -511,7 +452,6 @@ export default function Login() {
                 </button>
               </div>
 
-              {/* DIVISOR */}
               <div className="relative mb-4 md:mb-6">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-white/10" />
@@ -525,10 +465,7 @@ export default function Login() {
             </div>
           )}
 
-          {/* FORMULARIO PRINCIPAL */}
           <form onSubmit={handleAuth} className="space-y-3 md:space-y-4 relative z-10">
-
-            {/* EMAIL */}
             <div>
               <label className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase ml-1 tracking-widest mb-1 md:mb-1.5 block">
                 Correo Electrónico
@@ -552,7 +489,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* CONTRASEÑA */}
             {mode !== 'recuperar' && (
               <div className="relative animate-in fade-in zoom-in-[0.98] duration-300">
                 <div className="flex justify-between items-center mb-1 md:mb-1.5 ml-1 mr-1">
@@ -589,6 +525,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 md:right-4 text-white/30 hover:text-white p-1 transition-colors"
+                    aria-label="Mostrar contraseña"
                   >
                     {showPassword ? (
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -606,7 +543,6 @@ export default function Login() {
               </div>
             )}
 
-            {/* CONFIRMAR CONTRASEÑA */}
             {mode === 'registro' && (
               <div className="relative animate-in slide-in-from-top-4 fade-in duration-500 pt-1 md:pt-0">
                 <label className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase ml-1 tracking-widest mb-1 md:mb-1.5 block">
@@ -636,7 +572,6 @@ export default function Login() {
               </div>
             )}
 
-            {/* CHECKBOX LEGAL */}
             {mode === 'registro' && (
               <div className="flex items-start gap-2.5 md:gap-3 mt-3 md:mt-4 animate-in fade-in duration-500">
                 <div className="relative flex items-center mt-0.5">
@@ -662,7 +597,6 @@ export default function Login() {
               </div>
             )}
 
-            {/* BOTÓN PRINCIPAL */}
             <button
               type="submit"
               disabled={botonDeshabilitado}
@@ -673,7 +607,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* NAVEGACIÓN INFERIOR */}
           <div className="mt-6 md:mt-8 text-center relative z-10 border-t border-white/5 pt-4 md:pt-6">
             {mode === 'recuperar' ? (
               <button
@@ -695,7 +628,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* PIE DE PÁGINA */}
         <div className="mt-6 md:mt-10 flex flex-col items-center gap-2 opacity-30 relative z-10 pb-4 md:pb-8">
           <p className="text-[8px] md:text-[9px] font-black text-white/60 uppercase tracking-[0.4em]">
             Non Sistemas • Salsipuedes, CBA
