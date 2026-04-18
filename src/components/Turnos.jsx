@@ -106,8 +106,9 @@ export default function Turnos({ negocioId }) {
       const serv = servicios.find(s => s.id === nuevoTurno.servicio_id)
       const emp = empleados.find(e => e.id === nuevoTurno.empleado_id)
 
+      const { hora, ...turnoData } = nuevoTurno
       const { error } = await supabase.from('turnos').insert([{
-        ...nuevoTurno, 
+        ...turnoData, 
         negocio_id: negocioId, 
         fecha_hora: fechaHoraExacta, 
         estado: 'confirmado'
@@ -161,7 +162,7 @@ export default function Turnos({ negocioId }) {
                </span>
                <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1 uppercase tracking-widest truncate">
                  <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                 {t.empleados?.nombre.split(' ')[0]}
+                 {t.empleados ? t.empleados.nombre.split(' ')[0] : 'Sin asignar'}
                </span>
             </div>
          </div>

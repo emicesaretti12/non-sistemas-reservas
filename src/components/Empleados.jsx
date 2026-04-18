@@ -90,22 +90,10 @@ export default function Empleados({ negocioId }) {
   async function guardarEspecialista(e) {
     e.preventDefault()
     setGuardando(true)
-    
     try {
-      // 1. OBTENEMOS EL ID EXACTO DE LA SESIÓN PARA EVITAR EL ERROR 400
-      const { data: authData, error: authError } = await supabase.auth.getUser()
-      
-      if (authError || !authData?.user) {
-        alert("Tu sesión caducó. Por favor, refrescá la página e iniciá sesión nuevamente.")
-        setGuardando(false)
-        return
-      }
-
-      const userIdExacto = authData.user.id
-
-      // 2. ARMAMOS EL PAYLOAD 
+      // Remove user ID fetch since we use the exact UUID of the business
       const payload = {
-        negocio_id: userIdExacto,
+        negocio_id: negocioId,
         nombre: form.nombre.trim(),
         especialidad: form.especialidad.trim(),
         foto_url: form.foto_url
@@ -117,7 +105,7 @@ export default function Empleados({ negocioId }) {
           .from('empleados')
           .update(payload)
           .eq('id', modoEdicion)
-          .eq('negocio_id', userIdExacto)
+          .eq('negocio_id', negocioId)
           
         if (error) throw error
       } else {
@@ -130,7 +118,7 @@ export default function Empleados({ negocioId }) {
 
       setModalAbierto(false)
       // Recargamos forzando el ID validado
-      const { data: newData } = await supabase.from('empleados').select('*').eq('negocio_id', userIdExacto).order('creado_en', { ascending: true })
+      const { data: newData } = await supabase.from('empleados').select('*').eq('negocio_id', negocioId).order('creado_en', { ascending: true })
       setEspecialistas(newData || [])
 
     } catch (error) {
@@ -147,14 +135,11 @@ export default function Empleados({ negocioId }) {
 
   async function eliminarEspecialista(id) {
     if (confirm('¿Desea dar de baja a este especialista/recurso?')) {
-      const { data: authData } = await supabase.auth.getUser()
-      if (!authData?.user) return
-
       const { error } = await supabase
         .from('empleados')
         .delete()
         .eq('id', id)
-        .eq('negocio_id', authData.user.id)
+        .eq('negocio_id', negocioId)
 
       if (!error) {
         setEspecialistas(especialistas.filter(e => e.id !== id))

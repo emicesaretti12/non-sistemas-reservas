@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 
-export default function Servicios() {
+export default function Servicios({ negocioId }) {
   const [loading, setLoading] = useState(true)
   const [servicios, setServicios] = useState([])
   
@@ -18,28 +18,19 @@ export default function Servicios() {
 
   // Al montar el componente o refrescar, cargamos directamente desde Auth
   useEffect(() => {
-    cargarServicios()
-  }, [])
+    if (negocioId) {
+      cargarServicios()
+    }
+  }, [negocioId])
 
   // --- MOTOR DE LECTURA (AUTÓNOMO Y ANTI-REFRESH) ---
   async function cargarServicios() {
     setLoading(true)
     try {
-      // Pedimos la identidad directamente al motor de seguridad
-      const { data: authData, error: authError } = await supabase.auth.getUser()
-      
-      // Si el usuario no está logueado aún (ej: en medio de un refresh), no hacemos nada
-      if (authError || !authData?.user) {
-        setLoading(false)
-        return 
-      }
-
-      const userIdExacto = authData.user.id
-
       const { data, error } = await supabase
         .from('servicios')
         .select('*')
-        .eq('negocio_id', userIdExacto)
+        .eq('negocio_id', negocioId)
         .order('creado_en', { ascending: true })
 
       if (error) throw error
@@ -75,19 +66,9 @@ export default function Servicios() {
     setGuardando(true)
     
     try {
-      const { data: authData, error: authError } = await supabase.auth.getUser()
-      
-      if (authError || !authData?.user) {
-        alert("Tu sesión caducó. Por favor, refrescá la página e iniciá sesión nuevamente.")
-        setGuardando(false)
-        return
-      }
-
-      const userIdExacto = authData.user.id
-
       // PAYLOAD EXACTO: duracion_minutos coincide con tu SQL
       const payload = {
-        negocio_id: userIdExacto, 
+        negocio_id: negocioId, 
         nombre: form.nombre.trim(),
         duracion_minutos: Number(form.duracion), 
         precio: Number(form.precio)
@@ -98,7 +79,7 @@ export default function Servicios() {
           .from('servicios')
           .update(payload)
           .eq('id', modoEdicion)
-          .eq('negocio_id', userIdExacto) 
+          .eq('negocio_id', negocioId) 
         
         if (error) throw error
       } else {
@@ -123,14 +104,11 @@ export default function Servicios() {
 
   async function eliminarServicio(id) {
     if (confirm('¿Desea eliminar este servicio? Ya no estará disponible para nuevas reservas.')) {
-      const { data: authData } = await supabase.auth.getUser()
-      if (!authData?.user) return
-      
       const { error } = await supabase
         .from('servicios')
         .delete()
         .eq('id', id)
-        .eq('negocio_id', authData.user.id)
+        .eq('negocio_id', negocioId)
 
       if (error) {
         alert(`Error al eliminar: ${error.message}`)
