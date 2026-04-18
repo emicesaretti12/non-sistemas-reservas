@@ -127,9 +127,20 @@ export default function VistaPublica() {
         .lte('fecha_hora', finDiaISO)
 
       const takenHrs = taken?.map(t => {
-        const bdDate = new Date(t.fecha_hora)
+        // Blindaje contra "timestamp sin zona horaria" de Postgres.
+        let rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
+        
+        // Si Postgres mutiló la "Z" o el "+00" al guardarlo, se lo re-inyectamos
+        // para que JS lo interprete como Universal Cero verdadero y no sume horas fantasma.
+        if (!rawDate.endsWith('Z') && !rawDate.includes('+') && rawDate.split('-').length <= 3) {
+           rawDate += 'Z'
+        }
+        
+        const bdDate = new Date(rawDate)
+        if (isNaN(bdDate.getTime())) return null
+
         return `${String(bdDate.getHours()).padStart(2, '0')}:${String(bdDate.getMinutes()).padStart(2, '0')}`
-      }) || []
+      }).filter(Boolean) || []
       
       const avail = slots.filter(s => !takenHrs.includes(s))
 
