@@ -95,6 +95,10 @@ export default function Dashboard({ session }) {
       }
     } catch (e) {
       console.error('Nucleus System Error:', e.message)
+      if (e.message?.includes('JWT') || e.code === '401') {
+        await supabase.auth.signOut()
+        window.location.href = '/login'
+      }
     } finally {
       setLoading(false)
     }
