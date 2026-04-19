@@ -384,10 +384,11 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-4 md:p-6 relative overflow-hidden ns-animated-bg">
-      <div className="ns-orb w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-600/30 -top-[5%] -left-[10%]" />
-      <div className="ns-orb w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-cyan-400/20 -bottom-[5%] -right-[10%]" style={{ animationDelay: '3s' }} />
-      <div className="ns-orb w-[150px] h-[150px] md:w-[250px] md:h-[250px] bg-indigo-500/20 top-[50%] left-[60%]" style={{ animationDelay: '6s' }} />
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 md:p-6 relative overflow-hidden ns-animated-bg bg-slate-950">
+      {/* EXTREMA OPTIMIZACIÓN MÓVIL: Los Orbes (filter: blur) queman la GPU del celular y causan lag al tipear. Los ocultamos en móvil. */}
+      <div className="hidden md:block ns-orb w-[500px] h-[500px] bg-purple-600/30 -top-[5%] -left-[10%]" />
+      <div className="hidden md:block ns-orb w-[400px] h-[400px] bg-cyan-400/20 -bottom-[5%] -right-[10%]" style={{ animationDelay: '3s' }} />
+      <div className="hidden md:block ns-orb w-[250px] h-[250px] bg-indigo-500/20 top-[50%] left-[60%]" style={{ animationDelay: '6s' }} />
 
       <div
         className="absolute inset-0 opacity-[0.03]"
@@ -652,8 +653,13 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="mt-6 md:mt-10 flex flex-col items-center gap-2 opacity-30 relative z-10 pb-4 md:pb-8">
-          <p className="text-[8px] md:text-[9px] font-black text-white/60 uppercase tracking-[0.4em]">
+        {/* BADGE DE SEGURIDAD EXTREMA */}
+        <div className="mt-6 md:mt-10 flex flex-col items-center gap-3 relative z-10 pb-4 md:pb-8">
+          <div className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/50">
+            <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em]">Cifrado de Extremo a Extremo (SSL)</span>
+          </div>
+          <p className="text-[8px] md:text-[9px] font-black text-white/30 uppercase tracking-[0.4em] opacity-80 mt-2">
             Non Sistemas • Salsipuedes, CBA
           </p>
         </div>
