@@ -363,7 +363,10 @@ export default function Dashboard({ session }) {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                        <button onClick={() => window.open(`/app/${n.id}`, '_blank')} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
+                        <button onClick={() => {
+                          const slug = n.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                          window.open(`/app/${slug}/${n.id}`, '_blank')
+                        }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </button>
                         <button onClick={() => gestionarSuscripcion(n.id, n.estado_suscripcion)} className={`flex-1 md:flex-none px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all ${n.estado_suscripcion === 'activo' ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white'}`}>
@@ -440,8 +443,12 @@ export default function Dashboard({ session }) {
                        <div className="flex-1 z-10 w-full">
                           <h4 className="text-xl md:text-2xl font-bold tracking-tight mb-2 md:mb-4">Link Público</h4>
                           <p className="text-slate-400 text-xs md:text-sm font-medium leading-relaxed mb-6 md:mb-8">Envíe este link por WhatsApp o péguelo en Instagram.</p>
-                          <div className="flex items-center bg-white/10 border border-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/app/${negocio.id}`); alert("Link copiado")}}>
-                             <code className="text-[10px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{window.location.origin}/app/{negocio.id}</code>
+                          <div className="flex items-center bg-white/10 border border-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
+                             const slug = negocio.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                             navigator.clipboard.writeText(`${window.location.origin}/app/${slug}/${negocio.id}`); 
+                             alert("Link copiado")
+                          }}>
+                             <code className="text-[10px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{window.location.origin}/app/{negocio.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}/{negocio.id}</code>
                              <svg className="w-4 h-4 ml-3 md:ml-4 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                           </div>
                        </div>

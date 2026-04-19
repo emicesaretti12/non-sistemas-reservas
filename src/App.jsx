@@ -55,7 +55,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* RUTA PÚBLICA: Debe estar arriba para que no la atrape el "*" */}
+        {/* RUTA PÚBLICA NUEVA CON NOMBRE: Debe estar arriba para que no la atrape el "*" */}
+        <Route path="/app/:slug/:id" element={<VistaPublica />} />
+        
+        {/* RUTA PÚBLICA LEGACY: Se mantiene por compatibilidad de links viejos */}
         <Route path="/app/:id" element={<VistaPublica />} />
 
         {/* RECUPERAR CLAVE */}
