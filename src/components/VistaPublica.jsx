@@ -120,29 +120,46 @@ export default function VistaPublica() {
 
       const { data: taken } = await supabase
         .from('turnos')
-        .select('fecha_hora')
+        .select('fecha_hora, servicios(duracion_minutos)')
         .eq('empleado_id', reserva.empleadoId)
         .eq('estado', 'confirmado')
         .gte('fecha_hora', inicioDiaISO)
         .lte('fecha_hora', finDiaISO)
 
-      const takenHrs = taken?.map(t => {
-        // Blindaje contra "timestamp sin zona horaria" de Postgres.
+      const bookedIntervals = taken?.map(t => {
         let rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
-        
-        // Si Postgres mutiló la "Z" o el "+00" al guardarlo, se lo re-inyectamos
-        // para que JS lo interprete como Universal Cero verdadero y no sume horas fantasma.
         if (!rawDate.endsWith('Z') && !rawDate.includes('+') && rawDate.split('-').length <= 3) {
            rawDate += 'Z'
         }
-        
         const bdDate = new Date(rawDate)
         if (isNaN(bdDate.getTime())) return null
 
-        return `${String(bdDate.getHours()).padStart(2, '0')}:${String(bdDate.getMinutes()).padStart(2, '0')}`
+        const startMins = bdDate.getHours() * 60 + bdDate.getMinutes()
+        const duration = t.servicios?.duracion_minutos || 30
+        return { startMins, endMins: startMins + duration }
       }).filter(Boolean) || []
+
+      const selectedService = servicios.find(s => s.id === reserva.servicioId)
+      const selectedDuration = selectedService?.duracion_minutos || 30
       
-      const avail = slots.filter(s => !takenHrs.includes(s))
+      const [finH, finM] = config.fin.split(':').map(Number)
+      const finMins = finH * 60 + finM
+
+      const avail = slots.filter(s => {
+        const [h, m] = s.split(':').map(Number)
+        const startMins = h * 60 + m
+        const endMins = startMins + selectedDuration
+        
+        // No puede exceder el horario de cierre
+        if (endMins > finMins) return false
+        
+        // Comprobar solapamiento (overlap = max(start1, start2) < min(end1, end2))
+        const hasOverlap = bookedIntervals.some(b => {
+           return Math.max(startMins, b.startMins) < Math.min(endMins, b.endMins)
+        })
+
+        return !hasOverlap
+      })
 
       setHorasDisponibles({
         mañana: avail.filter(h => h < "12:00"),
