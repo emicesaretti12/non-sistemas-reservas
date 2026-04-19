@@ -28,32 +28,30 @@ export default function Login() {
    * que un registro nuevo no se cruce con una cuenta anterior.
    */
   useEffect(() => {
+    // 1. Purgar sesiones residuales al entrar
     const purgarSesionesFantasma = async () => {
       await supabase.auth.signOut()
     }
     purgarSesionesFantasma()
-  }, [])
 
-  /**
-   * Activa el cooldown client-side por N segundos.
-   */
-  const activarCooldown = useCallback((segundos = COOLDOWN_SEGUNDOS) => {
-    setCooldown(segundos)
-    if (cooldownRef.current) clearInterval(cooldownRef.current)
+    // 2. Atrapar errores de OAuth (Google/Github) que vienen pegados en la URL tras el redireccionamiento
+    const hash = window.location.hash.substring(1)
+    const queryParams = new URLSearchParams(window.location.search)
+    const errorDesc = new URLSearchParams(hash).get('error_description') || queryParams.get('error_description')
+    
+    if (errorDesc) {
+      const errorReal = decodeURIComponent(errorDesc.replace(/\+/g, ' '))
+      let textoTratado = errorReal
+      
+      if (errorReal.includes('Database error saving new user')) {
+         textoTratado = 'Falla de Integración: Existe un "Trigger" dañado en tu base de datos de Supabase que impide crear la cuenta de Google. Revisá "Triggers" en tu Supabase.'
+      }
+      
+      setMensaje({ tipo: 'error', texto: `Error del Servidor: ${textoTratado}` })
+      // Limpiar la URL para que no quede el error al recargar
+      window.history.replaceState(null, '', window.location.pathname)
+    }
 
-    cooldownRef.current = setInterval(() => {
-      setCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(cooldownRef.current)
-          cooldownRef.current = null
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-  }, [])
-
-  useEffect(() => {
     return () => {
       if (cooldownRef.current) clearInterval(cooldownRef.current)
     }
@@ -328,26 +326,32 @@ export default function Login() {
   }
 
   const renderPasswordMeter = () => {
-    if (mode !== 'registro' || !password) return null
-    const colors = ['bg-red-500', 'bg-orange-400', 'bg-blue-400', 'bg-emerald-500']
-    const labels = ['Muy débil', 'Débil', 'Aceptable', 'Fuerte']
+    if (mode !== 'registro') return null
+    
+    const rules = [
+      { id: 'length', text: 'Mínimo 8 caracteres', test: password.length >= 8 },
+      { id: 'upper', text: 'Una letra mayúscula', test: /[A-Z]/.test(password) },
+      { id: 'num', text: 'Un número', test: /[0-9]/.test(password) },
+      { id: 'spec', text: 'Un símbolo (@, #, !, etc.)', test: /[^A-Za-z0-9]/.test(password) }
+    ]
+
     return (
-      <div className="mt-2 md:mt-3 animate-in fade-in duration-300">
-        <div className="flex gap-1 md:gap-1.5 h-1 md:h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-          {[1, 2, 3, 4].map((level) => (
-            <div
-              key={level}
-              className={`h-full flex-1 transition-all duration-500 ${
-                passwordStrength >= level ? colors[passwordStrength - 1] : 'bg-transparent'
-              }`}
-            />
+      <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4 animate-in fade-in duration-300 shadow-inner">
+        <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-3">Requisitos de Seguridad</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {rules.map(rule => (
+            <div key={rule.id} className="flex items-center gap-2">
+              <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors ${rule.test ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/30'}`}>
+                {rule.test ? (
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                ) : (
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                )}
+              </div>
+              <span className={`text-[10px] md:text-xs font-semibold ${rule.test ? 'text-emerald-400' : 'text-white/40'}`}>{rule.text}</span>
+            </div>
           ))}
         </div>
-        <p className={`text-[8px] md:text-[9px] font-bold uppercase tracking-widest mt-1 md:mt-1.5 text-right transition-colors ${
-          passwordStrength < 3 ? 'text-white/40' : 'text-emerald-400'
-        }`}>
-          Nivel: {labels[Math.max(0, passwordStrength - 1)]}
-        </p>
       </div>
     )
   }
@@ -410,22 +414,35 @@ export default function Login() {
           </div>
 
           {mensaje && (
-            <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-[10px] md:text-xs font-bold text-center ns-fade-down relative z-10 ${
+            <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-[11px] md:text-sm font-medium leading-relaxed ns-fade-down relative z-10 flex items-start gap-3 shadow-xl border ${
               mensaje.tipo === 'error'
-                ? 'bg-red-500/10 text-red-300 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
-                : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                ? 'bg-[#2A1115]/90 text-red-200 border-red-500/30'
+                : 'bg-[#112A1F]/90 text-emerald-200 border-emerald-500/30'
             }`}>
-              {mensaje.texto}
-              {cooldown > 0 && mensaje.tipo === 'error' && (
-                <div className="mt-2.5">
-                  <div className="h-0.5 w-full bg-red-500/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-red-400/60 rounded-full transition-all duration-1000 ease-linear"
-                      style={{ width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
+              <div className="shrink-0 mt-0.5">
+                 {mensaje.tipo === 'error' ? (
+                   <svg className="w-5 h-5 md:w-6 md:h-6 text-red-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                 ) : (
+                   <svg className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                 )}
+              </div>
+              <div className="flex-1">
+                 <h4 className={`font-bold tracking-tight mb-1 ${mensaje.tipo === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
+                   {mensaje.tipo === 'error' ? 'Atención Requerida' : 'Operación Exitosa'}
+                 </h4>
+                 <p className="opacity-90">{mensaje.texto}</p>
+                 
+                 {cooldown > 0 && mensaje.tipo === 'error' && (
+                   <div className="mt-3">
+                     <div className="h-1 w-full bg-red-900/40 rounded-full overflow-hidden">
+                       <div
+                         className="h-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] transition-all duration-1000 ease-linear"
+                         style={{ width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%` }}
+                       />
+                     </div>
+                   </div>
+                 )}
+              </div>
             </div>
           )}
 
