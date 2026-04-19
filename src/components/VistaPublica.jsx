@@ -257,13 +257,11 @@ export default function VistaPublica() {
       {/* 1. HERO & BRANDING SECTION */}
       <header className="relative h-[30vh] w-full overflow-hidden bg-zinc-100 z-10">
          {negocio.portada_url ? (
-           <img src={negocio.portada_url} className="w-full h-full object-cover animate-in fade-in duration-1000 scale-105" alt="Cover" />
+           <img src={negocio.portada_url} className="w-full h-full object-cover animate-in fade-in duration-1000" alt="Cover" />
          ) : (
            <div className="w-full h-full bg-zinc-200"></div>
          )}
-         {/* Apple style gradient overlay adaptado al fondo claro */}
-         <div className="absolute inset-0 bg-gradient-to-t from-[#FDFDFC] via-[#FDFDFC]/60 to-transparent"></div>
-         <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/30 to-transparent"></div>
+         <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/20 to-transparent"></div>
       </header>
 
       <main className="max-w-md mx-auto relative z-20 -mt-16 px-4">
