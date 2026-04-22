@@ -159,12 +159,29 @@ export default function Dashboard({ session }) {
 
   async function gestionarSuscripcion(id, estadoActual) {
     const nuevoEstado = estadoActual === 'activo' ? 'suspendido' : 'activo'
-    const { error } = await supabase
+    const negocioTarget = todosLosNegocios.find(n => n.id === id)
+    const accion = nuevoEstado === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR'
+    
+    if (!confirm(`¿Confirma que desea ${accion} a "${negocioTarget?.nombre || id}"?`)) return
+
+    const { data, error, count } = await supabase
       .from('negocios')
       .update({ estado_suscripcion: nuevoEstado })
       .eq('id', id)
+      .select()
     
-    if (!error) cargarConsolaMaestra()
+    if (error) {
+      console.error('Error de RLS/Supabase:', error)
+      alert(`Error al ${accion.toLowerCase()}: ${error.message}\n\nAsegurate de haber ejecutado el script SQL de permisos de admin (sql_admin_fix.sql) en tu panel de Supabase.`)
+      return
+    }
+
+    if (!data || data.length === 0) {
+      alert(`No se pudo ${accion.toLowerCase()} el negocio. Las políticas de seguridad (RLS) de Supabase están bloqueando la acción.\n\nSolución: Ejecutá el archivo sql_admin_fix.sql en Supabase SQL Editor.`)
+      return
+    }
+
+    cargarConsolaMaestra()
   }
 
   /**
