@@ -20,7 +20,7 @@ export default function Dashboard({ session }) {
   
   // --- ESTADOS: GESTIÓN DE NEGOCIO (OWNER) ---
   const [tab, setTab] = useState('inicio')
-  const [stats, setStats] = useState({ hoy: 0, ingresos: 0, popular: '-' })
+  const [stats, setStats] = useState({ hoy: 0, ingresos: 0, popular: '-', semana: 0, mesIngresos: 0, tasaOcupacion: 0 })
   
   // Lógica Granular de Carga
   const [guardandoPerfil, setGuardandoPerfil] = useState(false)
@@ -39,10 +39,25 @@ export default function Dashboard({ session }) {
   const [portadaUrl, setPortadaUrl] = useState('')
   const [instagram, setInstagram] = useState('')
 
+  // --- ESTADOS: CONTACTO NEGOCIO ---
+  const [telefonoNegocio, setTelefonoNegocio] = useState('')
+  const [direccionNegocio, setDireccionNegocio] = useState('')
+  const [mensajeBienvenida, setMensajeBienvenida] = useState('')
+
   // --- ESTADOS: CLIENTES (NUEVO) ---
   const [clientes, setClientes] = useState([])
   const [cargandoClientes, setCargandoClientes] = useState(false)
   const [busquedaCliente, setBusquedaCliente] = useState('')
+  const [ordenClientes, setOrdenClientes] = useState('visitas') // visitas | nombre | reciente
+
+  // --- ESTADOS: ACTIVIDAD RECIENTE ---
+  const [actividadReciente, setActividadReciente] = useState([])
+
+  // --- ESTADOS: PRÓXIMA CITA ---
+  const [proximaCita, setProximaCita] = useState(null)
+
+  // --- ESTADOS: DISTRIBUCIÓN SEMANAL ---
+  const [distribucionSemanal, setDistribucionSemanal] = useState([0,0,0,0,0,0,0])
 
   const navigate = useNavigate()
 
@@ -75,6 +90,9 @@ export default function Dashboard({ session }) {
         setLogoUrl(data.logo_url || '')
         setPortadaUrl(data.portada_url || '')
         setInstagram(data.instagram || '')
+        setTelefonoNegocio(data.telefono || '')
+        setDireccionNegocio(data.direccion || '')
+        setMensajeBienvenida(data.mensaje_bienvenida || '')
 
         // --- SISTEMA DE AUTO-APROVISIONAMIENTO DE SUPER ADMIN ---
         let isAdmin = data.es_admin_plataforma
@@ -95,7 +113,11 @@ export default function Dashboard({ session }) {
         if (isAdmin) {
           await cargarConsolaMaestra()
         } else {
-          await cargarMetricasNegocio(data.id)
+          await Promise.all([
+            cargarMetricasNegocio(data.id),
+            cargarActividadReciente(data.id),
+            cargarClientes(data.id)
+          ])
         }
       }
     } catch (e) {
@@ -146,18 +168,31 @@ export default function Dashboard({ session }) {
   }
 
   /**
-   * LÓGICA NEGOCIO: BUSINESS INTELLIGENCE (Timezone Safe)
+   * LÓGICA NEGOCIO: BUSINESS INTELLIGENCE COMPLETA (Timezone Safe)
    */
   async function cargarMetricasNegocio(negocioId) {
-    const hoyInicio = new Date()
+    const ahora = new Date()
+    const hoyInicio = new Date(ahora)
     hoyInicio.setHours(0, 0, 0, 0)
+    
+    // Inicio de la semana (lunes)
+    const inicioSemana = new Date(ahora)
+    const diaSemana = ahora.getDay()
+    const diff = diaSemana === 0 ? 6 : diaSemana - 1
+    inicioSemana.setDate(ahora.getDate() - diff)
+    inicioSemana.setHours(0, 0, 0, 0)
+    
+    // Inicio del mes
+    const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1)
 
+    // Traemos todos los turnos desde inicio de mes para calcular todo
     const { data: turnos, error } = await supabase
       .from('turnos')
-      .select('*, servicios(nombre, precio)')
+      .select('*, servicios(nombre, precio, duracion_minutos), empleados(nombre)')
       .eq('negocio_id', negocioId)
       .eq('estado', 'confirmado')
-      .gte('fecha_hora', hoyInicio.toISOString())
+      .gte('fecha_hora', inicioMes.toISOString())
+      .order('fecha_hora', { ascending: true })
 
     if (error) {
       console.error('Error obteniendo métricas:', error.message)
@@ -165,8 +200,69 @@ export default function Dashboard({ session }) {
     }
 
     if (turnos) {
-      const ingresos = turnos.reduce((acc, t) => acc + (t.servicios?.precio || 0), 0)
-      setStats({ hoy: turnos.length, ingresos, popular: '-' })
+      // Turnos futuros desde hoy
+      const turnosFuturos = turnos.filter(t => new Date(t.fecha_hora) >= hoyInicio)
+      const ingresosFuturos = turnosFuturos.reduce((acc, t) => acc + (t.servicios?.precio || 0), 0)
+      
+      // Turnos esta semana
+      const turnosSemana = turnos.filter(t => {
+        const f = new Date(t.fecha_hora)
+        return f >= inicioSemana
+      })
+      
+      // Ingresos del mes completo
+      const ingresosMes = turnos.reduce((acc, t) => acc + (t.servicios?.precio || 0), 0)
+      
+      // Servicio más popular
+      const servicioCount = {}
+      turnos.forEach(t => {
+        const nombre = t.servicios?.nombre || 'Otro'
+        servicioCount[nombre] = (servicioCount[nombre] || 0) + 1
+      })
+      const popular = Object.keys(servicioCount).reduce((a, b) => 
+        servicioCount[a] > servicioCount[b] ? a : b, '-'
+      )
+      
+      // Distribución semanal (Lun-Dom)
+      const distSemanal = [0,0,0,0,0,0,0]
+      turnosSemana.forEach(t => {
+        const d = new Date(t.fecha_hora).getDay()
+        const idx = d === 0 ? 6 : d - 1 // Lunes=0, Domingo=6
+        distSemanal[idx]++
+      })
+      setDistribucionSemanal(distSemanal)
+
+      // Próxima cita
+      const ahora2 = new Date()
+      const proxima = turnosFuturos.find(t => new Date(t.fecha_hora) > ahora2)
+      if (proxima) {
+        setProximaCita(proxima)
+      }
+      
+      setStats({ 
+        hoy: turnosFuturos.length, 
+        ingresos: ingresosFuturos,
+        popular,
+        semana: turnosSemana.length,
+        mesIngresos: ingresosMes,
+        tasaOcupacion: turnosSemana.length > 0 ? Math.min(100, Math.round((turnosSemana.length / 35) * 100)) : 0
+      })
+    }
+  }
+
+  /**
+   * ACTIVIDAD RECIENTE: Últimos movimientos del negocio
+   */
+  async function cargarActividadReciente(negocioId) {
+    const { data, error } = await supabase
+      .from('turnos')
+      .select('*, servicios(nombre), empleados(nombre)')
+      .eq('negocio_id', negocioId)
+      .order('creado_en', { ascending: false })
+      .limit(8)
+
+    if (!error && data) {
+      setActividadReciente(data)
     }
   }
 
@@ -178,7 +274,7 @@ export default function Dashboard({ session }) {
     try {
       const { data: turnos, error } = await supabase
         .from('turnos')
-        .select('cliente_nombre, cliente_telefono, cliente_email, fecha_hora, servicios(nombre)')
+        .select('cliente_nombre, cliente_telefono, cliente_email, fecha_hora, servicios(nombre, precio)')
         .eq('negocio_id', negocioId)
         .order('fecha_hora', { ascending: false })
 
@@ -194,20 +290,24 @@ export default function Dashboard({ session }) {
             telefono: t.cliente_telefono,
             email: t.cliente_email || '',
             visitas: 0,
+            ingresoTotal: 0,
             ultimaVisita: t.fecha_hora,
+            primeraVisita: t.fecha_hora,
             servicios: new Set()
           }
         }
         clientesMap[key].visitas++
+        clientesMap[key].ingresoTotal += (t.servicios?.precio || 0)
+        clientesMap[key].primeraVisita = t.fecha_hora // como viene desc, la última iteración es la primera visita
         if (t.servicios?.nombre) clientesMap[key].servicios.add(t.servicios.nombre)
       })
 
       const listaClientes = Object.values(clientesMap).map(c => ({
         ...c,
-        servicios: Array.from(c.servicios)
+        servicios: Array.from(c.servicios),
+        frecuencia: c.visitas >= 10 ? 'VIP' : c.visitas >= 5 ? 'Frecuente' : c.visitas >= 2 ? 'Regular' : 'Nuevo'
       }))
 
-      // Ordenar por cantidad de visitas (más frecuentes primero)
       listaClientes.sort((a, b) => b.visitas - a.visitas)
       setClientes(listaClientes)
     } catch (e) {
@@ -219,7 +319,7 @@ export default function Dashboard({ session }) {
 
   // Cargar clientes cuando se selecciona la tab de clientes
   useEffect(() => {
-    if (tab === 'clientes' && negocio && !negocio.es_admin_plataforma) {
+    if (tab === 'clientes' && negocio && !negocio.es_admin_plataforma && clientes.length === 0) {
       cargarClientes(negocio.id)
     }
   }, [tab, negocio])
@@ -258,22 +358,41 @@ export default function Dashboard({ session }) {
 
   async function actualizarBranding() {
     setGuardandoPerfil(true)
+    const updatePayload = { 
+      color_primario: colorPrimario, 
+      descripcion, 
+      logo_url: logoUrl, 
+      portada_url: portadaUrl, 
+      instagram
+    }
+    
+    // Solo agregamos campos extra si la tabla los soporta
+    // (telefono, direccion, mensaje_bienvenida son opcionales)
+    if (telefonoNegocio) updatePayload.telefono = telefonoNegocio
+    if (direccionNegocio) updatePayload.direccion = direccionNegocio
+    if (mensajeBienvenida) updatePayload.mensaje_bienvenida = mensajeBienvenida
+    
     const { error } = await supabase
       .from('negocios')
-      .update({ 
-        color_primario: colorPrimario, 
-        descripcion, 
-        logo_url: logoUrl, 
-        portada_url: portadaUrl, 
-        instagram 
-      })
+      .update(updatePayload)
       .eq('id', negocio.id)
 
     if (!error) {
-      setNegocio({ ...negocio, color_primario: colorPrimario, descripcion, logo_url: logoUrl, portada_url: portadaUrl, instagram })
-      alert("Marca sincronizada con éxito.")
+      setNegocio({ ...negocio, ...updatePayload })
+      alert("Configuración guardada con éxito.")
     } else {
-      alert("Hubo un error al guardar la configuración.")
+      // Si falla por campos extra, intentamos sin ellos
+      const { error: e2 } = await supabase
+        .from('negocios')
+        .update({ color_primario: colorPrimario, descripcion, logo_url: logoUrl, portada_url: portadaUrl, instagram })
+        .eq('id', negocio.id)
+      
+      if (!e2) {
+        setNegocio({ ...negocio, color_primario: colorPrimario, descripcion, logo_url: logoUrl, portada_url: portadaUrl, instagram })
+        alert("Marca actualizada. Algunos campos avanzados no están disponibles aún en tu base de datos.")
+      } else {
+        alert("Hubo un error al guardar la configuración.")
+      }
     }
     setGuardandoPerfil(false)
   }
@@ -302,6 +421,34 @@ export default function Dashboard({ session }) {
       console.error("Onboarding Error:", error.message)
     }
     setCreando(false)
+  }
+
+  // ===== HELPERS =====
+  const formatearFechaRelativa = (fechaStr) => {
+    if (!fechaStr) return ''
+    const fecha = new Date(fechaStr)
+    const ahora = new Date()
+    const diff = ahora - fecha
+    const mins = Math.floor(diff / 60000)
+    const horas = Math.floor(diff / 3600000)
+    const dias = Math.floor(diff / 86400000)
+    
+    if (mins < 1) return 'Ahora'
+    if (mins < 60) return `Hace ${mins} min`
+    if (horas < 24) return `Hace ${horas}h`
+    if (dias < 7) return `Hace ${dias}d`
+    if (dias < 30) return `Hace ${Math.floor(dias/7)} sem`
+    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  }
+
+  const formatearHora = (fechaStr) => {
+    if (!fechaStr) return ''
+    return new Date(fechaStr).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  }
+
+  const formatearFecha = (fechaStr) => {
+    if (!fechaStr) return ''
+    return new Date(fechaStr).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
   }
 
   // ===== DEFINICIÓN DE TABS =====
@@ -334,13 +481,30 @@ export default function Dashboard({ session }) {
     n.rubro.toLowerCase().includes(filtroBusqueda.toLowerCase())
   )
 
-  const clientesFiltrados = clientes.filter(c =>
+  // Ordenar clientes según criterio
+  const clientesOrdenados = [...clientes].sort((a, b) => {
+    if (ordenClientes === 'nombre') return a.nombre.localeCompare(b.nombre)
+    if (ordenClientes === 'reciente') return new Date(b.ultimaVisita) - new Date(a.ultimaVisita)
+    if (ordenClientes === 'ingresos') return b.ingresoTotal - a.ingresoTotal
+    return b.visitas - a.visitas
+  })
+
+  const clientesFiltrados = clientesOrdenados.filter(c =>
     c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
     c.telefono?.toLowerCase().includes(busquedaCliente.toLowerCase())
   )
 
   const publicSlug = negocio?.nombre?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ''
   const publicLink = `${window.location.origin}/app/${publicSlug}/${negocio?.id || ''}`
+
+  // Distribución semanal max para normalizar barras
+  const maxSemanal = Math.max(...distribucionSemanal, 1)
+  const diasSemanaLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+
+  // Stats resumen del top de clientes
+  const totalIngresosClientes = clientes.reduce((acc, c) => acc + c.ingresoTotal, 0)
+  const clientesVIP = clientes.filter(c => c.frecuencia === 'VIP').length
+  const clientesFrecuentes = clientes.filter(c => c.frecuencia === 'Frecuente').length
 
   return (
     <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`}>
@@ -353,10 +517,18 @@ export default function Dashboard({ session }) {
           </div>
           <div className={`h-3 md:h-4 w-px mx-1 ${negocio?.es_admin_plataforma ? 'bg-white/10' : 'bg-slate-200'}`}></div>
           <p className="text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.3em] uppercase opacity-50">
-            {negocio?.es_admin_plataforma ? 'Nucleus Master' : 'Management Console'}
+            {negocio?.es_admin_plataforma ? 'Nucleus Master' : (negocio?.nombre || 'Panel')}
           </p>
         </div>
-        <button onClick={() => supabase.auth.signOut()} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">Salir</button>
+        <div className="flex items-center gap-3">
+          {negocio && !negocio.es_admin_plataforma && (
+            <button onClick={() => window.open(publicLink, '_blank')} className="hidden md:flex text-[9px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Ver App
+            </button>
+          )}
+          <button onClick={() => supabase.auth.signOut()} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">Salir</button>
+        </div>
       </nav>
 
       <main className={`max-w-7xl mx-auto p-4 md:p-8 ${!negocio?.es_admin_plataforma && negocio ? 'ns-has-bottom-nav' : ''}`}>
@@ -390,7 +562,7 @@ export default function Dashboard({ session }) {
           </div>
         ) : negocio.es_admin_plataforma ? (
           /* ==========================================================
-             VISTA: SUPER ADMIN (NUCLEUS) COMPACTA
+             VISTA: SUPER ADMIN (NUCLEUS) — SIN CAMBIOS
              ========================================================== */
           <div className="space-y-6 md:space-y-8 animate-in fade-in duration-1000">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6">
@@ -403,8 +575,6 @@ export default function Dashboard({ session }) {
                  <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60">Sistema Estable</span>
               </div>
             </header>
-
-            {/* BENTO GRID: GLOBAL ANALYTICS */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                {[
                  { label: 'Totales', val: statsGlobales.total, trend: 'Nodos' },
@@ -419,8 +589,6 @@ export default function Dashboard({ session }) {
                  </div>
                ))}
             </div>
-
-            {/* BENTO: CLIENT DATABASE */}
             <div className="bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 shadow-2xl">
                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-8 mb-6 md:mb-10">
                  <div>
@@ -432,14 +600,11 @@ export default function Dashboard({ session }) {
                    <input type="text" placeholder="Buscar por ID o Nombre..." className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 pl-10 md:pl-12 pr-4 text-[11px] md:text-xs outline-none focus:border-white/30 transition-all font-medium text-white" value={filtroBusqueda} onChange={(e) => setFiltroBusqueda(e.target.value)} />
                  </div>
                </div>
-
                <div className="space-y-3">
                  {negociosFiltrados.map(n => (
                    <div key={n.id} className="bg-white/5 border border-white/5 hover:border-white/15 transition-all p-4 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 group">
                       <div className="flex items-center gap-4 md:gap-6 w-full">
-                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white text-black flex items-center justify-center font-black text-lg md:text-xl shadow-xl transition-transform group-hover:rotate-6 shrink-0">
-                          {n.nombre.charAt(0)}
-                        </div>
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white text-black flex items-center justify-center font-black text-lg md:text-xl shadow-xl transition-transform group-hover:rotate-6 shrink-0">{n.nombre.charAt(0)}</div>
                         <div className="overflow-hidden flex-1">
                           <p className="font-bold text-white text-base md:text-lg tracking-tight leading-none truncate">{n.nombre}</p>
                           <div className="flex items-center gap-2 md:gap-3 mt-2">
@@ -449,10 +614,7 @@ export default function Dashboard({ session }) {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                        <button onClick={() => {
-                          const slug = n.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                          window.open(`/app/${slug}/${n.id}`, '_blank')
-                        }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
+                        <button onClick={() => { const slug = n.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </button>
                         <button onClick={() => gestionarSuscripcion(n.id, n.estado_suscripcion)} className={`flex-1 md:flex-none px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all ${n.estado_suscripcion === 'activo' ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white'}`}>
@@ -466,27 +628,34 @@ export default function Dashboard({ session }) {
           </div>
         ) : (
           /* ==========================================================
-             VISTA: DASHBOARD BUSINESS (OWNER) — MOBILE FIRST
+             VISTA: DASHBOARD BUSINESS (OWNER) — MOBILE FIRST COMPLETO
              ========================================================== */
           <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
             
             {/* BRAND HERO — COMPACTO EN MOBILE */}
             <header className="ns-hero-compact text-white shadow-xl relative overflow-hidden transition-all duration-1000 group" style={{ backgroundColor: colorPrimario }}>
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-2 md:mb-4 opacity-70">
-                   <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
-                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-green-500"></span>
-                   </span>
-                   <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
+              <div className="relative z-10 flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2 md:mb-4 opacity-70">
+                     <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
+                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-green-500"></span>
+                     </span>
+                     <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
+                  </div>
+                  <h2 className="text-2xl md:text-5xl font-bold tracking-tighter leading-tight truncate">{negocio.nombre}</h2>
+                  <p className="text-xs md:text-lg mt-1 md:mt-3 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
                 </div>
-                <h2 className="text-2xl md:text-6xl font-bold tracking-tighter leading-tight max-w-2xl">{negocio.nombre}</h2>
-                <p className="text-xs md:text-xl mt-1 md:mt-4 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
+                {logoUrl && (
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0 bg-white/10">
+                    <img src={logoUrl} className="w-full h-full object-cover" alt="Logo" />
+                  </div>
+                )}
               </div>
               <div className="absolute -top-20 -right-20 md:-top-32 md:-right-32 w-64 h-64 md:w-96 md:h-96 bg-white/10 rounded-full blur-[80px] md:blur-[120px] group-hover:scale-110 transition-transform duration-1000"></div>
             </header>
 
-            {/* TAB SELECTOR — DESKTOP ONLY (mobile usa bottom nav) */}
+            {/* TAB SELECTOR — DESKTOP ONLY */}
             <div className="hidden md:flex overflow-x-auto gap-1 md:gap-2 p-1 md:p-1.5 bg-white border border-slate-200 rounded-xl md:rounded-2xl w-fit no-scrollbar shadow-sm">
               {tabsConfig.map(i => (
                 <button key={i.id} onClick={() => setTab(i.id)} className={`px-4 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl flex items-center gap-2 md:gap-3 text-[9px] md:text-[11px] shrink-0 font-bold uppercase tracking-widest transition-all ${tab === i.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
@@ -496,7 +665,7 @@ export default function Dashboard({ session }) {
               ))}
             </div>
 
-            {/* MOBILE TAB PILLS — SECUNDARIOS (servicios, equipo, horarios) */}
+            {/* MOBILE TAB PILLS — Tabs no incluidos en el bottom nav */}
             <div className="flex md:hidden overflow-x-auto gap-2 no-scrollbar">
               {tabsConfig.filter(t => !bottomNavTabs.find(bn => bn.id === t.id)).map(i => (
                 <button key={i.id} onClick={() => setTab(i.id)} className={`px-4 py-2.5 rounded-xl flex items-center gap-2 text-[9px] shrink-0 font-bold uppercase tracking-widest transition-all border ${tab === i.id ? 'bg-slate-900 text-white shadow-lg border-slate-900' : 'text-slate-500 hover:text-slate-900 bg-white border-slate-200'}`}>
@@ -506,54 +675,194 @@ export default function Dashboard({ session }) {
               ))}
             </div>
 
-            {/* AREA DE CONTENIDO PRINCIPAL — FULL WIDTH EN MOBILE */}
+            {/* AREA DE CONTENIDO PRINCIPAL */}
             <div className="ns-mobile-content-area">
 
+              {/* ====== TAB: MONITOR — MEJORADO ====== */}
               {tab === 'inicio' && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 animate-in fade-in duration-1000">
+                <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
                   
-                  <div className="ns-stat-mini group">
-                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Turnos Próximos</p>
-                    <h3 className="text-4xl md:text-7xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stats.hoy}</h3>
-                    <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-blue-500 uppercase tracking-widest">
-                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
-                       En agenda
+                  {/* PRÓXIMA CITA CARD — Solo si existe */}
+                  {proximaCita && (
+                    <div className="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-sm flex items-center gap-4 relative overflow-hidden">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 text-white font-black text-sm shadow-lg" style={{ backgroundColor: colorPrimario }}>
+                        {formatearHora(proximaCita.fecha_hora)?.split(':')[0] || ''}
+                        <span className="text-[8px] font-bold ml-0.5">:{formatearHora(proximaCita.fecha_hora)?.split(':')[1] || ''}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Próxima Cita</p>
+                        <h4 className="text-sm md:text-base font-bold text-slate-900 truncate">{proximaCita.cliente_nombre}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">{proximaCita.servicios?.nombre || 'Servicio'}</span>
+                          <span className="text-[9px] text-slate-400 font-medium">{formatearFecha(proximaCita.fecha_hora)}</span>
+                        </div>
+                      </div>
+                      <button onClick={() => {
+                        const num = proximaCita.cliente_telefono?.replace(/[^0-9]/g, '') || ''
+                        window.open(`https://wa.me/${num}`, '_blank')
+                      }} className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shrink-0">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* KPIs GRID */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="ns-stat-mini group">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Turnos Próximos</p>
+                      <h3 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stats.hoy}</h3>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-blue-500 uppercase tracking-widest">
+                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
+                         En agenda
+                      </div>
+                    </div>
+
+                    <div className="ns-stat-mini group">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Proyec.</p>
+                      <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-[#34C759]">${stats.ingresos.toLocaleString()}</h3>
+                      <p className="text-[9px] font-medium text-slate-400 italic">Reservas activas</p>
+                    </div>
+
+                    <div className="ns-stat-mini group">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Esta Semana</p>
+                      <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{stats.semana}</h3>
+                      <p className="text-[9px] font-medium text-slate-400 italic">Citas agendadas</p>
+                    </div>
+
+                    <div className="ns-stat-mini group">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Clientes</p>
+                      <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{clientes.length}</h3>
+                      <p className="text-[9px] font-medium text-slate-400 italic">Registrados</p>
                     </div>
                   </div>
 
-                  <div className="ns-stat-mini group">
-                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Futuros</p>
-                    <h3 className="text-4xl md:text-7xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-[#34C759]">${stats.ingresos}</h3>
-                    <p className="text-[9px] md:text-[10px] font-medium text-slate-400 leading-tight italic">Reservas activas</p>
+                  {/* DISTRIBUCIÓN SEMANAL + SERVICIO POPULAR */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    {/* Mini Chart Semanal */}
+                    <div className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-sm">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Actividad Semanal</p>
+                      <div className="flex items-end gap-2 h-24 md:h-32">
+                        {distribucionSemanal.map((val, idx) => (
+                          <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
+                            <span className="text-[9px] font-bold text-slate-500">{val}</span>
+                            <div 
+                              className="w-full rounded-lg transition-all duration-700" 
+                              style={{ 
+                                height: `${Math.max(8, (val / maxSemanal) * 100)}%`,
+                                backgroundColor: idx === new Date().getDay() - 1 || (new Date().getDay() === 0 && idx === 6) ? colorPrimario : '#e2e8f0'
+                              }}
+                            ></div>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase">{diasSemanaLabels[idx]}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Info Cards Stack */}
+                    <div className="space-y-3">
+                      {/* Servicio Popular */}
+                      <div className="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+                          <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Más Solicitado</p>
+                          <p className="text-sm font-bold text-slate-900 truncate mt-0.5">{stats.popular !== '-' ? stats.popular : 'Sin datos aún'}</p>
+                        </div>
+                      </div>
+
+                      {/* Ingresos del Mes */}
+                      <div className="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                          <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ingresos del Mes</p>
+                          <p className="text-sm font-bold text-[#34C759] mt-0.5">${stats.mesIngresos.toLocaleString()}</p>
+                        </div>
+                      </div>
+
+                      {/* Tasa de ocupación */}
+                      <div className="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ocupación Semanal</p>
+                          <span className="text-sm font-black text-slate-900">{stats.tasaOcupacion}%</span>
+                        </div>
+                        <div className="ns-progress-bar">
+                          <div className="ns-progress-fill" style={{ width: `${stats.tasaOcupacion}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="ns-stat-mini group col-span-2 md:col-span-1">
-                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Base de Clientes</p>
-                    <h3 className="text-4xl md:text-7xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{clientes.length || '—'}</h3>
-                    <p className="text-[9px] md:text-[10px] font-medium text-slate-400 leading-tight italic">Registrados</p>
+                  {/* ACCIONES RÁPIDAS */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                    {[
+                      { label: 'Nueva Cita', icon: 'M12 4v16m8-8H4', action: () => setTab('agenda') },
+                      { label: 'Agregar Servicio', icon: 'M12 4v16m8-8H4', action: () => setTab('servicios') },
+                      { label: 'Copiar Link', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3', action: () => { navigator.clipboard.writeText(publicLink); alert('Link copiado') } },
+                      { label: 'Ver App Pública', icon: 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14', action: () => window.open(publicLink, '_blank') }
+                    ].map((a, i) => (
+                      <button key={i} onClick={a.action} className="bg-white p-4 rounded-[1.2rem] border border-slate-200 shadow-sm flex flex-col items-center gap-2.5 hover:border-slate-400 hover:shadow-md transition-all active:scale-95 group">
+                        <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all">
+                          <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={a.icon} strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{a.label}</span>
+                      </button>
+                    ))}
                   </div>
 
-                  {/* MARKETING WIDGET — LINK PÚBLICO */}
-                  <div className="col-span-2 md:col-span-3 bg-slate-900 p-5 md:p-10 rounded-[1.5rem] md:rounded-[3rem] text-white flex flex-col sm:flex-row items-start sm:items-center gap-5 md:gap-10 relative overflow-hidden shadow-xl">
-                     <div className="flex-1 z-10 w-full">
-                        <h4 className="text-lg md:text-2xl font-bold tracking-tight mb-1 md:mb-4">Link Público</h4>
-                        <p className="text-slate-400 text-[11px] md:text-sm font-medium leading-relaxed mb-4 md:mb-8">Envíe este link por WhatsApp o péguelo en Instagram.</p>
-                        <div className="flex items-center bg-white/10 border border-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
+                  {/* ACTIVIDAD RECIENTE */}
+                  {actividadReciente.length > 0 && (
+                    <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+                      <div className="p-5 md:p-6 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm md:text-base font-bold text-slate-900">Actividad Reciente</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Últimos movimientos</p>
+                        </div>
+                        <button onClick={() => setTab('agenda')} className="text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-700 transition-colors">
+                          Ver Todo
+                        </button>
+                      </div>
+                      <div className="divide-y divide-slate-50">
+                        {actividadReciente.slice(0, 5).map((act, idx) => (
+                          <div key={idx} className="px-5 md:px-6 py-3.5 flex items-center gap-3 hover:bg-slate-50/50 transition-colors">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                              <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-slate-900 truncate">{act.cliente_nombre}</p>
+                              <p className="text-[9px] text-slate-400 font-medium truncate">{act.servicios?.nombre || 'Servicio'} — {act.empleados?.nombre?.split(' ')[0] || 'Staff'}</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-[10px] font-bold text-slate-500">{formatearHora(act.fecha_hora)}</p>
+                              <p className="text-[9px] text-slate-400 font-medium">{formatearFechaRelativa(act.creado_en)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* LINK PÚBLICO WIDGET */}
+                  <div className="bg-slate-900 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
+                     <div className="relative z-10">
+                        <h4 className="text-lg md:text-xl font-bold tracking-tight mb-1 md:mb-3">Link de Reservas</h4>
+                        <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">Compartí este link con tus clientes para que reserven online.</p>
+                        <div className="flex items-center bg-white/10 border border-white/10 rounded-xl p-3 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
                            navigator.clipboard.writeText(publicLink); 
                            alert("Link copiado")
                         }}>
                            <code className="text-[9px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{publicLink}</code>
-                           <svg className="w-4 h-4 ml-3 md:ml-4 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                           <svg className="w-4 h-4 ml-2 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                         </div>
                      </div>
-                     <div className="hidden sm:flex w-24 h-24 md:w-40 md:h-40 bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-4 shadow-2xl rotate-3 flex-col items-center justify-center gap-2 border-[6px] md:border-8 border-slate-100 shrink-0">
-                        <div className="w-full h-full border-2 border-slate-100 border-dashed rounded-lg md:rounded-xl flex items-center justify-center text-slate-200 font-bold text-[8px] md:text-[10px] uppercase text-center">QR</div>
-                     </div>
+                     <div className="absolute -top-16 -right-16 w-48 h-48 bg-white/5 rounded-full blur-[60px]"></div>
                   </div>
                 </div>
               )}
 
-              {/* GESTIÓN DINÁMICA DE TABS */}
+              {/* GESTIÓN DINÁMICA DE TABS EXISTENTES */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                 {tab === 'agenda' && <Turnos negocioId={negocio.id} />}
                 {tab === 'servicios' && <Servicios negocioId={negocio.id} />}
@@ -561,17 +870,46 @@ export default function Dashboard({ session }) {
                 {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
               </div>
 
-              {/* ====== TAB: CLIENTES (NUEVO) ====== */}
+              {/* ====== TAB: CLIENTES — COMPLETO ====== */}
               {tab === 'clientes' && (
                 <div className="space-y-4 animate-in fade-in duration-700">
-                  <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 gap-3">
-                    <div>
-                      <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Base de Clientes</h2>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">{clientes.length} registrados en historial</p>
+                  {/* HEADER + BÚSQUEDA */}
+                  <header className="flex flex-col gap-3 bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Base de Clientes</h2>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">{clientes.length} registrados</p>
+                      </div>
                     </div>
-                    <div className="relative w-full sm:w-64">
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      <input type="text" placeholder="Buscar cliente..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:bg-white focus:border-slate-400 transition-all font-medium" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
+                    
+                    {/* STATS RÁPIDOS DE CLIENTES */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="bg-slate-50 rounded-xl p-3 text-center">
+                        <p className="text-lg md:text-2xl font-black text-slate-900">{clientes.length}</p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Total</p>
+                      </div>
+                      <div className="bg-amber-50 rounded-xl p-3 text-center">
+                        <p className="text-lg md:text-2xl font-black text-amber-600">{clientesVIP + clientesFrecuentes}</p>
+                        <p className="text-[8px] font-bold text-amber-500 uppercase tracking-widest">Recurrentes</p>
+                      </div>
+                      <div className="bg-green-50 rounded-xl p-3 text-center">
+                        <p className="text-lg md:text-2xl font-black text-green-600">${totalIngresosClientes.toLocaleString()}</p>
+                        <p className="text-[8px] font-bold text-green-500 uppercase tracking-widest">Facturado</p>
+                      </div>
+                    </div>
+
+                    {/* BÚSQUEDA + ORDENAR */}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <input type="text" placeholder="Buscar cliente..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:bg-white focus:border-slate-400 transition-all font-medium" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
+                      </div>
+                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 outline-none cursor-pointer appearance-none">
+                        <option value="visitas">Visitas</option>
+                        <option value="nombre">Nombre</option>
+                        <option value="reciente">Reciente</option>
+                        <option value="ingresos">Ingresos</option>
+                      </select>
                     </div>
                   </header>
 
@@ -588,12 +926,20 @@ export default function Dashboard({ session }) {
                   ) : (
                     <div className="space-y-2">
                       {clientesFiltrados.map((c, idx) => (
-                        <div key={idx} className="ns-client-card">
-                          <div className="ns-client-avatar">
+                        <div key={idx} className="ns-client-card hover:border-slate-300 hover:shadow-md">
+                          <div className="ns-client-avatar" style={c.frecuencia === 'VIP' ? { backgroundColor: '#fef3c7', color: '#d97706' } : {}}>
                             {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div className="flex-1 overflow-hidden">
-                            <h4 className="font-bold text-sm text-slate-900 truncate">{c.nombre}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-sm text-slate-900 truncate">{c.nombre}</h4>
+                              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 ${
+                                c.frecuencia === 'VIP' ? 'bg-amber-100 text-amber-700' :
+                                c.frecuencia === 'Frecuente' ? 'bg-blue-50 text-blue-600' :
+                                c.frecuencia === 'Regular' ? 'bg-slate-100 text-slate-500' :
+                                'bg-green-50 text-green-600'
+                              }`}>{c.frecuencia}</span>
+                            </div>
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-[10px] font-bold text-slate-400 tracking-wide">{c.telefono}</span>
                               {c.email && (
@@ -603,11 +949,10 @@ export default function Dashboard({ session }) {
                                 </>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 mt-1.5">
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                               <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
-                              {c.servicios.slice(0, 2).map((s, si) => (
-                                <span key={si} className="text-[9px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded uppercase tracking-wider truncate">{s}</span>
-                              ))}
+                              <span className="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase tracking-widest">${c.ingresoTotal.toLocaleString()}</span>
+                              <span className="text-[9px] text-slate-400 font-medium">Última: {formatearFechaRelativa(c.ultimaVisita)}</span>
                             </div>
                           </div>
                           <div className="flex flex-col gap-1.5 shrink-0">
@@ -617,6 +962,12 @@ export default function Dashboard({ session }) {
                             }} className="w-9 h-9 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all" title="WhatsApp">
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                             </button>
+                            <button onClick={() => {
+                              const num = c.telefono?.replace(/[^0-9]/g, '') || ''
+                              window.open(`tel:${num}`)
+                            }} className="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all" title="Llamar">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -625,9 +976,9 @@ export default function Dashboard({ session }) {
                 </div>
               )}
 
-              {/* ====== TAB: AJUSTES (NUEVO) ====== */}
+              {/* ====== TAB: AJUSTES — COMPLETO ====== */}
               {tab === 'ajustes' && (
-                <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700 max-w-2xl">
+                <div className="space-y-4 md:space-y-5 animate-in fade-in duration-700 max-w-2xl">
                   
                   {/* SECCIÓN: PERFIL DEL NEGOCIO */}
                   <div className="ns-settings-card">
@@ -648,7 +999,7 @@ export default function Dashboard({ session }) {
                       {/* Descripción */}
                       <div>
                         <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Biografía</label>
-                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de negocio..." className="w-full p-3 md:p-4 bg-slate-50 border border-slate-100 rounded-xl outline-none text-[11px] md:text-xs font-medium focus:bg-white focus:border-slate-900 transition-all h-20 md:h-28 resize-none leading-relaxed" />
+                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de tu negocio que verán tus clientes..." className="w-full p-3 md:p-4 bg-slate-50 border border-slate-100 rounded-xl outline-none text-[11px] md:text-xs font-medium focus:bg-white focus:border-slate-900 transition-all h-20 md:h-28 resize-none leading-relaxed" />
                       </div>
 
                       {/* Instagram */}
@@ -665,33 +1016,61 @@ export default function Dashboard({ session }) {
                         <div className="space-y-2">
                           <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
                             Logo 
-                            {subiendoLogo && <div className="w-2.5 h-2.5 md:w-3 md:h-3 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
+                            {subiendoLogo && <div className="w-2.5 h-2.5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
                           </label>
-                          <div className="relative aspect-square bg-slate-50 rounded-xl md:rounded-2xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
-                             {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 md:h-6 md:w-6 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
+                          <div className="relative aspect-square bg-slate-50 rounded-xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
+                             {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
                              <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
                             Portada
-                            {subiendoPortada && <div className="w-2.5 h-2.5 md:w-3 md:h-3 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
+                            {subiendoPortada && <div className="w-2.5 h-2.5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
                           </label>
-                          <div className="relative aspect-square bg-slate-50 rounded-xl md:rounded-2xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
-                             {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 md:h-6 md:w-6 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
+                          <div className="relative aspect-square bg-slate-50 rounded-xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
+                             {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
                              <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'portada')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
                         </div>
                       </div>
 
-                      {/* Botón Guardar */}
                       <button 
                         onClick={actualizarBranding} 
                         disabled={guardandoPerfil || subiendoLogo || subiendoPortada}
-                        className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl text-white font-bold text-[9px] md:text-[10px] uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-xl text-white font-bold text-[9px] md:text-[10px] uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                         style={{ backgroundColor: colorPrimario }}
                       >
-                        {guardandoPerfil ? <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Perfil'}
+                        {guardandoPerfil ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Perfil'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN: DATOS DE CONTACTO */}
+                  <div className="ns-settings-card">
+                    <div className="ns-settings-card-header">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <h4>Datos de Contacto</h4>
+                    </div>
+                    <div className="p-5 md:p-6 space-y-4">
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Teléfono / WhatsApp del Negocio</label>
+                        <input value={telefonoNegocio} onChange={(e) => setTelefonoNegocio(e.target.value)} placeholder="Ej: +5493515551234" className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Dirección</label>
+                        <input value={direccionNegocio} onChange={(e) => setDireccionNegocio(e.target.value)} placeholder="Ej: Av. Colón 1234, Córdoba" className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Mensaje de Bienvenida</label>
+                        <textarea value={mensajeBienvenida} onChange={(e) => setMensajeBienvenida(e.target.value)} placeholder="Mensaje que verán tus clientes al abrir la app de reservas..." className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-[11px] font-medium focus:bg-white focus:border-slate-300 transition-all h-20 resize-none leading-relaxed" />
+                      </div>
+                      <button 
+                        onClick={actualizarBranding} 
+                        disabled={guardandoPerfil}
+                        className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-[9px] uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {guardandoPerfil ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Contacto'}
                       </button>
                     </div>
                   </div>
@@ -703,17 +1082,25 @@ export default function Dashboard({ session }) {
                       <h4>Link Público</h4>
                     </div>
                     <div className="p-5 md:p-6">
-                      <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes.</p>
+                      <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
                       <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => {
                         navigator.clipboard.writeText(publicLink)
-                        alert("Link copiado")
+                        alert("Link copiado al portapapeles")
                       }}>
                         <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
                         <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                       </div>
-                      <button onClick={() => window.open(publicLink, '_blank')} className="w-full mt-3 py-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
-                        Vista Previa
-                      </button>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        <button onClick={() => window.open(publicLink, '_blank')} className="py-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
+                          Vista Previa
+                        </button>
+                        <button onClick={() => {
+                          const waMje = encodeURIComponent(`Reservá tu turno en ${negocio.nombre}: ${publicLink}`)
+                          window.open(`https://wa.me/?text=${waMje}`, '_blank')
+                        }} className="py-3 rounded-xl bg-green-50 border border-green-200 text-[10px] font-bold uppercase tracking-widest text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all">
+                          Compartir WA
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -738,7 +1125,7 @@ export default function Dashboard({ session }) {
                     <div className="ns-settings-row">
                       <div>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</p>
-                        <p className="text-sm font-bold text-green-600 mt-0.5">{negocio.estado_suscripcion === 'activo' ? 'Activo' : 'Suspendido'}</p>
+                        <p className={`text-sm font-bold mt-0.5 ${negocio.estado_suscripcion === 'activo' ? 'text-green-600' : 'text-red-500'}`}>{negocio.estado_suscripcion === 'activo' ? 'Activo' : 'Suspendido'}</p>
                       </div>
                       <span className={`w-2.5 h-2.5 rounded-full ${negocio.estado_suscripcion === 'activo' ? 'bg-green-500' : 'bg-red-500'}`}></span>
                     </div>
@@ -756,9 +1143,7 @@ export default function Dashboard({ session }) {
                       <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <h4>Seguridad</h4>
                     </div>
-                    <button onClick={() => {
-                       window.location.href = '/actualizar-clave'
-                    }} className="ns-settings-row cursor-pointer w-full text-left hover:bg-slate-50">
+                    <button onClick={() => window.location.href = '/actualizar-clave'} className="ns-settings-row cursor-pointer w-full text-left hover:bg-slate-50">
                       <div className="flex items-center gap-3">
                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         <span className="text-sm font-bold text-slate-900">Cambiar Contraseña</span>
@@ -795,6 +1180,7 @@ export default function Dashboard({ session }) {
                 <path d={item.d} strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <span>{item.label}</span>
+              {tab === item.id && <div className="w-1 h-1 rounded-full bg-slate-900 mt-px"></div>}
             </button>
           ))}
         </nav>
