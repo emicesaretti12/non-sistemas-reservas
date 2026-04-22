@@ -521,3 +521,194 @@ body {
   border: 2px dashed var(--ns-border);
   border-radius: var(--ns-radius-lg);
 }
+
+/* ============================================================
+   MOBILE BOTTOM NAVIGATION BAR
+   ============================================================ */
+
+.ns-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 4px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.04);
+}
+
+.ns-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px 4px;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex: 1;
+  min-width: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ns-bottom-nav-item svg {
+  width: 22px;
+  height: 22px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ns-bottom-nav-item.active {
+  color: #0f172a;
+}
+
+.ns-bottom-nav-item.active svg {
+  transform: scale(1.1);
+}
+
+.ns-bottom-nav-item:active {
+  transform: scale(0.92);
+}
+
+/* Add safe-area padding for mobile body when bottom nav is present */
+.ns-has-bottom-nav {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ============================================================
+   DASHBOARD MOBILE-FIRST REFINEMENTS
+   ============================================================ */
+
+/* Compact hero for mobile */
+.ns-hero-compact {
+  padding: 20px 20px;
+  border-radius: 20px;
+}
+
+@media (min-width: 768px) {
+  .ns-hero-compact {
+    padding: 48px 56px;
+    border-radius: 48px;
+  }
+}
+
+/* Settings section card */
+.ns-settings-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.ns-settings-card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ns-settings-card-header h4 {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #0f172a;
+}
+
+.ns-settings-row {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #f8fafc;
+  transition: background 0.2s;
+}
+
+.ns-settings-row:last-child {
+  border-bottom: none;
+}
+
+.ns-settings-row:hover {
+  background: #f8fafc;
+}
+
+/* Client list card */
+.ns-client-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ns-client-card:active {
+  transform: scale(0.98);
+}
+
+.ns-client-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+/* Stat mini card for mobile */
+.ns-stat-mini {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ns-stat-mini:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* Hide bottom nav on desktop */
+@media (min-width: 768px) {
+  .ns-bottom-nav {
+    display: none;
+  }
+  .ns-has-bottom-nav {
+    padding-bottom: 0;
+  }
+}
+
+/* Ensure content doesn't hide behind bottom nav on mobile */
+@media (max-width: 767px) {
+  .ns-mobile-content-area {
+    min-height: calc(100vh - 56px - 72px);
+  }
+}

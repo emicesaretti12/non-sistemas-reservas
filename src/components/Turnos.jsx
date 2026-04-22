@@ -308,7 +308,7 @@ export default function Turnos({ negocioId }) {
   }
 
   return (
-    <div className="flex flex-col h-[85vh] max-w-2xl mx-auto bg-[#F8FAFC] rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden relative">
+    <div className="flex flex-col max-w-2xl mx-auto bg-[#F8FAFC] rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden relative">
       
       {loading && (
          <div className="absolute top-4 right-4 z-50">

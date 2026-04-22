@@ -39,6 +39,11 @@ export default function Dashboard({ session }) {
   const [portadaUrl, setPortadaUrl] = useState('')
   const [instagram, setInstagram] = useState('')
 
+  // --- ESTADOS: CLIENTES (NUEVO) ---
+  const [clientes, setClientes] = useState([])
+  const [cargandoClientes, setCargandoClientes] = useState(false)
+  const [busquedaCliente, setBusquedaCliente] = useState('')
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -166,6 +171,60 @@ export default function Dashboard({ session }) {
   }
 
   /**
+   * LÓGICA CLIENTES: Extrae base de clientes del historial de turnos
+   */
+  async function cargarClientes(negocioId) {
+    setCargandoClientes(true)
+    try {
+      const { data: turnos, error } = await supabase
+        .from('turnos')
+        .select('cliente_nombre, cliente_telefono, cliente_email, fecha_hora, servicios(nombre)')
+        .eq('negocio_id', negocioId)
+        .order('fecha_hora', { ascending: false })
+
+      if (error) throw error
+
+      // Agrupar por teléfono como identificador único del cliente
+      const clientesMap = {}
+      ;(turnos || []).forEach(t => {
+        const key = t.cliente_telefono || t.cliente_nombre
+        if (!clientesMap[key]) {
+          clientesMap[key] = {
+            nombre: t.cliente_nombre,
+            telefono: t.cliente_telefono,
+            email: t.cliente_email || '',
+            visitas: 0,
+            ultimaVisita: t.fecha_hora,
+            servicios: new Set()
+          }
+        }
+        clientesMap[key].visitas++
+        if (t.servicios?.nombre) clientesMap[key].servicios.add(t.servicios.nombre)
+      })
+
+      const listaClientes = Object.values(clientesMap).map(c => ({
+        ...c,
+        servicios: Array.from(c.servicios)
+      }))
+
+      // Ordenar por cantidad de visitas (más frecuentes primero)
+      listaClientes.sort((a, b) => b.visitas - a.visitas)
+      setClientes(listaClientes)
+    } catch (e) {
+      console.error('Error cargando clientes:', e.message)
+    } finally {
+      setCargandoClientes(false)
+    }
+  }
+
+  // Cargar clientes cuando se selecciona la tab de clientes
+  useEffect(() => {
+    if (tab === 'clientes' && negocio && !negocio.es_admin_plataforma) {
+      cargarClientes(negocio.id)
+    }
+  }, [tab, negocio])
+
+  /**
    * GESTIÓN DE MEDIA (CLOUDINARY) CON CARGAS INDEPENDIENTES
    */
   async function manejarSubidaImagen(e, tipo) {
@@ -245,6 +304,25 @@ export default function Dashboard({ session }) {
     setCreando(false)
   }
 
+  // ===== DEFINICIÓN DE TABS =====
+  const tabsConfig = [
+    { id: 'inicio', label: 'Monitor', d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+    { id: 'agenda', label: 'Agenda', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { id: 'servicios', label: 'Servicios', d: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z' },
+    { id: 'equipo', label: 'Staff', d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+    { id: 'horarios', label: 'Horarios', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { id: 'clientes', label: 'Clientes', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+    { id: 'ajustes', label: 'Ajustes', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+  ]
+
+  // Bottom nav solo muestra un subconjunto para no saturar en móvil
+  const bottomNavTabs = [
+    tabsConfig[0], // Monitor
+    tabsConfig[1], // Agenda
+    tabsConfig[5], // Clientes
+    tabsConfig[6], // Ajustes
+  ]
+
   if (loading) return (
     <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]' : 'bg-white'}`}>
       <div className={`w-6 h-6 border-2 rounded-full animate-spin ${negocio?.es_admin_plataforma ? 'border-white/10 border-t-white' : 'border-slate-200 border-t-slate-800'}`}></div>
@@ -255,6 +333,14 @@ export default function Dashboard({ session }) {
     n.nombre.toLowerCase().includes(filtroBusqueda.toLowerCase()) || 
     n.rubro.toLowerCase().includes(filtroBusqueda.toLowerCase())
   )
+
+  const clientesFiltrados = clientes.filter(c =>
+    c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+    c.telefono?.toLowerCase().includes(busquedaCliente.toLowerCase())
+  )
+
+  const publicSlug = negocio?.nombre?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ''
+  const publicLink = `${window.location.origin}/app/${publicSlug}/${negocio?.id || ''}`
 
   return (
     <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`}>
@@ -273,7 +359,7 @@ export default function Dashboard({ session }) {
         <button onClick={() => supabase.auth.signOut()} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">Salir</button>
       </nav>
 
-      <main className="max-w-7xl mx-auto p-4 md:p-8">
+      <main className={`max-w-7xl mx-auto p-4 md:p-8 ${!negocio?.es_admin_plataforma && negocio ? 'ns-has-bottom-nav' : ''}`}>
         
         {!negocio ? (
           /* ESCENARIO: ONBOARDING */
@@ -380,35 +466,29 @@ export default function Dashboard({ session }) {
           </div>
         ) : (
           /* ==========================================================
-             VISTA: DASHBOARD BUSINESS (OWNER) COMPACTA
+             VISTA: DASHBOARD BUSINESS (OWNER) — MOBILE FIRST
              ========================================================== */
           <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
             
-            {/* BRAND HERO */}
-            <header className="p-6 md:p-14 rounded-[2rem] md:rounded-[3rem] text-white shadow-xl relative overflow-hidden transition-all duration-1000 group" style={{ backgroundColor: colorPrimario }}>
+            {/* BRAND HERO — COMPACTO EN MOBILE */}
+            <header className="ns-hero-compact text-white shadow-xl relative overflow-hidden transition-all duration-1000 group" style={{ backgroundColor: colorPrimario }}>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 md:mb-4 opacity-70">
+                <div className="flex items-center gap-2 mb-2 md:mb-4 opacity-70">
                    <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-green-500"></span>
                    </span>
                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
                 </div>
-                <h2 className="text-3xl md:text-6xl font-bold tracking-tighter leading-tight max-w-2xl">{negocio.nombre}</h2>
-                <p className="text-sm md:text-xl mt-2 md:mt-4 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
+                <h2 className="text-2xl md:text-6xl font-bold tracking-tighter leading-tight max-w-2xl">{negocio.nombre}</h2>
+                <p className="text-xs md:text-xl mt-1 md:mt-4 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
               </div>
               <div className="absolute -top-20 -right-20 md:-top-32 md:-right-32 w-64 h-64 md:w-96 md:h-96 bg-white/10 rounded-full blur-[80px] md:blur-[120px] group-hover:scale-110 transition-transform duration-1000"></div>
             </header>
 
-            {/* TAB SELECTOR BENTO */}
-            <div className="flex overflow-x-auto gap-1 md:gap-2 p-1 md:p-1.5 bg-white border border-slate-200 rounded-xl md:rounded-2xl w-full md:w-fit no-scrollbar shadow-sm">
-              {[
-                { id: 'inicio', label: 'Monitor', d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                { id: 'agenda', label: 'Agenda', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-                { id: 'servicios', label: 'Servicios', d: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z' },
-                { id: 'equipo', label: 'Staff', d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-                { id: 'horarios', label: 'Horarios', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
-              ].map(i => (
+            {/* TAB SELECTOR — DESKTOP ONLY (mobile usa bottom nav) */}
+            <div className="hidden md:flex overflow-x-auto gap-1 md:gap-2 p-1 md:p-1.5 bg-white border border-slate-200 rounded-xl md:rounded-2xl w-fit no-scrollbar shadow-sm">
+              {tabsConfig.map(i => (
                 <button key={i.id} onClick={() => setTab(i.id)} className={`px-4 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl flex items-center gap-2 md:gap-3 text-[9px] md:text-[11px] shrink-0 font-bold uppercase tracking-widest transition-all ${tab === i.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
                   <svg className="h-3 w-3 md:h-4 md:w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d}/></svg>
                   {i.label}
@@ -416,121 +496,309 @@ export default function Dashboard({ session }) {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-              
-              {/* AREA PRINCIPAL */}
-              <div className="lg:col-span-2 space-y-4 md:space-y-6">
-                {tab === 'inicio' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-1000">
-                    
-                    <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group">
-                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Turnos Próximos</p>
-                      <h3 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left mt-2 md:mt-0">{stats.hoy}</h3>
-                      <div className="flex items-center gap-2 mt-4 text-[9px] md:text-[10px] font-bold text-blue-500 uppercase tracking-widest">
-                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
-                         En agenda global
-                      </div>
-                    </div>
+            {/* MOBILE TAB PILLS — SECUNDARIOS (servicios, equipo, horarios) */}
+            <div className="flex md:hidden overflow-x-auto gap-2 no-scrollbar">
+              {tabsConfig.filter(t => !bottomNavTabs.find(bn => bn.id === t.id)).map(i => (
+                <button key={i.id} onClick={() => setTab(i.id)} className={`px-4 py-2.5 rounded-xl flex items-center gap-2 text-[9px] shrink-0 font-bold uppercase tracking-widest transition-all border ${tab === i.id ? 'bg-slate-900 text-white shadow-lg border-slate-900' : 'text-slate-500 hover:text-slate-900 bg-white border-slate-200'}`}>
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d}/></svg>
+                  {i.label}
+                </button>
+              ))}
+            </div>
 
-                    <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-between group">
-                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Proyectados Futuros</p>
-                      <h3 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left mt-2 md:mt-0 text-[#34C759]">${stats.ingresos}</h3>
-                      <p className="text-[9px] md:text-[10px] font-medium text-slate-400 mt-4 leading-tight italic">Cotización de reservas activas.</p>
-                    </div>
+            {/* AREA DE CONTENIDO PRINCIPAL — FULL WIDTH EN MOBILE */}
+            <div className="ns-mobile-content-area">
 
-                    {/* MARKETING WIDGET */}
-                    <div className="md:col-span-2 bg-slate-900 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] text-white flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-10 relative overflow-hidden shadow-xl">
-                       <div className="flex-1 z-10 w-full">
-                          <h4 className="text-xl md:text-2xl font-bold tracking-tight mb-2 md:mb-4">Link Público</h4>
-                          <p className="text-slate-400 text-xs md:text-sm font-medium leading-relaxed mb-6 md:mb-8">Envíe este link por WhatsApp o péguelo en Instagram.</p>
-                          <div className="flex items-center bg-white/10 border border-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
-                             const slug = negocio.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                             navigator.clipboard.writeText(`${window.location.origin}/app/${slug}/${negocio.id}`); 
-                             alert("Link copiado")
-                          }}>
-                             <code className="text-[10px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{window.location.origin}/app/{negocio.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}/{negocio.id}</code>
-                             <svg className="w-4 h-4 ml-3 md:ml-4 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                          </div>
-                       </div>
-                       <div className="hidden sm:flex w-24 h-24 md:w-40 md:h-40 bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-4 shadow-2xl rotate-3 flex-col items-center justify-center gap-2 border-[6px] md:border-8 border-slate-100 shrink-0">
-                          <div className="w-full h-full border-2 border-slate-100 border-dashed rounded-lg md:rounded-xl flex items-center justify-center text-slate-200 font-bold text-[8px] md:text-[10px] uppercase text-center">QR</div>
-                       </div>
+              {tab === 'inicio' && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 animate-in fade-in duration-1000">
+                  
+                  <div className="ns-stat-mini group">
+                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Turnos Próximos</p>
+                    <h3 className="text-4xl md:text-7xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stats.hoy}</h3>
+                    <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-blue-500 uppercase tracking-widest">
+                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
+                       En agenda
                     </div>
                   </div>
-                )}
 
-                {/* GESTIÓN DINÁMICA DE TABS */}
-                <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                  {tab === 'agenda' && <Turnos negocioId={negocio.id} />}
-                  {tab === 'servicios' && <Servicios negocioId={negocio.id} />}
-                  {tab === 'equipo' && <Empleados negocioId={negocio.id} />}
-                  {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
+                  <div className="ns-stat-mini group">
+                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Futuros</p>
+                    <h3 className="text-4xl md:text-7xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-[#34C759]">${stats.ingresos}</h3>
+                    <p className="text-[9px] md:text-[10px] font-medium text-slate-400 leading-tight italic">Reservas activas</p>
+                  </div>
+
+                  <div className="ns-stat-mini group col-span-2 md:col-span-1">
+                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Base de Clientes</p>
+                    <h3 className="text-4xl md:text-7xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{clientes.length || '—'}</h3>
+                    <p className="text-[9px] md:text-[10px] font-medium text-slate-400 leading-tight italic">Registrados</p>
+                  </div>
+
+                  {/* MARKETING WIDGET — LINK PÚBLICO */}
+                  <div className="col-span-2 md:col-span-3 bg-slate-900 p-5 md:p-10 rounded-[1.5rem] md:rounded-[3rem] text-white flex flex-col sm:flex-row items-start sm:items-center gap-5 md:gap-10 relative overflow-hidden shadow-xl">
+                     <div className="flex-1 z-10 w-full">
+                        <h4 className="text-lg md:text-2xl font-bold tracking-tight mb-1 md:mb-4">Link Público</h4>
+                        <p className="text-slate-400 text-[11px] md:text-sm font-medium leading-relaxed mb-4 md:mb-8">Envíe este link por WhatsApp o péguelo en Instagram.</p>
+                        <div className="flex items-center bg-white/10 border border-white/10 rounded-xl md:rounded-2xl p-3 md:p-4 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
+                           navigator.clipboard.writeText(publicLink); 
+                           alert("Link copiado")
+                        }}>
+                           <code className="text-[9px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{publicLink}</code>
+                           <svg className="w-4 h-4 ml-3 md:ml-4 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        </div>
+                     </div>
+                     <div className="hidden sm:flex w-24 h-24 md:w-40 md:h-40 bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-4 shadow-2xl rotate-3 flex-col items-center justify-center gap-2 border-[6px] md:border-8 border-slate-100 shrink-0">
+                        <div className="w-full h-full border-2 border-slate-100 border-dashed rounded-lg md:rounded-xl flex items-center justify-center text-slate-200 font-bold text-[8px] md:text-[10px] uppercase text-center">QR</div>
+                     </div>
+                  </div>
                 </div>
+              )}
+
+              {/* GESTIÓN DINÁMICA DE TABS */}
+              <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+                {tab === 'agenda' && <Turnos negocioId={negocio.id} />}
+                {tab === 'servicios' && <Servicios negocioId={negocio.id} />}
+                {tab === 'equipo' && <Empleados negocioId={negocio.id} />}
+                {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
               </div>
 
-              {/* COLUMNA BRANDING (BENTO LATERAL COMPACTO) */}
-              <div className="space-y-4 md:space-y-6">
-                <section className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
-                  <h4 className="text-[9px] md:text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] mb-6 md:mb-8 flex items-center gap-2 md:gap-3">
-                    <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.172-1.172a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 115.656-5.656L10 6.343l1.172-1.172z"/></svg>
-                    Branding
-                  </h4>
+              {/* ====== TAB: CLIENTES (NUEVO) ====== */}
+              {tab === 'clientes' && (
+                <div className="space-y-4 animate-in fade-in duration-700">
+                  <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 gap-3">
+                    <div>
+                      <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Base de Clientes</h2>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">{clientes.length} registrados en historial</p>
+                    </div>
+                    <div className="relative w-full sm:w-64">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <input type="text" placeholder="Buscar cliente..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:bg-white focus:border-slate-400 transition-all font-medium" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
+                    </div>
+                  </header>
+
+                  {cargandoClientes ? (
+                    <div className="flex justify-center items-center h-40">
+                      <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+                    </div>
+                  ) : clientesFiltrados.length === 0 ? (
+                    <div className="bg-white rounded-[1.5rem] border border-dashed border-slate-300 p-12 flex flex-col items-center text-center">
+                      <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Sin clientes</h3>
+                      <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[250px]">Los clientes aparecerán automáticamente cuando recibas tu primera reserva.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {clientesFiltrados.map((c, idx) => (
+                        <div key={idx} className="ns-client-card">
+                          <div className="ns-client-avatar">
+                            {c.nombre?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                          <div className="flex-1 overflow-hidden">
+                            <h4 className="font-bold text-sm text-slate-900 truncate">{c.nombre}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[10px] font-bold text-slate-400 tracking-wide">{c.telefono}</span>
+                              {c.email && (
+                                <>
+                                  <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                  <span className="text-[10px] font-medium text-slate-400 truncate">{c.email}</span>
+                                </>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
+                              {c.servicios.slice(0, 2).map((s, si) => (
+                                <span key={si} className="text-[9px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded uppercase tracking-wider truncate">{s}</span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1.5 shrink-0">
+                            <button onClick={() => {
+                              const num = c.telefono?.replace(/[^0-9]/g, '') || ''
+                              window.open(`https://wa.me/${num}?text=${encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, te escribimos desde ${negocio.nombre}.`)}`, '_blank')
+                            }} className="w-9 h-9 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all" title="WhatsApp">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ====== TAB: AJUSTES (NUEVO) ====== */}
+              {tab === 'ajustes' && (
+                <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700 max-w-2xl">
                   
-                  <div className="space-y-5 md:space-y-6">
-                    <div>
-                      <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 md:mb-3 block">Color Interfaz</label>
-                      <div className="flex gap-3 md:gap-4 items-center bg-slate-50 p-2 md:p-3 rounded-xl md:rounded-2xl border border-slate-100 focus-within:border-slate-300 transition-all">
-                        <input type="color" value={colorPrimario} onChange={(e) => setColorPrimario(e.target.value)} className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl cursor-pointer border-none bg-transparent" />
-                        <span className="font-mono text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">{colorPrimario}</span>
-                      </div>
+                  {/* SECCIÓN: PERFIL DEL NEGOCIO */}
+                  <div className="ns-settings-card">
+                    <div className="ns-settings-card-header">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.172-1.172a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 115.656-5.656L10 6.343l1.172-1.172z"/></svg>
+                      <h4>Perfil y Marca</h4>
                     </div>
-
-                    <div>
-                      <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Biografía</label>
-                      <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de negocio..." className="w-full p-3 md:p-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl outline-none text-[11px] md:text-xs font-medium focus:bg-white focus:border-slate-900 transition-all h-20 md:h-28 resize-none leading-relaxed" />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                      {/* Logo Upload Box */}
-                      <div className="space-y-2">
-                        <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                          Logo 
-                          {subiendoLogo && <div className="w-2.5 h-2.5 md:w-3 md:h-3 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
-                        </label>
-                        <div className="relative aspect-square bg-slate-50 rounded-xl md:rounded-2xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
-                           {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 md:h-6 md:w-6 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
-                           <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    <div className="p-5 md:p-6 space-y-5">
+                      {/* Color Primario */}
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Color de Interfaz</label>
+                        <div className="flex gap-3 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 focus-within:border-slate-300 transition-all">
+                          <input type="color" value={colorPrimario} onChange={(e) => setColorPrimario(e.target.value)} className="w-8 h-8 md:w-10 md:h-10 rounded-lg cursor-pointer border-none bg-transparent" />
+                          <span className="font-mono text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">{colorPrimario}</span>
                         </div>
                       </div>
 
-                      {/* Portada Upload Box */}
-                      <div className="space-y-2">
-                        <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                          Portada
-                          {subiendoPortada && <div className="w-2.5 h-2.5 md:w-3 md:h-3 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
-                        </label>
-                        <div className="relative aspect-square bg-slate-50 rounded-xl md:rounded-2xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
-                           {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 md:h-6 md:w-6 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
-                           <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'portada')} className="absolute inset-0 opacity-0 cursor-pointer" />
+                      {/* Descripción */}
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Biografía</label>
+                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de negocio..." className="w-full p-3 md:p-4 bg-slate-50 border border-slate-100 rounded-xl outline-none text-[11px] md:text-xs font-medium focus:bg-white focus:border-slate-900 transition-all h-20 md:h-28 resize-none leading-relaxed" />
+                      </div>
+
+                      {/* Instagram */}
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Instagram</label>
+                        <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-slate-300 transition-all">
+                          <span className="px-3 text-slate-400 text-xs font-bold">@</span>
+                          <input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="tu_negocio" className="flex-1 p-3 bg-transparent outline-none text-xs font-bold text-slate-900" />
                         </div>
                       </div>
-                    </div>
 
-                    <button 
-                      onClick={actualizarBranding} 
-                      disabled={guardandoPerfil || subiendoLogo || subiendoPortada}
-                      className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl text-white font-bold text-[9px] md:text-[10px] uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
-                      style={{ backgroundColor: colorPrimario }}
-                    >
-                      {guardandoPerfil ? <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Perfil'}
+                      {/* Upload Logo y Portada */}
+                      <div className="grid grid-cols-2 gap-3 md:gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                            Logo 
+                            {subiendoLogo && <div className="w-2.5 h-2.5 md:w-3 md:h-3 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
+                          </label>
+                          <div className="relative aspect-square bg-slate-50 rounded-xl md:rounded-2xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
+                             {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 md:h-6 md:w-6 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
+                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                            Portada
+                            {subiendoPortada && <div className="w-2.5 h-2.5 md:w-3 md:h-3 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
+                          </label>
+                          <div className="relative aspect-square bg-slate-50 rounded-xl md:rounded-2xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
+                             {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 md:h-6 md:w-6 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
+                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'portada')} className="absolute inset-0 opacity-0 cursor-pointer" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Botón Guardar */}
+                      <button 
+                        onClick={actualizarBranding} 
+                        disabled={guardandoPerfil || subiendoLogo || subiendoPortada}
+                        className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl text-white font-bold text-[9px] md:text-[10px] uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                        style={{ backgroundColor: colorPrimario }}
+                      >
+                        {guardandoPerfil ? <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Perfil'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN: LINK PÚBLICO */}
+                  <div className="ns-settings-card">
+                    <div className="ns-settings-card-header">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <h4>Link Público</h4>
+                    </div>
+                    <div className="p-5 md:p-6">
+                      <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes.</p>
+                      <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => {
+                        navigator.clipboard.writeText(publicLink)
+                        alert("Link copiado")
+                      }}>
+                        <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
+                        <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                      </div>
+                      <button onClick={() => window.open(publicLink, '_blank')} className="w-full mt-3 py-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
+                        Vista Previa
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN: INFORMACIÓN DE CUENTA */}
+                  <div className="ns-settings-card">
+                    <div className="ns-settings-card-header">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <h4>Cuenta</h4>
+                    </div>
+                    <div className="ns-settings-row">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</p>
+                        <p className="text-sm font-bold text-slate-900 mt-0.5">{session.user.email}</p>
+                      </div>
+                    </div>
+                    <div className="ns-settings-row">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rubro</p>
+                        <p className="text-sm font-bold text-slate-900 mt-0.5">{negocio.rubro}</p>
+                      </div>
+                    </div>
+                    <div className="ns-settings-row">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</p>
+                        <p className="text-sm font-bold text-green-600 mt-0.5">{negocio.estado_suscripcion === 'activo' ? 'Activo' : 'Suspendido'}</p>
+                      </div>
+                      <span className={`w-2.5 h-2.5 rounded-full ${negocio.estado_suscripcion === 'activo' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    </div>
+                    <div className="ns-settings-row">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID del Negocio</p>
+                        <p className="text-[10px] font-mono text-slate-500 mt-0.5 break-all">{negocio.id}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN: ZONA DE SEGURIDAD */}
+                  <div className="ns-settings-card">
+                    <div className="ns-settings-card-header">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <h4>Seguridad</h4>
+                    </div>
+                    <button onClick={() => {
+                       window.location.href = '/actualizar-clave'
+                    }} className="ns-settings-row cursor-pointer w-full text-left hover:bg-slate-50">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-sm font-bold text-slate-900">Cambiar Contraseña</span>
+                      </div>
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                    <button onClick={() => supabase.auth.signOut()} className="ns-settings-row cursor-pointer w-full text-left hover:bg-red-50 group">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-sm font-bold text-red-500">Cerrar Sesión</span>
+                      </div>
+                      <svg className="w-4 h-4 text-red-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </div>
-                </section>
-              </div>
+
+                </div>
+              )}
+
             </div>
           </div>
         )}
       </main>
+
+      {/* ====== BOTTOM NAVIGATION BAR — MOBILE ONLY ====== */}
+      {negocio && !negocio.es_admin_plataforma && (
+        <nav className="ns-bottom-nav md:hidden">
+          {bottomNavTabs.map(item => (
+            <button 
+              key={item.id} 
+              onClick={() => setTab(item.id)} 
+              className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
+            >
+              <svg fill="none" stroke="currentColor" strokeWidth={tab === item.id ? "2.5" : "2"} viewBox="0 0 24 24">
+                <path d={item.d} strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      )}
     </div>
   )
 }
