@@ -926,7 +926,7 @@ export default function Dashboard({ session }) {
                             </div>
                             <div className="text-right shrink-0">
                               <p className="text-[10px] font-bold text-slate-500">{formatearHora(act.fecha_hora)}</p>
-                              <p className="text-[9px] text-slate-400 font-medium">{formatearFechaRelativa(act.creado_en)}</p>
+                              <p className="text-[9px] text-slate-400 font-medium">{formatearFechaRelativa(act.fecha_hora)}</p>
                             </div>
                           </div>
                         ))}
