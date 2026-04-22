@@ -493,6 +493,79 @@ export default function Dashboard({ session }) {
     </div>
   )
 
+  // ===== PANTALLA DE CUENTA SUSPENDIDA =====
+  if (negocio && negocio.estado_suscripcion === 'suspendido' && !negocio.es_admin_plataforma) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased flex flex-col">
+        {/* Navbar mínimo */}
+        <nav className="h-14 border-b bg-white/90 backdrop-blur-md border-slate-200 shadow-sm flex items-center justify-between px-4 sticky top-0 z-50">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-slate-900 rounded-[0.4rem] flex items-center justify-center shadow-lg border border-white/10">
+              <span className="text-white font-black text-[9px] italic">NS</span>
+            </div>
+            <div className="h-3 w-px mx-1 bg-slate-200"></div>
+            <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-slate-400">Cuenta Suspendida</p>
+          </div>
+          <button onClick={() => supabase.auth.signOut()} className="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-opacity">Salir</button>
+        </nav>
+
+        {/* Contenido de bloqueo */}
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center animate-in zoom-in-95 duration-700">
+            {/* Icono de bloqueo */}
+            <div className="w-20 h-20 mx-auto mb-6 rounded-[1.5rem] bg-red-50 border-2 border-red-100 flex items-center justify-center">
+              <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+
+            {/* Mensaje principal */}
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 mb-2">Cuenta Suspendida</h2>
+            <p className="text-sm text-slate-500 font-medium leading-relaxed mb-8 max-w-sm mx-auto">
+              Tu cuenta de <span className="font-bold text-slate-700">{negocio.nombre}</span> fue suspendida por el administrador de la plataforma. 
+              Mientras esté suspendida, no podés acceder al panel de gestión ni recibir nuevas reservas.
+            </p>
+
+            {/* Info card */}
+            <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5 mb-4 text-left space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negocio</span>
+                <span className="text-sm font-bold text-slate-900">{negocio.nombre}</span>
+              </div>
+              <div className="h-px bg-slate-100"></div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</span>
+                <span className="text-[10px] font-black text-red-500 bg-red-50 px-2.5 py-1 rounded-lg uppercase tracking-widest">Suspendido</span>
+              </div>
+              <div className="h-px bg-slate-100"></div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Titular</span>
+                <span className="text-xs font-medium text-slate-600">{session.user.email}</span>
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="space-y-3">
+              <a 
+                href={`mailto:soporte@nonsistemas.com?subject=Cuenta suspendida: ${negocio.nombre}&body=Hola, mi cuenta ${negocio.nombre} (ID: ${negocio.id}) fue suspendida. Solicito la reactivación.`}
+                className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Contactar Soporte
+              </a>
+              <button 
+                onClick={() => supabase.auth.signOut()} 
+                className="w-full py-4 rounded-xl bg-white border border-slate-200 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 transition-all active:scale-95"
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const negociosFiltrados = todosLosNegocios.filter(n => 
     n.nombre.toLowerCase().includes(filtroBusqueda.toLowerCase()) || 
     n.rubro.toLowerCase().includes(filtroBusqueda.toLowerCase())
