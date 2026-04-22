@@ -48,9 +48,8 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -58,18 +57,14 @@ body {
   background-color: var(--ns-bg);
   color: var(--ns-text);
   margin: 0;
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
   overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 #root {
-  width: 100vw;
-  height: 100vh;
-  overflow-y: auto;
+  min-height: 100%;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
@@ -532,12 +527,12 @@ body {
   left: 0;
   right: 0;
   z-index: 80;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 6px 4px;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  padding: 4px 2px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: stretch;
   justify-content: space-around;
@@ -550,12 +545,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 2px 4px;
-  border-radius: 12px;
-  font-size: 9px;
+  gap: 2px;
+  padding: 5px 2px 3px;
+  border-radius: 10px;
+  font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #94a3b8;
   background: transparent;
@@ -568,8 +563,8 @@ body {
 }
 
 .ns-bottom-nav-item svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -578,7 +573,7 @@ body {
 }
 
 .ns-bottom-nav-item.active svg {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .ns-bottom-nav-item:active {
@@ -587,7 +582,7 @@ body {
 
 /* Add safe-area padding for mobile body when bottom nav is present */
 .ns-has-bottom-nav {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 /* ============================================================
@@ -706,9 +701,14 @@ body {
   }
 }
 
-/* Ensure content doesn't hide behind bottom nav on mobile */
+/* Mobile-specific enhancements */
 @media (max-width: 767px) {
   .ns-mobile-content-area {
-    min-height: calc(100vh - 56px - 72px);
+    min-height: calc(100vh - 56px - 80px);
+  }
+  
+  /* Turnos FAB above bottom nav */
+  .ns-fab-mobile {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 12px) !important;
   }
 }

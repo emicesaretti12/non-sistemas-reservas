@@ -726,21 +726,21 @@ export default function Dashboard({ session }) {
           <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
             
             {/* BRAND HERO — COMPACTO EN MOBILE */}
-            <header className="ns-hero-compact text-white shadow-xl relative overflow-hidden transition-all duration-1000 group" style={{ backgroundColor: colorPrimario }}>
-              <div className="relative z-10 flex items-start justify-between gap-4">
+            <header className="ns-hero-compact relative overflow-hidden rounded-[1.3rem] md:rounded-[2.5rem] text-white group animate-in fade-in duration-500" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${colorPrimario} 150%)` }}>
+              <div className="relative z-10 flex items-start justify-between gap-3 md:gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2 md:mb-4 opacity-70">
+                  <div className="flex items-center gap-2 mb-1.5 md:mb-4 opacity-70">
                      <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-green-500"></span>
                      </span>
-                     <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
+                     <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
                   </div>
-                  <h2 className="text-2xl md:text-5xl font-bold tracking-tighter leading-tight truncate">{negocio.nombre}</h2>
-                  <p className="text-xs md:text-lg mt-1 md:mt-3 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
+                  <h2 className="text-xl md:text-5xl font-bold tracking-tighter leading-tight truncate">{negocio.nombre}</h2>
+                  <p className="text-[10px] md:text-lg mt-0.5 md:mt-3 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
                 </div>
                 {logoUrl && (
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0 bg-white/10">
+                  <div className="w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0 bg-white/10">
                     <img src={logoUrl} className="w-full h-full object-cover" alt="Logo" />
                   </div>
                 )}

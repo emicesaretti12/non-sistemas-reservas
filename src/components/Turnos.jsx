@@ -251,16 +251,16 @@ export default function Turnos({ negocioId }) {
     const fechaAmigable = new Date(t.fecha_hora).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
     
     return (
-      <div key={t.id} className="bg-white rounded-3xl p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 group hover:shadow-md transition-all">
-         <div className="flex md:flex-col items-center gap-3 md:gap-0 justify-center shrink-0 w-full md:w-20 border-b md:border-b-0 border-slate-50 pb-4 md:pb-0">
-            <span className="text-3xl md:text-3xl font-black tracking-tighter text-slate-900 leading-none">{horaLocal}</span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest md:mt-1">{t.servicios?.duracion_minutos || 30} MIN</span>
+      <div key={t.id} className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 group hover:shadow-md transition-all">
+         <div className="flex md:flex-col items-center gap-2.5 md:gap-0 justify-between md:justify-center shrink-0 w-full md:w-20">
+            <span className="text-2xl md:text-3xl font-black tracking-tighter text-slate-900 leading-none">{horaLocal}</span>
+            <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest md:mt-1">{t.servicios?.duracion_minutos || 30} MIN</span>
          </div>
          
          <div className="hidden md:block w-px h-16 bg-slate-100 shrink-0"></div>
 
          <div className="flex-1 overflow-hidden w-full">
-            <h4 className="text-lg md:text-xl font-bold text-slate-900 truncate leading-tight mb-1">{t.cliente_nombre}</h4>
+            <h4 className="text-base md:text-xl font-bold text-slate-900 truncate leading-tight mb-0.5 md:mb-1">{t.cliente_nombre}</h4>
             
             <div className="flex items-center gap-2 mb-2 text-slate-500">
                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
@@ -286,7 +286,7 @@ export default function Turnos({ negocioId }) {
             </div>
          </div>
 
-         <div className="flex flex-row md:flex-col lg:flex-row gap-2 shrink-0 w-full md:w-auto mt-2 md:mt-0 justify-end border-t md:border-none border-slate-50 pt-4 md:pt-0">
+         <div className="flex flex-row gap-2 shrink-0 w-full md:w-auto mt-1 md:mt-0 justify-end border-t md:border-none border-slate-50 pt-3 md:pt-0">
             <button onClick={() => {
               const num = t.cliente_telefono.replace(/[^0-9]/g, '')
               const nombreCorto = t.cliente_nombre.split(' ')[0]
@@ -317,17 +317,17 @@ export default function Turnos({ negocioId }) {
       )}
 
       {/* VISTA PRINCIPAL: CALENDARIO PANORÁMICO */}
-      <div className="flex-1 px-4 py-8 md:p-8 bg-[#F8FAFC] overflow-y-auto no-scrollbar w-full">
-         <div className="mb-8 px-2">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-none">
-               Agenda Vital
+      <div className="flex-1 px-3 py-5 md:px-8 md:py-8 bg-[#F8FAFC] overflow-y-auto no-scrollbar w-full">
+         <div className="mb-5 md:mb-8 px-1 md:px-2">
+            <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900 leading-none">
+               Agenda
             </h1>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-2">
-              {todosLosTurnos.length} Citas Registradas en el mapa
+            <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1 md:mt-2">
+              {todosLosTurnos.length} Citas Registradas
             </p>
          </div>
 
-         <div className="mb-8 w-full">
+         <div className="mb-4 md:mb-8 w-full">
             {renderCalendarioCompleto()}
          </div>
 
@@ -344,10 +344,10 @@ export default function Turnos({ negocioId }) {
          </div>
       </div>
 
-      <div className="absolute bottom-6 right-6 z-30">
-         <button onClick={() => setModalAbierto(true)} className="flex items-center gap-3 px-6 md:px-8 py-4 rounded-full bg-slate-900 text-white shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] hidden md:inline">Carga Manual</span>
-            <svg className="w-6 h-6 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
+      <div className="absolute bottom-6 right-4 md:bottom-6 md:right-6 z-30 ns-fab-mobile">
+         <button onClick={() => setModalAbierto(true)} className="flex items-center gap-2 px-5 md:px-8 py-3.5 md:py-4 rounded-full bg-slate-900 text-white shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all">
+            <svg className="w-5 h-5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
+            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em]">Nueva Cita</span>
          </button>
       </div>
 
@@ -414,51 +414,51 @@ export default function Turnos({ negocioId }) {
       {/* MODAL PARA AGREGAR NUEVO TURNO (CARGA MANUAL) */}
       {modalAbierto && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-           <div className="bg-white w-full max-w-lg rounded-t-[3rem] sm:rounded-[3rem] shadow-2xl p-6 md:p-10 animate-in slide-in-from-bottom-[20%] duration-500 border border-slate-100">
-              <div className="flex justify-between items-center mb-8">
+           <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3rem] shadow-2xl p-5 md:p-10 animate-in slide-in-from-bottom-[20%] duration-500 border border-slate-100 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6 md:mb-8">
                  <div>
-                    <h2 className="text-3xl font-bold tracking-tighter text-slate-900">Nueva Cita</h2>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Carga manual en sistema</p>
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900">Nueva Cita</h2>
+                    <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Carga manual en sistema</p>
                  </div>
-                 <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"><svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg></button>
+                 <button onClick={() => setModalAbierto(false)} className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"><svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg></button>
               </div>
 
-              <form onSubmit={handleGuardarTurno} className="space-y-5">
+              <form onSubmit={handleGuardarTurno} className="space-y-4 md:space-y-5">
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Nombre Cliente</label>
-                    <input required className="w-full p-5 bg-[#F8FAFC] rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-base" placeholder="Ej: Juan Perez" value={nuevoTurno.cliente_nombre} onChange={e => setNuevoTurno({...nuevoTurno, cliente_nombre: e.target.value})} />
+                    <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1 md:ml-2">Nombre Cliente</label>
+                    <input required className="w-full p-4 md:p-5 bg-[#F8FAFC] rounded-[1.2rem] md:rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm md:text-base" placeholder="Ej: Juan Perez" value={nuevoTurno.cliente_nombre} onChange={e => setNuevoTurno({...nuevoTurno, cliente_nombre: e.target.value})} />
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="space-y-1.5">
-                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">WhatsApp</label>
-                       <input required type="tel" className="w-full p-5 bg-[#F8FAFC] rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-base" placeholder="351..." value={nuevoTurno.cliente_telefono} onChange={e => setNuevoTurno({...nuevoTurno, cliente_telefono: e.target.value})} />
+                       <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1 md:ml-2">WhatsApp</label>
+                       <input required type="tel" className="w-full p-4 md:p-5 bg-[#F8FAFC] rounded-[1.2rem] md:rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm md:text-base" placeholder="351..." value={nuevoTurno.cliente_telefono} onChange={e => setNuevoTurno({...nuevoTurno, cliente_telefono: e.target.value})} />
                     </div>
                     <div className="space-y-1.5">
-                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Hora Inicio</label>
-                       <input required type="time" className="w-full p-5 bg-[#F8FAFC] rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-base" value={nuevoTurno.hora} onChange={e => setNuevoTurno({...nuevoTurno, hora: e.target.value})} />
+                       <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1 md:ml-2">Hora Inicio</label>
+                       <input required type="time" className="w-full p-4 md:p-5 bg-[#F8FAFC] rounded-[1.2rem] md:rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm md:text-base" value={nuevoTurno.hora} onChange={e => setNuevoTurno({...nuevoTurno, hora: e.target.value})} />
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-1 gap-4">
+                 <div className="space-y-3 md:space-y-4">
                     <div className="space-y-1.5">
-                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Servicio Requerido</label>
-                       <select required className="w-full p-5 bg-[#F8FAFC] rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none transition-all text-sm cursor-pointer" value={nuevoTurno.servicio_id} onChange={e => setNuevoTurno({...nuevoTurno, servicio_id: e.target.value})}>
+                       <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1 md:ml-2">Servicio Requerido</label>
+                       <select required className="w-full p-4 md:p-5 bg-[#F8FAFC] rounded-[1.2rem] md:rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none transition-all text-sm cursor-pointer" value={nuevoTurno.servicio_id} onChange={e => setNuevoTurno({...nuevoTurno, servicio_id: e.target.value})}>
                           <option value="">Seleccionar Servicio</option>
                           {servicios.map(s => <option key={s.id} value={s.id}>{s.nombre} (${s.precio})</option>)}
                        </select>
                     </div>
                     <div className="space-y-1.5">
-                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Especialista</label>
-                       <select required className="w-full p-5 bg-[#F8FAFC] rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none transition-all text-sm cursor-pointer" value={nuevoTurno.empleado_id} onChange={e => setNuevoTurno({...nuevoTurno, empleado_id: e.target.value})}>
+                       <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1 md:ml-2">Especialista</label>
+                       <select required className="w-full p-4 md:p-5 bg-[#F8FAFC] rounded-[1.2rem] md:rounded-[1.5rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none transition-all text-sm cursor-pointer" value={nuevoTurno.empleado_id} onChange={e => setNuevoTurno({...nuevoTurno, empleado_id: e.target.value})}>
                           <option value="">Seleccionar Profesional</option>
                           {empleados.map(emp => <option key={emp.id} value={emp.id}>{emp.nombre}</option>)}
                        </select>
                     </div>
                  </div>
 
-                 <button disabled={guardando} type="submit" className="w-full py-6 rounded-[1.5rem] bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-6">
-                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Bloquear y Sincronizar'}
+                 <button disabled={guardando} type="submit" className="w-full py-5 md:py-6 rounded-[1.2rem] md:rounded-[1.5rem] bg-slate-900 text-white font-bold text-[10px] md:text-[11px] tracking-widest uppercase shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 md:mt-6">
+                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Confirmar Cita'}
                  </button>
               </form>
            </div>
