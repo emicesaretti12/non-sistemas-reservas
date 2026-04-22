@@ -275,7 +275,7 @@ export default function Dashboard({ session }) {
       .from('turnos')
       .select('*, servicios(nombre), empleados(nombre)')
       .eq('negocio_id', negocioId)
-      .order('creado_en', { ascending: false })
+      .order('fecha_hora', { ascending: false })
       .limit(8)
 
     if (!error && data) {
