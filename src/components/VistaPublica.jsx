@@ -153,6 +153,15 @@ export default function VistaPublica() {
       const [finH, finM] = config.fin.split(':').map(Number)
       const finMins = finH * 60 + finM
 
+      const tienePausa = config.pausa
+      let inicioPausaMins = 0, finPausaMins = 0
+      if (tienePausa && config.inicioPausa && config.finPausa) {
+          const [ipH, ipM] = config.inicioPausa.split(':').map(Number)
+          inicioPausaMins = ipH * 60 + ipM
+          const [fpH, fpM] = config.finPausa.split(':').map(Number)
+          finPausaMins = fpH * 60 + fpM
+      }
+
       const avail = slots.filter(s => {
         const [h, m] = s.split(':').map(Number)
         const startMins = h * 60 + m
@@ -160,6 +169,13 @@ export default function VistaPublica() {
         
         // No puede exceder el horario de cierre
         if (endMins > finMins) return false
+        
+        // No puede chocar con la pausa (corte) del día
+        if (tienePausa) {
+            if (Math.max(startMins, inicioPausaMins) < Math.min(endMins, finPausaMins)) {
+                return false
+            }
+        }
         
         // Comprobar solapamiento (overlap = max(start1, start2) < min(end1, end2))
         const hasOverlap = bookedIntervals.some(b => {

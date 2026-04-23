@@ -6,13 +6,13 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
 
   // Estructura base de la semana (por si el negocio es nuevo y no tiene horarios aún)
   const defaultHorarios = {
-    lunes: { abierto: true, inicio: '09:00', fin: '18:00' },
-    martes: { abierto: true, inicio: '09:00', fin: '18:00' },
-    miercoles: { abierto: true, inicio: '09:00', fin: '18:00' },
-    jueves: { abierto: true, inicio: '09:00', fin: '18:00' },
-    viernes: { abierto: true, inicio: '09:00', fin: '18:00' },
-    sabado: { abierto: false, inicio: '10:00', fin: '14:00' },
-    domingo: { abierto: false, inicio: '00:00', fin: '00:00' }
+    lunes: { abierto: true, inicio: '08:00', fin: '21:00', pausa: true, inicioPausa: '13:00', finPausa: '17:00' },
+    martes: { abierto: true, inicio: '08:00', fin: '21:00', pausa: true, inicioPausa: '13:00', finPausa: '17:00' },
+    miercoles: { abierto: true, inicio: '08:00', fin: '21:00', pausa: true, inicioPausa: '13:00', finPausa: '17:00' },
+    jueves: { abierto: true, inicio: '08:00', fin: '21:00', pausa: true, inicioPausa: '13:00', finPausa: '17:00' },
+    viernes: { abierto: true, inicio: '08:00', fin: '21:00', pausa: true, inicioPausa: '13:00', finPausa: '17:00' },
+    sabado: { abierto: false, inicio: '10:00', fin: '14:00', pausa: false, inicioPausa: '13:00', finPausa: '17:00' },
+    domingo: { abierto: false, inicio: '00:00', fin: '00:00', pausa: false, inicioPausa: '13:00', finPausa: '17:00' }
   }
 
   // Inicializamos el estado con lo que viene de la DB, o usamos el default
@@ -111,30 +111,65 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                     </div>
 
                     {/* Controles de Hora */}
-                    <div className={`flex items-center gap-3 transition-opacity duration-300 ${dataDia.abierto ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
+                    <div className={`flex flex-col gap-2 transition-opacity duration-300 ${dataDia.abierto ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
                        
-                       <div className="flex items-center gap-2 bg-[#F8FAFC] px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-slate-100">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Apertura</span>
-                          <input 
-                            type="time" 
-                            disabled={!dataDia.abierto}
-                            value={dataDia.inicio}
-                            onChange={(e) => cambiarHora(dia.id, 'inicio', e.target.value)}
-                            className="bg-transparent font-bold text-slate-900 outline-none text-sm w-full md:w-auto"
-                          />
-                       </div>
-                       
-                       <span className="text-slate-300 font-bold">-</span>
+                       <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 bg-[#F8FAFC] px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-slate-100">
+                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Apertura</span>
+                             <input 
+                               type="time" 
+                               disabled={!dataDia.abierto}
+                               value={dataDia.inicio}
+                               onChange={(e) => cambiarHora(dia.id, 'inicio', e.target.value)}
+                               className="bg-transparent font-bold text-slate-900 outline-none text-sm w-full md:w-auto"
+                             />
+                          </div>
+                          
+                          <span className="text-slate-300 font-bold">-</span>
 
-                       <div className="flex items-center gap-2 bg-[#F8FAFC] px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-slate-100">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Cierre</span>
-                          <input 
-                            type="time" 
-                            disabled={!dataDia.abierto}
-                            value={dataDia.fin}
-                            onChange={(e) => cambiarHora(dia.id, 'fin', e.target.value)}
-                            className="bg-transparent font-bold text-slate-900 outline-none text-sm w-full md:w-auto"
-                          />
+                          <div className="flex items-center gap-2 bg-[#F8FAFC] px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-slate-100">
+                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Cierre</span>
+                             <input 
+                               type="time" 
+                               disabled={!dataDia.abierto}
+                               value={dataDia.fin}
+                               onChange={(e) => cambiarHora(dia.id, 'fin', e.target.value)}
+                               className="bg-transparent font-bold text-slate-900 outline-none text-sm w-full md:w-auto"
+                             />
+                          </div>
+                       </div>
+
+                       <div className="flex items-center gap-3 mt-1 px-1">
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                             <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${dataDia.pausa ? 'bg-slate-900 border-slate-900' : 'bg-white border-slate-300 group-hover:border-slate-400'}`}>
+                                {dataDia.pausa && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                             </div>
+                             <input type="checkbox" checked={dataDia.pausa || false} onChange={(e) => {
+                                 const checked = e.target.checked
+                                 setHorarios(prev => ({
+                                     ...prev,
+                                     [dia.id]: {
+                                         ...prev[dia.id],
+                                         pausa: checked,
+                                         inicioPausa: prev[dia.id].inicioPausa || '13:00',
+                                         finPausa: prev[dia.id].finPausa || '17:00'
+                                     }
+                                 }))
+                             }} className="hidden" />
+                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Corte / Pausa</span>
+                          </label>
+
+                          {dataDia.pausa && (
+                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                                <div className="flex items-center gap-2 bg-[#F8FAFC] px-2 py-1.5 rounded-xl border border-slate-100">
+                                   <input type="time" value={dataDia.inicioPausa || '13:00'} onChange={(e) => cambiarHora(dia.id, 'inicioPausa', e.target.value)} className="bg-transparent font-bold text-slate-900 outline-none text-xs" />
+                                </div>
+                                <span className="text-slate-300 font-bold text-xs">-</span>
+                                <div className="flex items-center gap-2 bg-[#F8FAFC] px-2 py-1.5 rounded-xl border border-slate-100">
+                                   <input type="time" value={dataDia.finPausa || '17:00'} onChange={(e) => cambiarHora(dia.id, 'finPausa', e.target.value)} className="bg-transparent font-bold text-slate-900 outline-none text-xs" />
+                                </div>
+                             </div>
+                          )}
                        </div>
 
                     </div>
