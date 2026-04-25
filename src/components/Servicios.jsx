@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { getVocabulario } from '../utils/vocabulario'
 
-export default function Servicios({ negocioId }) {
+export default function Servicios({ negocioId, rubro }) {
+  const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
   const [servicios, setServicios] = useState([])
   
@@ -123,9 +125,9 @@ export default function Servicios({ negocioId }) {
       
       <header className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0">
          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Catálogo de Servicios</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">{vocab.servicioPlural}</h2>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1.5">
-               {servicios.length} Actividades configuradas
+               {servicios.length} {vocab.servicios} configurados
             </p>
          </div>
          <button 
@@ -133,7 +135,7 @@ export default function Servicios({ negocioId }) {
            className="w-10 h-10 md:w-auto md:px-6 md:py-3 rounded-full md:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all gap-2 hover:bg-slate-800"
          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
-            <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">Nuevo Servicio</span>
+            <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">{vocab.nuevoServicio}</span>
          </button>
       </header>
 
@@ -147,9 +149,9 @@ export default function Servicios({ negocioId }) {
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                  <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" /></svg>
               </div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Sin Actividades</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Sin {vocab.servicios}</h3>
               <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[250px]">
-                Debes crear al menos un servicio para recibir reservas.
+                Debes crear al menos un {vocab.servicio} para recibir reservas.
               </p>
            </div>
          ) : (
@@ -193,7 +195,7 @@ export default function Servicios({ negocioId }) {
               
               <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h2 className="text-2xl font-bold tracking-tighter text-slate-900">{modoEdicion ? 'Modificar Actividad' : 'Nueva Actividad'}</h2>
+                    <h2 className="text-2xl font-bold tracking-tighter text-slate-900">{modoEdicion ? vocab.editarServicio : vocab.nuevoServicio}</h2>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Configuración del catálogo</p>
                  </div>
                  <button onClick={() => setModalAbierto(false)} className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
@@ -204,11 +206,11 @@ export default function Servicios({ negocioId }) {
               <form onSubmit={guardarServicio} className="space-y-4">
                  
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre del Servicio</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre del {vocab.servicio}</label>
                     <input 
                       required 
                       className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
-                      placeholder="Ej: Corte Clásico, Alquiler Cancha F5" 
+                      placeholder={vocab.placeholderServicio} 
                       value={form.nombre} 
                       onChange={e => setForm({...form, nombre: e.target.value})} 
                     />
@@ -248,7 +250,7 @@ export default function Servicios({ negocioId }) {
                     type="submit" 
                     className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-6 hover:bg-slate-800 disabled:opacity-50"
                  >
-                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Actualizar Servicio' : 'Confirmar y Guardar')}
+                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? `Actualizar ${vocab.servicio}` : 'Confirmar y Guardar')}
                  </button>
               </form>
            </div>

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { getVocabulario } from '../utils/vocabulario'
 
-export default function Turnos({ negocioId }) {
+export default function Turnos({ negocioId, rubro }) {
+  const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
   const [fechaActual, setFechaActual] = useState(new Date())
   const [turnos, setTurnos] = useState([])
@@ -323,7 +325,7 @@ export default function Turnos({ negocioId }) {
                Agenda
             </h1>
             <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1 md:mt-2">
-              {todosLosTurnos.length} Citas Registradas
+              {todosLosTurnos.length} {vocab.citasRegistradas}
             </p>
          </div>
 
@@ -347,7 +349,7 @@ export default function Turnos({ negocioId }) {
       <div className="absolute bottom-6 right-4 md:bottom-6 md:right-6 z-30 ns-fab-mobile">
          <button onClick={() => setModalAbierto(true)} className="flex items-center gap-2 px-5 md:px-8 py-3.5 md:py-4 rounded-full bg-slate-900 text-white shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:scale-105 active:scale-95 transition-all">
             <svg className="w-5 h-5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
-            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em]">Nueva Cita</span>
+            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em]">{vocab.nuevaCita}</span>
          </button>
       </div>
 
@@ -361,7 +363,7 @@ export default function Turnos({ negocioId }) {
                     <h2 className="text-3xl font-black tracking-tighter text-slate-900 leading-none">
                        {fechaActual.getDate()} {fechaActual.toLocaleDateString('es-ES', { month: 'short' }).replace('.','')}
                     </h2>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1.5">{turnos.length} Citas Asignadas</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1.5">{turnos.length} {vocab.citasAsignadas}</p>
                  </div>
                  <button onClick={() => setModalDiaAbierto(false)} className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-all active:scale-90"><svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg></button>
               </div>
@@ -417,7 +419,7 @@ export default function Turnos({ negocioId }) {
            <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3rem] shadow-2xl p-5 md:p-10 animate-in slide-in-from-bottom-[20%] duration-500 border border-slate-100 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6 md:mb-8">
                  <div>
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900">Nueva Cita</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900">{vocab.nuevaCita}</h2>
                     <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Carga manual en sistema</p>
                  </div>
                  <button onClick={() => setModalAbierto(false)} className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"><svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg></button>
@@ -458,7 +460,7 @@ export default function Turnos({ negocioId }) {
                  </div>
 
                  <button disabled={guardando} type="submit" className="w-full py-5 md:py-6 rounded-[1.2rem] md:rounded-[1.5rem] bg-slate-900 text-white font-bold text-[10px] md:text-[11px] tracking-widest uppercase shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 md:mt-6">
-                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Confirmar Cita'}
+                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : vocab.confirmarCita}
                  </button>
               </form>
            </div>

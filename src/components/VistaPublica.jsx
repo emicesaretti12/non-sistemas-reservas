@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { getVocabulario, esGastronomia } from '../utils/vocabulario'
 
 export default function VistaPublica() {
   const { id } = useParams()
@@ -21,7 +22,8 @@ export default function VistaPublica() {
     hora: '', 
     clienteNombre: '', 
     clienteTelefono: '',
-    clienteEmail: ''
+    clienteEmail: '',
+    campoExtra: ''
   })
   
   // --- CALENDAR & SLOTS STATE ---
@@ -224,7 +226,8 @@ export default function VistaPublica() {
         return
       }
 
-      const { error } = await supabase.from('turnos').insert([{
+      // Payload base — NO incluir campos que podrían no existir en la DB de clientes existentes
+      const payload = {
         negocio_id: negocio.id,
         servicio_id: reserva.servicioId,
         empleado_id: reserva.empleadoId,
@@ -233,7 +236,14 @@ export default function VistaPublica() {
         cliente_email: reserva.clienteEmail,
         fecha_hora: fechaHoraISO,
         estado: 'confirmado'
-      }])
+      }
+
+      // Solo agregar notas si el campo extra tiene valor (evita errores si la columna no existe)
+      if (reserva.campoExtra) {
+        payload.notas = `${vocab.campoExtraLabel || 'Extra'}: ${reserva.campoExtra}`
+      }
+
+      const { error } = await supabase.from('turnos').insert([payload])
       
       if (error) throw error
       setPaso(5)
@@ -290,6 +300,10 @@ export default function VistaPublica() {
   const accentSoft = hexToRgba(accent, 0.12) 
   const accentGlow = hexToRgba(accent, 0.3)
   const accentDark = hexToRgba(accent, 0.85)
+
+  // Vocabulario dinámico según rubro
+  const vocab = getVocabulario(negocio.rubro)
+  const isRestaurante = esGastronomia(negocio.rubro)
 
   return (
     <div className="min-h-screen text-[#1D1D1F] font-sans antialiased selection:bg-zinc-900 selection:text-white relative overflow-x-hidden bg-[#FDFDFC]" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
@@ -421,7 +435,7 @@ export default function VistaPublica() {
             {/* --- PASO 1: SERVICIOS --- */}
             {paso === 1 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-2.5 md:space-y-3">
-                <h2 className="text-base md:text-lg font-bold tracking-tight px-1 text-zinc-900">Seleccione un servicio</h2>
+                <h2 className="text-base md:text-lg font-bold tracking-tight px-1 text-zinc-900">{vocab.paso1Titulo}</h2>
                 <div className="bg-white rounded-[1.3rem] md:rounded-[1.5rem] shadow-sm border border-zinc-100/80 overflow-hidden">
                    {servicios.map((s, idx) => (
                      <button 
@@ -431,7 +445,11 @@ export default function VistaPublica() {
                      >
                         <div className="flex items-center gap-3">
                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-[0.8rem] md:rounded-[0.9rem] flex items-center justify-center transition-all duration-300 group-hover:scale-105 shrink-0" style={{ backgroundColor: accentSoft, color: accent }}>
-                              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                               {vocab.usarIconoCustom ? (
+                                 <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor"><path d={vocab.iconoServicio}/></svg>
+                               ) : (
+                                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={vocab.iconoServicio} strokeLinecap="round" strokeLinejoin="round"/></svg>
+                               )}
                            </div>
                            <div className="min-w-0">
                               <p className="font-bold text-zinc-900 text-[14px] md:text-[15px] tracking-tight leading-none transition-colors truncate">{s.nombre}</p>
@@ -452,9 +470,9 @@ export default function VistaPublica() {
             {paso === 2 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
-                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">Especialista</h2>
+                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">{vocab.paso2Titulo}</h2>
                    <button onClick={() => setPaso(1)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white px-3 py-1.5 rounded-full shadow-sm active:scale-90 transition-all flex items-center gap-1" style={{ color: accent }}>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Volver
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso2Volver}
                    </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5 md:gap-3">
@@ -483,7 +501,7 @@ export default function VistaPublica() {
                 <div className="flex items-center justify-between px-1">
                    <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">Fecha y Horario</h2>
                    <button onClick={() => setPaso(2)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white px-3 py-1.5 rounded-full shadow-sm active:scale-90 transition-all flex items-center gap-1" style={{ color: accent }}>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Personal
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso3Volver}
                    </button>
                 </div>
                 
@@ -554,9 +572,9 @@ export default function VistaPublica() {
             {paso === 4 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
-                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">Tus Datos</h2>
+                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">{vocab.paso4Titulo}</h2>
                    <button onClick={() => setPaso(3)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white px-3 py-1.5 rounded-full shadow-sm active:scale-90 transition-all flex items-center gap-1" style={{ color: accent }}>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> Horario
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso4Volver}
                    </button>
                 </div>
                 
@@ -586,13 +604,23 @@ export default function VistaPublica() {
                             <input required type="email" className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="correo@ejemplo.com" value={reserva.clienteEmail} onChange={(e) => setReserva({...reserva, clienteEmail: e.target.value})} />
                          </div>
                       </div>
+                      
+                      {isRestaurante && (
+                        <div className="space-y-1">
+                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Comensales</label>
+                          <div className="relative flex items-center brand-input-wrapper">
+                             <div className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center brand-input-icon transition-colors" style={{ backgroundColor: accentUltraSoft }}><svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                             <input type="number" min="1" max="20" required className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="Cantidad de personas" value={reserva.campoExtra} onChange={(e) => setReserva({...reserva, campoExtra: e.target.value})} />
+                          </div>
+                        </div>
+                      )}
                    </div>
 
                    {/* TICKET VIP DEGRADADO */}
                    <div className="rounded-[1.3rem] md:rounded-[1.5rem] p-5 md:p-6 text-white shadow-xl relative overflow-hidden" style={{ background: `linear-gradient(135deg, #18181B 0%, ${accentDark} 150%)` }}>
                       <div className="relative z-10 flex justify-between items-center">
                          <div className="space-y-0.5">
-                            <p className="text-[8px] md:text-[9px] font-bold opacity-60 uppercase tracking-[0.3em] mb-0.5 md:mb-1 text-white">Ticket de Cita</p>
+                            <p className="text-[8px] md:text-[9px] font-bold opacity-60 uppercase tracking-[0.3em] mb-0.5 md:mb-1 text-white">{vocab.ticketTitulo}</p>
                             <p className="text-xl md:text-2xl font-bold tracking-tighter">{reserva.fecha.split('-').reverse().join('/')}</p>
                             <p className="text-sm md:text-base font-medium opacity-90">{reserva.hora} HS</p>
                          </div>
@@ -605,6 +633,12 @@ export default function VistaPublica() {
                           <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{servicioSeleccionado.nombre}</span>
                           <span className="text-sm font-bold text-white">${servicioSeleccionado.precio}</span>
                         </div>
+                      )}
+                      {reserva.campoExtra && (
+                         <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between">
+                           <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{vocab.campoExtraLabel || 'Comensales'}</span>
+                           <span className="text-sm font-bold text-white">{reserva.campoExtra}</span>
+                         </div>
                       )}
                    </div>
                 </form>
@@ -621,21 +655,21 @@ export default function VistaPublica() {
                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
                 <div className="space-y-1.5 px-2">
-                   <h3 className="text-2xl md:text-3xl font-extrabold tracking-tighter text-zinc-900">Confirmado</h3>
+                   <h3 className="text-2xl md:text-3xl font-extrabold tracking-tighter text-zinc-900">{vocab.exitoTitulo}</h3>
                    <p className="text-xs md:text-sm text-zinc-500 font-medium leading-relaxed max-w-[260px] mx-auto text-balance">
-                     Tu turno para el <b className="text-zinc-900">{reserva.fecha.split('-').reverse().join('/')}</b> a las <b className="text-zinc-900">{reserva.hora} hs</b> ha sido procesado.
+                     {vocab.exitoMensaje} <b className="text-zinc-900">{reserva.fecha.split('-').reverse().join('/')}</b> a las <b className="text-zinc-900">{reserva.hora} hs</b> {vocab.exitoMensaje2}
                    </p>
                 </div>
 
                 {/* Resumen final */}
                 <div className="bg-white rounded-[1.3rem] border border-zinc-100 shadow-sm p-4 text-left space-y-2.5 mx-auto max-w-[300px]">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Servicio</span>
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{vocab.servicio.charAt(0).toUpperCase() + vocab.servicio.slice(1)}</span>
                     <span className="text-xs font-bold text-zinc-900">{servicioSeleccionado?.nombre}</span>
                   </div>
                   <div className="h-px bg-zinc-50"></div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Especialista</span>
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{vocab.empleado.charAt(0).toUpperCase() + vocab.empleado.slice(1)}</span>
                     <span className="text-xs font-bold text-zinc-900">{empleadoSeleccionado?.nombre}</span>
                   </div>
                   <div className="h-px bg-zinc-50"></div>
@@ -646,7 +680,7 @@ export default function VistaPublica() {
                 </div>
 
                 <div className="pt-2">
-                   <button onClick={() => window.location.reload()} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2.5 rounded-full shadow-sm active:scale-95 transition-all" style={{ backgroundColor: accentUltraSoft, color: accent }}>Nueva Reserva</button>
+                   <button onClick={() => window.location.reload()} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2.5 rounded-full shadow-sm active:scale-95 transition-all" style={{ backgroundColor: accentUltraSoft, color: accent }}>{vocab.nuevaReservaBtn}</button>
                 </div>
               </section>
             )}
@@ -662,7 +696,7 @@ export default function VistaPublica() {
               className="w-full max-w-sm mx-auto block py-4 rounded-xl text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-[0.97] transition-all pointer-events-auto" 
               style={{ backgroundColor: accent, boxShadow: `0 10px 25px ${accentGlow}` }}
            >
-              Avanzar al cierre
+              {vocab.avanzarBtn}
            </button>
         </div>
       )}
@@ -676,7 +710,7 @@ export default function VistaPublica() {
               className="w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-xl text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-[0.97] transition-all pointer-events-auto" 
               style={{ backgroundColor: accent, boxShadow: `0 10px 25px ${accentGlow}` }}
            >
-              {guardando ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Confirmar Reserva'}
+              {guardando ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : vocab.confirmarBtn}
            </button>
         </div>
       )}

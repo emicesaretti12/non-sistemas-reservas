@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { getVocabulario } from '../utils/vocabulario'
 
-export default function Empleados({ negocioId }) {
+export default function Empleados({ negocioId, rubro }) {
+  const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
   const [especialistas, setEspecialistas] = useState([])
   
@@ -155,9 +157,9 @@ export default function Empleados({ negocioId }) {
       {/* --- HEADER COMPACTO --- */}
       <header className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0">
          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Especialistas</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">{vocab.empleadoPlural}</h2>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1.5">
-               {especialistas.length} Recursos disponibles
+               {especialistas.length} {vocab.empleados} disponibles
             </p>
          </div>
          <button 
@@ -165,7 +167,7 @@ export default function Empleados({ negocioId }) {
            className="w-10 h-10 md:w-auto md:px-6 md:py-3 rounded-full md:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all gap-2 hover:bg-slate-800"
          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
-            <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">Nuevo Registro</span>
+            <span className="hidden md:inline text-[11px] font-bold uppercase tracking-widest">{vocab.nuevoEmpleado}</span>
          </button>
       </header>
 
@@ -178,9 +180,9 @@ export default function Empleados({ negocioId }) {
          ) : especialistas.length === 0 ? (
            <div className="bg-white rounded-[2rem] border border-dashed border-slate-300 p-12 flex flex-col items-center text-center">
               <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              <h3 className="text-sm font-bold text-slate-900">Sin Staff</h3>
+              <h3 className="text-sm font-bold text-slate-900">Sin {vocab.empleados}</h3>
               <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[200px]">
-                Debes agregar al menos un especialista o recurso para recibir reservas.
+                Debes agregar al menos un {vocab.empleado} para recibir reservas.
               </p>
            </div>
          ) : (
@@ -224,8 +226,8 @@ export default function Empleados({ negocioId }) {
               
               <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h2 className="text-2xl font-bold tracking-tighter text-slate-900">{modoEdicion ? 'Editar Perfil' : 'Nuevo Especialista'}</h2>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Gestión de Staff y Recursos</p>
+                    <h2 className="text-2xl font-bold tracking-tighter text-slate-900">{modoEdicion ? vocab.editarEmpleado : vocab.nuevoEmpleado}</h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Gestión de {vocab.empleados}</p>
                  </div>
                  <button onClick={() => setModalAbierto(false)} className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg>
@@ -257,22 +259,22 @@ export default function Empleados({ negocioId }) {
                  </div>
 
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre Completo</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre</label>
                     <input 
                       required 
                       className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
-                      placeholder="Ej: Dr. Alejandro Sanz" 
+                      placeholder={vocab.placeholderEmpleado} 
                       value={form.nombre} 
                       onChange={e => setForm({...form, nombre: e.target.value})} 
                     />
                  </div>
 
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Especialidad / Rol</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{vocab.especialidad}</label>
                     <input 
                       required 
                       className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" 
-                      placeholder="Ej: Traumatólogo, Barbero Senior, etc." 
+                      placeholder={vocab.placeholderEspecialidad} 
                       value={form.especialidad} 
                       onChange={e => setForm({...form, especialidad: e.target.value})} 
                     />
@@ -283,7 +285,7 @@ export default function Empleados({ negocioId }) {
                     type="submit" 
                     className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 disabled:opacity-50 hover:bg-slate-800"
                  >
-                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Actualizar Registro' : 'Confirmar Especialista')}
+                    {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? `Actualizar ${vocab.empleado}` : `Confirmar ${vocab.empleado}`)}
                  </button>
               </form>
            </div>

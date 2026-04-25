@@ -9,6 +9,9 @@ import Empleados from './Empleados'
 import ConfiguracionHorarios from './ConfiguracionHorarios'
 import Reportes from './Reportes'
 
+// Sistema de Vocabulario Multi-Negocio
+import { getVocabulario, RUBROS_DISPONIBLES } from '../utils/vocabulario'
+
 export default function Dashboard({ session }) {
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
   const [loading, setLoading] = useState(true)
@@ -30,7 +33,7 @@ export default function Dashboard({ session }) {
 
   // --- ESTADOS: ONBOARDING ---
   const [nombreNegocio, setNombreNegocio] = useState('')
-  const [rubroSeleccionado, setRubroSeleccionado] = useState('Barbería / Peluquería')
+  const [rubroSeleccionado, setRubroSeleccionado] = useState(RUBROS_DISPONIBLES[0])
   const [creando, setCreando] = useState(false)
 
   // --- ESTADOS: BRANDING & UI ---
@@ -599,6 +602,9 @@ export default function Dashboard({ session }) {
   const clientesVIP = clientes.filter(c => c.frecuencia === 'VIP').length
   const clientesFrecuentes = clientes.filter(c => c.frecuencia === 'Frecuente').length
 
+  // Vocabulario dinámico según rubro del negocio
+  const vocab = getVocabulario(negocio?.rubro)
+
   return (
     <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`}>
       
@@ -635,16 +641,12 @@ export default function Dashboard({ session }) {
               <form onSubmit={handleOnboarding} className="space-y-5 md:space-y-6">
                 <div className="space-y-1">
                   <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Razón Social</label>
-                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1rem] md:rounded-2xl outline-none focus:bg-white focus:border-slate-900 transition-all font-semibold text-sm md:text-base" placeholder="Ej: Barbería Central" value={nombreNegocio} onChange={(e) => setNombreNegocio(e.target.value)} />
+                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1rem] md:rounded-2xl outline-none focus:bg-white focus:border-slate-900 transition-all font-semibold text-sm md:text-base" placeholder="Ej: Barbería Central, Restaurante La Casona" value={nombreNegocio} onChange={(e) => setNombreNegocio(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Ecosistema de Rubro</label>
                   <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1rem] md:rounded-2xl outline-none font-semibold cursor-pointer appearance-none text-sm md:text-base" value={rubroSeleccionado} onChange={(e) => setRubroSeleccionado(e.target.value)}>
-                    <option>Barbería / Peluquería</option>
-                    <option>Centro de Estética</option>
-                    <option>Veterinaria</option>
-                    <option>Salud / Clínica</option>
-                    <option>Otros Servicios</option>
+                    {RUBROS_DISPONIBLES.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
                 <button disabled={creando} className="w-full bg-slate-900 text-white font-bold py-4 md:py-5 rounded-[1rem] md:rounded-2xl active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-[10px] md:text-[11px] shadow-xl md:shadow-2xl flex justify-center items-center mt-2">
@@ -783,7 +785,7 @@ export default function Dashboard({ session }) {
                         <span className="text-[8px] font-bold ml-0.5">:{formatearHora(proximaCita.fecha_hora)?.split(':')[1] || ''}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Próxima Cita</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{vocab.proximaCita}</p>
                         <h4 className="text-sm md:text-base font-bold text-slate-900 truncate">{proximaCita.cliente_nombre}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">{proximaCita.servicios?.nombre || 'Servicio'}</span>
@@ -802,7 +804,7 @@ export default function Dashboard({ session }) {
                   {/* KPIs GRID */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="ns-stat-mini group">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Turnos Próximos</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorTurnos}</p>
                       <h3 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stats.hoy}</h3>
                       <div className="flex items-center gap-1.5 text-[9px] font-bold text-blue-500 uppercase tracking-widest">
                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
@@ -811,19 +813,19 @@ export default function Dashboard({ session }) {
                     </div>
 
                     <div className="ns-stat-mini group">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ingresos Proyec.</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorIngresos}</p>
                       <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-[#34C759]">${stats.ingresos.toLocaleString()}</h3>
-                      <p className="text-[9px] font-medium text-slate-400 italic">Reservas activas</p>
+                      <p className="text-[9px] font-medium text-slate-400 italic">{vocab.turnos} activos</p>
                     </div>
 
                     <div className="ns-stat-mini group">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Esta Semana</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorSemana}</p>
                       <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{stats.semana}</h3>
-                      <p className="text-[9px] font-medium text-slate-400 italic">Citas agendadas</p>
+                      <p className="text-[9px] font-medium text-slate-400 italic">{vocab.turnos} agendados</p>
                     </div>
 
                     <div className="ns-stat-mini group">
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Clientes</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.clientes.charAt(0).toUpperCase() + vocab.clientes.slice(1)}</p>
                       <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{clientes.length}</h3>
                       <p className="text-[9px] font-medium text-slate-400 italic">Registrados</p>
                     </div>
@@ -859,7 +861,7 @@ export default function Dashboard({ session }) {
                           <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Más Solicitado</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorPopular}</p>
                           <p className="text-sm font-bold text-slate-900 truncate mt-0.5">{stats.popular !== '-' ? stats.popular : 'Sin datos aún'}</p>
                         </div>
                       </div>
@@ -891,8 +893,8 @@ export default function Dashboard({ session }) {
                   {/* ACCIONES RÁPIDAS */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                     {[
-                      { label: 'Nueva Cita', icon: 'M12 4v16m8-8H4', action: () => setTab('agenda') },
-                      { label: 'Agregar Servicio', icon: 'M12 4v16m8-8H4', action: () => setTab('servicios') },
+                      { label: vocab.accionNueva, icon: 'M12 4v16m8-8H4', action: () => setTab('agenda') },
+                      { label: vocab.accionServicio, icon: 'M12 4v16m8-8H4', action: () => setTab('servicios') },
                       { label: 'Copiar Link', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3', action: () => { navigator.clipboard.writeText(publicLink); alert('Link copiado') } },
                       { label: 'Ver App Pública', icon: 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14', action: () => window.open(publicLink, '_blank') }
                     ].map((a, i) => (
@@ -941,7 +943,7 @@ export default function Dashboard({ session }) {
                   <div className="bg-slate-900 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
                      <div className="relative z-10">
                         <h4 className="text-lg md:text-xl font-bold tracking-tight mb-1 md:mb-3">Link de Reservas</h4>
-                        <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">Compartí este link con tus clientes para que reserven online.</p>
+                        <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">{vocab.linkDescripcion}</p>
                         <div className="flex items-center bg-white/10 border border-white/10 rounded-xl p-3 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
                            navigator.clipboard.writeText(publicLink); 
                            alert("Link copiado")
@@ -957,10 +959,10 @@ export default function Dashboard({ session }) {
 
               {/* GESTIÓN DINÁMICA DE TABS */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                {tab === 'agenda' && <Turnos negocioId={negocio.id} />}
+                {tab === 'agenda' && <Turnos negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'reportes' && <Reportes negocioId={negocio.id} colorPrimario={colorPrimario} />}
-                {tab === 'servicios' && <Servicios negocioId={negocio.id} />}
-                {tab === 'equipo' && <Empleados negocioId={negocio.id} />}
+                {tab === 'servicios' && <Servicios negocioId={negocio.id} rubro={negocio.rubro} />}
+                {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
               </div>
 
@@ -971,7 +973,7 @@ export default function Dashboard({ session }) {
                   <header className="flex flex-col gap-3 bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Base de Clientes</h2>
+                        <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">{vocab.clientePlural}</h2>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">{clientes.length} registrados</p>
                       </div>
                     </div>
@@ -1189,7 +1191,7 @@ export default function Dashboard({ session }) {
                           Vista Previa
                         </button>
                         <button onClick={() => {
-                          const waMje = encodeURIComponent(`Reservá tu turno en ${negocio.nombre}: ${publicLink}`)
+                          const waMje = encodeURIComponent(`${vocab.shareWA} ${negocio.nombre}: ${publicLink}`)
                           window.open(`https://wa.me/?text=${waMje}`, '_blank')
                         }} className="py-3 rounded-xl bg-green-50 border border-green-200 text-[10px] font-bold uppercase tracking-widest text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all">
                           Compartir WA
