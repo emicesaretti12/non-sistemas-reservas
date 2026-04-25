@@ -472,6 +472,9 @@ export default function Dashboard({ session }) {
     return new Date(fechaStr).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
   }
 
+  // Vocabulario dinámico según rubro del negocio (debe estar antes de tabsConfig)
+  const vocab = getVocabulario(negocio?.rubro)
+
   // ===== DEFINICIÓN DE TABS (se usa vocab si está disponible, sino fallback genérico) =====
   const _tabServicios = vocab?.tabServicios || 'Servicios'
   const _tabStaff = vocab?.tabStaff || 'Staff'
@@ -606,8 +609,6 @@ export default function Dashboard({ session }) {
   const clientesVIP = clientes.filter(c => c.frecuencia === 'VIP').length
   const clientesFrecuentes = clientes.filter(c => c.frecuencia === 'Frecuente').length
 
-  // Vocabulario dinámico según rubro del negocio
-  const vocab = getVocabulario(negocio?.rubro)
 
   return (
     <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`}>
