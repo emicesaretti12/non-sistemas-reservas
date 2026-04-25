@@ -70,6 +70,19 @@ const VOCABULARIOS = {
     linkDescripcion: 'Compartí este link con tus clientes para que reserven mesa online.',
     shareWA: 'Reservá tu mesa en',
 
+    // Tabs y Navegación
+    tabServicios: 'Experiencias',
+    tabStaff: 'Zonas',
+    tabClientes: 'Comensales',
+    filtroTodos: 'Todas las Zonas',
+    seleccionarServicio: 'Seleccionar Experiencia',
+    seleccionarEmpleado: 'Seleccionar Zona',
+    labelServicioRequerido: 'Experiencia',
+    labelEmpleado: 'Zona / Salón',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu reserva${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmada. ¡Te esperamos!`,
+
     // Icono del servicio (SVG path)
     servicioIconPath: 'M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h12v2H3v-2zm0 4h18v2H3v-2zm0 4h12v2H3v-2z',
     servicioIconViewBox: '0 0 24 24',
@@ -135,6 +148,18 @@ const VOCABULARIOS = {
     linkDescripcion: 'Compartí este link con tus clientes para que reserven online.',
     shareWA: 'Reservá tu turno en',
 
+    tabServicios: 'Servicios',
+    tabStaff: 'Staff',
+    tabClientes: 'Clientes',
+    filtroTodos: 'Staff Completo',
+    seleccionarServicio: 'Seleccionar Servicio',
+    seleccionarEmpleado: 'Seleccionar Profesional',
+    labelServicioRequerido: 'Servicio Requerido',
+    labelEmpleado: 'Especialista',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu cita${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmada. ¡Te esperamos!`,
+
     usarIconoCustom: false,
     iconoServicio: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
   },
@@ -195,6 +220,18 @@ const VOCABULARIOS = {
     actividadReciente: 'Actividad Reciente',
     linkDescripcion: 'Compartí este link con tus pacientes para que agenden online.',
     shareWA: 'Agendá tu cita en',
+
+    tabServicios: 'Tratamientos',
+    tabStaff: 'Profesionales',
+    tabClientes: 'Pacientes',
+    filtroTodos: 'Todo el Equipo',
+    seleccionarServicio: 'Seleccionar Tratamiento',
+    seleccionarEmpleado: 'Seleccionar Profesional',
+    labelServicioRequerido: 'Tratamiento',
+    labelEmpleado: 'Profesional',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu cita${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmada. ¡Te esperamos!`,
 
     usarIconoCustom: false,
     iconoServicio: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
@@ -260,6 +297,18 @@ const VOCABULARIOS = {
     linkDescripcion: 'Compartí este link con tus clientes para que saquen turno online.',
     shareWA: 'Sacá tu turno en',
 
+    tabServicios: 'Consultas',
+    tabStaff: 'Veterinarios',
+    tabClientes: 'Tutores',
+    filtroTodos: 'Todos',
+    seleccionarServicio: 'Seleccionar Consulta',
+    seleccionarEmpleado: 'Seleccionar Veterinario',
+    labelServicioRequerido: 'Tipo de Consulta',
+    labelEmpleado: 'Veterinario',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu turno${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmado. ¡Te esperamos!`,
+
     usarIconoCustom: false,
     iconoServicio: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
   },
@@ -320,6 +369,18 @@ const VOCABULARIOS = {
     actividadReciente: 'Actividad Reciente',
     linkDescripcion: 'Compartí este link con tus pacientes para que saquen turno online.',
     shareWA: 'Sacá tu turno en',
+
+    tabServicios: 'Consultas',
+    tabStaff: 'Profesionales',
+    tabClientes: 'Pacientes',
+    filtroTodos: 'Todo el Equipo',
+    seleccionarServicio: 'Seleccionar Consulta',
+    seleccionarEmpleado: 'Seleccionar Profesional',
+    labelServicioRequerido: 'Tipo de Consulta',
+    labelEmpleado: 'Profesional',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu turno${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmado. ¡Te esperamos!`,
 
     usarIconoCustom: false,
     iconoServicio: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
@@ -382,6 +443,18 @@ const VOCABULARIO_DEFAULT = {
   actividadReciente: 'Actividad Reciente',
   linkDescripcion: 'Compartí este link con tus clientes para que reserven online.',
   shareWA: 'Reservá en',
+
+  tabServicios: 'Servicios',
+  tabStaff: 'Staff',
+  tabClientes: 'Clientes',
+  filtroTodos: 'Todos',
+  seleccionarServicio: 'Seleccionar Servicio',
+  seleccionarEmpleado: 'Seleccionar Recurso',
+  labelServicioRequerido: 'Servicio Requerido',
+  labelEmpleado: 'Recurso',
+  fallbackStaff: 'Sin asignar',
+  waConfirmacion: (nombre, servicio, fecha, hora) =>
+    `Hola ${nombre}, tu reserva${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmada. ¡Te esperamos!`,
 
   usarIconoCustom: false,
   iconoServicio: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',

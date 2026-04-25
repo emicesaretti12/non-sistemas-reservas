@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { getVocabulario } from '../utils/vocabulario'
 
-export default function Reportes({ negocioId, colorPrimario }) {
+export default function Reportes({ negocioId, colorPrimario, rubro }) {
+  const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
   const [periodo, setPeriodo] = useState('semana') // semana | mes | todo
   const [datos, setDatos] = useState({
@@ -90,7 +92,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
       // === TOP EMPLEADOS ===
       const empleadoMap = {}
       listaTurnos.forEach(t => {
-        const nombre = t.empleados?.nombre || 'Sin asignar'
+        const nombre = t.empleados?.nombre || vocab.fallbackStaff
         if (!empleadoMap[nombre]) empleadoMap[nombre] = { nombre, count: 0, revenue: 0 }
         empleadoMap[nombre].count++
         empleadoMap[nombre].revenue += (t.servicios?.precio || 0)
@@ -271,7 +273,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
         {/* TOP SERVICIOS */}
         <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 md:p-5 border-b border-slate-100">
-            <h4 className="text-sm font-bold text-slate-900">Servicios más rentables</h4>
+            <h4 className="text-sm font-bold text-slate-900">{vocab.servicioPlural} más rentables</h4>
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Por facturación</p>
           </div>
           {datos.topServicios.length === 0 ? (
@@ -293,7 +295,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs font-black text-slate-900">${s.revenue.toLocaleString()}</p>
-                      <p className="text-[9px] font-medium text-slate-400">{s.count} citas</p>
+                      <p className="text-[9px] font-medium text-slate-400">{s.count} {vocab.turnos}</p>
                     </div>
                   </div>
                 )
@@ -305,7 +307,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
         {/* TOP EMPLEADOS */}
         <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 md:p-5 border-b border-slate-100">
-            <h4 className="text-sm font-bold text-slate-900">Staff por rendimiento</h4>
+            <h4 className="text-sm font-bold text-slate-900">{vocab.empleadoPlural} por rendimiento</h4>
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Por facturación generada</p>
           </div>
           {datos.topEmpleados.length === 0 ? (
@@ -329,7 +331,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs font-black text-slate-900">${e.revenue.toLocaleString()}</p>
-                      <p className="text-[9px] font-medium text-slate-400">{e.count} citas</p>
+                      <p className="text-[9px] font-medium text-slate-400">{e.count} {vocab.turnos}</p>
                     </div>
                   </div>
                 )
@@ -372,7 +374,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
         {/* TOP CLIENTES */}
         <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 md:p-5 border-b border-slate-100">
-            <h4 className="text-sm font-bold text-slate-900">Clientes destacados</h4>
+            <h4 className="text-sm font-bold text-slate-900">{vocab.clientePlural.replace('Base de ', '')} destacados</h4>
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Mayor facturación</p>
           </div>
           {datos.topClientes.length === 0 ? (
@@ -388,7 +390,7 @@ export default function Reportes({ negocioId, colorPrimario }) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-slate-900 truncate">{c.nombre}</p>
-                    <p className="text-[9px] font-medium text-slate-400">{c.count} cita{c.count !== 1 ? 's' : ''}</p>
+                    <p className="text-[9px] font-medium text-slate-400">{c.count} {vocab.turnos}</p>
                   </div>
                   <span className="text-xs font-black text-green-600 shrink-0">${c.revenue.toLocaleString()}</span>
                 </div>
