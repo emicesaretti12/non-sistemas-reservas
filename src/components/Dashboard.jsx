@@ -8,6 +8,7 @@ import Servicios from './Servicios'
 import Empleados from './Empleados'
 import ConfiguracionHorarios from './ConfiguracionHorarios'
 import Reportes from './Reportes'
+import Inventario from './Inventario'
 
 // Sistema de Vocabulario Multi-Negocio
 import { getVocabulario, RUBROS_DISPONIBLES } from '../utils/vocabulario'
@@ -59,6 +60,9 @@ export default function Dashboard({ session }) {
 
   // --- ESTADOS: PRÓXIMA CITA ---
   const [proximaCita, setProximaCita] = useState(null)
+
+  // --- ESTADOS: CRM STATS (NUEVO) ---
+  const [crmStats, setCrmStats] = useState({ stockBajo: 0, empleadosActivos: 0, totalEmpleados: 0 })
 
   // --- ESTADOS: DISTRIBUCIÓN SEMANAL ---
   const [distribucionSemanal, setDistribucionSemanal] = useState([0,0,0,0,0,0,0])
@@ -120,7 +124,8 @@ export default function Dashboard({ session }) {
           await Promise.all([
             cargarMetricasNegocio(data.id),
             cargarActividadReciente(data.id),
-            cargarClientes(data.id)
+            cargarClientes(data.id),
+            cargarCrmStats(data.id)
           ])
         }
       }
@@ -133,6 +138,27 @@ export default function Dashboard({ session }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  /**
+   * LÓGICA CRM: STOCK Y EMPLEADOS
+   */
+  async function cargarCrmStats(negocioId) {
+    const { data: inv } = await supabase.from('inventario').select('cantidad, stock_minimo').eq('negocio_id', negocioId).eq('activo', true)
+    let stockBajo = 0
+    if (inv) {
+      stockBajo = inv.filter(i => i.cantidad <= i.stock_minimo).length
+    }
+    
+    const { data: emp } = await supabase.from('empleados').select('estado').eq('negocio_id', negocioId)
+    let empActivos = 0
+    let empTotal = 0
+    if (emp) {
+      empTotal = emp.length
+      empActivos = emp.filter(e => e.estado === 'activo').length
+    }
+    
+    setCrmStats({ stockBajo, empleadosActivos: empActivos, totalEmpleados: empTotal })
   }
 
   /**
@@ -487,17 +513,18 @@ export default function Dashboard({ session }) {
     { id: 'servicios', label: _tabServicios, d: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z' },
     { id: 'equipo', label: _tabStaff, d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
     { id: 'horarios', label: 'Horarios', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { id: 'inventario', label: 'Inventario', d: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
     { id: 'clientes', label: _tabClientes, d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
     { id: 'ajustes', label: 'Ajustes', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
   ]
 
-  // Bottom nav: 5 items para acceso rápido en móvil
+  // Bottom nav: 5 items para acceso rápido en móvil (por ID, no por índice)
   const bottomNavTabs = [
-    tabsConfig[0], // Monitor
-    tabsConfig[1], // Agenda
-    tabsConfig[2], // Reportes
-    tabsConfig[6], // Clientes
-    tabsConfig[7], // Ajustes
+    tabsConfig.find(t => t.id === 'inicio'),
+    tabsConfig.find(t => t.id === 'agenda'),
+    tabsConfig.find(t => t.id === 'reportes'),
+    tabsConfig.find(t => t.id === 'clientes'),
+    tabsConfig.find(t => t.id === 'ajustes'),
   ]
 
   if (loading) return (
@@ -836,6 +863,31 @@ export default function Dashboard({ session }) {
                     </div>
                   </div>
 
+                  {/* CRM WIDGETS */}
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                     <div className={`p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] border ${crmStats.stockBajo > 0 ? 'bg-red-50 border-red-100' : 'bg-white border-slate-200'} shadow-sm flex items-center justify-between group`}>
+                        <div>
+                           <p className={`text-[9px] font-bold uppercase tracking-widest ${crmStats.stockBajo > 0 ? 'text-red-500' : 'text-slate-400'}`}>Alertas de Stock</p>
+                           <h4 className={`text-xl md:text-2xl font-bold mt-1 tracking-tighter ${crmStats.stockBajo > 0 ? 'text-red-700' : 'text-slate-900'}`}>{crmStats.stockBajo}</h4>
+                           <p className={`text-[9px] font-medium mt-1 ${crmStats.stockBajo > 0 ? 'text-red-400' : 'text-slate-400'}`}>Productos en nivel bajo</p>
+                        </div>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${crmStats.stockBajo > 0 ? 'bg-red-100 text-red-500' : 'bg-slate-50 text-slate-300'}`}>
+                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                     </div>
+
+                     <div className="p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] bg-white border border-slate-200 shadow-sm flex items-center justify-between group">
+                        <div>
+                           <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Estado del Staff</p>
+                           <h4 className="text-xl md:text-2xl font-bold mt-1 tracking-tighter text-slate-900">{crmStats.empleadosActivos} <span className="text-sm font-medium text-slate-400">/ {crmStats.totalEmpleados}</span></h4>
+                           <p className="text-[9px] font-medium text-slate-400 mt-1">{vocab.empleados} activos</p>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                     </div>
+                  </div>
+
                   {/* DISTRIBUCIÓN SEMANAL + SERVICIO POPULAR */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     {/* Mini Chart Semanal */}
@@ -969,6 +1021,7 @@ export default function Dashboard({ session }) {
                 {tab === 'servicios' && <Servicios negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
+                {tab === 'inventario' && <Inventario negocioId={negocio.id} rubro={negocio.rubro} />}
               </div>
 
               {/* ====== TAB: CLIENTES — COMPLETO ====== */}

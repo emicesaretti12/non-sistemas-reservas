@@ -16,7 +16,12 @@ export default function Empleados({ negocioId, rubro }) {
   const [form, setForm] = useState({
     nombre: '',
     especialidad: '',
-    foto_url: ''
+    foto_url: '',
+    email: '',
+    telefono: '',
+    comision_porcentaje: 0,
+    estado: 'activo',
+    notas: ''
   })
 
   useEffect(() => {
@@ -74,7 +79,7 @@ export default function Empleados({ negocioId, rubro }) {
 
   const abrirModalCrear = () => {
     setModoEdicion(null)
-    setForm({ nombre: '', especialidad: '', foto_url: '' })
+    setForm({ nombre: '', especialidad: '', foto_url: '', email: '', telefono: '', comision_porcentaje: 0, estado: 'activo', notas: '' })
     setModalAbierto(true)
   }
 
@@ -83,7 +88,12 @@ export default function Empleados({ negocioId, rubro }) {
     setForm({ 
       nombre: esp.nombre, 
       especialidad: esp.especialidad || '', 
-      foto_url: esp.foto_url || '' 
+      foto_url: esp.foto_url || '',
+      email: esp.email || '',
+      telefono: esp.telefono || '',
+      comision_porcentaje: esp.comision_porcentaje || 0,
+      estado: esp.estado || 'activo',
+      notas: esp.notas || ''
     })
     setModalAbierto(true)
   }
@@ -98,7 +108,12 @@ export default function Empleados({ negocioId, rubro }) {
         negocio_id: negocioId,
         nombre: form.nombre.trim(),
         especialidad: form.especialidad.trim(),
-        foto_url: form.foto_url
+        foto_url: form.foto_url,
+        email: form.email.trim() || null,
+        telefono: form.telefono.trim() || null,
+        comision_porcentaje: parseFloat(form.comision_porcentaje) || 0,
+        estado: form.estado,
+        notas: form.notas.trim() || null
       }
 
       // 3. ENVIAMOS A SUPABASE
@@ -190,19 +205,32 @@ export default function Empleados({ negocioId, rubro }) {
               {especialistas.map((esp) => (
                 <div key={esp.id} className="bg-white rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 group hover:border-slate-300 transition-all">
                    
-                   <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-50 shrink-0">
+                   <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-50 shrink-0">
                       {esp.foto_url ? (
                         <img src={esp.foto_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={esp.nombre} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-300 text-2xl font-bold">{esp.nombre.charAt(0)}</div>
                       )}
+                      {/* Estado badge */}
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${
+                        esp.estado === 'vacaciones' ? 'bg-amber-400' : esp.estado === 'inactivo' ? 'bg-red-400' : 'bg-emerald-400'
+                      }`}></div>
                    </div>
 
                    <div className="flex-1 overflow-hidden">
-                      <h4 className="font-bold text-base text-slate-900 truncate">{esp.nombre}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-base text-slate-900 truncate">{esp.nombre}</h4>
+                        {esp.comision_porcentaje > 0 && <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase">{esp.comision_porcentaje}%</span>}
+                      </div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">
                         {esp.especialidad || 'General'}
                       </p>
+                      {(esp.email || esp.telefono) && (
+                        <div className="flex items-center gap-3 mt-1">
+                          {esp.telefono && <span className="text-[9px] text-slate-400 font-medium truncate">{esp.telefono}</span>}
+                          {esp.email && <span className="text-[9px] text-slate-400 font-medium truncate">{esp.email}</span>}
+                        </div>
+                      )}
                    </div>
 
                    <div className="flex flex-col gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
@@ -278,6 +306,40 @@ export default function Empleados({ negocioId, rubro }) {
                       value={form.especialidad} 
                       onChange={e => setForm({...form, especialidad: e.target.value})} 
                     />
+                 </div>
+
+                 {/* CRM: Contacto */}
+                 <div className="grid grid-cols-2 gap-3">
+                   <div className="space-y-1.5">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Email</label>
+                     <input type="email" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" placeholder="email@ejemplo.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Teléfono</label>
+                     <input type="tel" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" placeholder="351..." value={form.telefono} onChange={e => setForm({...form, telefono: e.target.value})} />
+                   </div>
+                 </div>
+
+                 {/* CRM: Comisión y Estado */}
+                 <div className="grid grid-cols-2 gap-3">
+                   <div className="space-y-1.5">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Comisión %</label>
+                     <input type="number" min="0" max="100" step="0.5" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm" value={form.comision_porcentaje} onChange={e => setForm({...form, comision_porcentaje: e.target.value})} />
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Estado</label>
+                     <select className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none text-sm cursor-pointer" value={form.estado} onChange={e => setForm({...form, estado: e.target.value})}>
+                       <option value="activo">Activo</option>
+                       <option value="inactivo">Inactivo</option>
+                       <option value="vacaciones">Vacaciones</option>
+                     </select>
+                   </div>
+                 </div>
+
+                 {/* CRM: Notas internas */}
+                 <div className="space-y-1.5">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Notas Internas</label>
+                   <textarea className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm resize-none h-20 placeholder:text-slate-300" placeholder="Notas privadas sobre este recurso..." value={form.notas} onChange={e => setForm({...form, notas: e.target.value})} />
                  </div>
 
                  <button 
