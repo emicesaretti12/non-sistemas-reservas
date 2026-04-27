@@ -18,6 +18,7 @@ export default function VistaPublica() {
   const [catalogoLoading, setCatalogoLoading] = useState(false)
   const [catFiltro, setCatFiltro] = useState('todos')
   const [catBusqueda, setCatBusqueda] = useState('')
+  const [carrito, setCarrito] = useState({}) // { [prodId]: cantidad }
   
   // --- UI & FLOW STATE ---
   const [paso, setPaso] = useState(1)
@@ -316,6 +317,41 @@ export default function VistaPublica() {
   const vocab = getVocabulario(negocio.rubro)
   const isRestaurante = esGastronomia(negocio.rubro)
 
+  // --- CARRITO HELPERS ---
+  const addToCart = (prodId) => {
+    const prod = catalogo.find(p => p.id === prodId)
+    if (!prod || prod.cantidad <= 0) return
+    setCarrito(prev => {
+      const current = prev[prodId] || 0
+      if (current >= prod.cantidad) return prev
+      return { ...prev, [prodId]: current + 1 }
+    })
+  }
+  const removeFromCart = (prodId) => {
+    setCarrito(prev => {
+      const current = prev[prodId] || 0
+      if (current <= 1) { const n = { ...prev }; delete n[prodId]; return n }
+      return { ...prev, [prodId]: current - 1 }
+    })
+  }
+  const totalCarrito = Object.entries(carrito).reduce((sum, [pid, qty]) => {
+    const p = catalogo.find(x => x.id === pid)
+    return sum + (p ? p.precio_venta * qty : 0)
+  }, 0)
+  const itemsEnCarrito = Object.values(carrito).reduce((a, b) => a + b, 0)
+
+  const enviarPedidoWhatsApp = () => {
+    if (!negocio.telefono || itemsEnCarrito === 0) return
+    const num = negocio.telefono.replace(/[^0-9]/g, '')
+    let msg = `🛒 *Nuevo Pedido — ${negocio.nombre}*\n\n`
+    Object.entries(carrito).forEach(([pid, qty]) => {
+      const p = catalogo.find(x => x.id === pid)
+      if (p) msg += `• ${p.nombre} x${qty} — $${(p.precio_venta * qty).toLocaleString()}\n`
+    })
+    msg += `\n💰 *Total: $${totalCarrito.toLocaleString()}*`
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank')
+  }
+
   return (
     <div className="min-h-screen text-[#1D1D1F] font-sans antialiased selection:bg-zinc-900 selection:text-white relative overflow-x-hidden bg-[#FDFDFC]" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       
@@ -337,7 +373,7 @@ export default function VistaPublica() {
          
          {/* TARJETA DE IDENTIDAD — Optimizada para mobile */}
          <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
-            <div className="bg-white/70 backdrop-blur-3xl rounded-[1.8rem] md:rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.03)] border border-white/80 p-4 md:p-5 flex flex-col items-center text-center">
+            <div className="bg-white rounded-[1.8rem] md:rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-zinc-100 p-4 md:p-5 flex flex-col items-center text-center">
                
                <div 
                  className="w-[4.5rem] h-[4.5rem] md:w-20 md:h-20 rounded-[1rem] md:rounded-[1.2rem] bg-white p-1 -mt-12 md:-mt-14 mb-2 md:mb-3 border border-white/50 relative z-10 transition-transform duration-500 hover:scale-105"
@@ -714,40 +750,30 @@ export default function VistaPublica() {
          </>
          )}
 
-         {/* ========== VISTA: CATÁLOGO ========== */}
+         {/* ========== VISTA: CATÁLOGO TIENDA ========== */}
          {vistaActiva === 'catalogo' && (
            <section className="mt-4 space-y-3 animate-in fade-in slide-in-from-bottom-6 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
              
              {/* BÚSQUEDA */}
              <div className="relative">
                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-               <input 
-                 type="text" 
-                 placeholder="Buscar producto..." 
-                 className="w-full bg-white border border-zinc-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-zinc-300 transition-all font-medium text-zinc-900 shadow-sm brand-input" 
-                 value={catBusqueda} 
-                 onChange={e => setCatBusqueda(e.target.value)} 
-               />
+               <input type="text" placeholder="Buscar producto..." className="w-full bg-white border border-zinc-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-zinc-300 transition-all font-medium text-zinc-900 shadow-sm" value={catBusqueda} onChange={e => setCatBusqueda(e.target.value)} />
              </div>
 
-             {/* FILTROS DE CATEGORÍA */}
+             {/* FILTROS */}
              {(() => {
                const cats = [...new Set(catalogo.map(p => p.categoria))]
                return cats.length > 1 ? (
                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                   <button onClick={() => setCatFiltro('todos')} className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === 'todos' ? { backgroundColor: accent } : {}}>
-                     Todos
-                   </button>
+                   <button onClick={() => setCatFiltro('todos')} className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === 'todos' ? { backgroundColor: accent } : {}}>Todos</button>
                    {cats.map(c => (
-                     <button key={c} onClick={() => setCatFiltro(c)} className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === c ? { backgroundColor: accent } : {}}>
-                       {c}
-                     </button>
+                     <button key={c} onClick={() => setCatFiltro(c)} className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === c ? { backgroundColor: accent } : {}}>{c}</button>
                    ))}
                  </div>
                ) : null
              })()}
 
-             {/* GRID DE PRODUCTOS */}
+             {/* PRODUCTOS */}
              {(() => {
                const filtered = catalogo
                  .filter(p => catFiltro === 'todos' || p.categoria === catFiltro)
@@ -761,77 +787,82 @@ export default function VistaPublica() {
                )
 
                return (
-                 <div className="grid grid-cols-2 gap-2.5">
+                 <div className="space-y-2">
                    {filtered.map(prod => {
-                     const stockOk = prod.cantidad > prod.stock_minimo
+                     const qty = carrito[prod.id] || 0
                      const pocas = prod.cantidad > 0 && prod.cantidad <= prod.stock_minimo
+                     const sinStock = prod.cantidad <= 0
                      return (
-                       <div key={prod.id} className="bg-white rounded-[1.3rem] border border-zinc-100/80 shadow-sm overflow-hidden group brand-border-hover transition-all">
-                         {/* Product Color Header */}
-                         <div className="h-2 w-full" style={{ backgroundColor: accent, opacity: 0.15 }}></div>
-                         <div className="p-3.5 md:p-4 space-y-2.5">
-                           {/* Categoría */}
-                           <span className="text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full" style={{ backgroundColor: accentUltraSoft, color: accent }}>
-                             {prod.categoria}
-                           </span>
-                           {/* Nombre */}
-                           <h4 className="text-[13px] font-bold text-zinc-900 leading-tight line-clamp-2 min-h-[32px]">{prod.nombre}</h4>
-                           {/* Descripción */}
-                           {prod.descripcion && (
-                             <p className="text-[10px] text-zinc-400 font-medium leading-relaxed line-clamp-2">{prod.descripcion}</p>
-                           )}
-                           {/* Precio + Stock */}
-                           <div className="flex items-end justify-between pt-1">
-                             <div>
+                       <div key={prod.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${qty > 0 ? 'border-zinc-300 shadow-md' : 'border-zinc-100'}`}>
+                         <div className="p-4 flex gap-3.5">
+                           {/* ÍCONO PRODUCTO */}
+                           <div className="w-14 h-14 rounded-[1rem] flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: accentUltraSoft, color: accent }}>
+                             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                           </div>
+                           {/* INFO */}
+                           <div className="flex-1 min-w-0">
+                             <div className="flex items-start justify-between gap-2">
+                               <div className="min-w-0">
+                                 <h4 className="text-[13px] font-bold text-zinc-900 leading-tight truncate">{prod.nombre}</h4>
+                                 {prod.descripcion && <p className="text-[10px] text-zinc-400 font-medium mt-0.5 line-clamp-1">{prod.descripcion}</p>}
+                                 <div className="flex items-center gap-2 mt-1">
+                                   <span className="text-[7px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded" style={{ backgroundColor: accentUltraSoft, color: accent }}>{prod.categoria}</span>
+                                   {pocas && <span className="text-[7px] font-bold uppercase tracking-wider text-amber-500">¡Últimas!</span>}
+                                   {sinStock && <span className="text-[7px] font-bold uppercase tracking-wider text-red-400">Agotado</span>}
+                                 </div>
+                               </div>
                                {prod.precio_venta > 0 && (
-                                 <p className="text-lg font-black tracking-tighter text-zinc-900">${prod.precio_venta.toLocaleString()}</p>
+                                 <p className="text-base font-black tracking-tight text-zinc-900 shrink-0">${prod.precio_venta.toLocaleString()}</p>
                                )}
-                               <p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${pocas ? 'text-amber-500' : stockOk ? 'text-emerald-500' : 'text-red-400'}`}>
-                                 {pocas ? '¡Últimas unidades!' : stockOk ? 'Disponible' : 'Sin stock'}
-                               </p>
                              </div>
-                             {/* WhatsApp CTA */}
-                             {negocio.telefono && prod.cantidad > 0 && (
-                               <button 
-                                 onClick={() => {
-                                   const num = negocio.telefono.replace(/[^0-9]/g, '')
-                                   const msg = encodeURIComponent(`Hola! Vi en su catálogo el producto: *${prod.nombre}*${prod.precio_venta > 0 ? ` ($${prod.precio_venta})` : ''}. ¿Está disponible?`)
-                                   window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
-                                 }}
-                                 className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 shrink-0"
-                                 style={{ backgroundColor: accentSoft, color: accent }}
-                                 title="Consultar por WhatsApp"
-                               >
-                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                               </button>
+                             {/* CONTROLES +/- */}
+                             {!sinStock && (
+                               <div className="flex items-center justify-end gap-2 mt-2.5">
+                                 {qty > 0 ? (
+                                   <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-zinc-200">
+                                     <button onClick={() => removeFromCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:scale-90 transition-all font-bold text-lg">−</button>
+                                     <span className="w-8 text-center text-sm font-black text-zinc-900">{qty}</span>
+                                     <button onClick={() => addToCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-white active:scale-90 transition-all font-bold text-lg" style={{ backgroundColor: accent }}>+</button>
+                                   </div>
+                                 ) : (
+                                   <button onClick={() => addToCart(prod.id)} className="px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white active:scale-95 transition-all shadow-sm" style={{ backgroundColor: accent }}>
+                                     Agregar
+                                   </button>
+                                 )}
+                               </div>
                              )}
                            </div>
                          </div>
+                         {/* SUBTOTAL LINE */}
+                         {qty > 0 && prod.precio_venta > 0 && (
+                           <div className="px-4 py-2 border-t border-zinc-50 flex justify-between items-center" style={{ backgroundColor: accentUltraSoft }}>
+                             <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{qty} {qty === 1 ? 'unidad' : 'unidades'}</span>
+                             <span className="text-sm font-black" style={{ color: accent }}>${(prod.precio_venta * qty).toLocaleString()}</span>
+                           </div>
+                         )}
                        </div>
                      )
                    })}
                  </div>
                )
              })()}
-
-             {/* INFO DE CONTACTO PARA CONSULTAS */}
-             {negocio.telefono && (
-               <div className="rounded-[1.3rem] p-4 text-center space-y-2" style={{ backgroundColor: accentUltraSoft }}>
-                 <p className="text-[10px] font-bold text-zinc-500">¿Tenés alguna consulta sobre nuestros productos?</p>
-                 <button 
-                   onClick={() => {
-                     const num = negocio.telefono.replace(/[^0-9]/g, '')
-                     window.open(`https://wa.me/${num}?text=${encodeURIComponent(`Hola! Quiero consultar sobre los productos de ${negocio.nombre}`)}`, '_blank')
-                   }}
-                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[10px] font-bold uppercase tracking-widest shadow-md active:scale-95 transition-all"
-                   style={{ backgroundColor: accent }}
-                 >
-                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                   Escribinos
-                 </button>
-               </div>
-             )}
            </section>
+         )}
+
+         {/* CARRITO FLOTANTE */}
+         {vistaActiva === 'catalogo' && itemsEnCarrito > 0 && (
+           <div className="fixed bottom-0 inset-x-0 z-50 p-4 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+             <button onClick={enviarPedidoWhatsApp} className="w-full max-w-md mx-auto flex items-center justify-between py-4 px-5 rounded-2xl text-white font-bold shadow-2xl active:scale-[0.97] transition-all" style={{ backgroundColor: accent, boxShadow: `0 10px 30px ${accentGlow}` }}>
+               <div className="flex items-center gap-3">
+                 <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-black">{itemsEnCarrito}</div>
+                 <span className="text-[11px] font-bold uppercase tracking-widest">Enviar Pedido</span>
+               </div>
+               <div className="flex items-center gap-2">
+                 <span className="text-base font-black">${totalCarrito.toLocaleString()}</span>
+                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+               </div>
+             </button>
+           </div>
          )}
 
       </main>
