@@ -19,6 +19,10 @@ export default function VistaPublica() {
   const [catFiltro, setCatFiltro] = useState('todos')
   const [catBusqueda, setCatBusqueda] = useState('')
   const [carrito, setCarrito] = useState({}) // { [prodId]: cantidad }
+  const [productoDetalle, setProductoDetalle] = useState(null) // producto seleccionado para modal
+  const [carritoAbierto, setCarritoAbierto] = useState(false) // drawer del carrito
+  const [checkoutActivo, setCheckoutActivo] = useState(false) // paso final de checkout
+  const [clienteCheckout, setClienteCheckout] = useState({ nombre: '', telefono: '', notas: '' })
   
   // --- UI & FLOW STATE ---
   const [paso, setPaso] = useState(1)
@@ -337,16 +341,27 @@ export default function VistaPublica() {
   }, 0)
   const itemsEnCarrito = Object.values(carrito).reduce((a, b) => a + b, 0)
 
-  const enviarPedidoWhatsApp = () => {
+  const enviarPedidoWhatsApp = (e) => {
+    if (e) e.preventDefault();
     if (!negocio.telefono || itemsEnCarrito === 0) return
     const num = negocio.telefono.replace(/[^0-9]/g, '')
     let msg = `🛒 *Nuevo Pedido — ${negocio.nombre}*\n\n`
+    
+    msg += `👤 *Cliente:* ${clienteCheckout.nombre}\n`
+    if (clienteCheckout.telefono) msg += `📞 *Tel:* ${clienteCheckout.telefono}\n`
+    msg += `\n📦 *Productos:*\n`
+    
     Object.entries(carrito).forEach(([pid, qty]) => {
       const p = catalogo.find(x => x.id === pid)
       if (p) msg += `• ${p.nombre} x${qty} — $${(p.precio * qty).toLocaleString()}\n`
     })
     msg += `\n💰 *Total: $${totalCarrito.toLocaleString()}*`
+    if (clienteCheckout.notas) msg += `\n\n📝 *Notas:* ${clienteCheckout.notas}`
+    
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank')
+    setCheckoutActivo(false)
+    setCarritoAbierto(false)
+    setCarrito({})
   }
 
   return (
@@ -366,7 +381,7 @@ export default function VistaPublica() {
          <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[#FDFDFC] to-transparent"></div>
       </header>
 
-      <main className="max-w-md mx-auto relative z-20 -mt-14 md:-mt-16 px-4">
+      <main className={`mx-auto relative z-20 -mt-14 md:-mt-16 px-4 transition-all duration-500 ${vistaActiva === 'catalogo' ? 'max-w-md lg:max-w-5xl' : 'max-w-md'}`}>
          
          {/* TARJETA DE IDENTIDAD — Optimizada para mobile */}
          <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
@@ -749,92 +764,95 @@ export default function VistaPublica() {
 
          {/* ========== VISTA: CATÁLOGO TIENDA ========== */}
          {vistaActiva === 'catalogo' && (
-           <section className="mt-4 space-y-3 animate-in fade-in slide-in-from-bottom-6 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+           <section className="mt-4 md:mt-8 space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
              
-             {/* BÚSQUEDA */}
-             <div className="relative">
-               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-               <input type="text" placeholder="Buscar producto..." className="w-full bg-white border border-zinc-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-zinc-300 transition-all font-medium text-zinc-900 shadow-sm" value={catBusqueda} onChange={e => setCatBusqueda(e.target.value)} />
+             {/* HEADER CATÁLOGO: Búsqueda y Filtros */}
+             <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between bg-white p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-zinc-100">
+               <div className="relative flex-1 md:max-w-xs">
+                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                 <input type="text" placeholder="Buscar producto..." className="w-full bg-zinc-50 border border-transparent rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-zinc-200 focus:bg-white transition-all font-bold text-zinc-900 placeholder:text-zinc-400" value={catBusqueda} onChange={e => setCatBusqueda(e.target.value)} />
+               </div>
+               
+               {(() => {
+                 const cats = [...new Set(catalogo.map(p => p.categoria))]
+                 return cats.length > 1 ? (
+                   <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                     <button onClick={() => setCatFiltro('todos')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === 'todos' ? { backgroundColor: accent } : {}}>Todos</button>
+                     {cats.map(c => (
+                       <button key={c} onClick={() => setCatFiltro(c)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === c ? { backgroundColor: accent } : {}}>{c}</button>
+                     ))}
+                   </div>
+                 ) : null
+               })()}
              </div>
 
-             {/* FILTROS */}
-             {(() => {
-               const cats = [...new Set(catalogo.map(p => p.categoria))]
-               return cats.length > 1 ? (
-                 <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                   <button onClick={() => setCatFiltro('todos')} className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === 'todos' ? { backgroundColor: accent } : {}}>Todos</button>
-                   {cats.map(c => (
-                     <button key={c} onClick={() => setCatFiltro(c)} className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === c ? { backgroundColor: accent } : {}}>{c}</button>
-                   ))}
-                 </div>
-               ) : null
-             })()}
-
-             {/* PRODUCTOS */}
+             {/* GRILLA DE PRODUCTOS */}
              {(() => {
                const filtered = catalogo
                  .filter(p => catFiltro === 'todos' || p.categoria === catFiltro)
                  .filter(p => !catBusqueda || p.nombre.toLowerCase().includes(catBusqueda.toLowerCase()))
                
                if (filtered.length === 0) return (
-                 <div className="bg-white rounded-[1.5rem] border border-zinc-100 shadow-sm p-10 text-center">
-                   <svg className="w-12 h-12 text-zinc-200 mx-auto mb-3" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                   <p className="text-sm font-bold text-zinc-400">Sin productos disponibles</p>
+                 <div className="bg-white rounded-[2rem] border border-zinc-100 shadow-sm p-12 text-center">
+                   <div className="w-16 h-16 rounded-2xl bg-zinc-50 flex items-center justify-center mx-auto mb-4">
+                     <svg className="w-8 h-8 text-zinc-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                   </div>
+                   <h3 className="text-lg font-bold text-zinc-900 mb-1">Sin resultados</h3>
+                   <p className="text-sm font-medium text-zinc-500">No encontramos productos con esos filtros.</p>
                  </div>
                )
 
                return (
-                 <div className="space-y-2">
+                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
                    {filtered.map(prod => {
                      const qty = carrito[prod.id] || 0
                      return (
-                       <div key={prod.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${qty > 0 ? 'border-zinc-300 shadow-md' : 'border-zinc-100'}`}>
-                         <div className="flex gap-0">
-                           {/* IMAGEN */}
-                           <div className="w-24 h-24 md:w-28 md:h-28 bg-zinc-50 shrink-0 overflow-hidden">
-                             {prod.imagen_url ? (
-                               <img src={prod.imagen_url} alt={prod.nombre} className="w-full h-full object-cover" />
-                             ) : (
-                               <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft }}>
-                                 <svg className="w-6 h-6" style={{ color: accent, opacity: 0.4 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                               </div>
-                             )}
+                       <div key={prod.id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 flex flex-col group cursor-pointer" onClick={() => setProductoDetalle(prod)}>
+                         {/* IMAGEN DEL PRODUCTO */}
+                         <div className="aspect-[4/4] w-full bg-zinc-50 relative overflow-hidden shrink-0">
+                           {prod.imagen_url ? (
+                             <img src={prod.imagen_url} alt={prod.nombre} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                           ) : (
+                             <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft }}>
+                               <svg className="w-10 h-10 md:w-12 md:h-12" style={{ color: accent, opacity: 0.3 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                             </div>
+                           )}
+                           {/* Badge Categoría */}
+                           <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm border border-white/20">
+                             <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest" style={{ color: accent }}>{prod.categoria}</span>
                            </div>
-                           {/* INFO */}
-                           <div className="flex-1 min-w-0 p-3.5">
-                             <div className="flex items-start justify-between gap-2">
-                               <div className="min-w-0">
-                                 <h4 className="text-[13px] font-bold text-zinc-900 leading-tight truncate">{prod.nombre}</h4>
-                                 {prod.descripcion && <p className="text-[10px] text-zinc-400 font-medium mt-0.5 line-clamp-2">{prod.descripcion}</p>}
-                                 <span className="text-[7px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded mt-1 inline-block" style={{ backgroundColor: accentUltraSoft, color: accent }}>{prod.categoria}</span>
-                               </div>
-                               {prod.precio > 0 && (
-                                 <p className="text-base font-black tracking-tight text-zinc-900 shrink-0">${prod.precio.toLocaleString()}</p>
+                         </div>
+                         
+                         {/* INFO DEL PRODUCTO */}
+                         <div className="p-4 md:p-5 flex flex-col flex-1">
+                           <h4 className="text-[14px] md:text-[16px] font-extrabold text-zinc-900 leading-tight mb-1 line-clamp-2">{prod.nombre}</h4>
+                           {prod.descripcion && <p className="text-[11px] md:text-[12px] text-zinc-500 font-medium line-clamp-2 mb-3">{prod.descripcion}</p>}
+                           
+                           <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                             <div>
+                               {prod.precio > 0 ? (
+                                 <p className="text-lg md:text-xl font-black tracking-tighter text-zinc-900">${prod.precio.toLocaleString()}</p>
+                               ) : (
+                                 <p className="text-sm font-bold text-zinc-400">Consultar</p>
                                )}
                              </div>
-                             {/* CONTROLES +/- */}
-                             <div className="flex items-center justify-end gap-2 mt-2">
+                             
+                             {/* CONTROLES CLICK PREVENIDO PARA NO ABRIR MODAL */}
+                             <div onClick={e => e.stopPropagation()}>
                                {qty > 0 ? (
-                                 <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-zinc-200">
-                                   <button onClick={() => removeFromCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:scale-90 transition-all font-bold text-lg">−</button>
-                                   <span className="w-8 text-center text-sm font-black text-zinc-900">{qty}</span>
-                                   <button onClick={() => addToCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-white active:scale-90 transition-all font-bold text-lg" style={{ backgroundColor: accent }}>+</button>
+                                 <div className="flex items-center gap-0 rounded-xl overflow-hidden shadow-sm h-8 md:h-10" style={{ backgroundColor: accent, color: 'white' }}>
+                                   <button onClick={() => removeFromCart(prod.id)} className="w-8 md:w-9 h-full flex items-center justify-center hover:bg-black/10 active:bg-black/20 transition-all font-bold text-lg">−</button>
+                                   <span className="w-6 md:w-8 text-center text-[12px] md:text-[14px] font-black">{qty}</span>
+                                   <button onClick={() => addToCart(prod.id)} className="w-8 md:w-9 h-full flex items-center justify-center hover:bg-black/10 active:bg-black/20 transition-all font-bold text-lg">+</button>
                                  </div>
                                ) : (
-                                 <button onClick={() => addToCart(prod.id)} className="px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white active:scale-95 transition-all shadow-sm" style={{ backgroundColor: accent }}>
-                                   Agregar
+                                 <button onClick={() => addToCart(prod.id)} className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-white active:scale-90 transition-all shadow-md hover:shadow-lg" style={{ backgroundColor: accent, boxShadow: `0 4px 15px ${accentGlow}` }}>
+                                   <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                  </button>
                                )}
                              </div>
                            </div>
                          </div>
-                         {/* SUBTOTAL LINE */}
-                         {qty > 0 && prod.precio > 0 && (
-                           <div className="px-4 py-2 border-t border-zinc-50 flex justify-between items-center" style={{ backgroundColor: accentUltraSoft }}>
-                             <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{qty} {qty === 1 ? 'unidad' : 'unidades'}</span>
-                             <span className="text-sm font-black" style={{ color: accent }}>${(prod.precio * qty).toLocaleString()}</span>
-                           </div>
-                         )}
                        </div>
                      )
                    })}
@@ -844,19 +862,175 @@ export default function VistaPublica() {
            </section>
          )}
 
-         {/* CARRITO FLOTANTE */}
-         {vistaActiva === 'catalogo' && itemsEnCarrito > 0 && (
-           <div className="fixed bottom-0 inset-x-0 z-50 p-4 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
-             <button onClick={enviarPedidoWhatsApp} className="w-full max-w-md mx-auto flex items-center justify-between py-4 px-5 rounded-2xl text-white font-bold shadow-2xl active:scale-[0.97] transition-all" style={{ backgroundColor: accent, boxShadow: `0 10px 30px ${accentGlow}` }}>
+         {/* BOTÓN FLOTANTE CARRITO */}
+         {vistaActiva === 'catalogo' && itemsEnCarrito > 0 && !carritoAbierto && !productoDetalle && (
+           <div className="fixed bottom-0 inset-x-0 z-40 p-4 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex justify-center pointer-events-none" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+             <button onClick={() => setCarritoAbierto(true)} className="w-full max-w-sm flex items-center justify-between py-3.5 px-5 rounded-full text-white font-bold shadow-2xl active:scale-[0.97] transition-all pointer-events-auto" style={{ backgroundColor: accent, boxShadow: `0 10px 40px ${accentDark}` }}>
                <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-black">{itemsEnCarrito}</div>
-                 <span className="text-[11px] font-bold uppercase tracking-widest">Enviar Pedido</span>
+                 <div className="relative">
+                   <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                   <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-[10px] font-black flex items-center justify-center" style={{ color: accent }}>{itemsEnCarrito}</div>
+                 </div>
+                 <span className="text-[11px] font-black uppercase tracking-widest ml-1">Ver Carrito</span>
                </div>
-               <div className="flex items-center gap-2">
-                 <span className="text-base font-black">${totalCarrito.toLocaleString()}</span>
-                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-               </div>
+               <span className="text-base font-black">${totalCarrito.toLocaleString()}</span>
              </button>
+           </div>
+         )}
+         
+         {/* OVERLAYS GLOBALES (MODAL PRODUCTO & CARRITO) */}
+         {/* MODAL DETALLE PRODUCTO */}
+         {productoDetalle && (
+           <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setProductoDetalle(null)}></div>
+             <div className="relative w-full max-w-md bg-white rounded-t-[2rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-12 md:slide-in-from-bottom-8 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+               
+               {/* Btn Cerrar */}
+               <button onClick={() => setProductoDetalle(null)} className="absolute top-4 right-4 z-10 w-8 h-8 bg-black/10 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black/20 transition-colors">
+                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+               </button>
+
+               {/* Imagen grande */}
+               <div className="w-full aspect-[4/3] bg-zinc-100 relative shrink-0">
+                 {productoDetalle.imagen_url ? (
+                   <img src={productoDetalle.imagen_url} className="w-full h-full object-cover" alt={productoDetalle.nombre} />
+                 ) : (
+                   <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft }}>
+                     <svg className="w-16 h-16" style={{ color: accent, opacity: 0.3 }} fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                   </div>
+                 )}
+                 <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
+               </div>
+
+               {/* Contenido Modal */}
+               <div className="p-6 overflow-y-auto no-scrollbar pb-[100px]">
+                 <div className="mb-2">
+                   <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-md" style={{ backgroundColor: accentUltraSoft, color: accent }}>{productoDetalle.categoria}</span>
+                 </div>
+                 <h2 className="text-2xl font-extrabold text-zinc-900 tracking-tight leading-tight mb-3">{productoDetalle.nombre}</h2>
+                 {productoDetalle.precio > 0 && <p className="text-2xl font-black text-zinc-900 mb-4">${productoDetalle.precio.toLocaleString()}</p>}
+                 
+                 <div className="space-y-4">
+                   {productoDetalle.descripcion ? (
+                     <div>
+                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Acerca de</h4>
+                       <p className="text-sm font-medium text-zinc-600 leading-relaxed whitespace-pre-wrap">{productoDetalle.descripcion}</p>
+                     </div>
+                   ) : (
+                     <p className="text-sm font-medium text-zinc-400 italic">Sin descripción detallada.</p>
+                   )}
+                 </div>
+               </div>
+
+               {/* Acciones Sticky Modal */}
+               <div className="absolute bottom-0 inset-x-0 p-4 bg-white border-t border-zinc-100 flex items-center justify-between gap-4" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+                 {(() => {
+                   const qty = carrito[productoDetalle.id] || 0
+                   return qty > 0 ? (
+                     <div className="flex items-center justify-between w-full p-1 rounded-2xl border-2" style={{ borderColor: accent }}>
+                       <button onClick={() => removeFromCart(productoDetalle.id)} className="w-12 h-12 flex items-center justify-center hover:bg-zinc-50 rounded-xl transition-all font-bold text-2xl text-zinc-600">−</button>
+                       <span className="text-lg font-black text-zinc-900 px-4">{qty} en carrito</span>
+                       <button onClick={() => addToCart(productoDetalle.id)} className="w-12 h-12 flex items-center justify-center rounded-xl transition-all font-bold text-2xl text-white shadow-md" style={{ backgroundColor: accent }}>+</button>
+                     </div>
+                   ) : (
+                     <button onClick={() => { addToCart(productoDetalle.id); setProductoDetalle(null); }} className="w-full py-4 rounded-2xl text-white font-bold uppercase tracking-widest text-xs shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ backgroundColor: accent, boxShadow: `0 8px 25px ${accentGlow}` }}>
+                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                       Agregar al pedido
+                     </button>
+                   )
+                 })()}
+               </div>
+             </div>
+           </div>
+         )}
+
+         {/* DRAWER DEL CARRITO & CHECKOUT */}
+         {carritoAbierto && (
+           <div className="fixed inset-0 z-[110] flex items-end md:items-center justify-end md:justify-center p-0 md:p-4 animate-in fade-in duration-300">
+             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setCarritoAbierto(false)}></div>
+             <div className="relative w-full h-[85vh] md:h-auto md:max-h-[85vh] md:max-w-md bg-white rounded-t-[2rem] md:rounded-[2rem] shadow-2xl flex flex-col animate-in slide-in-from-bottom-full md:slide-in-from-bottom-12 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+               
+               {/* Header Carrito */}
+               <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
+                 <div className="flex items-center gap-3">
+                   {checkoutActivo ? (
+                     <button onClick={() => setCheckoutActivo(false)} className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-full transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                   ) : (
+                     <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft, color: accent }}><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                   )}
+                   <h3 className="text-lg font-extrabold text-zinc-900">{checkoutActivo ? 'Tus Datos' : 'Tu Pedido'}</h3>
+                 </div>
+                 <button onClick={() => setCarritoAbierto(false)} className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-full transition-colors">
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                 </button>
+               </div>
+
+               {/* Contenido Carrito / Formulario */}
+               <div className="flex-1 overflow-y-auto no-scrollbar p-5">
+                 {!checkoutActivo ? (
+                   <div className="space-y-4">
+                     {Object.entries(carrito).map(([pid, qty]) => {
+                       const p = catalogo.find(x => x.id === pid)
+                       if (!p) return null
+                       return (
+                         <div key={pid} className="flex gap-3 items-center">
+                           <div className="w-16 h-16 rounded-xl bg-zinc-50 shrink-0 overflow-hidden border border-zinc-100">
+                             {p.imagen_url ? <img src={p.imagen_url} className="w-full h-full object-cover" /> : <div className="w-full h-full" style={{ backgroundColor: accentUltraSoft }}></div>}
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <h5 className="text-[13px] font-bold text-zinc-900 truncate">{p.nombre}</h5>
+                             <p className="text-[11px] font-medium text-zinc-400">${p.precio.toLocaleString()} c/u</p>
+                             <div className="mt-1 flex items-center justify-between">
+                               <div className="flex items-center gap-2 border border-zinc-200 rounded-lg overflow-hidden h-7">
+                                 <button onClick={() => removeFromCart(pid)} className="w-7 h-full flex items-center justify-center text-zinc-500 hover:bg-zinc-50 font-bold">−</button>
+                                 <span className="w-6 text-center text-[11px] font-black">{qty}</span>
+                                 <button onClick={() => addToCart(pid)} className="w-7 h-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: accent }}>+</button>
+                               </div>
+                               <span className="text-sm font-black text-zinc-900">${(p.precio * qty).toLocaleString()}</span>
+                             </div>
+                           </div>
+                         </div>
+                       )
+                     })}
+                   </div>
+                 ) : (
+                   <form id="checkoutForm" onSubmit={enviarPedidoWhatsApp} className="space-y-4">
+                     <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Nombre Completo *</label>
+                        <input required className="w-full bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl py-3 px-4 font-bold outline-none focus:border-zinc-400 focus:bg-white transition-all text-sm placeholder:text-zinc-400" placeholder="¿Cómo te llamas?" value={clienteCheckout.nombre} onChange={(e) => setClienteCheckout({...clienteCheckout, nombre: e.target.value})} />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Teléfono (Opcional)</label>
+                        <input type="tel" className="w-full bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl py-3 px-4 font-bold outline-none focus:border-zinc-400 focus:bg-white transition-all text-sm placeholder:text-zinc-400" placeholder="Para contactarte si es necesario" value={clienteCheckout.telefono} onChange={(e) => setClienteCheckout({...clienteCheckout, telefono: e.target.value})} />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Notas del pedido (Opcional)</label>
+                        <textarea rows="3" className="w-full bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl py-3 px-4 font-bold outline-none focus:border-zinc-400 focus:bg-white transition-all text-sm placeholder:text-zinc-400 resize-none" placeholder="Aclaraciones sobre tu pedido..." value={clienteCheckout.notas} onChange={(e) => setClienteCheckout({...clienteCheckout, notas: e.target.value})}></textarea>
+                     </div>
+                   </form>
+                 )}
+               </div>
+
+               {/* Footer Carrito */}
+               <div className="p-5 border-t border-zinc-100 bg-zinc-50/50 shrink-0" style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
+                 <div className="flex items-center justify-between mb-4">
+                   <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Total del pedido</span>
+                   <span className="text-2xl font-black text-zinc-900">${totalCarrito.toLocaleString()}</span>
+                 </div>
+                 
+                 {!checkoutActivo ? (
+                   <button onClick={() => setCheckoutActivo(true)} className="w-full py-4 rounded-2xl text-white font-bold uppercase tracking-widest text-[11px] shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ backgroundColor: accent, boxShadow: `0 8px 25px ${accentGlow}` }}>
+                     Completar Datos
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                   </button>
+                 ) : (
+                   <button type="submit" form="checkoutForm" className="w-full py-4 rounded-2xl text-white font-bold uppercase tracking-widest text-[11px] shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ backgroundColor: '#25D366', boxShadow: '0 8px 25px rgba(37, 211, 102, 0.3)' }}>
+                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                     Enviar Pedido
+                   </button>
+                 )}
+               </div>
+             </div>
            </div>
          )}
 
