@@ -29,11 +29,22 @@ export default function Inventario({ negocioId, rubro }) {
 
   const categorias = ['General', 'Insumos', 'Productos', 'Herramientas', 'Limpieza', 'Otros']
 
+  // --- CATÁLOGO (VIDRIERA) ---
+  const [seccion, setSeccion] = useState('inventario') // 'inventario' | 'catalogo'
+  const [catItems, setCatItems] = useState([])
+  const [catModal, setCatModal] = useState(false)
+  const [catEdicion, setCatEdicion] = useState(null)
+  const [subiendoImg, setSubiendoImg] = useState(false)
+  const [catForm, setCatForm] = useState({
+    nombre: '', descripcion: '', categoria: 'General', precio: 0, imagen_url: '', activo: true
+  })
+  const catCategorias = ['General', 'Destacados', 'Nuevos', 'Ofertas', 'Accesorios', 'Otros']
+
   useEffect(() => { if (negocioId) cargar() }, [negocioId])
 
   // Scroll lock for modals — prevents background bounce on iOS
   useEffect(() => {
-    if (modalAbierto || modalMovimiento) {
+    if (modalAbierto || modalMovimiento || catModal) {
       document.body.style.overflow = 'hidden'
       document.body.style.touchAction = 'none'
     } else {
@@ -41,20 +52,20 @@ export default function Inventario({ negocioId, rubro }) {
       document.body.style.touchAction = ''
     }
     return () => { document.body.style.overflow = ''; document.body.style.touchAction = '' }
-  }, [modalAbierto, modalMovimiento])
+  }, [modalAbierto, modalMovimiento, catModal])
 
   async function cargar() {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('inventario').select('*')
-        .eq('negocio_id', negocioId)
-        .eq('activo', true)
-        .order('nombre', { ascending: true })
-      if (error) throw error
-      setItems(data || [])
+      const [invRes, catRes] = await Promise.all([
+        supabase.from('inventario').select('*').eq('negocio_id', negocioId).eq('activo', true).order('nombre', { ascending: true }),
+        supabase.from('catalogo_productos').select('*').eq('negocio_id', negocioId).order('orden').order('nombre')
+      ])
+      if (invRes.error) throw invRes.error
+      setItems(invRes.data || [])
+      setCatItems(catRes.data || [])
     } catch (e) {
-      console.error('Error cargando inventario:', e.message)
+      console.error('Error cargando:', e.message)
     } finally { setLoading(false) }
   }
 
@@ -126,6 +137,60 @@ export default function Inventario({ negocioId, rubro }) {
     setForm({ nombre: '', descripcion: '', categoria: 'General', cantidad: 0, stock_minimo: 5, precio_costo: 0, precio_venta: 0, unidad: 'unidad' })
   }
 
+  // === CATÁLOGO CRUD ===
+  async function subirImagenCatalogo(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setSubiendoImg(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('upload_preset', 'non_sistemas')
+    fd.append('cloud_name', 'ddp4r9dlu')
+    try {
+      const res = await fetch('https://api.cloudinary.com/v1_1/ddp4r9dlu/image/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (data.secure_url) {
+        setCatForm(prev => ({ ...prev, imagen_url: data.secure_url.replace('/upload/', '/upload/q_auto,f_auto,w_600/') }))
+      }
+    } catch { alert('Error al subir imagen') }
+    finally { setSubiendoImg(false) }
+  }
+
+  async function guardarCatalogo(e) {
+    e.preventDefault()
+    setGuardando(true)
+    try {
+      if (catEdicion) {
+        const { error } = await supabase.from('catalogo_productos').update({ ...catForm, updated_at: new Date().toISOString() }).eq('id', catEdicion)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('catalogo_productos').insert({ ...catForm, negocio_id: negocioId })
+        if (error) throw error
+      }
+      cerrarCatModal()
+      cargar()
+    } catch (e) { alert('Error: ' + e.message) }
+    finally { setGuardando(false) }
+  }
+
+  function abrirCatEdicion(item) {
+    setCatForm({ nombre: item.nombre, descripcion: item.descripcion || '', categoria: item.categoria, precio: item.precio, imagen_url: item.imagen_url || '', activo: item.activo })
+    setCatEdicion(item.id)
+    setCatModal(true)
+  }
+
+  function cerrarCatModal() {
+    setCatModal(false)
+    setCatEdicion(null)
+    setCatForm({ nombre: '', descripcion: '', categoria: 'General', precio: 0, imagen_url: '', activo: true })
+  }
+
+  async function eliminarCatalogo(id) {
+    if (!confirm('¿Eliminar este producto del catálogo?')) return
+    await supabase.from('catalogo_productos').delete().eq('id', id)
+    cargar()
+  }
+
   const getNivelStock = (item) => {
     if (item.cantidad <= 0) return { color: 'bg-red-500', text: 'Sin Stock', ring: 'ring-red-100' }
     if (item.cantidad <= item.stock_minimo) return { color: 'bg-amber-500', text: 'Bajo', ring: 'ring-amber-100' }
@@ -149,7 +214,20 @@ export default function Inventario({ negocioId, rubro }) {
   return (
     <div className="space-y-4 animate-in fade-in duration-700 pb-28 md:pb-4">
 
-      {/* HEADER + KPIs */}
+      {/* SECTION TABS */}
+      <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
+        <button onClick={() => setSeccion('inventario')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${seccion === 'inventario' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400'}`}>
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Stock
+        </button>
+        <button onClick={() => setSeccion('catalogo')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${seccion === 'catalogo' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400'}`}>
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Catálogo
+        </button>
+      </div>
+
+      {/* ===== SECCIÓN: INVENTARIO (STOCK) ===== */}
+      {seccion === 'inventario' && (<>
       <header className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -345,6 +423,158 @@ export default function Inventario({ negocioId, rubro }) {
           </div>
         </div>
       )}
+
+      </>)}
+
+      {/* ===== SECCIÓN: CATÁLOGO (VIDRIERA) ===== */}
+      {seccion === 'catalogo' && (<>
+        <header className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Catálogo</h2>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Vidriera pública · {catItems.filter(c => c.activo).length} productos visibles</p>
+            </div>
+            <button onClick={() => setCatModal(true)} className="px-4 md:px-6 py-3 bg-slate-900 text-white rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-2 shadow-lg">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
+              Nuevo
+            </button>
+          </div>
+        </header>
+
+        {/* LISTA DE PRODUCTOS DEL CATÁLOGO */}
+        {catItems.length === 0 ? (
+          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-12 text-center">
+            <svg className="w-16 h-16 text-slate-200 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Sin productos en el catálogo</p>
+            <p className="text-xs text-slate-400 mt-1">Agregá productos para mostrar en tu vidriera pública</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {catItems.map(item => (
+              <div key={item.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${item.activo ? 'border-slate-200' : 'border-slate-100 opacity-50'}`}>
+                <div className="flex gap-0">
+                  {/* IMAGEN */}
+                  <div className="w-28 h-28 md:w-36 md:h-36 bg-slate-50 shrink-0 overflow-hidden">
+                    {item.imagen_url ? (
+                      <img src={item.imagen_url} alt={item.nombre} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-slate-200" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </div>
+                    )}
+                  </div>
+                  {/* INFO */}
+                  <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-sm font-bold text-slate-900 leading-tight truncate">{item.nombre}</h4>
+                        {!item.activo && <span className="text-[7px] font-bold uppercase tracking-wider text-red-400 bg-red-50 px-1.5 py-0.5 rounded shrink-0">Oculto</span>}
+                      </div>
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 mt-0.5 block">{item.categoria}</span>
+                      {item.descripcion && <p className="text-[10px] text-slate-400 font-medium mt-1 line-clamp-2 leading-relaxed">{item.descripcion}</p>}
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      {item.precio > 0 && <p className="text-lg font-black tracking-tight text-slate-900">${item.precio.toLocaleString()}</p>}
+                      <div className="flex items-center gap-1.5">
+                        <button onClick={() => abrirCatEdicion(item)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center transition-all active:scale-90" title="Editar">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                        <button onClick={() => eliminarCatalogo(item.id)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all active:scale-90" title="Eliminar">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* MODAL: AGREGAR / EDITAR CATÁLOGO */}
+        {catModal && (
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 animate-in fade-in duration-300">
+            <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3rem] shadow-2xl p-5 md:p-10 animate-in slide-in-from-bottom-[20%] duration-500 border border-slate-100 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900">{catEdicion ? 'Editar' : 'Nuevo'} Producto</h2>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Catálogo público</p>
+                </div>
+                <button onClick={cerrarCatModal} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg>
+                </button>
+              </div>
+
+              <form onSubmit={guardarCatalogo} className="space-y-4">
+                {/* IMAGEN */}
+                <div className="space-y-2">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Imagen del producto</label>
+                  <div className="relative">
+                    {catForm.imagen_url ? (
+                      <div className="relative rounded-2xl overflow-hidden aspect-[16/10] bg-slate-50">
+                        <img src={catForm.imagen_url} className="w-full h-full object-cover" alt="Preview" />
+                        <button type="button" onClick={() => setCatForm({...catForm, imagen_url: ''})} className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round"/></svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-[16/10] bg-[#F8FAFC] rounded-2xl border-2 border-dashed border-slate-200 cursor-pointer hover:border-slate-400 transition-all">
+                        {subiendoImg ? (
+                          <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+                        ) : (
+                          <>
+                            <svg className="w-8 h-8 text-slate-300 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Subir imagen</span>
+                          </>
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={subirImagenCatalogo} />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Nombre del producto</label>
+                  <input required className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm" placeholder="Ej: Crema hidratante premium" value={catForm.nombre} onChange={e => setCatForm({...catForm, nombre: e.target.value})} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Categoría</label>
+                    <select className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none text-sm cursor-pointer" value={catForm.categoria} onChange={e => setCatForm({...catForm, categoria: e.target.value})}>
+                      {catCategorias.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Precio $</label>
+                    <input type="number" min="0" step="0.01" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={catForm.precio} onChange={e => setCatForm({...catForm, precio: parseFloat(e.target.value) || 0})} />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Descripción</label>
+                  <textarea className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm resize-none h-24" placeholder="Describí tu producto para tus clientes..." value={catForm.descripcion} onChange={e => setCatForm({...catForm, descripcion: e.target.value})} />
+                </div>
+
+                {/* TOGGLE VISIBLE */}
+                <div className="flex items-center justify-between p-4 bg-[#F8FAFC] rounded-[1.2rem]">
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">Visible en catálogo</p>
+                    <p className="text-[9px] text-slate-400 font-medium mt-0.5">Los clientes pueden verlo en tu vidriera</p>
+                  </div>
+                  <button type="button" onClick={() => setCatForm({...catForm, activo: !catForm.activo})} className={`w-12 h-7 rounded-full transition-all relative ${catForm.activo ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-1 transition-all shadow-sm ${catForm.activo ? 'left-6' : 'left-1'}`}></div>
+                  </button>
+                </div>
+
+                <button disabled={guardando} type="submit" className="w-full py-5 rounded-[1.2rem] bg-slate-900 text-white font-bold text-[10px] tracking-widest uppercase shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4">
+                  {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (catEdicion ? 'Guardar Cambios' : 'Publicar en Catálogo')}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </>)}
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }

@@ -65,7 +65,7 @@ export default function VistaPublica() {
       const [resSrvs, resEmps, resCat] = await Promise.all([
         supabase.from('servicios').select('*').eq('negocio_id', id),
         supabase.from('empleados').select('*').eq('negocio_id', id),
-        supabase.from('inventario').select('*').eq('negocio_id', id).eq('activo', true).gt('cantidad', 0).order('categoria').order('nombre')
+        supabase.from('catalogo_productos').select('*').eq('negocio_id', id).eq('activo', true).order('orden').order('nombre')
       ])
       
       setServicios(resSrvs.data || [])
@@ -319,11 +319,8 @@ export default function VistaPublica() {
 
   // --- CARRITO HELPERS ---
   const addToCart = (prodId) => {
-    const prod = catalogo.find(p => p.id === prodId)
-    if (!prod || prod.cantidad <= 0) return
     setCarrito(prev => {
       const current = prev[prodId] || 0
-      if (current >= prod.cantidad) return prev
       return { ...prev, [prodId]: current + 1 }
     })
   }
@@ -336,7 +333,7 @@ export default function VistaPublica() {
   }
   const totalCarrito = Object.entries(carrito).reduce((sum, [pid, qty]) => {
     const p = catalogo.find(x => x.id === pid)
-    return sum + (p ? p.precio_venta * qty : 0)
+    return sum + (p ? p.precio * qty : 0)
   }, 0)
   const itemsEnCarrito = Object.values(carrito).reduce((a, b) => a + b, 0)
 
@@ -346,7 +343,7 @@ export default function VistaPublica() {
     let msg = `🛒 *Nuevo Pedido — ${negocio.nombre}*\n\n`
     Object.entries(carrito).forEach(([pid, qty]) => {
       const p = catalogo.find(x => x.id === pid)
-      if (p) msg += `• ${p.nombre} x${qty} — $${(p.precio_venta * qty).toLocaleString()}\n`
+      if (p) msg += `• ${p.nombre} x${qty} — $${(p.precio * qty).toLocaleString()}\n`
     })
     msg += `\n💰 *Total: $${totalCarrito.toLocaleString()}*`
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank')
@@ -790,54 +787,52 @@ export default function VistaPublica() {
                  <div className="space-y-2">
                    {filtered.map(prod => {
                      const qty = carrito[prod.id] || 0
-                     const pocas = prod.cantidad > 0 && prod.cantidad <= prod.stock_minimo
-                     const sinStock = prod.cantidad <= 0
                      return (
                        <div key={prod.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${qty > 0 ? 'border-zinc-300 shadow-md' : 'border-zinc-100'}`}>
-                         <div className="p-4 flex gap-3.5">
-                           {/* ÍCONO PRODUCTO */}
-                           <div className="w-14 h-14 rounded-[1rem] flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: accentUltraSoft, color: accent }}>
-                             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                           </div>
-                           {/* INFO */}
-                           <div className="flex-1 min-w-0">
-                             <div className="flex items-start justify-between gap-2">
-                               <div className="min-w-0">
-                                 <h4 className="text-[13px] font-bold text-zinc-900 leading-tight truncate">{prod.nombre}</h4>
-                                 {prod.descripcion && <p className="text-[10px] text-zinc-400 font-medium mt-0.5 line-clamp-1">{prod.descripcion}</p>}
-                                 <div className="flex items-center gap-2 mt-1">
-                                   <span className="text-[7px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded" style={{ backgroundColor: accentUltraSoft, color: accent }}>{prod.categoria}</span>
-                                   {pocas && <span className="text-[7px] font-bold uppercase tracking-wider text-amber-500">¡Últimas!</span>}
-                                   {sinStock && <span className="text-[7px] font-bold uppercase tracking-wider text-red-400">Agotado</span>}
-                                 </div>
-                               </div>
-                               {prod.precio_venta > 0 && (
-                                 <p className="text-base font-black tracking-tight text-zinc-900 shrink-0">${prod.precio_venta.toLocaleString()}</p>
-                               )}
-                             </div>
-                             {/* CONTROLES +/- */}
-                             {!sinStock && (
-                               <div className="flex items-center justify-end gap-2 mt-2.5">
-                                 {qty > 0 ? (
-                                   <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-zinc-200">
-                                     <button onClick={() => removeFromCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:scale-90 transition-all font-bold text-lg">−</button>
-                                     <span className="w-8 text-center text-sm font-black text-zinc-900">{qty}</span>
-                                     <button onClick={() => addToCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-white active:scale-90 transition-all font-bold text-lg" style={{ backgroundColor: accent }}>+</button>
-                                   </div>
-                                 ) : (
-                                   <button onClick={() => addToCart(prod.id)} className="px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white active:scale-95 transition-all shadow-sm" style={{ backgroundColor: accent }}>
-                                     Agregar
-                                   </button>
-                                 )}
+                         <div className="flex gap-0">
+                           {/* IMAGEN */}
+                           <div className="w-24 h-24 md:w-28 md:h-28 bg-zinc-50 shrink-0 overflow-hidden">
+                             {prod.imagen_url ? (
+                               <img src={prod.imagen_url} alt={prod.nombre} className="w-full h-full object-cover" />
+                             ) : (
+                               <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft }}>
+                                 <svg className="w-6 h-6" style={{ color: accent, opacity: 0.4 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                </div>
                              )}
                            </div>
+                           {/* INFO */}
+                           <div className="flex-1 min-w-0 p-3.5">
+                             <div className="flex items-start justify-between gap-2">
+                               <div className="min-w-0">
+                                 <h4 className="text-[13px] font-bold text-zinc-900 leading-tight truncate">{prod.nombre}</h4>
+                                 {prod.descripcion && <p className="text-[10px] text-zinc-400 font-medium mt-0.5 line-clamp-2">{prod.descripcion}</p>}
+                                 <span className="text-[7px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded mt-1 inline-block" style={{ backgroundColor: accentUltraSoft, color: accent }}>{prod.categoria}</span>
+                               </div>
+                               {prod.precio > 0 && (
+                                 <p className="text-base font-black tracking-tight text-zinc-900 shrink-0">${prod.precio.toLocaleString()}</p>
+                               )}
+                             </div>
+                             {/* CONTROLES +/- */}
+                             <div className="flex items-center justify-end gap-2 mt-2">
+                               {qty > 0 ? (
+                                 <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-zinc-200">
+                                   <button onClick={() => removeFromCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:scale-90 transition-all font-bold text-lg">−</button>
+                                   <span className="w-8 text-center text-sm font-black text-zinc-900">{qty}</span>
+                                   <button onClick={() => addToCart(prod.id)} className="w-9 h-9 flex items-center justify-center text-white active:scale-90 transition-all font-bold text-lg" style={{ backgroundColor: accent }}>+</button>
+                                 </div>
+                               ) : (
+                                 <button onClick={() => addToCart(prod.id)} className="px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white active:scale-95 transition-all shadow-sm" style={{ backgroundColor: accent }}>
+                                   Agregar
+                                 </button>
+                               )}
+                             </div>
+                           </div>
                          </div>
                          {/* SUBTOTAL LINE */}
-                         {qty > 0 && prod.precio_venta > 0 && (
+                         {qty > 0 && prod.precio > 0 && (
                            <div className="px-4 py-2 border-t border-zinc-50 flex justify-between items-center" style={{ backgroundColor: accentUltraSoft }}>
                              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{qty} {qty === 1 ? 'unidad' : 'unidades'}</span>
-                             <span className="text-sm font-black" style={{ color: accent }}>${(prod.precio_venta * qty).toLocaleString()}</span>
+                             <span className="text-sm font-black" style={{ color: accent }}>${(prod.precio * qty).toLocaleString()}</span>
                            </div>
                          )}
                        </div>
