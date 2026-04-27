@@ -12,6 +12,13 @@ export default function VistaPublica() {
   const [servicios, setServicios] = useState([])
   const [empleados, setEmpleados] = useState([])
   
+  // --- CATÁLOGO PÚBLICO ---
+  const [vistaActiva, setVistaActiva] = useState('reservas') // 'reservas' | 'catalogo'
+  const [catalogo, setCatalogo] = useState([])
+  const [catalogoLoading, setCatalogoLoading] = useState(false)
+  const [catFiltro, setCatFiltro] = useState('todos')
+  const [catBusqueda, setCatBusqueda] = useState('')
+  
   // --- UI & FLOW STATE ---
   const [paso, setPaso] = useState(1)
   const [bioExpandida, setBioExpandida] = useState(false)
@@ -54,11 +61,15 @@ export default function VistaPublica() {
       if (error) throw error
       setNegocio(biz)
 
-      const { data: srvs } = await supabase.from('servicios').select('*').eq('negocio_id', id)
-      const { data: emps } = await supabase.from('empleados').select('*').eq('negocio_id', id)
+      const [resSrvs, resEmps, resCat] = await Promise.all([
+        supabase.from('servicios').select('*').eq('negocio_id', id),
+        supabase.from('empleados').select('*').eq('negocio_id', id),
+        supabase.from('inventario').select('*').eq('negocio_id', id).eq('activo', true).gt('cantidad', 0).order('categoria').order('nombre')
+      ])
       
-      setServicios(srvs || [])
-      setEmpleados(emps || [])
+      setServicios(resSrvs.data || [])
+      setEmpleados(resEmps.data || [])
+      setCatalogo(resCat.data || [])
       generarCalendarioPro(biz.horarios)
     } catch (e) {
       console.error("Nucleus Error:", e.message)
@@ -377,8 +388,23 @@ export default function VistaPublica() {
                  </>
                )}
             </div>
+
+            {/* TOGGLE RESERVAS / CATÁLOGO */}
+            {catalogo.length > 0 && paso < 5 && (
+              <div className="mt-3 flex bg-zinc-100 rounded-xl p-1 gap-0.5">
+                <button onClick={() => setVistaActiva('reservas')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${vistaActiva === 'reservas' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-400'}`}>
+                  {vocab.paso1Titulo || 'Reservas'}
+                </button>
+                <button onClick={() => setVistaActiva('catalogo')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${vistaActiva === 'catalogo' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-400'}`}>
+                  Catálogo
+                </button>
+              </div>
+            )}
          </section>
 
+         {/* ========== VISTA: RESERVAS ========== */}
+         {vistaActiva === 'reservas' && (
+          <>
          {/* RESUMEN DE SELECCIÓN (Paso 2+) — Mini pills */}
          {paso >= 2 && (
            <div className="mt-3 flex flex-wrap gap-1.5 px-1 animate-in fade-in duration-300">
@@ -685,11 +711,133 @@ export default function VistaPublica() {
               </section>
             )}
          </div>
+         </>
+         )}
+
+         {/* ========== VISTA: CATÁLOGO ========== */}
+         {vistaActiva === 'catalogo' && (
+           <section className="mt-4 space-y-3 animate-in fade-in slide-in-from-bottom-6 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+             
+             {/* BÚSQUEDA */}
+             <div className="relative">
+               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+               <input 
+                 type="text" 
+                 placeholder="Buscar producto..." 
+                 className="w-full bg-white border border-zinc-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-zinc-300 transition-all font-medium text-zinc-900 shadow-sm brand-input" 
+                 value={catBusqueda} 
+                 onChange={e => setCatBusqueda(e.target.value)} 
+               />
+             </div>
+
+             {/* FILTROS DE CATEGORÍA */}
+             {(() => {
+               const cats = [...new Set(catalogo.map(p => p.categoria))]
+               return cats.length > 1 ? (
+                 <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                   <button onClick={() => setCatFiltro('todos')} className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === 'todos' ? { backgroundColor: accent } : {}}>
+                     Todos
+                   </button>
+                   {cats.map(c => (
+                     <button key={c} onClick={() => setCatFiltro(c)} className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-white border-zinc-100 text-zinc-400'}`} style={catFiltro === c ? { backgroundColor: accent } : {}}>
+                       {c}
+                     </button>
+                   ))}
+                 </div>
+               ) : null
+             })()}
+
+             {/* GRID DE PRODUCTOS */}
+             {(() => {
+               const filtered = catalogo
+                 .filter(p => catFiltro === 'todos' || p.categoria === catFiltro)
+                 .filter(p => !catBusqueda || p.nombre.toLowerCase().includes(catBusqueda.toLowerCase()))
+               
+               if (filtered.length === 0) return (
+                 <div className="bg-white rounded-[1.5rem] border border-zinc-100 shadow-sm p-10 text-center">
+                   <svg className="w-12 h-12 text-zinc-200 mx-auto mb-3" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                   <p className="text-sm font-bold text-zinc-400">Sin productos disponibles</p>
+                 </div>
+               )
+
+               return (
+                 <div className="grid grid-cols-2 gap-2.5">
+                   {filtered.map(prod => {
+                     const stockOk = prod.cantidad > prod.stock_minimo
+                     const pocas = prod.cantidad > 0 && prod.cantidad <= prod.stock_minimo
+                     return (
+                       <div key={prod.id} className="bg-white rounded-[1.3rem] border border-zinc-100/80 shadow-sm overflow-hidden group brand-border-hover transition-all">
+                         {/* Product Color Header */}
+                         <div className="h-2 w-full" style={{ backgroundColor: accent, opacity: 0.15 }}></div>
+                         <div className="p-3.5 md:p-4 space-y-2.5">
+                           {/* Categoría */}
+                           <span className="text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full" style={{ backgroundColor: accentUltraSoft, color: accent }}>
+                             {prod.categoria}
+                           </span>
+                           {/* Nombre */}
+                           <h4 className="text-[13px] font-bold text-zinc-900 leading-tight line-clamp-2 min-h-[32px]">{prod.nombre}</h4>
+                           {/* Descripción */}
+                           {prod.descripcion && (
+                             <p className="text-[10px] text-zinc-400 font-medium leading-relaxed line-clamp-2">{prod.descripcion}</p>
+                           )}
+                           {/* Precio + Stock */}
+                           <div className="flex items-end justify-between pt-1">
+                             <div>
+                               {prod.precio_venta > 0 && (
+                                 <p className="text-lg font-black tracking-tighter text-zinc-900">${prod.precio_venta.toLocaleString()}</p>
+                               )}
+                               <p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${pocas ? 'text-amber-500' : stockOk ? 'text-emerald-500' : 'text-red-400'}`}>
+                                 {pocas ? '¡Últimas unidades!' : stockOk ? 'Disponible' : 'Sin stock'}
+                               </p>
+                             </div>
+                             {/* WhatsApp CTA */}
+                             {negocio.telefono && prod.cantidad > 0 && (
+                               <button 
+                                 onClick={() => {
+                                   const num = negocio.telefono.replace(/[^0-9]/g, '')
+                                   const msg = encodeURIComponent(`Hola! Vi en su catálogo el producto: *${prod.nombre}*${prod.precio_venta > 0 ? ` ($${prod.precio_venta})` : ''}. ¿Está disponible?`)
+                                   window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
+                                 }}
+                                 className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 shrink-0"
+                                 style={{ backgroundColor: accentSoft, color: accent }}
+                                 title="Consultar por WhatsApp"
+                               >
+                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                               </button>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                     )
+                   })}
+                 </div>
+               )
+             })()}
+
+             {/* INFO DE CONTACTO PARA CONSULTAS */}
+             {negocio.telefono && (
+               <div className="rounded-[1.3rem] p-4 text-center space-y-2" style={{ backgroundColor: accentUltraSoft }}>
+                 <p className="text-[10px] font-bold text-zinc-500">¿Tenés alguna consulta sobre nuestros productos?</p>
+                 <button 
+                   onClick={() => {
+                     const num = negocio.telefono.replace(/[^0-9]/g, '')
+                     window.open(`https://wa.me/${num}?text=${encodeURIComponent(`Hola! Quiero consultar sobre los productos de ${negocio.nombre}`)}`, '_blank')
+                   }}
+                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[10px] font-bold uppercase tracking-widest shadow-md active:scale-95 transition-all"
+                   style={{ backgroundColor: accent }}
+                 >
+                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                   Escribinos
+                 </button>
+               </div>
+             )}
+           </section>
+         )}
 
       </main>
 
       {/* STICKY CTAs — Safe area aware */}
-      {paso === 3 && reserva.hora && (
+      {vistaActiva === 'reservas' && paso === 3 && reserva.hora && (
         <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-[#FDFDFC] via-[#FDFDFC]/95 to-transparent z-50 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
            <button 
               onClick={() => setPaso(4)} 
@@ -701,7 +849,7 @@ export default function VistaPublica() {
         </div>
       )}
       
-      {paso === 4 && (
+      {vistaActiva === 'reservas' && paso === 4 && (
         <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-[#FDFDFC] via-[#FDFDFC]/95 to-transparent z-50 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
            <button 
               form="reservaForm" 
