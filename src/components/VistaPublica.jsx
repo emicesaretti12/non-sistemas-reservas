@@ -585,7 +585,7 @@ export default function VistaPublica() {
                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Nombre Completo</label>
                          <div className="relative flex items-center brand-input-wrapper">
                             <div className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center brand-input-icon transition-colors" style={{ backgroundColor: accentUltraSoft }}><svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="Ej. Emiliano Cesaretti" value={reserva.clienteNombre} onChange={(e) => setReserva({...reserva, clienteNombre: e.target.value})} />
+                            <input required className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="Ej. Pablo Pérez" value={reserva.clienteNombre} onChange={(e) => setReserva({...reserva, clienteNombre: e.target.value})} />
                          </div>
                       </div>
 

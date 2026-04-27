@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 
+// Explicit class map — Tailwind JIT cannot detect dynamically-built class names
+const tipoMovClasses = {
+  entrada: { active: 'bg-emerald-50 border-emerald-300 text-emerald-700', icon: '↑' },
+  salida:  { active: 'bg-red-50 border-red-300 text-red-700', icon: '↓' },
+  ajuste:  { active: 'bg-blue-50 border-blue-300 text-blue-700', icon: '⇄' }
+}
+
 export default function Inventario({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
   const [items, setItems] = useState([])
@@ -23,6 +30,18 @@ export default function Inventario({ negocioId, rubro }) {
   const categorias = ['General', 'Insumos', 'Productos', 'Herramientas', 'Limpieza', 'Otros']
 
   useEffect(() => { if (negocioId) cargar() }, [negocioId])
+
+  // Scroll lock for modals — prevents background bounce on iOS
+  useEffect(() => {
+    if (modalAbierto || modalMovimiento) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => { document.body.style.overflow = ''; document.body.style.touchAction = '' }
+  }, [modalAbierto, modalMovimiento])
 
   async function cargar() {
     setLoading(true)
@@ -128,7 +147,7 @@ export default function Inventario({ negocioId, rubro }) {
   )
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700">
+    <div className="space-y-4 animate-in fade-in duration-700 pb-28 md:pb-4">
 
       {/* HEADER + KPIs */}
       <header className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
@@ -187,29 +206,31 @@ export default function Inventario({ negocioId, rubro }) {
             const margen = item.precio_venta > 0 && item.precio_costo > 0
               ? Math.round(((item.precio_venta - item.precio_costo) / item.precio_venta) * 100) : null
             return (
-              <div key={item.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-5 flex items-center gap-3 md:gap-4 hover:border-slate-300 transition-all group">
-                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${nivel.ring} ring-4 ${nivel.color} flex items-center justify-center text-white font-black text-sm shrink-0`}>
-                  {item.cantidad}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-slate-900 truncate">{item.nombre}</p>
-                    <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${nivel.color === 'bg-red-500' ? 'bg-red-50 text-red-600' : nivel.color === 'bg-amber-500' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>{nivel.text}</span>
+              <div key={item.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 hover:border-slate-300 transition-all group">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-11 h-11 md:w-12 md:h-12 rounded-xl ${nivel.ring} ring-4 ${nivel.color} flex items-center justify-center text-white font-black text-sm shrink-0`}>
+                    {item.cantidad}
                   </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.categoria}</span>
-                    {item.precio_venta > 0 && <span className="text-[10px] font-bold text-emerald-600">${item.precio_venta}</span>}
-                    {margen !== null && <span className="text-[9px] font-medium text-slate-400">{margen}% margen</span>}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-slate-900 truncate">{item.nombre}</p>
+                      <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0 ${nivel.color === 'bg-red-500' ? 'bg-red-50 text-red-600' : nivel.color === 'bg-amber-500' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>{nivel.text}</span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.categoria}</span>
+                      {item.precio_venta > 0 && <span className="text-[10px] font-bold text-emerald-600">${item.precio_venta}</span>}
+                      {margen !== null && <span className="text-[9px] font-medium text-slate-400">{margen}% margen</span>}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button onClick={() => { setModalMovimiento(item.id); setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' }) }} className="w-9 h-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-all" title="Movimiento de stock">
+                <div className="flex items-center gap-2 shrink-0 justify-end border-t sm:border-none border-slate-50 pt-2 sm:pt-0">
+                  <button onClick={() => { setModalMovimiento(item.id); setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' }) }} className="w-10 h-10 md:w-9 md:h-9 rounded-xl md:rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-all active:scale-90" title="Movimiento de stock">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </button>
-                  <button onClick={() => abrirEdicion(item)} className="w-9 h-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center transition-all" title="Editar">
+                  <button onClick={() => abrirEdicion(item)} className="w-10 h-10 md:w-9 md:h-9 rounded-xl md:rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center transition-all active:scale-90" title="Editar">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </button>
-                  <button onClick={() => eliminar(item.id)} className="w-9 h-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all" title="Eliminar">
+                  <button onClick={() => eliminar(item.id)} className="w-10 h-10 md:w-9 md:h-9 rounded-xl md:rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all active:scale-90" title="Eliminar">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </button>
                 </div>
@@ -254,7 +275,7 @@ export default function Inventario({ negocioId, rubro }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Cantidad</label>
                   <input type="number" min="0" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.cantidad} onChange={e => setForm({...form, cantidad: parseInt(e.target.value) || 0})} />
@@ -263,7 +284,7 @@ export default function Inventario({ negocioId, rubro }) {
                   <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Costo $</label>
                   <input type="number" min="0" step="0.01" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.precio_costo} onChange={e => setForm({...form, precio_costo: parseFloat(e.target.value) || 0})} />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 col-span-2 sm:col-span-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Venta $</label>
                   <input type="number" min="0" step="0.01" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.precio_venta} onChange={e => setForm({...form, precio_venta: parseFloat(e.target.value) || 0})} />
                 </div>
@@ -303,8 +324,8 @@ export default function Inventario({ negocioId, rubro }) {
 
             <form onSubmit={registrarMovimiento} className="space-y-4">
               <div className="grid grid-cols-3 gap-2">
-                {[{ id: 'entrada', label: 'Entrada', color: 'emerald' }, { id: 'salida', label: 'Salida', color: 'red' }, { id: 'ajuste', label: 'Ajuste', color: 'blue' }].map(t => (
-                  <button key={t.id} type="button" onClick={() => setMovForm({...movForm, tipo: t.id})} className={`p-3 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all ${movForm.tipo === t.id ? `bg-${t.color}-50 border-${t.color}-200 text-${t.color}-700` : 'bg-white border-slate-200 text-slate-500'}`}>
+                {[{ id: 'entrada', label: 'Entrada' }, { id: 'salida', label: 'Salida' }, { id: 'ajuste', label: 'Ajuste' }].map(t => (
+                  <button key={t.id} type="button" onClick={() => setMovForm({...movForm, tipo: t.id})} className={`p-3.5 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all active:scale-95 ${movForm.tipo === t.id ? tipoMovClasses[t.id].active : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
                     {t.label}
                   </button>
                 ))}

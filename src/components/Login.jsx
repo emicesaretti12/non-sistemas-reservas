@@ -115,6 +115,25 @@ export default function Login() {
     return `Error: ${errorMsg}`
   }, [esRateLimit])
 
+  /**
+   * COOLDOWN TIMER: Activa el bloqueo temporal del botón de acción
+   * para evitar abuso de rate-limit en Supabase Auth.
+   */
+  const activarCooldown = useCallback((segundos) => {
+    setCooldown(segundos)
+    if (cooldownRef.current) clearInterval(cooldownRef.current)
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current)
+          cooldownRef.current = null
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }, [])
+
   const handleSocialLogin = async (provider) => {
     if (cooldown > 0) return
     setLoading(true)
