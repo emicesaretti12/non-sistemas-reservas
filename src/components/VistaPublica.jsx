@@ -637,21 +637,26 @@ export default function VistaPublica() {
                           <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div></div>
                         ) : (
                           <div className="space-y-4 md:space-y-5 mt-2 md:mt-4">
-                             {['mañana', 'tarde', 'noche'].map(periodo => (
+                             {['mañana', 'tarde', 'noche', 'madrugada'].map(periodo => (
                                horasDisponibles[periodo].length > 0 && (
                                  <div key={periodo} className="space-y-1.5 md:space-y-2">
                                     <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em] px-1" style={{ color: accentGlow }}>{periodo}</p>
                                     <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                                       {horasDisponibles[periodo].map(h => (
+                                       {horasDisponibles[periodo].map(h => {
+                                         const slotTime = typeof h === 'string' ? h : h.time;
+                                         const slotNextDay = typeof h === 'string' ? false : h.nextDay;
+                                         const isSelected = reserva.hora === slotTime && reserva.horaNextDay === slotNextDay;
+                                         return (
                                          <button 
-                                            key={h} 
-                                            onClick={() => setReserva({...reserva, hora: h})} 
-                                            className={`py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-[0.95] shadow-sm brand-date-hover ${reserva.hora === h ? 'text-white border-transparent' : 'bg-[#FDFDFC] text-zinc-800 border border-transparent'}`} 
-                                            style={{ backgroundColor: reserva.hora === h ? accent : '' }}
+                                            key={slotTime + (slotNextDay ? '-nd' : '')} 
+                                            onClick={() => setReserva({...reserva, hora: slotTime, horaNextDay: slotNextDay})} 
+                                            className={`py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-[0.95] shadow-sm brand-date-hover ${isSelected ? 'text-white border-transparent' : 'bg-[#FDFDFC] text-zinc-800 border border-transparent'}`} 
+                                            style={{ backgroundColor: isSelected ? accent : '' }}
                                          >
-                                            {h}
+                                            {slotTime}
                                          </button>
-                                       ))}
+                                         );
+                                       })}
                                     </div>
                                  </div>
                                )
