@@ -1091,6 +1091,49 @@ export default function VistaPublica() {
         </div>
       )}
 
+      {/* SECCIÓN: UBICACIÓN / MAPA */}
+      {(negocio.mapa_url || negocio.direccion) && paso < 5 && (
+        <section className="mt-6 md:mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 px-4">
+          <div className="max-w-md mx-auto">
+            <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-zinc-100 overflow-hidden">
+              {/* Map Header */}
+              <div className="p-4 md:p-5 flex items-center gap-3">
+                <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: accentSoft }}>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" style={{ color: accent }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round" strokeLinejoin="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em]" style={{ color: accentGlow }}>Ubicación</p>
+                  {negocio.direccion && (
+                    <p className="text-[12px] md:text-sm font-bold text-zinc-800 truncate">{negocio.direccion}</p>
+                  )}
+                </div>
+                {negocio.mapa_url && (
+                  <a
+                    href={negocio.mapa_url.includes('google.com/maps') ? negocio.mapa_url : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(negocio.direccion || negocio.mapa_url)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all active:scale-95"
+                    style={{ backgroundColor: accentSoft, color: accent }}
+                  >
+                    Abrir Mapa
+                  </a>
+                )}
+              </div>
+              {/* Map Embed */}
+              {negocio.mapa_url && (
+                <div className="h-[180px] md:h-[220px] w-full border-t border-zinc-100">
+                  <iframe
+                    src={negocio.mapa_url.includes('<iframe') ? negocio.mapa_url.match(/src="([^"]+)"/)?.[1] || '' : `https://www.google.com/maps?q=${encodeURIComponent(negocio.mapa_url.includes('google.com/maps') ? negocio.mapa_url : negocio.direccion || negocio.mapa_url)}&output=embed`}
+                    width="100%" height="100%" style={{border: 0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+                    title="Ubicación del negocio"
+                  ></iframe>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {paso < 5 && (
         <footer className="mt-8 py-6 md:py-8 flex flex-col items-center gap-2 opacity-30 relative z-10">
            <div className="w-6 h-6 bg-zinc-900 rounded-[0.4rem] flex items-center justify-center shadow-lg rotate-3"><span className="text-white font-black text-[7px] italic">NS</span></div>

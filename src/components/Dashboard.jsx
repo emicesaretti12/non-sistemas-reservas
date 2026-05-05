@@ -47,6 +47,7 @@ export default function Dashboard({ session }) {
   // --- ESTADOS: CONTACTO NEGOCIO ---
   const [telefonoNegocio, setTelefonoNegocio] = useState('')
   const [direccionNegocio, setDireccionNegocio] = useState('')
+  const [mapaUrl, setMapaUrl] = useState('')
   const [mensajeBienvenida, setMensajeBienvenida] = useState('')
 
   // --- ESTADOS: CLIENTES (NUEVO) ---
@@ -100,6 +101,7 @@ export default function Dashboard({ session }) {
         setInstagram(data.instagram || '')
         setTelefonoNegocio(data.telefono || '')
         setDireccionNegocio(data.direccion || '')
+        setMapaUrl(data.mapa_url || '')
         setMensajeBienvenida(data.mensaje_bienvenida || '')
 
         // --- SISTEMA DE AUTO-APROVISIONAMIENTO DE SUPER ADMIN ---
@@ -417,6 +419,7 @@ export default function Dashboard({ session }) {
     // (telefono, direccion, mensaje_bienvenida son opcionales)
     if (telefonoNegocio) updatePayload.telefono = telefonoNegocio
     if (direccionNegocio) updatePayload.direccion = direccionNegocio
+    if (mapaUrl !== undefined) updatePayload.mapa_url = mapaUrl
     if (mensajeBienvenida) updatePayload.mensaje_bienvenida = mensajeBienvenida
     
     const { error } = await supabase
@@ -1214,6 +1217,19 @@ export default function Dashboard({ session }) {
                       <div>
                         <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Dirección</label>
                         <input value={direccionNegocio} onChange={(e) => setDireccionNegocio(e.target.value)} placeholder="Ej: Av. Colón 1234, Córdoba" className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ubicación — Google Maps</label>
+                        <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
+                        <p className="text-[9px] text-slate-400 mt-1.5 ml-1 font-medium">Abrí Google Maps, buscá tu negocio, tocá "Compartir" y pegá el link acá.</p>
+                        {mapaUrl && (
+                          <div className="mt-3 rounded-xl overflow-hidden border border-slate-200 h-40">
+                            <iframe
+                              src={mapaUrl.includes('<iframe') ? mapaUrl.match(/src="([^"]+)"/)?.[1] || '' : `https://www.google.com/maps?q=${encodeURIComponent(mapaUrl.includes('google.com/maps') ? mapaUrl : direccionNegocio || mapaUrl)}&output=embed`}
+                              width="100%" height="100%" style={{border: 0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Mensaje de Bienvenida</label>
