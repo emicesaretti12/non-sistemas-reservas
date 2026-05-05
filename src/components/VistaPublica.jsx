@@ -32,6 +32,7 @@ export default function VistaPublica() {
     empleadoId: null, 
     fecha: '', 
     hora: '', 
+    horaNextDay: false,
     clienteNombre: '', 
     clienteTelefono: '',
     clienteEmail: '',
@@ -39,7 +40,7 @@ export default function VistaPublica() {
   })
   
   // --- CALENDAR & SLOTS STATE ---
-  const [horasDisponibles, setHorasDisponibles] = useState({ mañana: [], tarde: [], noche: [] })
+  const [horasDisponibles, setHorasDisponibles] = useState({ mañana: [], tarde: [], noche: [], madrugada: [] })
   const [buscandoHoras, setBuscandoHoras] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [diasCalendario, setDiasCalendario] = useState([])
@@ -114,7 +115,7 @@ export default function VistaPublica() {
 
   const handleDateSelect = async (day) => {
     if (!day.available) return
-    setReserva({ ...reserva, fecha: day.full, hora: '' })
+    setReserva({ ...reserva, fecha: day.full, hora: '', horaNextDay: false })
     setBuscandoHoras(true)
     
     const [year, month, d] = day.full.split('-').map(Number)
@@ -124,25 +125,37 @@ export default function VistaPublica() {
     const config = negocio.horarios?.[daysName[dateObj.getDay()]]
 
     if (!config || !config.abierto || !config.inicio || !config.fin) {
-      setHorasDisponibles({ mañana: [], tarde: [], noche: [] })
+      setHorasDisponibles({ mañana: [], tarde: [], noche: [], madrugada: [] })
       setBuscandoHoras(false)
       return
     }
 
+    // --- MOTOR DE SLOTS CON SOPORTE NOCTURNO (ej: 19:00 a 05:00) ---
+    const [startH, startM] = config.inicio.split(':').map(Number)
+    const [endH, endM] = config.fin.split(':').map(Number)
+    let openMins = startH * 60 + startM
+    let closeMins = endH * 60 + endM
+
+    // Detectar horario nocturno que cruza medianoche
+    const isOvernight = closeMins <= openMins
+    if (isOvernight) closeMins += 1440 // extender al día siguiente
+
     const slots = []
-    let cursor = config.inicio
-    while (cursor < config.fin) {
-      slots.push(cursor)
-      const [h, m] = cursor.split(':').map(Number)
-      const tempD = new Date()
-      tempD.setHours(h, m + 30)
-      cursor = tempD.toTimeString().slice(0, 5)
+    for (let m = openMins; m < closeMins; m += 30) {
+      const nextDay = m >= 1440
+      const actualMins = m % 1440
+      const hh = String(Math.floor(actualMins / 60)).padStart(2, '0')
+      const mm = String(actualMins % 60).padStart(2, '0')
+      slots.push({ time: `${hh}:${mm}`, nextDay, totalMins: m })
     }
 
     try {
-      // Filtrado blindado por zona horaria local a UTC
-      const inicioDiaISO = new Date(year, month - 1, d, 0, 0, 0).toISOString()
-      const finDiaISO = new Date(year, month - 1, d, 23, 59, 59, 999).toISOString()
+      // Para horarios nocturnos, consultar reservas del día actual Y el siguiente
+      const selectedDayStart = new Date(year, month - 1, d, 0, 0, 0)
+      const inicioDiaISO = selectedDayStart.toISOString()
+      const finBusquedaISO = isOvernight
+        ? new Date(year, month - 1, d + 1, 23, 59, 59, 999).toISOString()
+        : new Date(year, month - 1, d, 23, 59, 59, 999).toISOString()
 
       const { data: taken } = await supabase
         .from('turnos')
@@ -150,8 +163,9 @@ export default function VistaPublica() {
         .eq('empleado_id', reserva.empleadoId)
         .eq('estado', 'confirmado')
         .gte('fecha_hora', inicioDiaISO)
-        .lte('fecha_hora', finDiaISO)
+        .lte('fecha_hora', finBusquedaISO)
 
+      // Convertir reservas existentes a "minutos desde medianoche del día seleccionado"
       const bookedIntervals = taken?.map(t => {
         let rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
         if (!rawDate.endsWith('Z') && !rawDate.includes('+') && rawDate.split('-').length <= 3) {
@@ -160,16 +174,15 @@ export default function VistaPublica() {
         const bdDate = new Date(rawDate)
         if (isNaN(bdDate.getTime())) return null
 
-        const startMins = bdDate.getHours() * 60 + bdDate.getMinutes()
+        // Minutos absolutos desde medianoche del día seleccionado (soporta día siguiente)
+        const diffMs = bdDate.getTime() - selectedDayStart.getTime()
+        const startMins = Math.round(diffMs / 60000)
         const duration = t.servicios?.duracion_minutos || 30
         return { startMins, endMins: startMins + duration }
       }).filter(Boolean) || []
 
       const selectedService = servicios.find(s => s.id === reserva.servicioId)
       const selectedDuration = selectedService?.duracion_minutos || 30
-      
-      const [finH, finM] = config.fin.split(':').map(Number)
-      const finMins = finH * 60 + finM
 
       const tienePausa = config.pausa
       let inicioPausaMins = 0, finPausaMins = 0
@@ -178,36 +191,47 @@ export default function VistaPublica() {
           inicioPausaMins = ipH * 60 + ipM
           const [fpH, fpM] = config.finPausa.split(':').map(Number)
           finPausaMins = fpH * 60 + fpM
+          if (isOvernight && finPausaMins <= inicioPausaMins) finPausaMins += 1440
       }
 
       const avail = slots.filter(s => {
-        const [h, m] = s.split(':').map(Number)
-        const startMins = h * 60 + m
-        const endMins = startMins + selectedDuration
+        const slotStart = s.totalMins
+        const slotEnd = slotStart + selectedDuration
         
-        // No puede exceder el horario de cierre
-        if (endMins > finMins) return false
+        // No puede exceder el horario de cierre (en minutos extendidos)
+        if (slotEnd > closeMins) return false
         
         // No puede chocar con la pausa (corte) del día
         if (tienePausa) {
-            if (Math.max(startMins, inicioPausaMins) < Math.min(endMins, finPausaMins)) {
+            if (Math.max(slotStart, inicioPausaMins) < Math.min(slotEnd, finPausaMins)) {
                 return false
             }
         }
         
-        // Comprobar solapamiento (overlap = max(start1, start2) < min(end1, end2))
+        // Comprobar solapamiento con reservas existentes
         const hasOverlap = bookedIntervals.some(b => {
-           return Math.max(startMins, b.startMins) < Math.min(endMins, b.endMins)
+           return Math.max(slotStart, b.startMins) < Math.min(slotEnd, b.endMins)
         })
 
         return !hasOverlap
       })
 
-      setHorasDisponibles({
-        mañana: avail.filter(h => h < "12:00"),
-        tarde: avail.filter(h => h >= "12:00" && h < "18:00"),
-        noche: avail.filter(h => h >= "18:00")
-      })
+      // Categorización inteligente: horario nocturno agrupa en noche + madrugada
+      if (isOvernight) {
+        setHorasDisponibles({
+          mañana: [],
+          tarde: [],
+          noche: avail.filter(s => !s.nextDay),
+          madrugada: avail.filter(s => s.nextDay)
+        })
+      } else {
+        setHorasDisponibles({
+          mañana: avail.filter(s => s.time < "12:00"),
+          tarde: avail.filter(s => s.time >= "12:00" && s.time < "18:00"),
+          noche: avail.filter(s => s.time >= "18:00"),
+          madrugada: []
+        })
+      }
     } catch (e) {
       console.error("Error en slots")
     } finally {
@@ -219,10 +243,11 @@ export default function VistaPublica() {
     e.preventDefault()
     setGuardando(true)
     try {
-      // Empaquetado de hora local a UTC exacto
+      // Empaquetado de hora local a UTC exacto (soporta horario nocturno cross-midnight)
       const [year, month, day] = reserva.fecha.split('-').map(Number)
       const [hour, minute] = reserva.hora.split(':').map(Number)
-      const dateExacta = new Date(year, month - 1, day, hour, minute, 0)
+      const bookingDay = reserva.horaNextDay ? day + 1 : day
+      const dateExacta = new Date(year, month - 1, bookingDay, hour, minute, 0)
       const fechaHoraISO = dateExacta.toISOString()
 
       // Prevención de Double-Booking
