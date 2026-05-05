@@ -712,3 +712,83 @@ body {
     bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 12px) !important;
   }
 }
+
+/* ============================================================
+   LANDING PAGE — PRO SaaS STYLES
+   ============================================================ */
+
+/* Animated gradient text */
+.ns-hero-gradient {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 30%, #00cec9 60%, #6c5ce7 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ns-gradient-shift 6s ease infinite;
+}
+
+/* Floating mockup */
+.ns-float-slow { animation: ns-float 6s ease-in-out infinite; }
+.ns-float-slower { animation: ns-float 8s ease-in-out infinite; animation-delay: 1s; }
+
+/* Counter animation */
+.ns-counter-up { animation: ns-counter 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Testimonial card */
+.ns-testimonial {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 28px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ns-testimonial:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+  transform: translateY(-4px);
+}
+
+/* Feature card pro */
+.ns-feature-pro {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 32px;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.ns-feature-pro::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6c5ce7, #a29bfe, #00cec9);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ns-feature-pro:hover::before { transform: scaleX(1); }
+.ns-feature-pro:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 24px 48px rgba(108, 92, 231, 0.08);
+  transform: translateY(-6px);
+}
+
+/* Marquee scroll */
+@keyframes ns-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ns-marquee { animation: ns-marquee 30s linear infinite; }
+
+/* Pricing glow */
+.ns-pricing-glow {
+  box-shadow: 0 0 60px rgba(108, 92, 231, 0.15), 0 30px 60px rgba(0,0,0,0.2);
+}
+
+/* Stats counter card */
+.ns-stat-landing {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+/* Smooth scroll anchor offset */
+[id] { scroll-margin-top: 80px; }
