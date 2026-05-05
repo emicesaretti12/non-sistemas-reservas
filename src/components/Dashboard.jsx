@@ -407,7 +407,9 @@ export default function Dashboard({ session }) {
 
   async function actualizarBranding() {
     setGuardandoPerfil(true)
-    const updatePayload = { 
+    
+    // Payload base de branding (siempre existe)
+    const brandingPayload = { 
       color_primario: colorPrimario, 
       descripcion, 
       logo_url: logoUrl, 
@@ -415,33 +417,61 @@ export default function Dashboard({ session }) {
       instagram
     }
     
-    // Solo agregamos campos extra si la tabla los soporta
-    // (telefono, direccion, mensaje_bienvenida son opcionales)
-    if (telefonoNegocio) updatePayload.telefono = telefonoNegocio
-    if (direccionNegocio) updatePayload.direccion = direccionNegocio
-    if (mapaUrl !== undefined) updatePayload.mapa_url = mapaUrl
-    if (mensajeBienvenida) updatePayload.mensaje_bienvenida = mensajeBienvenida
+    // Payload de contacto (campos opcionales que pueden no existir en la DB)
+    const contactoPayload = {}
+    if (telefonoNegocio) contactoPayload.telefono = telefonoNegocio
+    if (direccionNegocio) contactoPayload.direccion = direccionNegocio
+    if (mapaUrl || mapaUrl === '') contactoPayload.mapa_url = mapaUrl
+    if (mensajeBienvenida) contactoPayload.mensaje_bienvenida = mensajeBienvenida
     
+    // Intento 1: Todo junto
+    const fullPayload = { ...brandingPayload, ...contactoPayload }
     const { error } = await supabase
       .from('negocios')
-      .update(updatePayload)
+      .update(fullPayload)
       .eq('id', negocio.id)
 
     if (!error) {
-      setNegocio({ ...negocio, ...updatePayload })
+      setNegocio({ ...negocio, ...fullPayload })
       alert("Configuración guardada con éxito.")
     } else {
-      // Si falla por campos extra, intentamos sin ellos
+      console.warn('Guardado completo falló, intentando por partes:', error.message)
+      
+      // Intento 2: Solo branding
       const { error: e2 } = await supabase
         .from('negocios')
-        .update({ color_primario: colorPrimario, descripcion, logo_url: logoUrl, portada_url: portadaUrl, instagram })
+        .update(brandingPayload)
         .eq('id', negocio.id)
       
       if (!e2) {
-        setNegocio({ ...negocio, color_primario: colorPrimario, descripcion, logo_url: logoUrl, portada_url: portadaUrl, instagram })
-        alert("Marca actualizada. Algunos campos avanzados no están disponibles aún en tu base de datos.")
+        setNegocio({ ...negocio, ...brandingPayload })
+      }
+      
+      // Intento 3: Contacto campo por campo
+      let contactoGuardado = false
+      if (Object.keys(contactoPayload).length > 0) {
+        for (const [campo, valor] of Object.entries(contactoPayload)) {
+          const { error: ec } = await supabase
+            .from('negocios')
+            .update({ [campo]: valor })
+            .eq('id', negocio.id)
+          
+          if (!ec) {
+            setNegocio(prev => ({ ...prev, [campo]: valor }))
+            contactoGuardado = true
+          } else {
+            console.warn(`Campo "${campo}" no existe en la DB. Ejecutá el SQL de migración.`)
+          }
+        }
+      }
+      
+      if (!e2) {
+        alert(contactoGuardado 
+          ? "Configuración guardada con éxito." 
+          : "Marca guardada. Para guardar datos de contacto, ejecutá el SQL de migración (sql_mapa_url.sql) en Supabase."
+        )
       } else {
-        alert("Hubo un error al guardar la configuración.")
+        alert("Hubo un error al guardar. Revisá tu conexión e intentá de nuevo.")
       }
     }
     setGuardandoPerfil(false)

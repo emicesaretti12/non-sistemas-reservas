@@ -1,10 +1,12 @@
 -- ============================================
--- SQL: Agregar campo mapa_url a la tabla negocios
+-- SQL: Agregar TODOS los campos opcionales a negocios
 -- Ejecutar en Supabase SQL Editor
 -- ============================================
 
--- 1. Agregar columna para la URL del mapa
-ALTER TABLE negocios ADD COLUMN IF NOT EXISTS mapa_url TEXT DEFAULT NULL;
+-- Campos de contacto
+ALTER TABLE negocios ADD COLUMN IF NOT EXISTS telefono TEXT DEFAULT NULL;
+ALTER TABLE negocios ADD COLUMN IF NOT EXISTS direccion TEXT DEFAULT NULL;
+ALTER TABLE negocios ADD COLUMN IF NOT EXISTS mensaje_bienvenida TEXT DEFAULT NULL;
 
--- 2. Comentario descriptivo
-COMMENT ON COLUMN negocios.mapa_url IS 'URL de Google Maps del negocio para embeber en la vista pública';
+-- Campo de ubicación (Google Maps)
+ALTER TABLE negocios ADD COLUMN IF NOT EXISTS mapa_url TEXT DEFAULT NULL;
