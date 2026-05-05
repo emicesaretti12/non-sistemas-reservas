@@ -41,6 +41,57 @@ const FAQS = [
   { q: '¿Incluye soporte técnico?', a: 'Sí. Soporte por WhatsApp directo con nuestro equipo, incluido en el plan.' },
 ]
 
+// Phone Mockup — animated demo preview
+function PhoneMockup() {
+  const [screen, setScreen] = useState(0)
+  useEffect(() => { const t = setInterval(() => setScreen(s => (s + 1) % 4), 3000); return () => clearInterval(t) }, [])
+  const screens = [
+    { title: 'Reserva Online', color: '#6c5ce7', items: ['Corte Clásico — $3.500','Barba Premium — $2.800','Combo Completo — $5.500'], badge: 'Paso 1: Elegí servicio' },
+    { title: 'Dashboard', color: '#0f172a', items: ['12 turnos hoy','$42.000 ingresos','98% ocupación'], badge: 'Panel en tiempo real' },
+    { title: 'CRM Clientes', color: '#059669', items: ['Martín — VIP (23 visitas)','Lucía — Frecuente (8)','Carlos — Nuevo (1)'], badge: 'Base automática' },
+    { title: '✓ Confirmado', color: '#6c5ce7', items: ['Corte + Barba','Hoy 15:30 hs','Carlos López'], badge: 'Confirmación instantánea' },
+  ]
+  const s = screens[screen]
+  return (
+    <div className="max-w-sm mx-auto px-5 pb-12 md:pb-16">
+      <div className="relative mx-auto w-[260px] md:w-[280px]">
+        {/* Phone frame */}
+        <div className="rounded-[2.5rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl overflow-hidden" style={{boxShadow:'0 40px 80px rgba(0,0,0,0.2)'}}>
+          {/* Notch */}
+          <div className="relative bg-slate-900 flex justify-center pt-2 pb-1"><div className="w-20 h-5 bg-slate-900 rounded-full"/></div>
+          {/* Screen */}
+          <div className="bg-white min-h-[380px] md:min-h-[400px] flex flex-col transition-all duration-700">
+            {/* Header */}
+            <div className="px-5 py-4 text-white flex items-center justify-between" style={{background:`linear-gradient(135deg,${s.color},${s.color}cc)`}}>
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-widest opacity-60">{s.badge}</p>
+                <h4 className="text-sm font-black tracking-tight mt-0.5">{s.title}</h4>
+              </div>
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center"><span className="text-[10px] font-black">NS</span></div>
+            </div>
+            {/* Content */}
+            <div className="flex-1 p-5 space-y-3">
+              {s.items.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 transition-all duration-500" style={{animationDelay:`${i*0.1}s`}}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-black shrink-0" style={{background:`linear-gradient(135deg,${s.color},${s.color}aa)`}}>{i+1}</div>
+                  <span className="text-xs font-bold text-slate-700">{item}</span>
+                </div>
+              ))}
+              {screen === 3 && <div className="mt-4 py-3 rounded-xl text-center text-white font-black text-[10px] uppercase tracking-widest" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}>Reserva Confirmada ✓</div>}
+            </div>
+          </div>
+          {/* Home bar */}
+          <div className="bg-white flex justify-center py-2"><div className="w-24 h-1 bg-slate-200 rounded-full"/></div>
+        </div>
+        {/* Screen dots */}
+        <div className="flex justify-center gap-2 mt-5">
+          {screens.map((_, i) => <button key={i} onClick={() => setScreen(i)} className={`w-2 h-2 rounded-full transition-all ${screen === i ? 'bg-purple-500 w-6' : 'bg-slate-300'}`}/>)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function LandingPage() {
   const nav = useNavigate()
   const [faq, setFaq] = useState(null)
@@ -98,7 +149,7 @@ export default function LandingPage() {
         </div>
 
         {/* SOCIAL PROOF STATS */}
-        <div className="max-w-4xl mx-auto px-5 md:px-8 pb-16 md:pb-24">
+        <div className="max-w-4xl mx-auto px-5 md:px-8 pb-8 md:pb-12">
           <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100">
             {[{n:200,s:'+',l:'Negocios Activos'},{n:15000,s:'+',l:'Reservas/mes'},{n:98,s:'%',l:'Uptime'},{n:4.9,s:'★',l:'Satisfacción',dec:true}].map((s,i)=>(
               <div key={i} className="ns-stat-landing py-6 md:py-8">
@@ -106,6 +157,21 @@ export default function LandingPage() {
                 <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{s.l}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* PHONE MOCKUP DEMO */}
+        <PhoneMockup />
+
+        {/* RUBROS MARQUEE */}
+        <div className="max-w-6xl mx-auto px-5 md:px-8 pb-16 md:pb-24">
+          <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em] text-center mb-4">Diseñado para todos los rubros</p>
+          <div className="overflow-hidden relative">
+            <div className="flex gap-3 ns-marquee" style={{width:'max-content'}}>
+              {[...Array(2)].flatMap((_,r)=>['🏥 Clínicas','💇 Barberías','🍽️ Restaurantes','💅 Estéticas','🐾 Veterinarias','🏋️ Gimnasios','📸 Estudios Foto','🎓 Academias','🧘 Spa & Wellness','🔧 Talleres','🏨 Hoteles','🎭 Eventos'].map((x,i)=>(
+                <span key={`${r}-${i}`} className="px-4 py-2 rounded-full bg-white border border-slate-100 text-[10px] font-bold text-slate-500 whitespace-nowrap shadow-sm">{x}</span>
+              )))}
+            </div>
           </div>
         </div>
       </section>
@@ -151,6 +217,35 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* AUTOMATIZACIÓN — Visual pipeline */}
+      <section className="py-16 md:py-28 bg-white border-y border-slate-100">
+        <div className="max-w-5xl mx-auto px-5 md:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">Automatización Total</span>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Vos te enfocás en tu trabajo.<br/><span className="text-slate-400">El sistema hace el resto.</span></h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-0">
+            {[
+              {emoji:'📱',t:'Cliente reserva',d:'Desde el celular, 24/7',c:'bg-purple-50 border-purple-100 text-purple-700'},
+              {emoji:'⚡',t:'Confirmación auto',d:'Mensaje instantáneo',c:'bg-blue-50 border-blue-100 text-blue-700'},
+              {emoji:'🔔',t:'Recordatorio',d:'WhatsApp automático',c:'bg-amber-50 border-amber-100 text-amber-700'},
+              {emoji:'📊',t:'CRM se actualiza',d:'Cliente + historial',c:'bg-emerald-50 border-emerald-100 text-emerald-700'},
+              {emoji:'💰',t:'Reporte generado',d:'Ingresos en tiempo real',c:'bg-pink-50 border-pink-100 text-pink-700'},
+            ].map((a,i)=>(
+              <div key={i} className="flex md:flex-col items-center gap-3 md:gap-0">
+                <div className={`flex-1 md:flex-none w-full p-4 md:p-5 rounded-2xl border text-center ${a.c} transition-all hover:scale-105`}>
+                  <span className="text-2xl">{a.emoji}</span>
+                  <p className="text-xs font-bold mt-2">{a.t}</p>
+                  <p className="text-[9px] font-medium opacity-70 mt-0.5">{a.d}</p>
+                </div>
+                {i<4&&<div className="hidden md:flex justify-center py-2"><svg className="w-4 h-4 text-slate-300 rotate-90" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>}
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-8">Todo esto pasa automáticamente. Sin intervención manual.</p>
         </div>
       </section>
 
