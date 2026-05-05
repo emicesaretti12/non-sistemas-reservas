@@ -16,6 +16,9 @@ import { getVocabulario, RUBROS_DISPONIBLES } from '../utils/vocabulario'
 // Wizard de Onboarding Guiado
 import OnboardingWizard from './OnboardingWizard'
 
+// Panel de Configuración Guiada Post-Onboarding
+import GuidedSetup from './GuidedSetup'
+
 export default function Dashboard({ session }) {
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
   const [loading, setLoading] = useState(true)
@@ -66,7 +69,7 @@ export default function Dashboard({ session }) {
   const [proximaCita, setProximaCita] = useState(null)
 
   // --- ESTADOS: CRM STATS (NUEVO) ---
-  const [crmStats, setCrmStats] = useState({ stockBajo: 0, empleadosActivos: 0, totalEmpleados: 0 })
+  const [crmStats, setCrmStats] = useState({ stockBajo: 0, empleadosActivos: 0, totalEmpleados: 0, totalServicios: 0 })
 
   // --- ESTADOS: DISTRIBUCIÓN SEMANAL ---
   const [distribucionSemanal, setDistribucionSemanal] = useState([0,0,0,0,0,0,0])
@@ -162,8 +165,10 @@ export default function Dashboard({ session }) {
       empTotal = emp.length
       empActivos = emp.filter(e => e.estado === 'activo').length
     }
+
+    const { count: svcCount } = await supabase.from('servicios').select('*', { count: 'exact', head: true }).eq('negocio_id', negocioId)
     
-    setCrmStats({ stockBajo, empleadosActivos: empActivos, totalEmpleados: empTotal })
+    setCrmStats({ stockBajo, empleadosActivos: empActivos, totalEmpleados: empTotal, totalServicios: svcCount || 0 })
   }
 
   /**
@@ -824,6 +829,15 @@ export default function Dashboard({ session }) {
               {/* ====== TAB: MONITOR — MEJORADO ====== */}
               {tab === 'inicio' && (
                 <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
+                  
+                  {/* GUIDED SETUP — Checklist de configuración post-onboarding */}
+                  <GuidedSetup
+                    negocio={negocio}
+                    serviciosCount={crmStats.totalServicios}
+                    empleadosCount={crmStats.totalEmpleados}
+                    onNavigate={(t) => setTab(t)}
+                    onDismiss={() => {}}
+                  />
                   
                   {/* PRÓXIMA CITA CARD — Solo si existe */}
                   {proximaCita && (
