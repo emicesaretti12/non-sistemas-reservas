@@ -88,6 +88,19 @@ export default function Turnos({ negocioId, rubro }) {
       setTodosLosTurnos(data || [])
     } catch (e) {
       console.error("Smart Agenda Error:", e.message)
+      // Si JWT expiró, intentar renovar sesión
+      if (e.message?.includes('JWT') || e.message?.includes('expired')) {
+        const { error: refreshErr } = await supabase.auth.refreshSession()
+        if (refreshErr) {
+          alert('Tu sesión expiró. Serás redirigido al login.')
+          await supabase.auth.signOut()
+          window.location.href = '/login'
+        } else {
+          // Reintentar la carga tras refresh exitoso
+          bootSmartAgenda()
+          return
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -230,7 +243,30 @@ export default function Turnos({ negocioId, rubro }) {
 
   async function cancelarTurno(id) {
     if (confirm('¿Estás seguro de que deseas cancelar y eliminar este turno?')) {
-      await supabase.from('turnos').delete().eq('id', id)
+      const { error } = await supabase.from('turnos').delete().eq('id', id)
+      
+      if (error) {
+        // Si el JWT expiró, intentar refrescar la sesión y reintentar
+        if (error.message?.includes('JWT') || error.code === '401' || error.message?.includes('expired')) {
+          const { error: refreshErr } = await supabase.auth.refreshSession()
+          if (refreshErr) {
+            alert('Tu sesión expiró. Serás redirigido al login.')
+            await supabase.auth.signOut()
+            window.location.href = '/login'
+            return
+          }
+          // Reintentar tras refresh exitoso
+          const { error: retryErr } = await supabase.from('turnos').delete().eq('id', id)
+          if (retryErr) {
+            alert('Error al eliminar el turno: ' + retryErr.message)
+            return
+          }
+        } else {
+          alert('Error al eliminar el turno: ' + error.message)
+          return
+        }
+      }
+      
       bootSmartAgenda()
     }
   }
