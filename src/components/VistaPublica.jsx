@@ -402,8 +402,6 @@ export default function VistaPublica() {
          ) : (
            <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${hexToRgba(accent, 0.15)} 0%, ${hexToRgba(accent, 0.05)} 100%)` }}></div>
          )}
-         <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/20 to-transparent"></div>
-         <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[#FDFDFC] to-transparent"></div>
       </header>
 
       <main className={`mx-auto relative z-20 -mt-14 md:-mt-16 px-4 transition-all duration-500 ${vistaActiva === 'catalogo' ? 'max-w-md lg:max-w-5xl' : 'max-w-md'}`}>
