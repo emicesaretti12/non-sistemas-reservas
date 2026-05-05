@@ -5,10 +5,11 @@ import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import VistaPublica from './components/VistaPublica'
 import ActualizarClave from './components/ActualizarClave'
+import LandingPage from './components/LandingPage'
 
 function App() {
   const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true) // 1. Nuevo estado de carga
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Consultar sesión inicial
@@ -29,7 +30,7 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // 3. Mientras comprobamos la sesión, mostramos un splash animado
+  // Mientras comprobamos la sesión, mostramos un splash animado
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center ns-animated-bg relative overflow-hidden">
@@ -55,6 +56,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* LANDING PAGE: Página de venta pública */}
+        <Route path="/" element={session ? <Navigate to="/admin" replace /> : <LandingPage />} />
+
         {/* RUTA PÚBLICA NUEVA CON NOMBRE: Debe estar arriba para que no la atrape el "*" */}
         <Route path="/app/:slug/:id" element={<VistaPublica />} />
         
@@ -77,7 +81,7 @@ function App() {
         />
 
         {/* RUTA POR DEFECTO: Siempre al final */}
-        <Route path="*" element={<Navigate to={session ? "/admin" : "/login"} replace />} />
+        <Route path="*" element={<Navigate to={session ? "/admin" : "/"} replace />} />
       </Routes>
     </BrowserRouter>
   )

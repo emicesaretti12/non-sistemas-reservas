@@ -13,6 +13,9 @@ import Inventario from './Inventario'
 // Sistema de Vocabulario Multi-Negocio
 import { getVocabulario, RUBROS_DISPONIBLES } from '../utils/vocabulario'
 
+// Wizard de Onboarding Guiado
+import OnboardingWizard from './OnboardingWizard'
+
 export default function Dashboard({ session }) {
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
   const [loading, setLoading] = useState(true)
@@ -698,28 +701,8 @@ export default function Dashboard({ session }) {
       <main className={`max-w-7xl mx-auto p-4 md:p-8 ${!negocio?.es_admin_plataforma && negocio ? 'ns-has-bottom-nav' : ''}`}>
         
         {!negocio ? (
-          /* ESCENARIO: ONBOARDING */
-          <div className="max-w-xl mx-auto mt-4 md:mt-10">
-            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-[0_20px_40px_-12px_rgba(0,0,0,0.1)] md:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] p-6 md:p-10 border border-slate-100 text-slate-900 animate-in zoom-in-95 duration-700">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tighter mb-2">Non Sistemas</h2>
-              <p className="text-slate-500 mb-8 md:mb-10 text-sm md:text-base font-medium">Inicie la activación de su infraestructura digital.</p>
-              <form onSubmit={handleOnboarding} className="space-y-5 md:space-y-6">
-                <div className="space-y-1">
-                  <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Razón Social</label>
-                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1rem] md:rounded-2xl outline-none focus:bg-white focus:border-slate-900 transition-all font-semibold text-sm md:text-base" placeholder="Ej: Barbería Central, Restaurante La Casona" value={nombreNegocio} onChange={(e) => setNombreNegocio(e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Ecosistema de Rubro</label>
-                  <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1rem] md:rounded-2xl outline-none font-semibold cursor-pointer appearance-none text-sm md:text-base" value={rubroSeleccionado} onChange={(e) => setRubroSeleccionado(e.target.value)}>
-                    {RUBROS_DISPONIBLES.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-                <button disabled={creando} className="w-full bg-slate-900 text-white font-bold py-4 md:py-5 rounded-[1rem] md:rounded-2xl active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-[10px] md:text-[11px] shadow-xl md:shadow-2xl flex justify-center items-center mt-2">
-                  {creando ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Configurar Entorno'}
-                </button>
-              </form>
-            </div>
-          </div>
+          /* ESCENARIO: ONBOARDING WIZARD GUIADO */
+          <OnboardingWizard session={session} onComplete={() => inicializarPanel()} />
         ) : negocio.es_admin_plataforma ? (
           /* ==========================================================
              VISTA: SUPER ADMIN (NUCLEUS) — SIN CAMBIOS
