@@ -187,10 +187,25 @@ function HeroGeometric({
                         initial="hidden"
                         animate="visible"
                     >
-                        <p className="text-base sm:text-lg md:text-xl text-white/40 mb-8 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
-                            Crafting exceptional digital experiences through
-                            innovative design and cutting-edge technology.
+                        <p className="text-base sm:text-lg md:text-xl text-white/40 mb-10 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
+                            La plataforma que automatiza reservas, gestiona clientes
+                            y potencia tu negocio con datos en tiempo real.
                         </p>
+                    </motion.div>
+
+                    <motion.div
+                        custom={3}
+                        variants={fadeUpVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="flex flex-col sm:flex-row gap-4 justify-center px-4"
+                    >
+                        <a href="#" className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base hover:scale-[1.03] transition-transform shadow-2xl shadow-white/10">
+                            Empezar gratis →
+                        </a>
+                        <a href="#" className="px-8 py-4 bg-white/[0.05] text-white/80 font-medium rounded-2xl text-base hover:bg-white/[0.08] transition-colors border border-white/[0.1] backdrop-blur-sm">
+                            Ver cómo funciona
+                        </a>
                     </motion.div>
                 </div>
             </div>
