@@ -253,7 +253,7 @@ export function CinematicHero({
         .to([".mockup-scroll-wrapper", ".floating-badge", ".card-left-text", ".card-right-text"], {
           scale: 0.9, y: -30, z: -100, autoAlpha: 0, ease: "power3.in", duration: 0.8, stagger: 0.03,
         })
-        .to(".main-card", { width: isMobile ? "92vw" : "85vw", height: isMobile ? "92vh" : "85vh", borderRadius: isMobile ? "32px" : "40px", ease: "expo.inOut", duration: 1 }, "pullback")
+        .to(".main-card", { width: isMobile ? "94vw" : "85vw", height: isMobile ? "94dvh" : "85vh", borderRadius: isMobile ? "24px" : "40px", ease: "expo.inOut", duration: 1 }, "pullback")
         .to(".cta-wrapper", { scale: 1, filter: "blur(0px)", ease: "expo.inOut", duration: 1 }, "pullback")
         .to(".main-card", { y: -window.innerHeight - 300, ease: "power3.in", duration: 0.8 });
     }, containerRef);
@@ -261,17 +261,17 @@ export function CinematicHero({
   },[metricValue]);
 
   return (
-    <div ref={containerRef} className={cn("relative w-screen h-screen h-[100dvh] overflow-hidden flex items-center justify-center bg-background text-foreground font-sans antialiased", className)} style={{ perspective: "1500px" }} {...props}>
+    <div ref={containerRef} className={cn("relative w-full h-[100dvh] overflow-hidden flex items-center justify-center bg-background text-foreground font-sans antialiased", className)} style={{ perspective: "1500px" }} {...props}>
       <style dangerouslySetInnerHTML={{ __html: INJECTED_STYLES }} />
       <div className="film-grain" aria-hidden="true" />
       <div className="bg-grid-theme absolute inset-0 z-0 pointer-events-none opacity-50" aria-hidden="true" />
 
-      <div className="hero-text-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 will-change-transform transform-style-3d">
+      <div className="hero-text-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-full px-4 will-change-transform transform-style-3d">
         <h1 className="text-track gsap-reveal text-3d-matte text-[2rem] sm:text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">{tagline1}</h1>
         <h1 className="text-days gsap-reveal text-silver-matte text-[2rem] sm:text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">{tagline2}</h1>
       </div>
 
-      <div className="cta-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 gsap-reveal pointer-events-auto will-change-transform">
+      <div className="cta-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-full px-4 gsap-reveal pointer-events-auto will-change-transform">
         <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 tracking-tight text-silver-matte">{ctaHeading}</h2>
         <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-8 sm:mb-12 max-w-xl mx-auto font-light leading-relaxed px-2">{ctaDescription}</p>
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto px-4 sm:px-0">
@@ -287,11 +287,11 @@ export function CinematicHero({
       </div>
 
       <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none" style={{ perspective: "1500px" }}>
-        <div ref={mainCardRef} className="main-card premium-depth-card relative overflow-hidden gsap-reveal flex items-center justify-center pointer-events-auto w-[96vw] sm:w-[92vw] md:w-[85vw] h-[92vh] h-[92dvh] md:h-[85vh] md:h-[85dvh] rounded-[24px] sm:rounded-[32px] md:rounded-[40px]">
+        <div ref={mainCardRef} className="main-card premium-depth-card relative overflow-hidden gsap-reveal flex items-center justify-center pointer-events-auto w-[94vw] sm:w-[92vw] md:w-[85vw] h-[94dvh] sm:h-[92dvh] md:h-[85vh] md:h-[85dvh] rounded-[24px] sm:rounded-[32px] md:rounded-[40px]">
           <div className="card-sheen" aria-hidden="true" />
           <div className="relative w-full h-full max-w-7xl mx-auto px-4 lg:px-12 flex flex-col justify-evenly lg:grid lg:grid-cols-3 items-center lg:gap-8 z-10 py-6 lg:py-0">
             <div className="card-right-text gsap-reveal order-1 lg:order-3 flex justify-center lg:justify-end z-20 w-full">
-              <h2 className="text-4xl sm:text-6xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-card-silver-matte lg:mt-0">{brandName}</h2>
+              <h2 className="text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-card-silver-matte lg:mt-0">{brandName}</h2>
             </div>
             <div className="mockup-scroll-wrapper order-2 lg:order-2 relative w-full h-[320px] sm:h-[380px] lg:h-[600px] flex items-center justify-center z-10" style={{ perspective: "1000px" }}>
               <div className="relative w-full h-full flex items-center justify-center transform scale-[0.55] sm:scale-[0.65] md:scale-85 lg:scale-100">
