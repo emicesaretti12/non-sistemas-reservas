@@ -192,24 +192,27 @@ export function CinematicHero({
   const requestRef = useRef<number>(0);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const isTouchDevice = 'ontouchstart' in window;
+    const handlePointer = (clientX: number, clientY: number) => {
       if (window.scrollY > window.innerHeight * 2) return;
       cancelAnimationFrame(requestRef.current);
       requestRef.current = requestAnimationFrame(() => {
         if (mainCardRef.current && mockupRef.current) {
           const rect = mainCardRef.current.getBoundingClientRect();
-          const mouseX = e.clientX - rect.left;
-          const mouseY = e.clientY - rect.top;
-          mainCardRef.current.style.setProperty("--mouse-x", `${mouseX}px`);
-          mainCardRef.current.style.setProperty("--mouse-y", `${mouseY}px`);
-          const xVal = (e.clientX / window.innerWidth - 0.5) * 2;
-          const yVal = (e.clientY / window.innerHeight - 0.5) * 2;
-          gsap.to(mockupRef.current, { rotationY: xVal * 12, rotationX: -yVal * 12, ease: "power3.out", duration: 1.2 });
+          mainCardRef.current.style.setProperty("--mouse-x", `${clientX - rect.left}px`);
+          mainCardRef.current.style.setProperty("--mouse-y", `${clientY - rect.top}px`);
+          const xVal = (clientX / window.innerWidth - 0.5) * 2;
+          const yVal = (clientY / window.innerHeight - 0.5) * 2;
+          const intensity = isTouchDevice ? 6 : 12;
+          gsap.to(mockupRef.current, { rotationY: xVal * intensity, rotationX: -yVal * intensity, ease: "power3.out", duration: 1.2 });
         }
       });
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => { window.removeEventListener("mousemove", handleMouseMove); cancelAnimationFrame(requestRef.current); };
+    const handleMouse = (e: MouseEvent) => handlePointer(e.clientX, e.clientY);
+    const handleTouch = (e: TouchEvent) => { const t = e.touches[0]; if (t) handlePointer(t.clientX, t.clientY); };
+    window.addEventListener("mousemove", handleMouse);
+    if (isTouchDevice) window.addEventListener("touchmove", handleTouch, { passive: true });
+    return () => { window.removeEventListener("mousemove", handleMouse); window.removeEventListener("touchmove", handleTouch); cancelAnimationFrame(requestRef.current); };
   },[]);
 
   useEffect(() => {
@@ -258,20 +261,20 @@ export function CinematicHero({
   },[metricValue]);
 
   return (
-    <div ref={containerRef} className={cn("relative w-screen h-screen overflow-hidden flex items-center justify-center bg-background text-foreground font-sans antialiased", className)} style={{ perspective: "1500px" }} {...props}>
+    <div ref={containerRef} className={cn("relative w-screen h-screen h-[100dvh] overflow-hidden flex items-center justify-center bg-background text-foreground font-sans antialiased", className)} style={{ perspective: "1500px" }} {...props}>
       <style dangerouslySetInnerHTML={{ __html: INJECTED_STYLES }} />
       <div className="film-grain" aria-hidden="true" />
       <div className="bg-grid-theme absolute inset-0 z-0 pointer-events-none opacity-50" aria-hidden="true" />
 
       <div className="hero-text-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 will-change-transform transform-style-3d">
-        <h1 className="text-track gsap-reveal text-3d-matte text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">{tagline1}</h1>
-        <h1 className="text-days gsap-reveal text-silver-matte text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">{tagline2}</h1>
+        <h1 className="text-track gsap-reveal text-3d-matte text-[2rem] sm:text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">{tagline1}</h1>
+        <h1 className="text-days gsap-reveal text-silver-matte text-[2rem] sm:text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">{tagline2}</h1>
       </div>
 
       <div className="cta-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 gsap-reveal pointer-events-auto will-change-transform">
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight text-silver-matte">{ctaHeading}</h2>
-        <p className="text-muted-foreground text-lg md:text-xl mb-12 max-w-xl mx-auto font-light leading-relaxed">{ctaDescription}</p>
-        <div className="flex flex-col sm:flex-row gap-6">
+        <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 tracking-tight text-silver-matte">{ctaHeading}</h2>
+        <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-8 sm:mb-12 max-w-xl mx-auto font-light leading-relaxed px-2">{ctaDescription}</p>
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto px-4 sm:px-0">
           <a href="#" className="btn-modern-light flex items-center justify-center gap-3 px-10 py-4 rounded-[1.25rem] group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             <span className="text-lg font-bold tracking-tight">Empezar gratis</span>
@@ -284,14 +287,14 @@ export function CinematicHero({
       </div>
 
       <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none" style={{ perspective: "1500px" }}>
-        <div ref={mainCardRef} className="main-card premium-depth-card relative overflow-hidden gsap-reveal flex items-center justify-center pointer-events-auto w-[92vw] md:w-[85vw] h-[92vh] md:h-[85vh] rounded-[32px] md:rounded-[40px]">
+        <div ref={mainCardRef} className="main-card premium-depth-card relative overflow-hidden gsap-reveal flex items-center justify-center pointer-events-auto w-[96vw] sm:w-[92vw] md:w-[85vw] h-[92vh] h-[92dvh] md:h-[85vh] md:h-[85dvh] rounded-[24px] sm:rounded-[32px] md:rounded-[40px]">
           <div className="card-sheen" aria-hidden="true" />
           <div className="relative w-full h-full max-w-7xl mx-auto px-4 lg:px-12 flex flex-col justify-evenly lg:grid lg:grid-cols-3 items-center lg:gap-8 z-10 py-6 lg:py-0">
             <div className="card-right-text gsap-reveal order-1 lg:order-3 flex justify-center lg:justify-end z-20 w-full">
-              <h2 className="text-6xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-card-silver-matte lg:mt-0">{brandName}</h2>
+              <h2 className="text-4xl sm:text-6xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-card-silver-matte lg:mt-0">{brandName}</h2>
             </div>
-            <div className="mockup-scroll-wrapper order-2 lg:order-2 relative w-full h-[380px] lg:h-[600px] flex items-center justify-center z-10" style={{ perspective: "1000px" }}>
-              <div className="relative w-full h-full flex items-center justify-center transform scale-[0.65] md:scale-85 lg:scale-100">
+            <div className="mockup-scroll-wrapper order-2 lg:order-2 relative w-full h-[320px] sm:h-[380px] lg:h-[600px] flex items-center justify-center z-10" style={{ perspective: "1000px" }}>
+              <div className="relative w-full h-full flex items-center justify-center transform scale-[0.55] sm:scale-[0.65] md:scale-85 lg:scale-100">
                 <div ref={mockupRef} className="relative w-[280px] h-[580px] rounded-[3rem] iphone-bezel flex flex-col will-change-transform transform-style-3d">
                   <div className="absolute top-[120px] -left-[3px] w-[3px] h-[25px] hardware-btn rounded-l-md z-0" aria-hidden="true" />
                   <div className="absolute top-[160px] -left-[3px] w-[3px] h-[45px] hardware-btn rounded-l-md z-0" aria-hidden="true" />

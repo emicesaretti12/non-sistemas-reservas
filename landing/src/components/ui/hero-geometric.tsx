@@ -95,7 +95,7 @@ function HeroGeometric({
     };
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#030303]">
+        <div className="relative min-h-screen min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#030303]">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-rose-500/[0.05] blur-3xl" />
 
             <div className="absolute inset-0 overflow-hidden">
@@ -105,7 +105,7 @@ function HeroGeometric({
                     height={140}
                     rotate={12}
                     gradient="from-indigo-500/[0.15]"
-                    className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
+                    className="left-[-15%] sm:left-[-10%] md:left-[-5%] top-[15%] md:top-[20%] hidden sm:block"
                 />
 
                 <ElegantShape
@@ -166,7 +166,7 @@ function HeroGeometric({
                         initial="hidden"
                         animate="visible"
                     >
-                        <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 md:mb-8 tracking-tight">
+                        <h1 className="text-[2.25rem] leading-[1.1] sm:text-6xl md:text-8xl font-bold mb-4 sm:mb-6 md:mb-8 tracking-tight">
                             <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
                                 {title1}
                             </span>
@@ -198,12 +198,12 @@ function HeroGeometric({
                         variants={fadeUpVariants}
                         initial="hidden"
                         animate="visible"
-                        className="flex flex-col sm:flex-row gap-4 justify-center px-4"
+                        className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 w-full sm:w-auto"
                     >
-                        <a href="#" className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base hover:scale-[1.03] transition-transform shadow-2xl shadow-white/10">
+                        <a href="#" className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base hover:scale-[1.03] transition-transform shadow-2xl shadow-white/10 text-center">
                             Empezar gratis →
                         </a>
-                        <a href="#" className="px-8 py-4 bg-white/[0.05] text-white/80 font-medium rounded-2xl text-base hover:bg-white/[0.08] transition-colors border border-white/[0.1] backdrop-blur-sm">
+                        <a href="#" className="px-8 py-4 bg-white/[0.05] text-white/80 font-medium rounded-2xl text-base hover:bg-white/[0.08] transition-colors border border-white/[0.1] backdrop-blur-sm text-center">
                             Ver cómo funciona
                         </a>
                     </motion.div>

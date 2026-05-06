@@ -1,32 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FAFAFE;
-  --foreground: #0f172a;
-  --color-background: #FAFAFE;
-  --color-foreground: #0f172a;
-  --muted-foreground: #64748b;
+  --background: #030303;
+  --foreground: #ededed;
+  --color-background: #030303;
+  --color-foreground: #ededed;
+  --muted-foreground: #a1a1aa;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --color-background: #0a0a0a;
-    --color-foreground: #ededed;
-    --muted-foreground: #a1a1aa;
-  }
+/* Force dark always — this is a dark landing */
+html {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Mobile viewport height fix (Safari address bar) */
+.h-screen-safe { height: 100vh; height: 100dvh; }
+.min-h-screen-safe { min-height: 100vh; min-height: 100dvh; }
 
 .bg-background { background-color: var(--background); }
 .text-foreground { color: var(--foreground); }
 .text-muted-foreground { color: var(--muted-foreground); }
+
+/* Prevent horizontal overflow on mobile */
+section, footer { overflow-x: hidden; }
+
+/* Smooth touch scrolling */
+* { -webkit-overflow-scrolling: touch; }
 
 /* BackgroundGradientAnimation Keyframes */
 @keyframes first {

@@ -75,7 +75,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="relative py-24 md:py-32 bg-[#030303] overflow-hidden">
+    <section className="relative py-16 sm:py-24 md:py-32 bg-[#030303] overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#030303] via-transparent to-[#030303]" />
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.div
@@ -83,8 +83,8 @@ export function FeaturesSection() {
           variants={fadeIn}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-16 md:mb-20"
+          viewport={{ once: true, margin: "-50px" }}
+          className="text-center mb-10 sm:mb-16 md:mb-20"
         >
           <span className="inline-block text-sm text-indigo-400 font-medium tracking-widest uppercase mb-4">
             Funcionalidades
@@ -100,7 +100,7 @@ export function FeaturesSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {features.map((f, i) => (
             <motion.div
               key={i}
@@ -109,7 +109,7 @@ export function FeaturesSection() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
-              className="group relative p-8 rounded-3xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-500 hover:bg-white/[0.04]"
+              className="group relative p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-500 hover:bg-white/[0.04] active:bg-white/[0.06]"
             >
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 flex items-center justify-center text-indigo-400 mb-6 border border-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
                 {f.icon}
@@ -136,10 +136,10 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="relative py-20 bg-[#030303]">
+    <section className="relative py-14 sm:py-20 bg-[#030303]">
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/[0.03] via-transparent to-rose-500/[0.03]" />
       <div className="relative z-10 container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
           {stats.map((s, i) => (
             <motion.div
               key={i}
@@ -150,7 +150,7 @@ export function StatsSection() {
               viewport={{ once: true }}
               className="text-center"
             >
-              <div className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight mb-2">
+              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight mb-1 sm:mb-2">
                 {s.value}
               </div>
               <div className="text-white/40 text-sm md:text-base font-light tracking-wide">
@@ -176,7 +176,7 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="relative py-24 md:py-32 bg-[#030303] overflow-hidden">
+    <section className="relative py-16 sm:py-24 md:py-32 bg-[#030303] overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.div
           custom={0}
@@ -197,7 +197,7 @@ export function HowItWorksSection() {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {steps.map((s, i) => (
             <motion.div
               key={i}
@@ -252,7 +252,7 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section className="relative py-24 md:py-32 bg-[#030303] overflow-hidden">
+    <section className="relative py-16 sm:py-24 md:py-32 bg-[#030303] overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/[0.02] to-transparent" />
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.div
@@ -260,8 +260,8 @@ export function TestimonialsSection() {
           variants={fadeIn}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-16"
+          viewport={{ once: true, margin: "-50px" }}
+          className="text-center mb-10 sm:mb-16"
         >
           <span className="inline-block text-sm text-violet-400 font-medium tracking-widest uppercase mb-4">
             Testimonios
@@ -274,7 +274,7 @@ export function TestimonialsSection() {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
@@ -283,7 +283,7 @@ export function TestimonialsSection() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
-              className="p-8 rounded-3xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors duration-500"
+              className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors duration-500"
             >
               <div className="flex gap-1 mb-6">
                 {[...Array(5)].map((_, j) => (
@@ -347,7 +347,7 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section className="relative py-24 md:py-32 bg-[#030303] overflow-hidden">
+    <section className="relative py-16 sm:py-24 md:py-32 bg-[#030303] overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.div
           custom={0}
@@ -368,7 +368,7 @@ export function PricingSection() {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {plans.map((p, i) => (
             <motion.div
               key={i}
@@ -378,7 +378,7 @@ export function PricingSection() {
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
               className={cn(
-                "relative p-8 rounded-3xl border transition-all duration-500",
+                "relative p-6 sm:p-8 rounded-2xl sm:rounded-3xl border transition-all duration-500",
                 p.highlighted
                   ? "bg-gradient-to-b from-indigo-500/[0.08] to-transparent border-indigo-500/30 scale-[1.02]"
                   : "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]"
@@ -407,7 +407,7 @@ export function PricingSection() {
               </ul>
               <button
                 className={cn(
-                  "w-full py-3 rounded-2xl font-semibold text-sm transition-all duration-300",
+                  "w-full py-3.5 sm:py-3 rounded-2xl font-semibold text-sm transition-all duration-300 active:scale-[0.98]",
                   p.highlighted
                     ? "bg-white text-slate-900 hover:scale-[1.02] shadow-lg shadow-indigo-500/20"
                     : "bg-white/[0.05] text-white border border-white/[0.1] hover:bg-white/[0.08]"
@@ -428,10 +428,10 @@ export function PricingSection() {
    ═══════════════════════════════════════════════════ */
 export function Footer() {
   return (
-    <footer className="relative py-16 bg-[#030303] border-t border-white/[0.04]">
+    <footer className="relative py-12 sm:py-16 bg-[#030303] border-t border-white/[0.04]">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
+          <div className="col-span-2 sm:col-span-2 md:col-span-1">
             <h3 className="text-xl font-bold text-white tracking-tight mb-3">Non Sistemas</h3>
             <p className="text-white/30 text-sm font-light leading-relaxed">
               Plataforma profesional de gestión de reservas para negocios modernos.
