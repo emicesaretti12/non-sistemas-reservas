@@ -37,16 +37,16 @@ export default function OnboardingWizard({ session, onComplete }) {
   const vocab = getVocabulario(data.rubro || RUBROS_DISPONIBLES[0])
 
   const steps = [
-    { id: 'welcome', bot: () => "¡Hola! 👋 Qué bueno tenerte por acá. Vamos a armar tu app de reservas en un par de minutos. ¿Arrancamos?", type: 'button', btnText: '¡Dale, empecemos!' },
+    { id: 'welcome', bot: () => "¡Hola! 👋 Vamos a armar tu app de reservas en un par de minutos. Fijate la pantalla de la derecha, ¡ahí vas a ver cómo se va creando en vivo! ¿Arrancamos?", type: 'button', btnText: '¡Dale, empecemos!' },
     { id: 'nombre', bot: () => "Primero lo primero... 📝 ¿Cómo se llama tu negocio?", type: 'text', placeholder: 'Ej: Barbería Central' },
-    { id: 'rubro', bot: (d) => `¡Me encanta "${d.nombre}"! 🚀 ¿A qué rubro se dedican?`, type: 'options', options: RUBROS_DISPONIBLES },
-    { id: 'color', bot: () => "¡Perfecto! Ahora vamos a darle tu estilo. 🎨 Elegí el color de tu marca para tu app en vivo.", type: 'color' },
-    { id: 'descripcion', bot: () => "¡Queda genial! ✨ ¿Querés agregar una frase corta que describa tu negocio? (Opcional)", type: 'textarea' },
-    { id: 'instagram', bot: () => "¡Casi terminamos con el perfil! 📸 ¿Tenés un usuario de Instagram para asociar? (Opcional)", type: 'instagram' },
-    { id: 'horarios', bot: () => "Ahora lo importante: Tus horarios de atención 🕒. Podés agregar pausas.", type: 'horarios' },
-    { id: 'servicio', bot: () => `¡Excelente! Necesitamos tu primer ${vocab.servicio || 'servicio'}. ¿Qué vas a ofrecer y a qué precio?`, type: 'servicio' },
-    { id: 'staff', bot: () => `Por último, ¿cómo se llama el primer ${vocab.empleado || 'profesional'} de tu equipo? (Podés ser vos mismo)`, type: 'staff' },
-    { id: 'saving', bot: () => "¡Todo listo! 🪄 Estoy construyendo y desplegando tu plataforma...", type: 'loading' },
+    { id: 'rubro', bot: (d) => `¡Me encanta "${d.nombre}"! Mirá cómo ya aparece en tu app. 🚀 ¿A qué rubro se dedican?`, type: 'options', options: RUBROS_DISPONIBLES },
+    { id: 'color', bot: () => "¡Perfecto! 🎨 Ahora elegí un color para tu marca. Vas a ver cómo toda la app de la derecha cambia instantáneamente.", type: 'color' },
+    { id: 'descripcion', bot: () => "¡Qué buen color! ✨ ¿Querés agregar una frase corta que describa tu negocio? (Va a aparecer debajo del título)", type: 'textarea' },
+    { id: 'instagram', bot: () => "¡Casi terminamos el perfil! 📸 ¿Tenés Instagram? Agregalo y aparecerá el botón en tu app.", type: 'instagram' },
+    { id: 'horarios', bot: () => "Ahora lo importante: Tus horarios de atención 🕒.", type: 'horarios' },
+    { id: 'servicio', bot: () => `¡Excelente! Para que puedan reservar, necesitamos un ${vocab.servicio || 'servicio'}. ¿Qué vas a ofrecer y a qué precio?`, type: 'servicio' },
+    { id: 'staff', bot: () => `Por último, ¿cómo se llama el primer ${vocab.empleado || 'profesional'} de tu equipo?`, type: 'staff' },
+    { id: 'saving', bot: () => "¡Todo listo! 🪄 Instalando tu aplicación en la nube...", type: 'loading' },
     { id: 'listo', bot: () => "🎉 ¡Felicitaciones! Tu app está activa.", type: 'success' },
   ]
 
@@ -86,7 +86,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       if (nextStep.id === 'saving') {
         await executeBackendCreation(newData, nextIdx)
       }
-    }, 1000)
+    }, 1200)
   }
 
   const executeBackendCreation = async (finalData, savingIdx) => {
@@ -136,7 +136,7 @@ export default function OnboardingWizard({ session, onComplete }) {
     } catch (e) { alert("Error al provisionar sistema: " + e.message) }
   }
 
-  const springConfig = { type: "spring", stiffness: 350, damping: 25 }
+  const springConfig = { type: "spring", stiffness: 400, damping: 25 }
 
   const renderInput = () => {
     if (isTyping) return null
@@ -210,36 +210,10 @@ export default function OnboardingWizard({ session, onComplete }) {
       case 'color':
         return (
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={springConfig} className="w-full flex flex-col gap-4">
-            {/* Live Preview IN THE CHAT */}
-            <div className="bg-white rounded-[2rem] border border-slate-200 shadow-md w-full overflow-hidden relative">
-              <div className="h-full w-full bg-slate-50 relative flex flex-col pb-6">
-                <motion.div layout className="h-24 relative rounded-b-[1.5rem]" style={{ backgroundColor: `${data.color}15` }}>
-                  <motion.div layout className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-xl border-4 border-white flex items-center justify-center shadow-md overflow-hidden" style={{ backgroundColor: data.color }}>
-                     <span className="font-black text-white text-xl drop-shadow-sm">{data.nombre ? data.nombre.substring(0,1).toUpperCase() : 'NS'}</span>
-                  </motion.div>
-                </motion.div>
-                <div className="mt-8 text-center px-4">
-                  <h4 className="font-black text-lg text-slate-900 truncate">{data.nombre || 'Tu Negocio'}</h4>
-                </div>
-                <div className="mt-4 px-4 space-y-3">
-                  <div className="p-3 rounded-2xl bg-white shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                      <p className="text-sm font-black text-slate-800">Corte Clásico</p>
-                      <p className="text-[10px] font-medium text-slate-400">30 min</p>
-                    </div>
-                    <motion.button layout className="px-4 py-2 rounded-xl text-[10px] font-black text-white shadow-sm" style={{ backgroundColor: data.color }}>
-                      Reservar
-                    </motion.button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Controles de Color */}
             <div className="bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm space-y-4 w-full">
               <div className="flex gap-2 justify-between">
-               {['#0EA5E9', '#10B981', '#F43F5E', '#8B5CF6', '#F59E0B'].map(c => (
-                 <motion.button key={c} onClick={() => setData({...data, color: c})} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="flex-1 aspect-square rounded-2xl border-4 shadow-sm" style={{ backgroundColor: c, borderColor: data.color === c ? '#0f172a' : 'transparent' }}></motion.button>
+               {['#0EA5E9', '#10B981', '#F43F5E', '#8B5CF6', '#F59E0B', '#0f172a'].map(c => (
+                 <motion.button key={c} onClick={() => setData({...data, color: c})} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} className="flex-1 aspect-square rounded-2xl border-4 shadow-sm" style={{ backgroundColor: c, borderColor: data.color === c ? '#cbd5e1' : 'transparent' }}></motion.button>
                ))}
               </div>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={() => advance(`Color elegido: ${data.color}`)} className="w-full py-4 bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-xl shadow-md">
@@ -278,7 +252,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex flex-col gap-2 pl-12 overflow-hidden">
                           <label className="flex items-center gap-2 cursor-pointer pt-1">
                             <input type="checkbox" checked={data.horarios[d].pausa || false} onChange={e => setData(p => ({ ...p, horarios: { ...p.horarios, [d]: { ...p.horarios[d], pausa: e.target.checked } } }))} className="w-3 h-3 rounded border-slate-300 text-sky-500" />
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Corte de descanso</span>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Corte</span>
                           </label>
                           <AnimatePresence>
                             {data.horarios[d].pausa && (
@@ -375,17 +349,17 @@ export default function OnboardingWizard({ session, onComplete }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#E2E8F0] flex items-center justify-center p-0 md:p-8 selection:bg-sky-200 font-sans">
+    <div className="min-h-screen bg-[#E2E8F0] flex flex-col lg:flex-row items-center justify-center gap-12 p-4 lg:p-8 selection:bg-sky-200 font-sans">
       
-      {/* Contenedor tipo "Teléfono Celular" */}
-      <div className="w-full h-full md:w-[400px] md:h-[850px] bg-[#F4F9FF] md:rounded-[3rem] md:border-[10px] md:border-slate-800 md:shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative flex flex-col overflow-hidden">
+      {/* TELÉFONO 1: EL CHAT (Asistente) */}
+      <div className="w-full h-[90vh] lg:w-[400px] lg:h-[850px] bg-[#F4F9FF] lg:rounded-[3rem] lg:border-[10px] lg:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden shrink-0">
         
         {/* Notch / Dynamic Island Falso para Desktop */}
-        <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-[1.2rem] z-50"></div>
+        <div className="hidden lg:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-[1.2rem] z-50"></div>
 
         {/* Top Navbar */}
-        <nav className="h-16 bg-white/80 backdrop-blur-md border-b border-sky-100 flex items-center justify-between px-5 sticky top-0 z-40">
-          <div className="flex items-center gap-3 mt-2 md:mt-0">
+        <nav className="h-16 bg-white/80 backdrop-blur-md border-b border-sky-100 flex items-center justify-between px-5 sticky top-0 z-40 shrink-0">
+          <div className="flex items-center gap-3 mt-2 lg:mt-0">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-sky-300 flex items-center justify-center shadow-md">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
@@ -394,7 +368,7 @@ export default function OnboardingWizard({ session, onComplete }) {
               <p className="text-[9px] font-bold text-sky-500">Asistente Virtual</p>
             </div>
           </div>
-          <div className="flex gap-1 mt-2 md:mt-0">
+          <div className="flex gap-1 mt-2 lg:mt-0">
             <div className="text-[10px] font-black text-slate-400">{stepIndex + 1}/{steps.length}</div>
           </div>
         </nav>
@@ -448,7 +422,7 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div ref={messagesEndRef} className="h-2" />
         </div>
 
-        {/* Input Area (Bottom sheet style) */}
+        {/* Input Area */}
         <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#F4F9FF] via-[#F4F9FF] to-transparent pt-12 pb-6 px-4 z-40 pointer-events-none">
           <div className="w-full flex justify-center pointer-events-auto">
             <AnimatePresence mode="wait">
@@ -458,6 +432,89 @@ export default function OnboardingWizard({ session, onComplete }) {
         </div>
 
       </div>
+
+      {/* TELÉFONO 2: LIVE PREVIEW (La vista al público) - Oculto en móviles */}
+      <motion.div 
+        initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.3 }}
+        className="hidden lg:flex w-[400px] h-[850px] bg-[#F8FAFC] rounded-[3rem] border-[10px] border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.1)] relative flex-col overflow-hidden shrink-0"
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-200 rounded-b-[1.2rem] z-50"></div>
+        
+        <div className="flex-1 overflow-y-auto pb-10">
+          {/* Header */}
+          <motion.div layout className="h-40 relative rounded-b-[2rem] transition-colors duration-500" style={{ backgroundColor: `${data.color}15` }}>
+            <motion.div layout className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-[1.5rem] border-4 border-[#F8FAFC] flex items-center justify-center shadow-lg transition-colors duration-500 overflow-hidden" style={{ backgroundColor: data.color }}>
+                <span className="font-black text-white text-3xl drop-shadow-sm">{data.nombre ? data.nombre.substring(0,1).toUpperCase() : 'NS'}</span>
+            </motion.div>
+          </motion.div>
+
+          {/* Info Principal */}
+          <div className="mt-14 text-center px-6">
+            <h1 className="font-black text-2xl text-slate-900 tracking-tight">{data.nombre || 'Nombre de tu Negocio'}</h1>
+            <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">{data.rubro || 'Tu Rubro'}</p>
+            {data.descripcion && (
+              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-sm font-medium text-slate-600 mt-4 leading-relaxed">
+                "{data.descripcion}"
+              </motion.p>
+            )}
+            {data.instagram && (
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-4 flex justify-center">
+                <span className="px-4 py-1.5 bg-pink-50 text-pink-500 text-xs font-black rounded-full border border-pink-100 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                  {data.instagram}
+                </span>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Servicios */}
+          <div className="mt-8 px-6 space-y-4">
+            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Servicios Disponibles</h3>
+            
+            {data.svcNombre ? (
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-4 rounded-3xl bg-white shadow-sm border border-slate-100 flex flex-col gap-4">
+                <div>
+                  <div className="flex justify-between items-start">
+                    <p className="text-base font-black text-slate-800">{data.svcNombre}</p>
+                    <p className="text-sm font-black text-slate-600">${data.svcPrecio}</p>
+                  </div>
+                  <p className="text-xs font-medium text-slate-400 mt-1">{data.svcDuracion} minutos</p>
+                </div>
+                <motion.button layout className="w-full py-3 rounded-2xl text-xs font-black text-white shadow-md transition-colors duration-500" style={{ backgroundColor: data.color }}>
+                  Reservar Turno
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div className="p-4 rounded-3xl bg-white/50 shadow-sm border border-slate-100 border-dashed flex flex-col gap-4 opacity-50">
+                 <div>
+                  <div className="w-32 h-4 bg-slate-200 rounded-full mb-2"></div>
+                  <div className="w-16 h-3 bg-slate-200 rounded-full"></div>
+                 </div>
+                 <div className="w-full py-3 rounded-2xl bg-slate-200"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Staff */}
+          {data.staffNombre && (
+            <div className="mt-8 px-6 space-y-4">
+              <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Profesionales</h3>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-400 text-lg">
+                  {data.staffNombre.substring(0,1).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-black text-slate-800">{data.staffNombre}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{data.staffEspecialidad || 'General'}</p>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </div>
+
+        {/* Home Indicator */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-300 rounded-full"></div>
+      </motion.div>
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
