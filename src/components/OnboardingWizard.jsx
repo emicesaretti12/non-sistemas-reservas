@@ -6,7 +6,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo' }
 
+// Paleta de colores extendida
+const COLORES = [
+  '#0f172a', '#334155', '#ef4444', '#f97316', '#f59e0b', '#eab308', 
+  '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', 
+  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'
+]
+
 export default function OnboardingWizard({ session, onComplete }) {
+  // Estado inicial: -1 es la pantalla de bienvenida. 0 es el inicio del chat.
+  const [stepIndex, setStepIndex] = useState(-1)
+  
   const [data, setData] = useState({
     nombre: '',
     rubro: '',
@@ -28,36 +38,45 @@ export default function OnboardingWizard({ session, onComplete }) {
   })
   
   const [negocioId, setNegocioId] = useState(null)
-  const [stepIndex, setStepIndex] = useState(0)
   
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef(null)
+  const scrollContainerRef = useRef(null)
 
   const vocab = getVocabulario(data.rubro || RUBROS_DISPONIBLES[0])
 
   const steps = [
-    { id: 'welcome', bot: () => "¡Hola! 👋 Vamos a armar tu app de reservas en un par de minutos. Fijate la pantalla de la derecha, ¡ahí vas a ver cómo se va creando en vivo! ¿Arrancamos?", type: 'button', btnText: '¡Dale, empecemos!' },
+    { id: 'welcome', bot: () => "¡Hola! 👋 Vamos a armar tu app de reservas en un par de minutos. Fijate en la vista previa, ¡ahí vas a ver cómo se va creando en vivo! ¿Arrancamos?", type: 'button', btnText: '¡Dale, empecemos!' },
     { id: 'nombre', bot: () => "Primero lo primero... 📝 ¿Cómo se llama tu negocio?", type: 'text', placeholder: 'Ej: Barbería Central' },
     { id: 'rubro', bot: (d) => `¡Me encanta "${d.nombre}"! Mirá cómo ya aparece en tu app. 🚀 ¿A qué rubro se dedican?`, type: 'options', options: RUBROS_DISPONIBLES },
-    { id: 'color', bot: () => "¡Perfecto! 🎨 Ahora elegí un color para tu marca. Vas a ver cómo toda la app de la derecha cambia instantáneamente.", type: 'color' },
+    { id: 'color', bot: () => "¡Perfecto! 🎨 Ahora elegí un color para tu marca. Vas a ver cómo toda la app cambia instantáneamente.", type: 'color' },
     { id: 'descripcion', bot: () => "¡Qué buen color! ✨ ¿Querés agregar una frase corta que describa tu negocio? (Va a aparecer debajo del título)", type: 'textarea' },
     { id: 'instagram', bot: () => "¡Casi terminamos el perfil! 📸 ¿Tenés Instagram? Agregalo y aparecerá el botón en tu app.", type: 'instagram' },
     { id: 'horarios', bot: () => "Ahora lo importante: Tus horarios de atención 🕒.", type: 'horarios' },
     { id: 'servicio', bot: () => `¡Excelente! Para que puedan reservar, necesitamos un ${vocab.servicio || 'servicio'}. ¿Qué vas a ofrecer y a qué precio?`, type: 'servicio' },
     { id: 'staff', bot: () => `Por último, ¿cómo se llama el primer ${vocab.empleado || 'profesional'} de tu equipo?`, type: 'staff' },
     { id: 'saving', bot: () => "¡Todo listo! 🪄 Instalando tu aplicación en la nube...", type: 'loading' },
-    { id: 'listo', bot: () => "🎉 ¡Felicitaciones! Tu app está activa.", type: 'success' },
+    { id: 'listo', bot: () => "🎉 ¡Felicitaciones! Tu app está activa y lista para recibir clientes.", type: 'success' },
   ]
 
-  const [history, setHistory] = useState([{ role: 'bot', text: steps[0].bot(data), id: 'welcome_msg' }])
+  const [history, setHistory] = useState([])
+
+  // Inicializar chat cuando se pasa del welcome screen
+  useEffect(() => {
+    if (stepIndex === 0 && history.length === 0) {
+      setHistory([{ role: 'bot', text: steps[0].bot(data), id: 'welcome_msg' }])
+    }
+  }, [stepIndex])
 
   const stateRef = useRef({ stepIndex, data, history })
   useEffect(() => { stateRef.current = { stepIndex, data, history } }, [stepIndex, data, history])
 
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, 100)
+    if (messagesEndRef.current && scrollContainerRef.current) {
+      setTimeout(() => { 
+        if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }, 150)
     }
   }
   useEffect(() => { scrollToBottom() }, [history, isTyping, stepIndex, data.color])
@@ -91,20 +110,27 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   const executeBackendCreation = async (finalData, savingIdx) => {
     try {
+      setIsTyping(true)
+
+      // INSERCIÓN BÁSICA SEGURA (Evita errores de columnas faltantes)
       const { data: negData, error: negErr } = await supabase.from('negocios').insert([{
         owner_id: session.user.id, 
         nombre: finalData.nombre, 
         rubro: finalData.rubro, 
         color_primario: finalData.color,
-        descripcion: finalData.descripcion, 
-        instagram: finalData.instagram, 
-        horarios: finalData.horarios,
         estado_suscripcion: 'activo',
         es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL ? (session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL) : false
       }]).select().single()
       
       if (negErr) throw negErr
       setNegocioId(negData.id)
+
+      // Actualizar campos adicionales sin fallar si la DB no está sincronizada
+      await supabase.from('negocios').update({
+        descripcion: finalData.descripcion, 
+        instagram: finalData.instagram, 
+        horarios: finalData.horarios
+      }).eq('id', negData.id).catch(e => console.warn('Campos adicionales omitidos', e))
 
       if (finalData.svcNombre) {
         await supabase.from('servicios').insert([{ 
@@ -124,7 +150,6 @@ export default function OnboardingWizard({ session, onComplete }) {
         }])
       }
 
-      setIsTyping(true)
       setTimeout(() => {
         setIsTyping(false)
         const nextIdx = savingIdx + 1
@@ -133,13 +158,17 @@ export default function OnboardingWizard({ session, onComplete }) {
         setHistory(h => [...h, { role: 'bot', text: nextStep.bot(finalData), id: `bot_${nextIdx}_${Date.now()}` }])
       }, 1500)
 
-    } catch (e) { alert("Error al provisionar sistema: " + e.message) }
+    } catch (e) { 
+      console.error(e)
+      alert("Error al crear el sistema: " + e.message)
+      setIsTyping(false) // Desbloquear si hay error
+    }
   }
 
-  const springConfig = { type: "spring", stiffness: 400, damping: 25 }
+  const springConfig = { type: "spring", stiffness: 350, damping: 25 }
 
   const renderInput = () => {
-    if (isTyping) return null
+    if (isTyping || stepIndex < 0) return null
     const currentStep = steps[stepIndex]
 
     switch(currentStep.type) {
@@ -158,7 +187,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       
       case 'text':
         return (
-          <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={springConfig} onSubmit={(e) => { e.preventDefault(); if(inputValue.trim()) advance(inputValue, { nombre: inputValue }) }} className="flex w-full gap-2">
+          <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={springConfig} onSubmit={(e) => { e.preventDefault(); if(inputValue.trim()) advance(inputValue, { nombre: inputValue }) }} className="flex w-full gap-2 relative">
             <input autoFocus value={inputValue} onChange={e => setInputValue(e.target.value)} placeholder={currentStep.placeholder} className="flex-1 p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-sky-400 font-bold text-slate-800 shadow-sm transition-all" />
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={!inputValue.trim()} className="p-4 bg-sky-500 text-white rounded-2xl disabled:opacity-50 shadow-md">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -197,7 +226,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             {currentStep.options.map((opt, i) => (
               <motion.button 
                 key={opt} onClick={() => advance(opt, { rubro: opt })} 
-                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05, ...springConfig }}
+                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.03, ...springConfig }}
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 className="px-4 py-3 bg-white border-2 border-slate-100 text-slate-700 font-bold text-sm rounded-2xl shadow-sm hover:border-sky-400 hover:text-sky-600 transition-colors"
               >
@@ -211,13 +240,31 @@ export default function OnboardingWizard({ session, onComplete }) {
         return (
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={springConfig} className="w-full flex flex-col gap-4">
             <div className="bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm space-y-4 w-full">
-              <div className="flex gap-2 justify-between">
-               {['#0EA5E9', '#10B981', '#F43F5E', '#8B5CF6', '#F59E0B', '#0f172a'].map(c => (
-                 <motion.button key={c} onClick={() => setData({...data, color: c})} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} className="flex-1 aspect-square rounded-2xl border-4 shadow-sm" style={{ backgroundColor: c, borderColor: data.color === c ? '#cbd5e1' : 'transparent' }}></motion.button>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center pt-2">Elegí el color principal</p>
+              
+              {/* Grilla extendida de colores */}
+              <div className="grid grid-cols-5 md:grid-cols-6 gap-2 px-2">
+               {COLORES.map((c, i) => (
+                 <motion.button 
+                   key={c} onClick={() => setData({...data, color: c})} 
+                   initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.02 }}
+                   whileHover={{ scale: 1.2, zIndex: 10 }} whileTap={{ scale: 0.9 }} 
+                   className="aspect-square rounded-full shadow-sm border-2 transition-colors relative" 
+                   style={{ backgroundColor: c, borderColor: data.color === c ? '#0f172a' : 'transparent' }}
+                 >
+                    {data.color === c && <div className="absolute inset-0 rounded-full border-2 border-white pointer-events-none scale-75"></div>}
+                 </motion.button>
                ))}
+               
+               {/* Color Picker Nativo Oculto + Botón visible */}
+               <label className="aspect-square rounded-full shadow-sm border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                 <input type="color" value={data.color} onChange={e => setData({...data, color: e.target.value})} className="opacity-0 absolute inset-0 cursor-pointer w-full h-full" />
+                 <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+               </label>
               </div>
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={() => advance(`Color elegido: ${data.color}`)} className="w-full py-4 bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-xl shadow-md">
-                Confirmar Estilo
+
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={() => advance(`Color elegido: ${data.color}`)} className="w-full py-4 bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-xl shadow-md mt-2">
+                Confirmar Color
               </motion.button>
             </div>
           </motion.div>
@@ -252,7 +299,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex flex-col gap-2 pl-12 overflow-hidden">
                           <label className="flex items-center gap-2 cursor-pointer pt-1">
                             <input type="checkbox" checked={data.horarios[d].pausa || false} onChange={e => setData(p => ({ ...p, horarios: { ...p.horarios, [d]: { ...p.horarios[d], pausa: e.target.checked } } }))} className="w-3 h-3 rounded border-slate-300 text-sky-500" />
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Corte</span>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Pausa (Almuerzo)</span>
                           </label>
                           <AnimatePresence>
                             {data.horarios[d].pausa && (
@@ -348,18 +395,44 @@ export default function OnboardingWizard({ session, onComplete }) {
     }
   }
 
+  // PANTALLA DE BIENVENIDA (Paso -1)
+  if (stepIndex === -1) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, type: "spring", bounce: 0.4 }} className="max-w-md w-full space-y-8">
+          <div className="w-24 h-24 bg-gradient-to-tr from-sky-500 to-sky-400 rounded-[2rem] mx-auto shadow-xl shadow-sky-500/20 flex items-center justify-center">
+             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">Creá tu plataforma</h1>
+            <p className="text-slate-500 mt-3 font-medium text-sm md:text-base">Te guiamos paso a paso para armar tu sistema de reservas y página pública en menos de 2 minutos.</p>
+          </div>
+          <div className="pt-4">
+            <motion.button 
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => setStepIndex(0)}
+              className="w-full py-5 bg-slate-900 text-white font-black text-xs md:text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-slate-900/20"
+            >
+              Iniciar Configuración
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-[#E2E8F0] flex flex-col lg:flex-row items-center justify-center gap-12 p-4 lg:p-8 selection:bg-sky-200 font-sans">
+    <div className="min-h-screen bg-[#E2E8F0] flex flex-col lg:flex-row items-center justify-center gap-0 lg:gap-12 p-0 lg:p-8 selection:bg-sky-200 font-sans">
       
       {/* TELÉFONO 1: EL CHAT (Asistente) */}
-      <div className="w-full h-[90vh] lg:w-[400px] lg:h-[850px] bg-[#F4F9FF] lg:rounded-[3rem] lg:border-[10px] lg:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden shrink-0">
+      <div className="w-full h-[100dvh] lg:w-[400px] lg:h-[850px] bg-[#F4F9FF] lg:rounded-[3rem] lg:border-[10px] lg:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden shrink-0 z-20">
         
-        {/* Notch / Dynamic Island Falso para Desktop */}
+        {/* Notch Falso para Desktop */}
         <div className="hidden lg:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-[1.2rem] z-50"></div>
 
         {/* Top Navbar */}
-        <nav className="h-16 bg-white/80 backdrop-blur-md border-b border-sky-100 flex items-center justify-between px-5 sticky top-0 z-40 shrink-0">
-          <div className="flex items-center gap-3 mt-2 lg:mt-0">
+        <nav className="h-16 bg-white/80 backdrop-blur-md border-b border-sky-100 flex items-center justify-between px-5 sticky top-0 z-40 shrink-0 shadow-sm">
+          <div className="flex items-center gap-3 mt-1 lg:mt-0">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-sky-300 flex items-center justify-center shadow-md">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
@@ -368,13 +441,29 @@ export default function OnboardingWizard({ session, onComplete }) {
               <p className="text-[9px] font-bold text-sky-500">Asistente Virtual</p>
             </div>
           </div>
-          <div className="flex gap-1 mt-2 lg:mt-0">
+          <div className="flex gap-1 mt-1 lg:mt-0">
             <div className="text-[10px] font-black text-slate-400">{stepIndex + 1}/{steps.length}</div>
           </div>
         </nav>
 
+        {/* Vista Previa Sticky SÓLO MÓVIL (cuando el panel derecho no existe) */}
+        <div className="lg:hidden w-full bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between shadow-sm sticky top-16 z-30">
+           <div className="flex items-center gap-3 w-full">
+             <motion.div layout className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-black text-xs shadow-inner" style={{ backgroundColor: data.color }}>
+               {data.nombre ? data.nombre.substring(0,1).toUpperCase() : 'NS'}
+             </motion.div>
+             <div className="min-w-0 flex-1">
+               <p className="text-[11px] font-black text-slate-900 truncate">{data.nombre || 'Tu App'}</p>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">{data.rubro || 'Rubro'}</p>
+             </div>
+             <motion.div layout className="w-12 h-6 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: data.color }}>
+                <span className="text-[8px] font-black text-white">RESERVAR</span>
+             </motion.div>
+           </div>
+        </div>
+
         {/* Chat History Area */}
-        <div className="flex-1 overflow-y-auto p-4 w-full pb-48" style={{ scrollBehavior: 'smooth' }}>
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 w-full pb-56" style={{ scrollBehavior: 'smooth' }}>
           <AnimatePresence initial={false}>
             {history.map((msg, idx) => (
               <motion.div 
@@ -419,7 +508,7 @@ export default function OnboardingWizard({ session, onComplete }) {
               </motion.div>
             )}
           </AnimatePresence>
-          <div ref={messagesEndRef} className="h-2" />
+          <div ref={messagesEndRef} className="h-10" />
         </div>
 
         {/* Input Area */}
@@ -436,11 +525,11 @@ export default function OnboardingWizard({ session, onComplete }) {
       {/* TELÉFONO 2: LIVE PREVIEW (La vista al público) - Oculto en móviles */}
       <motion.div 
         initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.3 }}
-        className="hidden lg:flex w-[400px] h-[850px] bg-[#F8FAFC] rounded-[3rem] border-[10px] border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.1)] relative flex-col overflow-hidden shrink-0"
+        className="hidden lg:flex w-[400px] h-[850px] bg-[#F8FAFC] rounded-[3rem] border-[10px] border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.1)] relative flex-col overflow-hidden shrink-0 z-10"
       >
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-200 rounded-b-[1.2rem] z-50"></div>
         
-        <div className="flex-1 overflow-y-auto pb-10">
+        <div className="flex-1 overflow-y-auto pb-10 custom-scrollbar">
           {/* Header */}
           <motion.div layout className="h-40 relative rounded-b-[2rem] transition-colors duration-500" style={{ backgroundColor: `${data.color}15` }}>
             <motion.div layout className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-[1.5rem] border-4 border-[#F8FAFC] flex items-center justify-center shadow-lg transition-colors duration-500 overflow-hidden" style={{ backgroundColor: data.color }}>
