@@ -384,7 +384,7 @@ export default function OnboardingWizard({ session, onComplete }) {
           </div>
         </div>
         <div className="hidden md:flex gap-1.5">
-          {[...Array(STEPS_COUNT || 10)].map((_, i) => (
+          {[...Array(steps.length)].map((_, i) => (
              <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i < stepIndex ? 'w-4 bg-sky-500' : i === stepIndex ? 'w-6 bg-sky-400 animate-pulse' : 'w-1.5 bg-sky-100'}`}></div>
           ))}
         </div>
