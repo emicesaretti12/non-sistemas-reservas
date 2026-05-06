@@ -177,62 +177,77 @@ export default function OnboardingWizard({ session, onComplete }) {
 
       case 'color':
         return (
-          <div className="w-full max-w-3xl flex flex-col md:flex-row gap-6 items-end md:items-stretch">
+          <div className="w-full max-w-4xl flex flex-col md:flex-row gap-8 items-center md:items-stretch">
             {/* Controles de Color */}
-            <div className="bg-white p-5 md:p-6 rounded-[2rem] border-2 border-sky-100 shadow-2xl space-y-6 flex-1 w-full max-w-sm">
-              <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                <div className="relative">
-                  <input type="color" value={data.color} onChange={e => setData({...data, color: e.target.value})} className="w-12 h-12 rounded-xl cursor-pointer opacity-0 absolute inset-0 z-10" />
-                  <div className="w-12 h-12 rounded-xl shadow-inner border-2 border-white pointer-events-none" style={{ backgroundColor: data.color }}></div>
+            <div className="bg-white/80 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-8 flex-1 w-full max-w-md">
+              <div className="flex items-center gap-5 bg-slate-50/50 p-4 rounded-3xl border border-slate-100">
+                <div className="relative group cursor-pointer">
+                  <input type="color" value={data.color} onChange={e => setData({...data, color: e.target.value})} className="w-16 h-16 rounded-2xl cursor-pointer opacity-0 absolute inset-0 z-10" />
+                  <div className="w-16 h-16 rounded-2xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] border-4 border-white pointer-events-none group-hover:scale-105 transition-transform duration-300" style={{ backgroundColor: data.color }}></div>
                 </div>
-                <span className="font-mono font-black text-lg text-slate-700 uppercase tracking-widest">{data.color}</span>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Color Principal</p>
+                  <span className="font-mono font-black text-xl text-slate-700 uppercase tracking-widest">{data.color}</span>
+                </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3 justify-between px-1">
                {['#0EA5E9', '#10B981', '#F43F5E', '#8B5CF6', '#F59E0B'].map(c => (
-                 <button key={c} onClick={() => setData({...data, color: c})} className="flex-1 aspect-square rounded-xl border-4 transition-transform hover:scale-110 shadow-md" style={{ backgroundColor: c, borderColor: data.color === c ? '#1e293b' : 'transparent' }}></button>
+                 <button key={c} onClick={() => setData({...data, color: c})} className="flex-1 aspect-square rounded-[1.2rem] border-[3px] transition-all hover:scale-110 hover:-translate-y-1 shadow-md" style={{ backgroundColor: c, borderColor: data.color === c ? '#0f172a' : 'transparent' }}></button>
                ))}
               </div>
-              <button onClick={() => advance(`Color elegido: ${data.color}`)} className="w-full py-4 bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20">
-                Me encanta, sigamos
+              <button onClick={() => advance(`Color elegido: ${data.color}`)} className="w-full py-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:shadow-[0_8px_30px_rgba(15,23,42,0.3)] transition-all hover:-translate-y-0.5 active:scale-95">
+                Confirmar Estilo
               </button>
             </div>
             
-            {/* Live Preview */}
-            <div className="hidden md:block bg-white p-4 rounded-[2.5rem] border-4 border-slate-100 shadow-2xl w-72 shrink-0 animate-in slide-in-from-right-8 duration-700 overflow-hidden relative">
-              {/* Header decor */}
-              <div className="h-24 -mx-4 -mt-4 bg-slate-100 relative">
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full border-4 border-white flex items-center justify-center font-black text-white text-xl shadow-md transition-colors duration-500" style={{ backgroundColor: data.color }}>
-                  {data.nombre ? data.nombre.substring(0,1).toUpperCase() : 'NS'}
-                </div>
-              </div>
-              <div className="mt-8 text-center px-2">
-                <h4 className="font-black text-lg text-slate-900 truncate">{data.nombre || 'Tu Negocio'}</h4>
-                <p className="text-[10px] font-bold text-slate-400 mt-0.5">{data.rubro || 'Rubro'}</p>
-              </div>
-              <div className="mt-6 space-y-3">
-                <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Servicio Básico</p>
-                    <p className="text-[10px] text-slate-500">30 min</p>
+            {/* Live Preview - iPhone Mockup */}
+            <div className="hidden md:block bg-white rounded-[3rem] border-[8px] border-slate-200/80 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] w-[300px] shrink-0 animate-in slide-in-from-right-12 fade-in duration-1000 overflow-hidden relative scale-[0.95] hover:scale-100 transition-transform origin-bottom">
+              {/* iPhone Notch / Dynamic Island */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-200/80 rounded-full z-20 backdrop-blur-md"></div>
+              
+              <div className="h-full w-full bg-slate-50 relative flex flex-col">
+                {/* Header decor */}
+                <div className="h-32 bg-slate-100 relative transition-colors duration-500 rounded-b-[2rem]" style={{ backgroundColor: `${data.color}15` }}>
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-20 h-20 rounded-[1.5rem] border-4 border-white flex items-center justify-center shadow-lg transition-colors duration-500 overflow-hidden" style={{ backgroundColor: data.color }}>
+                     <span className="font-black text-white text-2xl drop-shadow-md">
+                       {data.nombre ? data.nombre.substring(0,1).toUpperCase() : 'NS'}
+                     </span>
                   </div>
-                  <button className="px-3 py-1.5 rounded-lg text-[10px] font-black text-white transition-colors duration-500 shadow-md" style={{ backgroundColor: data.color }}>
-                    Reservar
-                  </button>
                 </div>
-                <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Servicio Premium</p>
-                    <p className="text-[10px] text-slate-500">60 min</p>
+                
+                <div className="mt-10 text-center px-4">
+                  <h4 className="font-black text-xl text-slate-900 truncate tracking-tight">{data.nombre || 'Tu Negocio'}</h4>
+                  <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-wider">{data.rubro || 'Rubro'}</p>
+                </div>
+                
+                <div className="mt-8 px-5 space-y-4 flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Servicios Disponibles</p>
+                  
+                  {/* Mock Service 1 */}
+                  <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col gap-3 group">
+                    <div>
+                      <p className="text-sm font-black text-slate-800">Servicio Básico</p>
+                      <p className="text-xs font-medium text-slate-400 mt-0.5">30 minutos</p>
+                    </div>
+                    <button className="w-full py-2.5 rounded-xl text-xs font-black text-white transition-all duration-500 shadow-md group-hover:opacity-90 group-hover:scale-[1.02]" style={{ backgroundColor: data.color }}>
+                      Reservar Turno
+                    </button>
                   </div>
-                  <button className="px-3 py-1.5 rounded-lg text-[10px] font-black text-white transition-colors duration-500 shadow-md" style={{ backgroundColor: data.color }}>
-                    Reservar
-                  </button>
+
+                  {/* Mock Service 2 */}
+                  <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col gap-3 opacity-60">
+                    <div>
+                      <p className="text-sm font-black text-slate-800">Servicio Premium</p>
+                      <p className="text-xs font-medium text-slate-400 mt-0.5">60 minutos</p>
+                    </div>
+                    <button className="w-full py-2.5 rounded-xl text-xs font-black text-white transition-all duration-500 shadow-md" style={{ backgroundColor: data.color }}>
+                      Reservar Turno
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 flex justify-center gap-1.5">
-                 <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                 <div className="w-1.5 h-1.5 rounded-full transition-colors duration-500" style={{ backgroundColor: data.color }}></div>
-                 <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                
+                {/* Home Indicator */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-300 rounded-full"></div>
               </div>
             </div>
           </div>
@@ -356,33 +371,38 @@ export default function OnboardingWizard({ session, onComplete }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F9FF] flex flex-col font-sans antialiased selection:bg-sky-200">
+    <div className="min-h-screen bg-[#F4F9FF] flex flex-col font-sans antialiased selection:bg-sky-200">
       {/* Top Navbar */}
-      <nav className="h-16 border-b bg-white/70 backdrop-blur-xl border-sky-100 flex items-center justify-center px-6 sticky top-0 z-50 shadow-sm">
+      <nav className="h-16 border-b bg-white/70 backdrop-blur-2xl border-sky-100/50 flex items-center justify-between px-6 md:px-8 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-[0.6rem] bg-gradient-to-tr from-sky-500 to-sky-400 flex items-center justify-center shadow-md">
-            <span className="text-white font-black text-[11px] italic">NS</span>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-sky-300 flex items-center justify-center shadow-lg shadow-sky-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-800">Non Sistemas</p>
-            <p className="text-[8px] font-black uppercase tracking-widest text-sky-500">Setup Interactivo</p>
+            <p className="text-[8px] font-bold uppercase tracking-widest text-sky-500">Configuración Interactiva</p>
           </div>
+        </div>
+        <div className="hidden md:flex gap-1.5">
+          {[...Array(STEPS_COUNT || 10)].map((_, i) => (
+             <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i < stepIndex ? 'w-4 bg-sky-500' : i === stepIndex ? 'w-6 bg-sky-400 animate-pulse' : 'w-1.5 bg-sky-100'}`}></div>
+          ))}
         </div>
       </nav>
 
       {/* Chat History Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full pb-48 scroll-smooth">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full pb-48 scroll-smooth" style={{ scrollBehavior: 'smooth' }}>
         {history.map((msg, idx) => (
-          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
+          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-forwards`} style={{ animationDelay: `${idx === history.length - 1 ? '100ms' : '0ms'}` }}>
             {msg.role === 'bot' && (
-              <div className="w-10 h-10 rounded-[0.8rem] bg-white border border-sky-100 flex items-center justify-center shrink-0 mr-3 mt-1 shadow-sm">
-                <span className="text-lg">🤖</span>
+              <div className="w-10 h-10 rounded-2xl bg-white border border-sky-100 shadow-sm flex items-center justify-center shrink-0 mr-4 mt-1">
+                <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.792 0-5.484-.478-8.035-1.387-1.717-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
               </div>
             )}
-            <div className={`max-w-[85%] md:max-w-[75%] p-5 md:p-6 text-sm md:text-base font-bold leading-relaxed shadow-lg ${
+            <div className={`max-w-[85%] md:max-w-[75%] p-5 md:p-6 text-[15px] font-medium leading-relaxed shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all ${
               msg.role === 'user' 
-                ? 'bg-sky-500 text-white rounded-[2rem] rounded-tr-sm shadow-sky-500/20' 
-                : 'bg-white border-2 border-sky-100 text-slate-700 rounded-[2rem] rounded-tl-sm'
+                ? 'bg-gradient-to-br from-sky-500 to-sky-600 text-white rounded-[2rem] rounded-tr-sm shadow-sky-500/20' 
+                : 'bg-white/80 backdrop-blur-md border border-white/40 text-slate-700 rounded-[2rem] rounded-tl-sm'
             }`}>
               {msg.text}
             </div>
@@ -390,14 +410,14 @@ export default function OnboardingWizard({ session, onComplete }) {
         ))}
         
         {isTyping && (
-          <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-             <div className="w-10 h-10 rounded-[0.8rem] bg-white border border-sky-100 flex items-center justify-center shrink-0 mr-3 shadow-sm">
-                <span className="text-lg">🤖</span>
+          <div className="flex justify-start animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <div className="w-10 h-10 rounded-2xl bg-white border border-sky-100 shadow-sm flex items-center justify-center shrink-0 mr-4 mt-1">
+                <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.792 0-5.484-.478-8.035-1.387-1.717-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
              </div>
-             <div className="bg-white border-2 border-sky-100 rounded-[2rem] rounded-tl-sm p-6 flex items-center gap-1.5 shadow-lg">
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-300 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-300 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-300 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+             <div className="bg-white/80 backdrop-blur-md border border-white/40 rounded-[2rem] rounded-tl-sm p-6 flex items-center gap-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="w-2 h-2 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 rounded-full bg-sky-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
              </div>
           </div>
         )}
@@ -405,8 +425,8 @@ export default function OnboardingWizard({ session, onComplete }) {
       </div>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#F0F9FF] via-[#F0F9FF] to-transparent pt-16 pb-8 px-4 pointer-events-none">
-        <div className="max-w-4xl mx-auto flex justify-end md:justify-start pl-0 md:pl-14 pointer-events-auto">
+      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#F4F9FF] via-[#F4F9FF] to-transparent pt-16 pb-8 px-4 pointer-events-none">
+        <div className="max-w-4xl mx-auto flex justify-end md:justify-start pl-0 md:pl-[3.5rem] pointer-events-auto">
           {renderInput()}
         </div>
       </div>
