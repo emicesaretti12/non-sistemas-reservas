@@ -253,7 +253,6 @@ export default function Login() {
         if (data?.session) {
           setMensaje({ tipo: 'exito', texto: '¡Cuenta creada! Preparando entorno...' })
           hasRedirected = true;
-          // ANTI-ERRORES: CAPA 3 - Redirección dura. Evita que listeners globales se mareen.
           setTimeout(() => {
             window.location.href = '/admin'
           }, 800)
