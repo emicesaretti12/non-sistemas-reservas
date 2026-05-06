@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
+import { CinematicHero } from './ui/cinematic-landing-hero'
 
 function Counter({ end, suffix = '', prefix = '' }) {
   const [val, setVal] = useState(0)
@@ -116,6 +117,19 @@ export default function LandingPage() {
           </div>
         </div>
       </nav>
+
+      {/* CINEMATIC HERO */}
+      <CinematicHero
+        brandName="Non Sistemas"
+        tagline1="Automatizá las reservas,"
+        tagline2="profesionalizá tu negocio."
+        cardHeading="Gestión inteligente."
+        cardDescription={<><span className="text-white font-semibold">Non Sistemas</span> automatiza reservas, clientes e inventario para que te enfoques en lo que importa: hacer crecer tu negocio.</>}
+        metricValue={200}
+        metricLabel="Negocios"
+        ctaHeading="Empezá hoy."
+        ctaDescription="Unite a los negocios que ya automatizan su gestión con Non Sistemas. Configuración en 5 minutos."
+      />
 
       {/* HERO */}
       <section className="relative overflow-hidden">
