@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FAFAFE;
+  --foreground: #0f172a;
+  --color-background: #FAFAFE;
+  --color-foreground: #0f172a;
+  --muted-foreground: #64748b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --color-background: #0a0a0a;
+    --color-foreground: #ededed;
+    --muted-foreground: #a1a1aa;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
+.bg-background { background-color: var(--background); }
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+
+/* BackgroundGradientAnimation Keyframes */
+@keyframes first {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(100px, -50px) rotate(90deg) scale(1.1); }
+  50% { transform: translate(-50px, 100px) rotate(180deg) scale(0.9); }
+  75% { transform: translate(50px, 50px) rotate(270deg) scale(1.05); }
+  100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+}
+
+@keyframes second {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(-100px, 50px) rotate(-90deg) scale(1.15); }
+  50% { transform: translate(100px, -100px) rotate(-180deg) scale(0.85); }
+  75% { transform: translate(-50px, -50px) rotate(-270deg) scale(1.1); }
+  100% { transform: translate(0, 0) rotate(-360deg) scale(1); }
+}
+
+@keyframes third {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(50px, 100px) rotate(45deg) scale(1.1); }
+  50% { transform: translate(-100px, -50px) rotate(90deg) scale(0.9); }
+  75% { transform: translate(100px, -100px) rotate(135deg) scale(1.05); }
+  100% { transform: translate(0, 0) rotate(180deg) scale(1); }
+}
+
+@keyframes fourth {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(-50px, -100px) rotate(-45deg) scale(1.2); }
+  50% { transform: translate(50px, 50px) rotate(-90deg) scale(0.8); }
+  75% { transform: translate(-100px, 100px) rotate(-135deg) scale(1.1); }
+  100% { transform: translate(0, 0) rotate(-180deg) scale(1); }
+}
+
+@keyframes fifth {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(100px, 100px) rotate(60deg) scale(1.15); }
+  50% { transform: translate(-50px, -100px) rotate(120deg) scale(0.85); }
+  75% { transform: translate(50px, -50px) rotate(180deg) scale(1.1); }
+  100% { transform: translate(0, 0) rotate(240deg) scale(1); }
+}
+
+@theme {
+  --animate-first: first 25s ease infinite;
+  --animate-second: second 20s ease infinite;
+  --animate-third: third 22s ease infinite;
+  --animate-fourth: fourth 18s ease infinite;
+  --animate-fifth: fifth 30s ease infinite;
+}
