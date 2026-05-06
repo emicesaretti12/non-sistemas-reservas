@@ -1,18 +1,32 @@
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { HeroGeometric } from "@/components/ui/hero-geometric";
 import { CinematicHero } from "@/components/ui/cinematic-landing-hero";
+import {
+  FeaturesSection,
+  StatsSection,
+  HowItWorksSection,
+  TestimonialsSection,
+  PricingSection,
+  Footer,
+} from "@/components/ui/landing-sections";
 
 export default function Home() {
   return (
-    <div className="overflow-x-hidden w-full">
-      {/* Section 1: Geometric Hero */}
+    <div className="overflow-x-hidden w-full bg-[#030303]">
+      {/* 1. Hero Geometric — First impression */}
       <HeroGeometric
         badge="Non Sistemas"
         title1="Automatizá las reservas,"
         title2="profesionalizá tu negocio."
       />
 
-      {/* Section 2: Cinematic Hero with iPhone Mockup */}
+      {/* 2. Social Proof Stats */}
+      <StatsSection />
+
+      {/* 3. Features Grid */}
+      <FeaturesSection />
+
+      {/* 4. Cinematic Hero — iPhone Mockup scroll experience */}
       <CinematicHero
         brandName="Non Sistemas"
         tagline1="Gestión inteligente,"
@@ -31,7 +45,16 @@ export default function Home() {
         ctaDescription="Unite a los negocios que ya automatizan su gestión con Non Sistemas. Configuración en 5 minutos."
       />
 
-      {/* Section 3: Gradient Background CTA */}
+      {/* 5. How It Works */}
+      <HowItWorksSection />
+
+      {/* 6. Testimonials */}
+      <TestimonialsSection />
+
+      {/* 7. Pricing */}
+      <PricingSection />
+
+      {/* 8. Gradient CTA — Final conversion */}
       <BackgroundGradientAnimation
         gradientBackgroundStart="rgb(15, 23, 42)"
         gradientBackgroundEnd="rgb(30, 10, 60)"
@@ -67,6 +90,9 @@ export default function Home() {
           </div>
         </div>
       </BackgroundGradientAnimation>
+
+      {/* 9. Footer */}
+      <Footer />
     </div>
   );
 }
