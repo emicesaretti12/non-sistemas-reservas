@@ -102,7 +102,12 @@ export default function OnboardingWizard({ session, onComplete }) {
   }
   useEffect(() => { scrollToBottom() }, [history, isTyping, stepIndex, data.color, isUploading])
 
+  const isProcessingRef = useRef(false)
+
   const advance = (userAnswerText, dataUpdates = {}) => {
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+
     const { stepIndex: currStep, data: currData, history: currHistory } = stateRef.current
     
     const newData = { ...currData, ...dataUpdates }
@@ -138,6 +143,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       if (nextStep.id === 'saving') {
         await executeBackendCreation(newData, nextIdx)
       }
+      isProcessingRef.current = false
     }, 1200)
   }
 
