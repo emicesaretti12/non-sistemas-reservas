@@ -200,10 +200,10 @@ function HeroGeometric({
                         animate="visible"
                         className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 w-full sm:w-auto"
                     >
-                        <a href="https://non-sistemas-reservas-5aya.vercel.app/" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base hover:scale-[1.03] transition-transform shadow-2xl shadow-white/10 text-center">
+                        <a href="https://non-sistemas-reservas.vercel.app/login" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base hover:scale-[1.03] transition-transform shadow-2xl shadow-white/10 text-center">
                             Empezar gratis →
                         </a>
-                        <a href="https://non-sistemas-reservas-5aya.vercel.app/" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-white/[0.05] text-white/80 font-medium rounded-2xl text-base hover:bg-white/[0.08] transition-colors border border-white/[0.1] backdrop-blur-sm text-center">
+                        <a href="https://non-sistemas-reservas.vercel.app/" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-white/[0.05] text-white/80 font-medium rounded-2xl text-base hover:bg-white/[0.08] transition-colors border border-white/[0.1] backdrop-blur-sm text-center">
                             Ver cómo funciona
                         </a>
                     </motion.div>

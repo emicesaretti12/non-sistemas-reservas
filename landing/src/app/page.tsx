@@ -76,7 +76,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <a
-              href="https://non-sistemas-reservas-5aya.vercel.app/"
+              href="https://non-sistemas-reservas.vercel.app/login"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base sm:text-lg hover:scale-105 transition-transform shadow-2xl text-center"
@@ -84,7 +84,7 @@ export default function Home() {
               Empezar gratis
             </a>
             <a
-              href="https://non-sistemas-reservas-5aya.vercel.app/"
+              href="https://non-sistemas-reservas.vercel.app/login"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white/10 text-white font-semibold rounded-2xl text-base sm:text-lg hover:bg-white/20 transition-colors border border-white/20 backdrop-blur-sm text-center"
