@@ -102,9 +102,13 @@ export default function OnboardingWizard({ session, onComplete }) {
   }
   useEffect(() => { scrollToBottom() }, [history, isTyping, stepIndex, data.color, isUploading])
 
+  // Guard principal: bloquea avances duplicados (doble click, StrictMode, etc)
   const isProcessingRef = useRef(false)
+  // Guard de idempotencia: garantiza que el insert a Supabase ocurra UNA SOLA VEZ
+  const hasCreatedNegocioRef = useRef(false)
 
   const advance = (userAnswerText, dataUpdates = {}) => {
+    // Si hay un avance en curso, ignorar completamente
     if (isProcessingRef.current) return
     isProcessingRef.current = true
 
@@ -141,8 +145,10 @@ export default function OnboardingWizard({ session, onComplete }) {
       }])
 
       if (nextStep.id === 'saving') {
+        // El backend creation maneja su propio lock; esperamos su resultado
         await executeBackendCreation(newData, nextIdx)
       }
+      // Solo liberar el lock cuando el paso (incluyendo backend) terminó
       isProcessingRef.current = false
     }, 1200)
   }
@@ -172,24 +178,52 @@ export default function OnboardingWizard({ session, onComplete }) {
   }
 
   const executeBackendCreation = async (finalData, savingIdx) => {
+    // Guarda de idempotencia: si ya se creó el negocio (por StrictMode u otro re-render), no volver a intentarlo
+    if (hasCreatedNegocioRef.current) {
+      console.warn('Onboarding: executeBackendCreation ignorada (ya ejecutada una vez).')
+      return
+    }
+    hasCreatedNegocioRef.current = true
+
     try {
       setIsTyping(true)
-      const { data: negData, error: negErr } = await supabase.from('negocios').insert([{
-        owner_id: session.user.id, nombre: finalData.nombre, rubro: finalData.rubro, color_primario: finalData.color,
-        estado_suscripcion: 'activo', es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL ? (session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL) : false
-      }]).select().single()
-      if (negErr) throw negErr
-      setNegocioId(negData.id)
+
+      // Verificar primero si el usuario YA tiene un negocio (defensa extra contra duplicados en BD)
+      const { data: existente } = await supabase
+        .from('negocios')
+        .select('id')
+        .eq('owner_id', session.user.id)
+        .maybeSingle()
+
+      let negocioIdFinal
+
+      if (existente?.id) {
+        // El negocio ya existe (creado por un render previo), usar el existente
+        console.warn('Onboarding: negocio ya existente encontrado, usando ID existente:', existente.id)
+        negocioIdFinal = existente.id
+      } else {
+        // Crear el negocio por primera vez
+        const { data: negData, error: negErr } = await supabase.from('negocios').insert([{
+          owner_id: session.user.id, nombre: finalData.nombre, rubro: finalData.rubro, color_primario: finalData.color,
+          estado_suscripcion: 'activo', es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL ? (session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL) : false
+        }]).select().single()
+        if (negErr) throw negErr
+        negocioIdFinal = negData.id
+      }
+
+      setNegocioId(negocioIdFinal)
 
       await supabase.from('negocios').update({
         descripcion: finalData.descripcion, instagram: finalData.instagram, horarios: finalData.horarios, logo_url: finalData.logo_url
-      }).eq('id', negData.id).catch(e => console.warn('Campos adicionales omitidos'))
+      }).eq('id', negocioIdFinal).catch(e => console.warn('Campos adicionales omitidos'))
 
       if (finalData.svcNombre) {
-        await supabase.from('servicios').insert([{ negocio_id: negData.id, nombre: finalData.svcNombre, precio: Number(finalData.svcPrecio) || 0, duracion_minutos: Number(finalData.svcDuracion) || 30 }])
+        await supabase.from('servicios').insert([{ negocio_id: negocioIdFinal, nombre: finalData.svcNombre, precio: Number(finalData.svcPrecio) || 0, duracion_minutos: Number(finalData.svcDuracion) || 30 }])
+          .catch(e => console.warn('Servicio omitido:', e.message))
       }
       if (finalData.staffNombre) {
-        await supabase.from('empleados').insert([{ negocio_id: negData.id, nombre: finalData.staffNombre, especialidad: finalData.staffEspecialidad, estado: 'activo' }])
+        await supabase.from('empleados').insert([{ negocio_id: negocioIdFinal, nombre: finalData.staffNombre, especialidad: finalData.staffEspecialidad, estado: 'activo' }])
+          .catch(e => console.warn('Staff omitido:', e.message))
       }
 
       setTimeout(() => {

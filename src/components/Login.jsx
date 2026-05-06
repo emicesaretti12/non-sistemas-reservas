@@ -24,20 +24,21 @@ export default function Login() {
 
   /**
    * ANTI-ERRORES: CAPA 1 - Limpieza de caché al montar la vista.
-   * Destruye cualquier token residual en localStorage para asegurar 
-   * que un registro nuevo no se cruce con una cuenta anterior.
+   * Destruye tokens residuales SOLO si no hay un token OAuth/email válido en la URL.
+   * (El signOut agresivo previo causaba el error "Session from the future / clock skew"
+   *  al invalidar tokens de confirmación de email antes de que Supabase los procesara.)
    */
   useEffect(() => {
-    // 1. Purgar sesiones residuales al entrar
-    const purgarSesionesFantasma = async () => {
-      await supabase.auth.signOut()
-    }
-    purgarSesionesFantasma()
-
     // 2. Atrapar errores de OAuth (Google/Github) que vienen pegados en la URL tras el redireccionamiento
     const hash = window.location.hash.substring(1)
     const queryParams = new URLSearchParams(window.location.search)
     const errorDesc = new URLSearchParams(hash).get('error_description') || queryParams.get('error_description')
+    const hasAuthToken = hash.includes('access_token') || hash.includes('refresh_token') || queryParams.get('code')
+
+    // 1. Solo purgar sesión si NO hay tokens válidos en la URL (para no romper flujos OAuth/email)
+    if (!hasAuthToken) {
+      supabase.auth.signOut().catch(() => {})
+    }
     
     if (errorDesc) {
       const errorReal = decodeURIComponent(errorDesc.replace(/\+/g, ' '))
