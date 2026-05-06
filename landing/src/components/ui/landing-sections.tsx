@@ -183,8 +183,8 @@ export function HowItWorksSection() {
           variants={fadeIn}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-16 md:mb-20"
+          viewport={{ once: true, margin: "-50px" }}
+          className="text-center mb-10 sm:mb-16 md:mb-20"
         >
           <span className="inline-block text-sm text-rose-400 font-medium tracking-widest uppercase mb-4">
             Cómo funciona
@@ -354,8 +354,8 @@ export function PricingSection() {
           variants={fadeIn}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-16 md:mb-20"
+          viewport={{ once: true, margin: "-50px" }}
+          className="text-center mb-10 sm:mb-16 md:mb-20"
         >
           <span className="inline-block text-sm text-emerald-400 font-medium tracking-widest uppercase mb-4">
             Planes

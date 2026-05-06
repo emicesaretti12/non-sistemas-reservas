@@ -64,26 +64,26 @@ export default function Home() {
         fourthColor="99, 102, 241"
         fifthColor="168, 85, 247"
         pointerColor="99, 102, 241"
-        containerClassName="!h-screen"
+        containerClassName="!h-screen !min-h-[100dvh]"
         className="absolute z-50 inset-0 flex items-center justify-center"
       >
-        <div className="text-center px-4 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl">
+        <div className="text-center px-4 max-w-3xl mx-auto w-full">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight drop-shadow-2xl">
             ¿Listo para crecer?
           </h2>
-          <p className="text-lg md:text-xl text-white/60 mb-10 max-w-xl mx-auto font-light leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-white/60 mb-8 sm:mb-10 max-w-xl mx-auto font-light leading-relaxed">
             Configurá tu negocio en minutos y empezá a recibir reservas automatizadas hoy mismo.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <a
               href="#"
-              className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl text-lg hover:scale-105 transition-transform shadow-2xl"
+              className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white text-slate-900 font-semibold rounded-2xl text-base sm:text-lg hover:scale-105 transition-transform shadow-2xl text-center"
             >
               Empezar gratis
             </a>
             <a
               href="#"
-              className="px-8 py-4 bg-white/10 text-white font-semibold rounded-2xl text-lg hover:bg-white/20 transition-colors border border-white/20 backdrop-blur-sm"
+              className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white/10 text-white font-semibold rounded-2xl text-base sm:text-lg hover:bg-white/20 transition-colors border border-white/20 backdrop-blur-sm text-center"
             >
               Ver demo
             </a>
