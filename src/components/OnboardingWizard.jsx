@@ -7,6 +7,55 @@ const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
 const COLORES = ['#0f172a','#1e40af','#7c3aed','#db2777','#dc2626','#ea580c','#ca8a04','#16a34a','#0891b2','#0ea5e9']
 
+// Sugerencias inteligentes por rubro
+const SUGERENCIAS = {
+  'Barbería / Peluquería': {
+    servicios: ['Corte Clásico', 'Corte + Barba', 'Afeitado Premium', 'Degradé', 'Coloración'],
+    precios: [2500, 3500, 2800, 3000, 5000],
+    duraciones: [30, 45, 30, 45, 90],
+    staff: ['Carlos', 'Martín', 'Diego'],
+    especialidad: 'Barbero',
+    descripcion: 'Los mejores cortes de la ciudad. Estilo y tradición.',
+    color: '#0f172a',
+  },
+  'Restaurante / Gastronomía': {
+    servicios: ['Mesa para 2', 'Mesa para 4', 'Mesa Privada VIP', 'Brunch Especial'],
+    precios: [0, 0, 5000, 2500],
+    duraciones: [60, 90, 120, 90],
+    staff: ['Salón Principal', 'Terraza'],
+    especialidad: 'Interior',
+    descripcion: 'Sabores únicos en un ambiente inigualable.',
+    color: '#92400e',
+  },
+  'Centro de Estética': {
+    servicios: ['Limpieza Facial', 'Masaje Relajante', 'Depilación Laser', 'Manicura Premium'],
+    precios: [4500, 5500, 8000, 2500],
+    duraciones: [60, 60, 30, 45],
+    staff: ['Valentina', 'Lucía', 'María'],
+    especialidad: 'Esteticista',
+    descripcion: 'Tu bienestar y belleza son nuestra prioridad.',
+    color: '#db2777',
+  },
+  'Veterinaria': {
+    servicios: ['Consulta General', 'Vacunación', 'Baño y Peluquería', 'Cirugía'],
+    precios: [3500, 2000, 4000, 15000],
+    duraciones: [30, 20, 60, 120],
+    staff: ['Dr. García', 'Dra. López'],
+    especialidad: 'Veterinario/a',
+    descripcion: 'Cuidamos a tu mascota como si fuera la nuestra.',
+    color: '#0891b2',
+  },
+  'Salud / Clínica': {
+    servicios: ['Consulta General', 'Revisión', 'Consulta Especializada'],
+    precios: [5000, 3500, 8000],
+    duraciones: [30, 20, 45],
+    staff: ['Dr. Martínez', 'Dra. Pérez'],
+    especialidad: 'Médico/a',
+    descripcion: 'Tu salud, nuestra misión.',
+    color: '#0ea5e9',
+  },
+}
+
 // ── Live Preview (right panel) ─────────────────────────────────────────────
 function LivePreview({ data }) {
   const color = data.color || '#0ea5e9'
@@ -137,7 +186,25 @@ export default function OnboardingWizard({ session, onComplete }) {
   const next = (updates = {}) => {
     if (lockRef.current) return
     lockRef.current = true
-    const newData = { ...data, ...updates }
+    let newData = { ...data, ...updates }
+
+    // Auto-sugerencias al elegir rubro
+    if (updates.rubro) {
+      const sug = SUGERENCIAS[updates.rubro]
+      if (sug) {
+        newData = {
+          ...newData,
+          color: sug.color,
+          descripcion: newData.descripcion || sug.descripcion,
+          svcNombre: newData.svcNombre || sug.servicios[0],
+          svcPrecio: newData.svcPrecio || String(sug.precios[0]),
+          svcDuracion: newData.svcDuracion || String(sug.duraciones[0]),
+          staffNombre: newData.staffNombre || sug.staff[0],
+          staffEspecialidad: newData.staffEspecialidad || sug.especialidad,
+        }
+      }
+    }
+
     setData(newData)
     setInput('')
     if (stepIdx < steps.length - 1) {
@@ -263,16 +330,24 @@ export default function OnboardingWizard({ session, onComplete }) {
             <button type="submit" disabled={!input.trim()} className="w-full py-4 bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-white font-black rounded-2xl transition-all">Continuar →</button>
           </form>
         )
-      case 'textarea':
+      case 'textarea': {
+        const sug = SUGERENCIAS[data.rubro]
         return (
           <div className="space-y-3">
+            {sug?.descripcion && (
+              <button onClick={() => setInput(sug.descripcion)}
+                className="w-full text-left px-4 py-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-300 text-sm font-medium hover:bg-sky-500/20 transition-all">
+                ✨ Sugerencia: "{sug.descripcion}"
+              </button>
+            )}
             <textarea ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} rows={3} className={base + " resize-none"} />
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => next({ [step.id]: '' })} className="py-4 bg-white/10 hover:bg-white/20 text-white/70 font-bold rounded-2xl transition-all">Omitir</button>
-              <button onClick={() => next({ [step.id]: input })} className="py-4 bg-sky-500 hover:bg-sky-400 text-white font-black rounded-2xl transition-all">Continuar →</button>
+              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="py-4 bg-sky-500 hover:bg-sky-400 text-white font-black rounded-2xl transition-all">Continuar →</button>
             </div>
           </div>
         )
+      }
       case 'instagram':
         return (
           <div className="space-y-3">
@@ -337,13 +412,26 @@ export default function OnboardingWizard({ session, onComplete }) {
             )}
           </div>
         )
-      case 'servicio':
+      case 'servicio': {
+        const sug = SUGERENCIAS[data.rubro]
         return (
           <div className="space-y-3">
+            {sug?.servicios && (
+              <div className="flex flex-wrap gap-2">
+                {sug.servicios.map((s, i) => (
+                  <button key={s} onClick={() => setData(d => ({ ...d, svcNombre: s, svcPrecio: String(sug.precios[i] || 0), svcDuracion: String(sug.duraciones[i] || 30) }))}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
+                      data.svcNombre === s ? 'bg-sky-500 border-sky-400 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                    }`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
             <input value={data.svcNombre} onChange={e=>setData(d=>({...d,svcNombre:e.target.value}))} placeholder={vocab.placeholderServicio || 'Nombre del servicio'} className={base} ref={inputRef} />
             <div className="grid grid-cols-2 gap-3">
               <input type="number" value={data.svcPrecio} onChange={e=>setData(d=>({...d,svcPrecio:e.target.value}))} placeholder="Precio $" className={base} />
-              <select value={data.svcDuracion} onChange={e=>setData(d=>({...d,svcDuracion:e.target.value}))} className={base}>
+              <select value={data.svcDuracion} onChange={e=>setData(d=>({...d,svcDuracion:e.target.value}))} className={base + " bg-slate-800"}>
                 {[15,30,45,60,90,120].map(m=><option key={m} value={m}>{m} min</option>)}
               </select>
             </div>
@@ -353,9 +441,23 @@ export default function OnboardingWizard({ session, onComplete }) {
             </div>
           </div>
         )
-      case 'staff':
+      }
+      case 'staff': {
+        const sug = SUGERENCIAS[data.rubro]
         return (
           <div className="space-y-3">
+            {sug?.staff && (
+              <div className="flex flex-wrap gap-2">
+                {sug.staff.map(s => (
+                  <button key={s} onClick={() => setData(d => ({ ...d, staffNombre: s, staffEspecialidad: d.staffEspecialidad || sug.especialidad }))}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
+                      data.staffNombre === s ? 'bg-sky-500 border-sky-400 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                    }`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
             <input ref={inputRef} value={data.staffNombre} onChange={e=>setData(d=>({...d,staffNombre:e.target.value}))} placeholder="Nombre del profesional" className={base} />
             <input value={data.staffEspecialidad} onChange={e=>setData(d=>({...d,staffEspecialidad:e.target.value}))} placeholder={vocab.placeholderEspecialidad || 'Especialidad'} className={base} />
             <div className="grid grid-cols-2 gap-3">
@@ -364,6 +466,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             </div>
           </div>
         )
+      }
       default: return null
     }
   }
