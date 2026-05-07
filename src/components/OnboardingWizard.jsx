@@ -236,18 +236,20 @@ export default function OnboardingWizard({ session, onComplete }) {
       await supabase.from('negocios').update({
         descripcion: finalData.descripcion, instagram: finalData.instagram,
         logo_url: finalData.logo_url, horarios: null
-      }).eq('id', id).catch(() => {})
+      }).eq('id', id)
+      
       if (finalData.svcNombre) {
         await supabase.from('servicios').insert([{
           negocio_id: id, nombre: finalData.svcNombre,
           precio: Number(finalData.svcPrecio) || 0, duracion_minutos: Number(finalData.svcDuracion) || 30
-        }]).catch(() => {})
+        }])
       }
+      
       if (finalData.staffNombre) {
         await supabase.from('empleados').insert([{
           negocio_id: id, nombre: finalData.staffNombre,
           especialidad: finalData.staffEspecialidad, estado: 'activo'
-        }]).catch(() => {})
+        }])
       }
       setDone(true)
     } catch(e) {
