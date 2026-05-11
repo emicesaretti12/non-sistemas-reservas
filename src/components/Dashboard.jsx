@@ -19,6 +19,12 @@ import OnboardingWizard from './OnboardingWizard'
 // Panel de Configuración Guiada Post-Onboarding
 import GuidedSetup from './GuidedSetup'
 
+// Tour Guiado Interactivo del Dashboard
+import DashboardTour, { useTour } from './DashboardTour'
+
+// Asistente Flotante "Noni"
+import FloatingAssistant from './FloatingAssistant'
+
 export default function Dashboard({ session }) {
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
   const [loading, setLoading] = useState(true)
@@ -75,6 +81,9 @@ export default function Dashboard({ session }) {
   const [distribucionSemanal, setDistribucionSemanal] = useState([0,0,0,0,0,0,0])
 
   const navigate = useNavigate()
+
+  // Tour guiado interactivo
+  const tour = useTour()
 
   useEffect(() => {
     if (session) {
@@ -804,9 +813,9 @@ export default function Dashboard({ session }) {
             </header>
 
             {/* TAB SELECTOR — DESKTOP: Grid flexible que envuelve */}
-            <div className="hidden md:flex flex-wrap gap-1.5 p-1.5 bg-white border border-slate-200 rounded-2xl no-scrollbar shadow-sm">
+            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-1.5 p-1.5 bg-white border border-slate-200 rounded-2xl no-scrollbar shadow-sm">
               {tabsConfig.map(i => (
-                <button key={i.id} onClick={() => setTab(i.id)} className={`px-5 py-2.5 rounded-xl flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${tab === i.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
+                <button key={i.id} id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined} onClick={() => setTab(i.id)} className={`px-5 py-2.5 rounded-xl flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${tab === i.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d}/></svg>
                   {i.label}
                 </button>
@@ -828,7 +837,7 @@ export default function Dashboard({ session }) {
 
               {/* ====== TAB: MONITOR — MEJORADO ====== */}
               {tab === 'inicio' && (
-                <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
+                <div id="tour-monitor" className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
                   
                   {/* GUIDED SETUP — Checklist de configuración post-onboarding */}
                   <GuidedSetup
@@ -863,33 +872,71 @@ export default function Dashboard({ session }) {
                     </div>
                   )}
 
-                  {/* KPIs GRID */}
+                  {/* KPIs GRID — Con estados educativos cuando están en 0 */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="ns-stat-mini group">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorTurnos}</p>
-                      <h3 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stats.hoy}</h3>
-                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-blue-500 uppercase tracking-widest">
-                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
-                         En agenda
-                      </div>
+                      {stats.hoy === 0 && crmStats.totalServicios === 0 ? (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold text-slate-200 tracking-tighter">0</h3>
+                          <button onClick={() => setTab('servicios')} className="text-[9px] font-bold text-purple-500 hover:text-purple-700 transition-colors cursor-pointer">
+                            Creá un servicio para empezar →
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stats.hoy}</h3>
+                          <div className="flex items-center gap-1.5 text-[9px] font-bold text-blue-500 uppercase tracking-widest">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeWidth="3"/></svg>
+                            En agenda
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="ns-stat-mini group">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorIngresos}</p>
-                      <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-[#34C759]">${stats.ingresos.toLocaleString()}</h3>
-                      <p className="text-[9px] font-medium text-slate-400 italic">{vocab.turnos} activos</p>
+                      {stats.ingresos === 0 && stats.hoy === 0 ? (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold text-slate-200 tracking-tighter">$0</h3>
+                          <p className="text-[9px] font-medium text-slate-400">Se calcula con los turnos confirmados</p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-[#34C759]">${stats.ingresos.toLocaleString()}</h3>
+                          <p className="text-[9px] font-medium text-slate-400 italic">{vocab.turnos} activos</p>
+                        </>
+                      )}
                     </div>
 
                     <div className="ns-stat-mini group">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.monitorSemana}</p>
-                      <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{stats.semana}</h3>
-                      <p className="text-[9px] font-medium text-slate-400 italic">{vocab.turnos} agendados</p>
+                      {stats.semana === 0 ? (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold text-slate-200 tracking-tighter">0</h3>
+                          <p className="text-[9px] font-medium text-slate-400">Los turnos de esta semana aparecen acá</p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{stats.semana}</h3>
+                          <p className="text-[9px] font-medium text-slate-400 italic">{vocab.turnos} agendados</p>
+                        </>
+                      )}
                     </div>
 
                     <div className="ns-stat-mini group">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{vocab.clientes.charAt(0).toUpperCase() + vocab.clientes.slice(1)}</p>
-                      <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{clientes.length}</h3>
-                      <p className="text-[9px] font-medium text-slate-400 italic">Registrados</p>
+                      {clientes.length === 0 ? (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold text-slate-200 tracking-tighter">0</h3>
+                          <p className="text-[9px] font-medium text-slate-400">Se agregan al recibir reservas</p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-3xl md:text-5xl font-bold tracking-tighter group-hover:scale-105 transition-transform origin-left text-slate-900">{clientes.length}</h3>
+                          <p className="text-[9px] font-medium text-slate-400 italic">Registrados</p>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -1027,7 +1074,7 @@ export default function Dashboard({ session }) {
                   )}
                   
                   {/* LINK PÚBLICO WIDGET */}
-                  <div className="bg-slate-900 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
+                  <div id="tour-link" className="bg-slate-900 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
                      <div className="relative z-10">
                         <h4 className="text-lg md:text-xl font-bold tracking-tight mb-1 md:mb-3">Link de Reservas</h4>
                         <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">{vocab.linkDescripcion}</p>
@@ -1381,6 +1428,36 @@ export default function Dashboard({ session }) {
             </button>
           ))}
         </nav>
+      )}
+
+      {/* ====== TOUR GUIADO INTERACTIVO ====== */}
+      {negocio && !negocio.es_admin_plataforma && (
+        <DashboardTour
+          active={tour.active}
+          onDismiss={tour.dismiss}
+          negocio={negocio}
+          onNavigate={(t) => setTab(t)}
+          publicLink={publicLink}
+        />
+      )}
+
+      {/* ====== ASISTENTE FLOTANTE "NONI" ====== */}
+      {negocio && !negocio.es_admin_plataforma && (
+        <FloatingAssistant
+          tab={tab}
+          setupData={{
+            hasServicios: crmStats.totalServicios > 0,
+            hasEmpleados: crmStats.totalEmpleados > 0,
+            hasHorarios: negocio?.horarios && Object.values(negocio.horarios).some(d => d.abierto),
+            hasBranding: !!(logoUrl || descripcion),
+            hasShared: false,
+            hasTurnos: stats.hoy > 0 || actividadReciente.length > 0,
+          }}
+          vocab={vocab}
+          publicLink={publicLink}
+          onNavigate={(t) => setTab(t)}
+          onStartTour={() => tour.start()}
+        />
       )}
     </div>
   )
