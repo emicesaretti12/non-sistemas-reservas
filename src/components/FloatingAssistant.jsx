@@ -260,6 +260,7 @@ export default function FloatingAssistant({
   const [dismissed, setDismissed] = useState(false)
   const [showPulse, setShowPulse] = useState(true)
   const [mood, setMood] = useState('happy')
+  const [showBubble, setShowBubble] = useState(false)
   const panelRef = useRef(null)
 
   // Load persisted state
@@ -309,6 +310,19 @@ export default function FloatingAssistant({
     setMessageIdx(0)
   }, [tab])
 
+  // Auto-show speech bubble for first time users
+  useEffect(() => {
+    const bubbleSeen = localStorage.getItem('ns_bubble_shown')
+    if (!bubbleSeen && !open) {
+      const timer = setTimeout(() => {
+        setShowBubble(true)
+        localStorage.setItem('ns_bubble_shown', '1')
+        setTimeout(() => setShowBubble(false), 8000)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
   // Wink randomly
   useEffect(() => {
     const winkInterval = setInterval(() => {
@@ -332,7 +346,22 @@ export default function FloatingAssistant({
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
-  if (dismissed) return null
+  if (dismissed) {
+    return (
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed bottom-6 right-5 z-[85] w-8 h-8 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-500 hover:bg-purple-500 hover:text-white transition-all shadow-sm cursor-pointer"
+        onClick={() => { setDismissed(false); setOpen(true) }}
+        title="Mostrar a Noni"
+        style={{ bottom: window.innerWidth < 768 ? 'calc(80px + env(safe-area-inset-bottom, 0px) + 12px)' : '24px' }}
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </motion.button>
+    )
+  }
 
   const messages = getContextualMessages(tab, setupData, vocab)
   const currentMessage = messages[messageIdx] || messages[0]
@@ -380,6 +409,19 @@ export default function FloatingAssistant({
               <span className="ns-assistant-pulse" />
             )}
             <RobotAvatar size={36} speaking={false} mood={mood} />
+            {/* Speech bubble tooltip */}
+            {showBubble && (
+              <motion.div
+                initial={{ opacity: 0, x: 10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-purple-100 px-4 py-3 whitespace-nowrap pointer-events-none"
+              >
+                <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-purple-600">Noni</span> 🤖</p>
+                <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tocame para empezar a configurar</p>
+                <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-purple-100 rotate-[-45deg]"></div>
+              </motion.div>
+            )}
             {/* Progress badge */}
             {!allDone && (
               <span className="ns-assistant-badge">

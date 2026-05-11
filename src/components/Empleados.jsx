@@ -12,6 +12,7 @@ export default function Empleados({ negocioId, rubro }) {
   const [guardando, setGuardando] = useState(false)
   const [subiendoFoto, setSubiendoFoto] = useState(false)
   const [modoEdicion, setModoEdicion] = useState(null)
+  const [showCelebration, setShowCelebration] = useState(false)
   
   const [form, setForm] = useState({
     nombre: '',
@@ -134,9 +135,15 @@ export default function Empleados({ negocioId, rubro }) {
       }
 
       setModalAbierto(false)
+      // Celebrate first employee!
+      const wasEmpty = especialistas.length === 0 && !modoEdicion
       // Recargamos forzando el ID validado
       const { data: newData } = await supabase.from('empleados').select('*').eq('negocio_id', negocioId).order('creado_en', { ascending: true })
       setEspecialistas(newData || [])
+      if (wasEmpty) {
+        setShowCelebration(true)
+        setTimeout(() => setShowCelebration(false), 5000)
+      }
 
     } catch (error) {
       console.error("Payload rechazado por Supabase:", error)
@@ -170,6 +177,18 @@ export default function Empleados({ negocioId, rubro }) {
     <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
       
       {/* --- HEADER COMPACTO --- */}
+      
+      {/* Celebration toast */}
+      {showCelebration && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-emerald-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
+          <span className="text-2xl">🎉</span>
+          <div>
+            <p className="text-sm font-bold text-slate-900">¡{vocab.empleado} agregado!</p>
+            <p className="text-[10px] text-slate-500 font-medium">Ahora configurá tus horarios de atención</p>
+          </div>
+        </div>
+      )}
+
       <header className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0">
          <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">{vocab.empleadoPlural}</h2>
@@ -192,14 +211,45 @@ export default function Empleados({ negocioId, rubro }) {
            <div className="flex justify-center items-center h-40">
               <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
            </div>
-         ) : especialistas.length === 0 ? (
-           <div className="bg-white rounded-[2rem] border border-dashed border-slate-300 p-12 flex flex-col items-center text-center">
-              <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              <h3 className="text-sm font-bold text-slate-900">Sin {vocab.empleados}</h3>
-              <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[200px]">
-                Debes agregar al menos un {vocab.empleado} para recibir reservas.
-              </p>
-           </div>
+          ) : especialistas.length === 0 ? (
+            <div className="bg-white rounded-[2rem] border border-purple-100 p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
+               {/* Background decoration */}
+               <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-50 rounded-full blur-[40px]"></div>
+               <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-50 rounded-full blur-[30px]"></div>
+               
+               {/* Robot emoji */}
+               <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm relative z-10">
+                  <span className="text-3xl">🤖</span>
+               </div>
+               
+               <h3 className="text-base font-bold text-slate-900 tracking-tight relative z-10">¡Agregá a tu equipo!</h3>
+               <p className="text-xs text-slate-500 mt-2 max-w-[320px] leading-relaxed font-medium relative z-10">
+                 Acá cargás a las personas que atienden en tu negocio. Si <strong className="text-slate-700">trabajás solo</strong>, ponete a vos mismo. Los clientes van a elegir <strong className="text-slate-700">con quién reservar</strong>.
+               </p>
+
+               {/* Example card */}
+               <div className="mt-5 w-full max-w-[300px] space-y-2 relative z-10">
+                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ejemplo:</p>
+                 <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">A</div>
+                   <div className="text-left">
+                     <p className="text-xs font-bold text-slate-700">Ana García</p>
+                     <p className="text-[9px] text-slate-400 font-medium">{vocab.especialidad || 'Especialista'}</p>
+                   </div>
+                   <div className="ml-auto w-3 h-3 rounded-full bg-emerald-400"></div>
+                 </div>
+               </div>
+
+               {/* CTA */}
+               <button 
+                 onClick={abrirModalCrear}
+                 className="mt-6 px-8 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold text-[11px] uppercase tracking-widest shadow-lg hover:from-purple-400 hover:to-indigo-400 transition-all active:scale-95 relative z-10 flex items-center gap-2"
+               >
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
+                 Agregar {vocab.empleado}
+               </button>
+               <p className="text-[9px] text-slate-400 mt-2 font-medium relative z-10">Necesitás al menos uno para recibir reservas</p>
+            </div>
          ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {especialistas.map((esp) => (

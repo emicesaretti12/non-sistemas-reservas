@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient'
 
 export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   const [guardando, setGuardando] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
 
   // Estructura base de la semana (por si el negocio es nuevo y no tiene horarios aún)
   const defaultHorarios = {
@@ -54,7 +55,8 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
 
       if (error) throw error
       
-      alert("Horarios comerciales actualizados con éxito. La agenda pública ha sido modificada.")
+      setShowCelebration(true)
+      setTimeout(() => setShowCelebration(false), 5000)
       if (onUpdate) onUpdate() // Llama a la función del padre (Dashboard) para refrescar datos
       
     } catch (error) {
@@ -69,6 +71,18 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
     <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
       
       {/* --- HEADER --- */}
+
+      {/* Celebration toast */}
+      {showCelebration && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-emerald-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
+          <span className="text-2xl">✅</span>
+          <div>
+            <p className="text-sm font-bold text-slate-900">¡Horarios guardados!</p>
+            <p className="text-[10px] text-slate-500 font-medium">Tus clientes ya pueden ver los turnos disponibles. ¡Compartí tu link!</p>
+          </div>
+        </div>
+      )}
+
       <header className="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
          <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Matriz de Horarios</h2>
@@ -84,6 +98,19 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
             {guardando ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar y Sincronizar'}
          </button>
       </header>
+
+      {/* --- TIP EDUCATIVO — Solo si no hay horarios configurados --- */}
+      {!Object.values(horarios).some(d => d.abierto) && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-2xl p-4 md:p-5 mb-4 md:mb-6 flex items-start gap-3">
+          <span className="text-2xl shrink-0">🤖</span>
+          <div>
+            <p className="text-xs font-bold text-slate-900">¿Cómo funcionan los horarios?</p>
+            <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">
+              Activá los días que abrís y configurá el rango horario (ej: 9:00 a 18:00). El sistema calcula automáticamente los turnos disponibles según la <strong className="text-slate-700">duración de cada servicio</strong>. Si cerrás al mediodía, usá la opción "Corte / Pausa".
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* --- LISTA DE DÍAS (APPLE SETTINGS STYLE) --- */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
