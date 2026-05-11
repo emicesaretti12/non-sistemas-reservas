@@ -111,6 +111,7 @@ export function useTour() {
 export default function DashboardTour({ active, onDismiss, negocio, onNavigate, publicLink }) {
   const [step, setStep] = useState(0)
   const [targetRect, setTargetRect] = useState(null)
+  const [copyToast, setCopyToast] = useState(false)
   const current = STEPS[step]
 
   useEffect(() => {
@@ -164,6 +165,17 @@ export default function DashboardTour({ active, onDismiss, negocio, onNavigate, 
     <AnimatePresence>
       {active && (
         <>
+          {/* Copy toast */}
+          {copyToast && (
+            <div className="ns-copy-toast">
+              <span className="text-lg">✅</span>
+              <div>
+                <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
+                <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+              </div>
+            </div>
+          )}
+
           {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -261,8 +273,9 @@ export default function DashboardTour({ active, onDismiss, negocio, onNavigate, 
                     <button
                       onClick={() => {
                         if (current.actionCopyLink && publicLink) {
-                          navigator.clipboard.writeText(publicLink)
-                          alert('¡Link copiado!')
+                          navigator.clipboard.writeText(publicLink).catch(() => {})
+                          setCopyToast(true)
+                          setTimeout(() => setCopyToast(false), 3000)
                         } else if (current.actionTab) {
                           onNavigate?.(current.actionTab)
                         }

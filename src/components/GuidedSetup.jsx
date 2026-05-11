@@ -77,6 +77,7 @@ export default function GuidedSetup({ negocio, serviciosCount, empleadosCount, o
   const [expanded, setExpanded] = useState(true)
   const [shared, setShared] = useState(false)
   const [expandedStep, setExpandedStep] = useState(null)
+  const [copyToast, setCopyToast] = useState(false)
 
   // Check completion state
   const data = {
@@ -116,13 +117,24 @@ export default function GuidedSetup({ negocio, serviciosCount, empleadosCount, o
   }
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(publicLink)
+    navigator.clipboard.writeText(publicLink).catch(() => {})
     setShared(true)
-    alert('¡Link copiado!')
+    setCopyToast(true)
+    setTimeout(() => setCopyToast(false), 3000)
   }
 
   return (
     <div id="tour-setup" className="mb-4 md:mb-6 animate-in slide-in-from-top-4 duration-700">
+      {/* Copy toast */}
+      {copyToast && (
+        <div className="ns-copy-toast">
+          <span className="text-lg">✅</span>
+          <div>
+            <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
+            <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+          </div>
+        </div>
+      )}
       <div className={`relative overflow-hidden rounded-[1.5rem] md:rounded-[2rem] border transition-all duration-500 ${allDone ? 'bg-emerald-50 border-emerald-200' : 'bg-gradient-to-br from-purple-50 via-white to-blue-50 border-purple-100'}`}>
 
         {/* Header — always visible */}

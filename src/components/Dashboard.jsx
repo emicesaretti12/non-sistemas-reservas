@@ -85,6 +85,9 @@ export default function Dashboard({ session }) {
   // Tour guiado interactivo
   const tour = useTour()
 
+  // Toast for copy-link
+  const [copyToast, setCopyToast] = useState(false)
+
   useEffect(() => {
     if (session) {
       inicializarPanel()
@@ -676,6 +679,7 @@ export default function Dashboard({ session }) {
 
   const publicSlug = negocio?.nombre?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ''
   const publicLink = `${window.location.origin}/app/${publicSlug}/${negocio?.id || ''}`
+  const showCopyToast = () => { navigator.clipboard.writeText(publicLink).catch(() => {}); setCopyToast(true); setTimeout(() => setCopyToast(false), 3000) }
 
   // Distribución semanal max para normalizar barras
   const maxSemanal = Math.max(...distribucionSemanal, 1)
@@ -690,6 +694,17 @@ export default function Dashboard({ session }) {
   return (
     <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`}>
       
+      {/* Copy-link toast */}
+      {copyToast && (
+        <div className="ns-copy-toast">
+          <span className="text-lg">✅</span>
+          <div>
+            <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
+            <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+          </div>
+        </div>
+      )}
+
       {/* GLOBAL NAVBAR COMPACTO */}
       <nav className={`h-14 md:h-16 border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]/90 backdrop-blur-md border-white/5 shadow-2xl' : 'bg-white/90 backdrop-blur-md border-slate-200 shadow-sm'}`}>
         <div className="flex items-center gap-2 md:gap-3">
@@ -1029,7 +1044,7 @@ export default function Dashboard({ session }) {
                     {[
                       { label: vocab.accionNueva, icon: 'M12 4v16m8-8H4', action: () => setTab('agenda') },
                       { label: vocab.accionServicio, icon: 'M12 4v16m8-8H4', action: () => setTab('servicios') },
-                      { label: 'Copiar Link', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3', action: () => { navigator.clipboard.writeText(publicLink); alert('Link copiado') } },
+                      { label: 'Copiar Link', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3', action: () => showCopyToast() },
                       { label: 'Ver App Pública', icon: 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14', action: () => window.open(publicLink, '_blank') }
                     ].map((a, i) => (
                       <button key={i} onClick={a.action} className="bg-white p-4 rounded-[1.2rem] border border-slate-200 shadow-sm flex flex-col items-center gap-2.5 hover:border-slate-400 hover:shadow-md transition-all active:scale-95 group">
@@ -1078,10 +1093,7 @@ export default function Dashboard({ session }) {
                      <div className="relative z-10">
                         <h4 className="text-lg md:text-xl font-bold tracking-tight mb-1 md:mb-3">Link de Reservas</h4>
                         <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">{vocab.linkDescripcion}</p>
-                        <div className="flex items-center bg-white/10 border border-white/10 rounded-xl p-3 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
-                           navigator.clipboard.writeText(publicLink); 
-                           alert("Link copiado")
-                        }}>
+                        <div className="flex items-center bg-white/10 border border-white/10 rounded-xl p-3 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => showCopyToast()}>
                            <code className="text-[9px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{publicLink}</code>
                            <svg className="w-4 h-4 ml-2 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                         </div>
@@ -1327,10 +1339,7 @@ export default function Dashboard({ session }) {
                     </div>
                     <div className="p-5 md:p-6">
                       <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
-                      <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => {
-                        navigator.clipboard.writeText(publicLink)
-                        alert("Link copiado al portapapeles")
-                      }}>
+                      <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => showCopyToast()}>
                         <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
                         <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                       </div>

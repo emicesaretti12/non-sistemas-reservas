@@ -1031,3 +1031,60 @@ body {
   color: #64748b;
   border-color: #e2e8f0;
 }
+
+/* Re-show Noni button (when dismissed) */
+.ns-assistant-reshow {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  z-index: 85;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ede9fe;
+  border: 1px solid #c4b5fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7c3aed;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+}
+
+.ns-assistant-reshow:hover {
+  background: #7c3aed;
+  color: white;
+  border-color: #7c3aed;
+  transform: scale(1.1);
+}
+
+@media (max-width: 767px) {
+  .ns-assistant-reshow {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 12px);
+    right: 16px;
+  }
+}
+
+/* Copy-link toast */
+.ns-copy-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: ns-toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ns-toast-in {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.95); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}

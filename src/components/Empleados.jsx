@@ -13,6 +13,7 @@ export default function Empleados({ negocioId, rubro }) {
   const [subiendoFoto, setSubiendoFoto] = useState(false)
   const [modoEdicion, setModoEdicion] = useState(null)
   const [showCelebration, setShowCelebration] = useState(false)
+  const [showError, setShowError] = useState('')
   
   const [form, setForm] = useState({
     nombre: '',
@@ -72,7 +73,8 @@ export default function Empleados({ negocioId, rubro }) {
         setForm({ ...form, foto_url: urlOptimizada })
       }
     } catch (error) {
-      alert("Error al subir la imagen. Intente nuevamente.")
+      setShowError('Error al subir la imagen. Intentá de nuevo.')
+      setTimeout(() => setShowError(''), 5000)
     } finally {
       setSubiendoFoto(false)
     }
@@ -148,10 +150,11 @@ export default function Empleados({ negocioId, rubro }) {
     } catch (error) {
       console.error("Payload rechazado por Supabase:", error)
       if (error.code === '42501' || error.message.includes('403')) {
-        alert("Error 403: La base de datos bloqueó la acción. Ejecutá el script SQL de sincronización.")
+        setShowError('La base de datos bloqueó la acción. Ejecutá el script SQL de sincronización.')
       } else {
-        alert(`Error del servidor: ${error.message}`)
+        setShowError(error.message)
       }
+      setTimeout(() => setShowError(''), 5000)
     } finally {
       setGuardando(false)
     }
@@ -168,7 +171,8 @@ export default function Empleados({ negocioId, rubro }) {
       if (!error) {
         setEspecialistas(especialistas.filter(e => e.id !== id))
       } else {
-        alert("No se puede eliminar un recurso con agendas activas.")
+        setShowError('No se puede eliminar un recurso con agendas activas.')
+        setTimeout(() => setShowError(''), 5000)
       }
     }
   }
@@ -185,6 +189,17 @@ export default function Empleados({ negocioId, rubro }) {
           <div>
             <p className="text-sm font-bold text-slate-900">¡{vocab.empleado} agregado!</p>
             <p className="text-[10px] text-slate-500 font-medium">Ahora configurá tus horarios de atención</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error toast */}
+      {showError && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-red-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
+          <span className="text-2xl">❌</span>
+          <div>
+            <p className="text-sm font-bold text-slate-900">Error</p>
+            <p className="text-[10px] text-slate-500 font-medium">{showError}</p>
           </div>
         </div>
       )}

@@ -411,10 +411,25 @@ export default function Turnos({ negocioId, rubro }) {
 
               <div className="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 md:p-6 no-scrollbar relative">
                  {turnos.length === 0 ? (
-                   <div className="flex flex-col items-center justify-center h-full text-center opacity-50 py-20 pb-40">
-                      <svg className="w-16 h-16 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                      <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Día Libre</p>
-                   </div>
+                    <div className="flex flex-col items-center justify-center h-full text-center py-20 pb-40">
+                       {servicios.length === 0 || empleados.length === 0 ? (
+                         <>
+                           <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                             <span className="text-2xl">🤖</span>
+                           </div>
+                           <p className="text-sm font-bold text-slate-700">Todavía no podés recibir turnos</p>
+                           <p className="text-[11px] text-slate-400 font-medium mt-2 max-w-[260px] leading-relaxed">
+                             {servicios.length === 0 ? 'Primero creá al menos un servicio' : 'Agregá al menos un profesional a tu equipo'} para que los clientes puedan reservar.
+                           </p>
+                         </>
+                       ) : (
+                         <>
+                           <svg className="w-14 h-14 text-slate-200 mb-4" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Día Libre</p>
+                           <p className="text-[10px] text-slate-400 font-medium mt-2">Tocá el botón "+" para agendar un turno manual</p>
+                         </>
+                       )}
+                    </div>
                  ) : (
                    <div className="space-y-8 pb-32">
                       {turnosMañana.length > 0 && (

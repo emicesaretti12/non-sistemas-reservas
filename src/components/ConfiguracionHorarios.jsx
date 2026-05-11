@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   const [guardando, setGuardando] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
+  const [showError, setShowError] = useState(false)
 
   // Estructura base de la semana (por si el negocio es nuevo y no tiene horarios aún)
   const defaultHorarios = {
@@ -60,7 +61,8 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       if (onUpdate) onUpdate() // Llama a la función del padre (Dashboard) para refrescar datos
       
     } catch (error) {
-      alert("Hubo un error al guardar los horarios. Verifique su conexión.")
+      setShowError(true)
+      setTimeout(() => setShowError(false), 5000)
       console.error(error.message)
     } finally {
       setGuardando(false)
@@ -79,6 +81,17 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
           <div>
             <p className="text-sm font-bold text-slate-900">¡Horarios guardados!</p>
             <p className="text-[10px] text-slate-500 font-medium">Tus clientes ya pueden ver los turnos disponibles. ¡Compartí tu link!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error toast */}
+      {showError && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-red-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
+          <span className="text-2xl">❌</span>
+          <div>
+            <p className="text-sm font-bold text-slate-900">Error al guardar</p>
+            <p className="text-[10px] text-slate-500 font-medium">Verificá tu conexión a internet e intentá de nuevo</p>
           </div>
         </div>
       )}

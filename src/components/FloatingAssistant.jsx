@@ -261,6 +261,7 @@ export default function FloatingAssistant({
   const [showPulse, setShowPulse] = useState(true)
   const [mood, setMood] = useState('happy')
   const [showBubble, setShowBubble] = useState(false)
+  const [copyToast, setCopyToast] = useState(false)
   const panelRef = useRef(null)
 
   // Load persisted state
@@ -314,12 +315,14 @@ export default function FloatingAssistant({
   useEffect(() => {
     const bubbleSeen = localStorage.getItem('ns_bubble_shown')
     if (!bubbleSeen && !open) {
-      const timer = setTimeout(() => {
+      const showTimer = setTimeout(() => {
         setShowBubble(true)
         localStorage.setItem('ns_bubble_shown', '1')
-        setTimeout(() => setShowBubble(false), 8000)
       }, 3000)
-      return () => clearTimeout(timer)
+      const hideTimer = setTimeout(() => {
+        setShowBubble(false)
+      }, 11000) // 3s delay + 8s visible
+      return () => { clearTimeout(showTimer); clearTimeout(hideTimer) }
     }
   }, [])
 
@@ -351,10 +354,9 @@ export default function FloatingAssistant({
       <motion.button
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="fixed bottom-6 right-5 z-[85] w-8 h-8 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-500 hover:bg-purple-500 hover:text-white transition-all shadow-sm cursor-pointer"
-        onClick={() => { setDismissed(false); setOpen(true) }}
+        className="ns-assistant-reshow"
+        onClick={() => { setDismissed(false); setOpen(true); localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed: false, minimized: false })) }}
         title="Mostrar a Noni"
-        style={{ bottom: window.innerWidth < 768 ? 'calc(80px + env(safe-area-inset-bottom, 0px) + 12px)' : '24px' }}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
@@ -385,13 +387,25 @@ export default function FloatingAssistant({
       setOpen(false)
     }
     if (cta.action === 'copy-link') {
-      navigator.clipboard.writeText(publicLink || '')
-      alert('¡Link copiado al portapapeles!')
+      navigator.clipboard.writeText(publicLink || '').catch(() => {})
+      setCopyToast(true)
+      setTimeout(() => setCopyToast(false), 3000)
     }
   }
 
   return (
     <>
+      {/* Copy toast */}
+      {copyToast && (
+        <div className="ns-copy-toast">
+          <span className="text-lg">✅</span>
+          <div>
+            <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
+            <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Floating Button ───────────────────────────────────────── */}
       <AnimatePresence>
         {!open && (
@@ -400,7 +414,7 @@ export default function FloatingAssistant({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            onClick={() => { setOpen(true); setShowPulse(false) }}
+            onClick={() => { setOpen(true); setShowPulse(false); setShowBubble(false) }}
             className="ns-assistant-fab"
             title={`${ROBOT_NAME} — Tu asistente`}
           >
