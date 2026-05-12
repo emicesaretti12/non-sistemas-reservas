@@ -1467,6 +1467,7 @@ export default function Dashboard({ session }) {
           publicLink={publicLink}
           onNavigate={(t) => setTab(t)}
           onStartTour={() => tour.start()}
+          negocioNombre={negocio?.nombre}
         />
       )}
     </div>

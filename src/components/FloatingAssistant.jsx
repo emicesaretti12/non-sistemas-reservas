@@ -5,14 +5,44 @@ import { IconRobot, IconCheckCircle, IconErrorCircle, IconCelebrate, IconBolt, I
 const ASSISTANT_KEY = 'ns_assistant_state_v2'
 const ROBOT_NAME = 'Noni'
 
+// ── Time-of-day greeting ────────────────────────────────────────────────────
+function getGreeting(nombre) {
+  const h = new Date().getHours()
+  const saludo = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
+  return nombre ? `${saludo}, ${nombre}` : saludo
+}
+
+// ── Typing Indicator ────────────────────────────────────────────────────────
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1 px-3 py-2">
+      {[0, 1, 2].map(i => (
+        <motion.div
+          key={i}
+          className="w-1.5 h-1.5 bg-purple-400 rounded-full"
+          animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
+        />
+      ))}
+    </div>
+  )
+}
+
 // ── Robot SVG Avatar ────────────────────────────────────────────────────────
-function RobotAvatar({ size = 40, speaking = false, mood = 'happy' }) {
-  const eyeVariants = {
-    happy: { ry: 2.5, y: 0 },
-    wink: { ry: 0.5, y: 0 },
+function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = false }) {
+  const getEyeRy = () => {
+    if (blinking) return 0.3
+    if (mood === 'wink') return 0.5
+    return 2.5
   }
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Glow behind head */}
+      <motion.circle
+        cx="24" cy="25" r="18" fill="#6c5ce7" opacity="0.08"
+        animate={{ scale: speaking ? [1, 1.1, 1] : 1 }}
+        transition={{ repeat: speaking ? Infinity : 0, duration: 1.5 }}
+      />
       {/* Antenna */}
       <motion.line
         x1="24" y1="4" x2="24" y2="12"
@@ -22,46 +52,54 @@ function RobotAvatar({ size = 40, speaking = false, mood = 'happy' }) {
       />
       <motion.circle
         cx="24" cy="3" r="2.5" fill="#a29bfe"
-        animate={{ scale: speaking ? [1, 1.3, 1] : 1, fill: speaking ? ['#a29bfe', '#6c5ce7', '#a29bfe'] : '#a29bfe' }}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 0.8 }}
+        animate={{ scale: speaking ? [1, 1.4, 1] : [1, 1.15, 1], fill: speaking ? ['#a29bfe', '#6c5ce7', '#a29bfe'] : '#a29bfe' }}
+        transition={{ repeat: Infinity, duration: speaking ? 0.6 : 2 }}
       />
       {/* Head */}
       <rect x="8" y="12" width="32" height="26" rx="8" fill="url(#robotGrad)" />
       <rect x="8" y="12" width="32" height="26" rx="8" stroke="#6c5ce7" strokeWidth="1.5" fill="none" />
       {/* Visor / Face plate */}
-      <rect x="12" y="17" width="24" height="14" rx="5" fill="#1e1e2e" opacity="0.85" />
+      <rect x="12" y="17" width="24" height="14" rx="5" fill="#1e1e2e" opacity="0.9" />
+      {/* Eye glow */}
+      <circle cx="19" cy="24" r="4" fill="#00cec9" opacity="0.15" />
+      <circle cx="29" cy="24" r="4" fill="#00cec9" opacity="0.15" />
       {/* Eyes */}
       <motion.ellipse
         cx="19" cy="24" rx="2.5"
         fill="#00cec9"
-        animate={mood === 'wink' ? eyeVariants.wink : eyeVariants.happy}
-        transition={{ duration: 0.3 }}
-        ry={mood === 'wink' ? 0.5 : 2.5}
+        animate={{ ry: getEyeRy() }}
+        transition={{ duration: 0.1 }}
       />
       <motion.ellipse
-        cx="29" cy="24" rx="2.5" ry="2.5"
+        cx="29" cy="24" rx="2.5"
         fill="#00cec9"
-        animate={{ scale: speaking ? [1, 1.15, 1] : 1 }}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 0.6 }}
+        animate={{ ry: getEyeRy(), scale: speaking ? [1, 1.15, 1] : 1 }}
+        transition={{ duration: 0.1, scale: { repeat: speaking ? Infinity : 0, duration: 0.6 } }}
       />
       {/* Mouth */}
       <motion.path
-        d={speaking ? "M20 28 Q24 31 28 28" : "M20 28 Q24 30 28 28"}
+        d={speaking ? "M20 28 Q24 31 28 28" : mood === 'happy' ? "M20 28 Q24 30.5 28 28" : "M20 28 Q24 29 28 28"}
         stroke="#00cec9"
         strokeWidth="1.5"
         strokeLinecap="round"
         fill="none"
-        animate={speaking ? { d: ["M20 28 Q24 31 28 28", "M20 28 Q24 27 28 28", "M20 28 Q24 31 28 28"] } : {}}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
+        animate={speaking ? { d: ["M20 28 Q24 32 28 28", "M20 28 Q24 26 28 28", "M20 28 Q24 32 28 28"] } : {}}
+        transition={{ repeat: speaking ? Infinity : 0, duration: 0.4 }}
       />
       {/* Ears */}
-      <rect x="4" y="20" width="5" height="8" rx="2" fill="#6c5ce7" />
-      <rect x="39" y="20" width="5" height="8" rx="2" fill="#6c5ce7" />
+      <motion.rect x="4" y="20" width="5" height="8" rx="2" fill="#6c5ce7"
+        animate={speaking ? { x: [4, 3, 4] } : {}}
+        transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
+      />
+      <motion.rect x="39" y="20" width="5" height="8" rx="2" fill="#6c5ce7"
+        animate={speaking ? { x: [39, 40, 39] } : {}}
+        transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
+      />
       {/* Body hint */}
       <rect x="16" y="38" width="16" height="6" rx="3" fill="#6c5ce7" opacity="0.5" />
       <defs>
         <linearGradient id="robotGrad" x1="8" y1="12" x2="40" y2="38">
-          <stop offset="0%" stopColor="#ddd6fe" />
+          <stop offset="0%" stopColor="#ede9fe" />
           <stop offset="100%" stopColor="#c4b5fd" />
         </linearGradient>
       </defs>
@@ -252,6 +290,7 @@ export default function FloatingAssistant({
   publicLink,
   onNavigate,
   onStartTour,
+  negocioNombre,
 }) {
   const [open, setOpen] = useState(false)
   const [minimized, setMinimized] = useState(false)
@@ -263,6 +302,8 @@ export default function FloatingAssistant({
   const [mood, setMood] = useState('happy')
   const [showBubble, setShowBubble] = useState(false)
   const [copyToast, setCopyToast] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
+  const [blinking, setBlinking] = useState(false)
   const panelRef = useRef(null)
 
   // Load persisted state
@@ -282,12 +323,16 @@ export default function FloatingAssistant({
     localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed, minimized }))
   }, [dismissed, minimized])
 
-  // Speaking animation when panel opens or message changes
+  // Speaking animation + typing indicator when panel opens or message changes
   useEffect(() => {
     if (open) {
-      setSpeaking(true)
-      const t = setTimeout(() => setSpeaking(false), 2000)
-      return () => clearTimeout(t)
+      setIsTyping(true)
+      const typingTimer = setTimeout(() => {
+        setIsTyping(false)
+        setSpeaking(true)
+      }, 600)
+      const speakTimer = setTimeout(() => setSpeaking(false), 2600)
+      return () => { clearTimeout(typingTimer); clearTimeout(speakTimer) }
     }
   }, [open, messageIdx, tab])
 
@@ -327,15 +372,21 @@ export default function FloatingAssistant({
     }
   }, [])
 
-  // Wink randomly
+  // Blink + wink randomly
   useEffect(() => {
+    // Natural blinking every 3-5 seconds
+    const blinkInterval = setInterval(() => {
+      setBlinking(true)
+      setTimeout(() => setBlinking(false), 150)
+    }, 3000 + Math.random() * 2000)
+    // Wink occasionally
     const winkInterval = setInterval(() => {
       if (!open) {
         setMood('wink')
-        setTimeout(() => setMood('happy'), 300)
+        setTimeout(() => setMood('happy'), 400)
       }
-    }, 8000)
-    return () => clearInterval(winkInterval)
+    }, 12000)
+    return () => { clearInterval(blinkInterval); clearInterval(winkInterval) }
   }, [open])
 
   // Close on click outside
@@ -423,7 +474,7 @@ export default function FloatingAssistant({
             {showPulse && !allDone && (
               <span className="ns-assistant-pulse" />
             )}
-            <RobotAvatar size={36} speaking={false} mood={mood} />
+            <RobotAvatar size={36} speaking={false} mood={mood} blinking={blinking} />
             {/* Speech bubble tooltip */}
             {showBubble && (
               <motion.div
@@ -461,27 +512,39 @@ export default function FloatingAssistant({
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="ns-assistant-panel"
           >
-            {/* Header */}
-            <div className="ns-assistant-header">
-              <div className="flex items-center gap-3">
-                <div className="ns-assistant-avatar-wrap">
-                  <RobotAvatar size={32} speaking={speaking} mood="happy" />
+            {/* Header — Gradient with greeting */}
+            <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #00cec9 100%)' }}>
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-2 right-4 w-24 h-24 border border-white/30 rounded-full" />
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 border border-white/20 rounded-full" />
+              </div>
+              <div className="relative px-5 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                    <RobotAvatar size={28} speaking={speaking} mood="happy" blinking={blinking} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-white tracking-tight">{ROBOT_NAME}</h4>
+                    <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">
+                      {speaking ? 'Escribiendo...' : 'Tu asistente'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-black text-slate-900 tracking-tight">{ROBOT_NAME}</h4>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tu asistente</p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
+                    title="Minimizar"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setOpen(false)}
-                  className="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
-                  title="Minimizar"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
+              {/* Greeting bar */}
+              <div className="px-5 pb-3">
+                <p className="text-[11px] text-white/80 font-medium">{getGreeting(negocioNombre)}</p>
               </div>
             </div>
 
@@ -504,30 +567,31 @@ export default function FloatingAssistant({
               </div>
             )}
 
-            {/* Message */}
+            {/* Message — Chat bubble style */}
             <div className="ns-assistant-body">
-              {currentMessage && (
+              {isTyping && <TypingIndicator />}
+              {!isTyping && currentMessage && (
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentMessage.id}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
                     className="ns-assistant-message"
                   >
                     {currentMessage.badge && (
                       <span className="ns-assistant-msg-badge">{currentMessage.badge}</span>
                     )}
                     <div className="flex items-start gap-2.5">
-                      <span className="w-6 h-6 shrink-0 mt-0.5 text-purple-500">
-                        {currentMessage.emoji === 'bolt' && <IconBolt size={20} />}
-                        {currentMessage.emoji === 'rocket' && <IconRocket size={20} />}
-                        {currentMessage.emoji === 'chart' && <IconChart size={20} />}
-                        {currentMessage.emoji === 'calendar' && <IconCalendar size={20} />}
-                        {currentMessage.emoji === 'palette' && <IconPalette size={20} />}
-                        {currentMessage.emoji === 'robot' && <IconRobot size={20} />}
-                        {currentMessage.emoji === 'clipboard' && <IconRobot size={20} />}
-                      </span>
+                      <div className="w-7 h-7 shrink-0 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500">
+                        {currentMessage.emoji === 'bolt' && <IconBolt size={16} />}
+                        {currentMessage.emoji === 'rocket' && <IconRocket size={16} />}
+                        {currentMessage.emoji === 'chart' && <IconChart size={16} />}
+                        {currentMessage.emoji === 'calendar' && <IconCalendar size={16} />}
+                        {currentMessage.emoji === 'palette' && <IconPalette size={16} />}
+                        {currentMessage.emoji === 'robot' && <IconRobot size={16} />}
+                        {currentMessage.emoji === 'clipboard' && <IconRobot size={16} />}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-slate-900 leading-tight">{currentMessage.title}</p>
                         <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">{currentMessage.text}</p>
