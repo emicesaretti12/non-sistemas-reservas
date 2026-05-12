@@ -108,7 +108,7 @@ function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = f
 }
 
 // ── Contextual Messages Config ──────────────────────────────────────────────
-const getContextualMessages = (tab, setupData, vocab) => {
+const getContextualMessages = (tab, setupData, vocab, smartAlerts = {}) => {
   const messages = []
 
   // Global urgent messages based on setup state
@@ -160,16 +160,74 @@ const getContextualMessages = (tab, setupData, vocab) => {
     })
   }
 
+  // ═══ SMART ALERTS — real-time contextual intelligence ═══
+  if (smartAlerts.turnosHoy > 0 && tab === 'inicio') {
+    const ingFmt = smartAlerts.ingresosHoy?.toLocaleString() || '0'
+    messages.push({
+      id: 'smart-today',
+      priority: 3,
+      emoji: 'chart',
+      title: `Hoy tenés ${smartAlerts.turnosHoy} ${smartAlerts.turnosHoy === 1 ? vocab?.turno || 'turno' : vocab?.turnos || 'turnos'}`,
+      text: `Ingresos esperados: $${ingFmt}. ${smartAlerts.ocupacion > 70 ? '¡Gran ocupación!' : smartAlerts.ocupacion > 40 ? 'Buena actividad.' : 'Hay margen para más reservas.'}`,
+    })
+  }
+
+  if (smartAlerts.proximaCita && tab === 'inicio') {
+    const proximo = new Date(smartAlerts.proximaCita.fecha_hora)
+    const diffMin = Math.round((proximo - new Date()) / 60000)
+    if (diffMin > 0 && diffMin < 120) {
+      messages.push({
+        id: 'smart-proxima',
+        priority: 2,
+        emoji: 'calendar',
+        title: `${smartAlerts.proximaCita.cliente_nombre} llega ${diffMin < 60 ? `en ${diffMin} min` : `en ${Math.floor(diffMin/60)}h`}`,
+        text: `${smartAlerts.proximaCita.servicios?.nombre || vocab?.servicio || 'Turno'}. ¿Querés enviarle un recordatorio por WhatsApp?`,
+        cta: { label: 'Ver agenda →', tab: 'agenda' },
+      })
+    }
+  }
+
+  if (smartAlerts.clientesVIP > 0 && tab === 'clientes') {
+    messages.push({
+      id: 'smart-vip',
+      priority: 4,
+      emoji: 'rocket',
+      title: `Tenés ${smartAlerts.clientesVIP} ${smartAlerts.clientesVIP === 1 ? 'cliente VIP' : 'clientes VIP'}`,
+      text: 'Son los que más vuelven. Considerá ofrecerles descuentos o beneficios exclusivos para fidelizarlos aún más.',
+    })
+  }
+
+  if (smartAlerts.stockBajo > 0) {
+    messages.push({
+      id: 'smart-stock',
+      priority: 2,
+      emoji: 'bolt',
+      title: `Alerta: ${smartAlerts.stockBajo} producto${smartAlerts.stockBajo > 1 ? 's' : ''} con stock bajo`,
+      text: 'Revisá tu inventario para reponer antes de que se agote. Los productos con stock bajo pueden afectar la atención.',
+      cta: { label: 'Ver inventario →', tab: 'inventario' },
+    })
+  }
+
+  if (smartAlerts.ingresosMes > 0 && tab === 'reportes') {
+    messages.push({
+      id: 'smart-ingresos',
+      priority: 4,
+      emoji: 'chart',
+      title: `Este mes: $${smartAlerts.ingresosMes?.toLocaleString()}`,
+      text: `Con ${smartAlerts.turnosSemana} ${vocab?.turnos || 'turnos'} esta semana y ${smartAlerts.totalClientes} clientes registrados. ¡Seguí así!`,
+    })
+  }
+
   // Tab-specific educational messages
   switch (tab) {
     case 'inicio':
-      if (setupData.hasServicios && setupData.hasEmpleados && setupData.hasHorarios) {
+      if (setupData.hasServicios && setupData.hasEmpleados && setupData.hasHorarios && !smartAlerts.turnosHoy) {
         messages.push({
           id: 'monitor-intro',
           priority: 5,
           emoji: 'chart',
-          title: 'Este es tu Monitor',
-          text: 'Acá ves un resumen de tu negocio en tiempo real: turnos del día, ingresos, actividad reciente. Se actualiza solo cada vez que recibís una reserva.',
+          title: 'Tu panel de control',
+          text: 'Acá ves el resumen de tu negocio en tiempo real. Se actualiza con cada reserva nueva.',
         })
       }
       break
@@ -291,6 +349,7 @@ export default function FloatingAssistant({
   onNavigate,
   onStartTour,
   negocioNombre,
+  smartAlerts = {},
 }) {
   const [open, setOpen] = useState(false)
   const [minimized, setMinimized] = useState(false)

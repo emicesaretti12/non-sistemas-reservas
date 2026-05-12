@@ -863,6 +863,113 @@ export default function Dashboard({ session }) {
                     onNavigate={(t) => setTab(t)}
                     onDismiss={() => {}}
                   />
+
+                  {/* ═══════════ RESUMEN DE HOY ═══════════ */}
+                  {(stats.hoy > 0 || actividadReciente.length > 0) && (() => {
+                    const ahora = new Date()
+                    const turnosHoyData = actividadReciente.filter(t => {
+                      const td = new Date(t.fecha_hora)
+                      return td.toDateString() === ahora.toDateString() && td > ahora
+                    })
+                    const turnosPasados = actividadReciente.filter(t => {
+                      const td = new Date(t.fecha_hora)
+                      return td.toDateString() === ahora.toDateString() && td <= ahora
+                    })
+                    const ingresosDia = [...turnosHoyData, ...turnosPasados].reduce((a, t) => a + (t.servicios?.precio || 0), 0)
+                    
+                    // Turnos en próximas 2 horas para recordatorios
+                    const en2h = new Date(ahora.getTime() + 2 * 60 * 60000)
+                    const recordatorios = turnosHoyData.filter(t => {
+                      const td = new Date(t.fecha_hora)
+                      return td <= en2h
+                    })
+                    
+                    // Countdown al próximo
+                    let countdown = ''
+                    if (turnosHoyData.length > 0) {
+                      const proximo = new Date(turnosHoyData[0].fecha_hora)
+                      const diffMin = Math.round((proximo - ahora) / 60000)
+                      if (diffMin < 60) countdown = `en ${diffMin} min`
+                      else countdown = `en ${Math.floor(diffMin / 60)}h ${diffMin % 60}m`
+                    }
+                    
+                    return (
+                      <div className="bg-gradient-to-br from-white to-slate-50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+                        {/* Header */}
+                        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+                          <div>
+                            <h3 className="text-sm font-black text-slate-900 tracking-tight">Resumen de hoy</h3>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                              {ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            </p>
+                          </div>
+                          {countdown && (
+                            <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest animate-pulse">
+                              Próximo {countdown}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Mini Stats */}
+                        <div className="grid grid-cols-4 gap-px bg-slate-100 mx-5 rounded-xl overflow-hidden mb-4">
+                          <div className="bg-white p-3 text-center">
+                            <p className="text-lg font-black text-slate-900">{turnosHoyData.length + turnosPasados.length}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{vocab.turnos}</p>
+                          </div>
+                          <div className="bg-white p-3 text-center">
+                            <p className="text-lg font-black text-emerald-600">${ingresosDia.toLocaleString()}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Ingresos</p>
+                          </div>
+                          <div className="bg-white p-3 text-center">
+                            <p className="text-lg font-black text-blue-600">{turnosPasados.length}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Atendidos</p>
+                          </div>
+                          <div className="bg-white p-3 text-center">
+                            <p className="text-lg font-black text-purple-600">{turnosHoyData.length}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Pendientes</p>
+                          </div>
+                        </div>
+                        
+                        {/* Banner de Recordatorios */}
+                        {recordatorios.length > 0 && (
+                          <div className="mx-5 mb-4 bg-amber-50 border border-amber-100 rounded-xl p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">
+                                {recordatorios.length} {recordatorios.length === 1 ? 'turno' : 'turnos'} en las próximas 2 horas
+                              </p>
+                            </div>
+                            <div className="space-y-1.5">
+                              {recordatorios.map(t => {
+                                const hora = new Date(t.fecha_hora).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                                const num = t.cliente_telefono?.replace(/[^0-9]/g, '') || ''
+                                const nombreCorto = t.cliente_nombre?.split(' ')[0] || ''
+                                const servNombre = t.servicios?.nombre?.toLowerCase() || vocab.servicio
+                                const mje = `Hola ${nombreCorto}, te recuerdo tu ${servNombre} hoy a las ${hora} hs. ¡Te esperamos!`
+                                return (
+                                  <div key={t.id} className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <span className="text-xs font-black text-amber-800">{hora}</span>
+                                      <span className="text-[10px] font-medium text-amber-700 truncate">{t.cliente_nombre}</span>
+                                    </div>
+                                    <a
+                                      href={`https://wa.me/${num}?text=${encodeURIComponent(mje)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1 px-2.5 py-1 bg-green-500 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-green-600 transition-colors shrink-0"
+                                    >
+                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                                      Recordar
+                                    </a>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
                   
                   {/* PRÓXIMA CITA CARD — Solo si existe */}
                   {proximaCita && (
@@ -881,8 +988,12 @@ export default function Dashboard({ session }) {
                       </div>
                       <button onClick={() => {
                         const num = proximaCita.cliente_telefono?.replace(/[^0-9]/g, '') || ''
-                        window.open(`https://wa.me/${num}`, '_blank')
-                      }} className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shrink-0">
+                        const nombreCorto = proximaCita.cliente_nombre?.split(' ')[0] || ''
+                        const servNombre = proximaCita.servicios?.nombre?.toLowerCase() || vocab.servicio
+                        const horaStr = formatearHora(proximaCita.fecha_hora)
+                        const mje = `Hola ${nombreCorto}, te recuerdo tu ${servNombre} hoy a las ${horaStr} hs. ¡Te esperamos!`
+                        window.open(`https://wa.me/${num}?text=${encodeURIComponent(mje)}`, '_blank')
+                      }} className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shrink-0" title="Enviar recordatorio por WhatsApp">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                       </button>
                     </div>
@@ -1344,7 +1455,19 @@ export default function Dashboard({ session }) {
                         <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
                         <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 mt-3">
+
+                      {/* QR Code */}
+                      <div className="mt-4 p-4 bg-white border border-slate-200 rounded-xl text-center">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicLink)}&bgcolor=ffffff&color=0f172a&margin=8`}
+                          alt="QR de reservas"
+                          className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-lg"
+                          loading="lazy"
+                        />
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">Escaneá para reservar</p>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 mt-3">
                         <button onClick={() => window.open(publicLink, '_blank')} className="py-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
                           Vista Previa
                         </button>
@@ -1353,6 +1476,16 @@ export default function Dashboard({ session }) {
                           window.open(`https://wa.me/?text=${waMje}`, '_blank')
                         }} className="py-3 rounded-xl bg-green-50 border border-green-200 text-[10px] font-bold uppercase tracking-widest text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all">
                           Compartir WA
+                        </button>
+                        <button onClick={() => {
+                          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(publicLink)}&bgcolor=ffffff&color=0f172a&margin=16&format=png`
+                          const a = document.createElement('a')
+                          a.href = qrUrl
+                          a.download = `qr-${negocio?.nombre?.replace(/\s+/g, '-')?.toLowerCase() || 'reservas'}.png`
+                          a.target = '_blank'
+                          a.click()
+                        }} className="py-3 rounded-xl bg-purple-50 border border-purple-200 text-[10px] font-bold uppercase tracking-widest text-purple-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all">
+                          Descargar QR
                         </button>
                       </div>
                     </div>
@@ -1468,6 +1601,17 @@ export default function Dashboard({ session }) {
           onNavigate={(t) => setTab(t)}
           onStartTour={() => tour.start()}
           negocioNombre={negocio?.nombre}
+          smartAlerts={{
+            turnosHoy: stats.hoy || 0,
+            ingresosHoy: stats.ingresos || 0,
+            turnosSemana: stats.semana || 0,
+            ingresosMes: stats.mesIngresos || 0,
+            totalClientes: clientes.length,
+            clientesVIP: clientes.filter(c => c.frecuencia === 'VIP').length,
+            stockBajo: crmStats.stockBajo,
+            proximaCita,
+            ocupacion: stats.tasaOcupacion || 0,
+          }}
         />
       )}
     </div>
