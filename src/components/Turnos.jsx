@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 import { IconRobot } from './NoniIcons'
 
-export default function Turnos({ negocioId, rubro }) {
+export default function Turnos({ negocioId, rubro, negocio }) {
   const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
   const [fechaActual, setFechaActual] = useState(new Date())
@@ -386,6 +386,205 @@ export default function Turnos({ negocioId, rubro }) {
                </button>
             ))}
          </div>
+
+         {/* === PRÓXIMOS TURNOS === */}
+         {(() => {
+           const ahora = new Date()
+           const proximos = todosLosTurnos
+             .filter(t => {
+               const tDate = safeParseDate(t.fecha_hora)
+               return tDate && tDate > ahora
+             })
+             .slice(0, 5)
+           
+           if (proximos.length === 0) return null
+           return (
+             <div className="mt-6 md:mt-8 px-1">
+               <div className="flex items-center gap-2 mb-3">
+                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Próximos {vocab.turnos}</h3>
+               </div>
+               <div className="space-y-2">
+                 {proximos.map(t => {
+                   const tDate = safeParseDate(t.fecha_hora)
+                   const horaStr = tDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                   const fechaStr = tDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
+                   const esHoy = tDate.toDateString() === new Date().toDateString()
+                   return (
+                     <div key={t.id} className="bg-white rounded-xl p-3 border border-slate-100 shadow-sm flex items-center gap-3 hover:shadow-md transition-all">
+                       <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${esHoy ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-600'}`}>
+                         <span className="text-sm font-black leading-none">{horaStr}</span>
+                         <span className="text-[8px] font-bold uppercase tracking-wider mt-0.5 opacity-60">{esHoy ? 'Hoy' : fechaStr}</span>
+                       </div>
+                       <div className="flex-1 min-w-0">
+                         <p className="text-sm font-bold text-slate-900 truncate">{t.cliente_nombre}</p>
+                         <p className="text-[10px] text-slate-400 font-medium truncate">
+                           {t.servicios?.nombre} · {t.empleados?.nombre?.split(' ')[0] || vocab.fallbackStaff}
+                         </p>
+                       </div>
+                       <a
+                         href={`https://wa.me/${t.cliente_telefono?.replace(/[^0-9]/g, '')}`}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="w-8 h-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-100 transition-colors shrink-0"
+                         title="WhatsApp"
+                       >
+                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+                       </a>
+                     </div>
+                   )
+                 })}
+               </div>
+             </div>
+           )
+         })()}
+
+         {/* === LUGARES LIBRES HOY === */}
+         {(() => {
+           const horarios = negocio?.horarios
+           if (!horarios) return null
+           
+           const diasMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
+           const hoy = new Date()
+           const diaKey = diasMap[hoy.getDay()]
+           const config = horarios[diaKey]
+           
+           if (!config || !config.abierto) return (
+             <div className="mt-6 md:mt-8 px-1">
+               <div className="flex items-center gap-2 mb-3">
+                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
+                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Lugares libres hoy</h3>
+               </div>
+               <div className="bg-white rounded-xl p-4 border border-slate-100 text-center">
+                 <p className="text-sm text-slate-400 font-medium">Hoy no hay horario de atención configurado</p>
+               </div>
+             </div>
+           )
+           
+           // Generate all possible time slots based on the minimum service duration
+           const minDuration = servicios.length > 0 
+             ? Math.min(...servicios.map(s => s.duracion_minutos || 30))
+             : 30
+           
+           const parseTime = (str) => {
+             const [h, m] = str.split(':').map(Number)
+             return h * 60 + m
+           }
+           
+           const inicioMin = parseTime(config.inicio)
+           const finMin = parseTime(config.fin)
+           const pausaInicio = config.pausa ? parseTime(config.inicioPausa) : null
+           const pausaFin = config.pausa ? parseTime(config.finPausa) : null
+           
+           // Get booked slots for today
+           const turnosHoy = todosLosTurnos.filter(t => {
+             const tDate = safeParseDate(t.fecha_hora)
+             if (!tDate) return false
+             return tDate.toDateString() === hoy.toDateString()
+           })
+           
+           const bookedMinutes = turnosHoy.map(t => {
+             const tDate = safeParseDate(t.fecha_hora)
+             const start = tDate.getHours() * 60 + tDate.getMinutes()
+             const dur = t.servicios?.duracion_minutos || 30
+             return { start, end: start + dur, empId: t.empleado_id }
+           })
+           
+           // Generate free slots for each employee
+           const freeSlots = []
+           const nowMin = hoy.getHours() * 60 + hoy.getMinutes()
+           
+           const empsActivos = empleados.filter(e => e.estado === 'activo' || !e.estado)
+           
+           empsActivos.forEach(emp => {
+             const empBookings = bookedMinutes.filter(b => b.empId === emp.id)
+             
+             for (let slot = inicioMin; slot + minDuration <= finMin; slot += minDuration) {
+               // Skip pause period
+               if (pausaInicio !== null && slot >= pausaInicio && slot < pausaFin) continue
+               // Skip past slots
+               if (slot < nowMin) continue
+               // Check if slot overlaps with any booking
+               const isBooked = empBookings.some(b => {
+                 return (slot >= b.start && slot < b.end) || (slot + minDuration > b.start && slot < b.end)
+               })
+               if (!isBooked) {
+                 freeSlots.push({
+                   time: slot,
+                   timeStr: `${String(Math.floor(slot / 60)).padStart(2, '0')}:${String(slot % 60).padStart(2, '0')}`,
+                   emp: emp,
+                 })
+               }
+             }
+           })
+           
+           // Group by time
+           const byTime = {}
+           freeSlots.forEach(s => {
+             if (!byTime[s.timeStr]) byTime[s.timeStr] = []
+             byTime[s.timeStr].push(s.emp)
+           })
+           
+           const timeKeys = Object.keys(byTime).sort()
+           
+           if (timeKeys.length === 0) return (
+             <div className="mt-6 md:mt-8 px-1">
+               <div className="flex items-center gap-2 mb-3">
+                 <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Lugares libres hoy</h3>
+               </div>
+               <div className="bg-white rounded-xl p-4 border border-slate-100 text-center">
+                 <p className="text-sm text-slate-400 font-medium">No hay lugares disponibles por el resto del día</p>
+               </div>
+             </div>
+           )
+           
+           return (
+             <div className="mt-6 md:mt-8 px-1">
+               <div className="flex items-center justify-between mb-3">
+                 <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                   <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Lugares libres hoy</h3>
+                 </div>
+                 <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
+                   {timeKeys.length} {timeKeys.length === 1 ? 'horario' : 'horarios'}
+                 </span>
+               </div>
+               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                 {timeKeys.slice(0, 12).map(time => (
+                   <button
+                     key={time}
+                     onClick={() => {
+                       setFechaActual(new Date())
+                       setNuevoTurno(prev => ({ ...prev, hora: time, empleado_id: byTime[time][0]?.id || '' }))
+                       setModalAbierto(true)
+                     }}
+                     className="bg-white rounded-xl p-3 border border-emerald-100 hover:border-emerald-300 hover:shadow-md transition-all text-left group"
+                   >
+                     <p className="text-lg font-black text-slate-900 tracking-tighter group-hover:text-emerald-600 transition-colors">{time}</p>
+                     <div className="flex items-center gap-1 mt-1">
+                       {byTime[time].slice(0, 3).map(emp => (
+                         <div key={emp.id} className="w-5 h-5 rounded-full bg-slate-100 overflow-hidden border border-white shadow-sm" title={emp.nombre}>
+                           {emp.foto_url ? <img src={emp.foto_url} className="w-full h-full object-cover" /> : <span className="text-[8px] font-bold text-slate-400 flex items-center justify-center h-full">{emp.nombre[0]}</span>}
+                         </div>
+                       ))}
+                       {byTime[time].length > 3 && <span className="text-[9px] font-bold text-slate-400">+{byTime[time].length - 3}</span>}
+                     </div>
+                     <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1.5">
+                       {byTime[time].length} {byTime[time].length === 1 ? 'disponible' : 'disponibles'}
+                     </p>
+                   </button>
+                 ))}
+               </div>
+               {timeKeys.length > 12 && (
+                 <p className="text-[10px] text-slate-400 font-medium text-center mt-3">Y {timeKeys.length - 12} horarios más disponibles</p>
+               )}
+             </div>
+           )
+         })()}
+
+         {/* Spacer for FAB */}
+         <div className="h-24" />
       </div>
 
       <div className="absolute bottom-6 right-4 md:bottom-6 md:right-6 z-30 ns-fab-mobile">

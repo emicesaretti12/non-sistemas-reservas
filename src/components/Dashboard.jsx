@@ -1106,7 +1106,7 @@ export default function Dashboard({ session }) {
 
               {/* GESTIÓN DINÁMICA DE TABS */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                {tab === 'agenda' && <Turnos negocioId={negocio.id} rubro={negocio.rubro} />}
+                {tab === 'agenda' && <Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} />}
                 {tab === 'reportes' && <Reportes negocioId={negocio.id} colorPrimario={colorPrimario} rubro={negocio.rubro} />}
                 {tab === 'servicios' && <Servicios negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
