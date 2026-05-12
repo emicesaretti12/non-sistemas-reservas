@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { IconRobot, IconChart, IconCheckCircle, IconClipboard, IconBolt, IconCalendar, IconLink, IconPalette, IconRocket, IconCelebrate } from './NoniIcons'
 
 const TOUR_KEY = 'ns_tour_completed_v2'
 
 const STEPS = [
   {
-    target: null, // welcome modal - no highlight
-    title: '¡Bienvenido a tu panel! 🎉',
+    target: null,
+    title: '¡Bienvenido a tu panel!',
     message: 'Soy Noni y te voy a mostrar cómo funciona tu sistema de reservas en menos de 1 minuto. ¡Vamos!',
     position: 'center',
-    emoji: '🤖',
+    Icon: IconRobot,
+    iconColor: 'text-purple-500',
     actionLabel: null,
     actionTab: null,
   },
@@ -18,7 +20,8 @@ const STEPS = [
     title: 'Tu Monitor en tiempo real',
     message: 'Este es el centro de control de tu negocio. Acá ves los turnos del día, ingresos, y la actividad reciente. Se actualiza automáticamente con cada nueva reserva.',
     position: 'bottom',
-    emoji: '📊',
+    Icon: IconChart,
+    iconColor: 'text-blue-500',
     actionLabel: null,
     actionTab: null,
   },
@@ -27,7 +30,8 @@ const STEPS = [
     title: 'Checklist de configuración',
     message: 'Esta lista te muestra qué falta configurar. Completá todos los pasos para que tu sistema funcione al 100%. ¡Es lo primero que deberías hacer!',
     position: 'bottom',
-    emoji: '✅',
+    Icon: IconCheckCircle,
+    iconColor: 'text-emerald-500',
     actionLabel: null,
     actionTab: null,
   },
@@ -36,53 +40,59 @@ const STEPS = [
     title: 'Secciones del panel',
     message: 'Desde acá accedés a todas las secciones: Agenda para ver turnos, Servicios para definir qué ofrecés, Equipo para cargar a tus profesionales, Horarios para definir cuándo atendés, y más.',
     position: 'bottom',
-    emoji: '📋',
+    Icon: IconClipboard,
+    iconColor: 'text-slate-600',
     actionLabel: 'Ir a Servicios',
     actionTab: 'servicios',
   },
   {
     target: 'tour-servicios',
-    title: '⚡ Servicios — Lo que ofrecés',
+    title: 'Servicios — Lo que ofrecés',
     message: 'Cada servicio necesita un nombre, un precio y cuánto dura. Por ejemplo: "Corte Clásico — $3500 — 30 min". Tus clientes ven estos servicios cuando abren tu link.',
     position: 'bottom',
-    emoji: '⚡',
+    Icon: IconBolt,
+    iconColor: 'text-amber-500',
     actionLabel: 'Crear servicio',
     actionTab: 'servicios',
   },
   {
     target: 'tour-agenda',
-    title: '📅 Agenda — Tus turnos',
+    title: 'Agenda — Tus turnos',
     message: 'Acá aparecen todos los turnos: los que reservan los clientes desde tu link y los que vos creés manualmente. Podés confirmarlos, cancelarlos o contactar al cliente por WhatsApp.',
     position: 'bottom',
-    emoji: '📅',
+    Icon: IconCalendar,
+    iconColor: 'text-blue-500',
     actionLabel: 'Ver Agenda',
     actionTab: 'agenda',
   },
   {
     target: 'tour-link',
-    title: '🔗 Tu link público — ¡La clave!',
+    title: 'Tu link público — ¡La clave!',
     message: 'Este es tu link de reservas. Compartilo por WhatsApp, Instagram o donde quieras. Tus clientes entran, eligen servicio, profesional, día y hora, ¡y reservan solos! Sin que los tengas que atender por teléfono.',
     position: 'top',
-    emoji: '🔗',
+    Icon: IconLink,
+    iconColor: 'text-cyan-500',
     actionLabel: 'Copiar link',
     actionTab: null,
     actionCopyLink: true,
   },
   {
     target: 'tour-ajustes',
-    title: '🎨 Personalizá tu marca',
+    title: 'Personalizá tu marca',
     message: 'Subí tu logo, elegí tu color, escribí tu bio e Instagram. Todo esto aparece en tu app de reservas y le da identidad a tu negocio.',
     position: 'bottom',
-    emoji: '🎨',
+    Icon: IconPalette,
+    iconColor: 'text-pink-500',
     actionLabel: 'Ir a Ajustes',
     actionTab: 'ajustes',
   },
   {
     target: null,
-    title: '¡Listo! Ya sabés todo 🎉',
-    message: 'Para empezar, lo más importante es:\n\n1️⃣ Creá tus servicios\n2️⃣ Agregá a tu equipo\n3️⃣ Configurá tus horarios\n4️⃣ Compartí tu link\n\nSi necesitás ayuda, tocá el ícono de Noni 🤖 abajo a la derecha.',
+    title: '¡Listo! Ya sabés todo',
+    message: 'Para empezar, lo más importante es:\n\n1. Creá tus servicios\n2. Agregá a tu equipo\n3. Configurá tus horarios\n4. Compartí tu link\n\nSi necesitás ayuda, tocá el ícono de Noni abajo a la derecha.',
     position: 'center',
-    emoji: '🚀',
+    Icon: IconRocket,
+    iconColor: 'text-purple-500',
     actionLabel: null,
     actionTab: null,
   },
@@ -168,7 +178,7 @@ export default function DashboardTour({ active, onDismiss, negocio, onNavigate, 
           {/* Copy toast */}
           {copyToast && (
             <div className="ns-copy-toast">
-              <span className="text-lg">✅</span>
+              <IconCheckCircle size={20} className="text-emerald-500 shrink-0" />
               <div>
                 <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
                 <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
@@ -210,7 +220,9 @@ export default function DashboardTour({ active, onDismiss, negocio, onNavigate, 
               className="fixed inset-0 z-[9999] flex items-center justify-center p-6 pointer-events-auto"
             >
               <div className="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full p-8 text-center">
-                <div className="text-6xl mb-4">{current.emoji}</div>
+                <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mx-auto mb-4">
+                  <current.Icon size={32} className={current.iconColor} />
+                </div>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">{current.title}</h2>
                 {negocio && step === 0 && <p className="text-purple-600 font-bold mt-1">{negocio.nombre}</p>}
                 <p className="text-slate-500 text-sm mt-3 leading-relaxed whitespace-pre-line">{current.message}</p>
@@ -229,8 +241,8 @@ export default function DashboardTour({ active, onDismiss, negocio, onNavigate, 
                       <button onClick={prev} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm hover:bg-slate-200 transition-all">
                         ← Atrás
                       </button>
-                      <button onClick={onDismiss} className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black text-sm hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg">
-                        ¡Entendido, a configurar! 🚀
+                      <button onClick={onDismiss} className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black text-sm hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg flex items-center justify-center gap-2">
+                        <IconRocket size={16} /> ¡Entendido, a configurar!
                       </button>
                     </>
                   )}
@@ -258,7 +270,7 @@ export default function DashboardTour({ active, onDismiss, negocio, onNavigate, 
                 {/* Tooltip header */}
                 <div className="bg-gradient-to-r from-purple-50 to-indigo-50 px-5 py-3 border-b border-purple-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{current.emoji}</span>
+                    <span className={`${current.iconColor}`}><current.Icon size={18} /></span>
                     <p className="font-black text-slate-900 text-sm tracking-tight">{current.title}</p>
                   </div>
                   <button onClick={onDismiss} className="text-slate-400 hover:text-slate-600 transition-colors text-lg leading-none w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center">×</button>

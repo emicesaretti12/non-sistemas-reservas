@@ -18,6 +18,7 @@ import OnboardingWizard from './OnboardingWizard'
 
 // Panel de Configuración Guiada Post-Onboarding
 import GuidedSetup from './GuidedSetup'
+import { IconCheckCircle } from './NoniIcons'
 
 // Tour Guiado Interactivo del Dashboard
 import DashboardTour, { useTour } from './DashboardTour'
@@ -697,7 +698,7 @@ export default function Dashboard({ session }) {
       {/* Copy-link toast */}
       {copyToast && (
         <div className="ns-copy-toast">
-          <span className="text-lg">✅</span>
+          <IconCheckCircle size={20} className="text-emerald-500 shrink-0" />
           <div>
             <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
             <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { IconCelebrate, IconErrorCircle, IconRobot } from './NoniIcons'
 
 export default function Empleados({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
@@ -185,7 +186,7 @@ export default function Empleados({ negocioId, rubro }) {
       {/* Celebration toast */}
       {showCelebration && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-emerald-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <span className="text-2xl">🎉</span>
+          <IconCelebrate size={24} className="text-emerald-500" />
           <div>
             <p className="text-sm font-bold text-slate-900">¡{vocab.empleado} agregado!</p>
             <p className="text-[10px] text-slate-500 font-medium">Ahora configurá tus horarios de atención</p>
@@ -196,7 +197,7 @@ export default function Empleados({ negocioId, rubro }) {
       {/* Error toast */}
       {showError && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-red-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <span className="text-2xl">❌</span>
+          <IconErrorCircle size={24} className="text-red-500" />
           <div>
             <p className="text-sm font-bold text-slate-900">Error</p>
             <p className="text-[10px] text-slate-500 font-medium">{showError}</p>
@@ -234,7 +235,7 @@ export default function Empleados({ negocioId, rubro }) {
                
                {/* Robot emoji */}
                <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm relative z-10">
-                  <span className="text-3xl">🤖</span>
+                  <IconRobot size={28} className="text-purple-500" />
                </div>
                
                <h3 className="text-base font-bold text-slate-900 tracking-tight relative z-10">¡Agregá a tu equipo!</h3>

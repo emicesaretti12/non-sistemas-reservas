@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { IconRobot } from './NoniIcons'
 
 export default function Turnos({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
@@ -415,7 +416,7 @@ export default function Turnos({ negocioId, rubro }) {
                        {servicios.length === 0 || empleados.length === 0 ? (
                          <>
                            <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4">
-                             <span className="text-2xl">🤖</span>
+                             <IconRobot size={28} className="text-purple-500" />
                            </div>
                            <p className="text-sm font-bold text-slate-700">Todavía no podés recibir turnos</p>
                            <p className="text-[11px] text-slate-400 font-medium mt-2 max-w-[260px] leading-relaxed">

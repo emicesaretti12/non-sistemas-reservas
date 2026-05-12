@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { IconBolt, IconPalette, IconRocket, IconCheckCircle, IconRobot } from './NoniIcons'
 
 /**
  * GuidedSetup — Panel de configuración guiada post-onboarding.
@@ -18,7 +19,7 @@ const SETUP_STEPS = [
     tab: 'servicios',
     icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
     check: (data) => data.servicios > 0,
-    badge: '⚡ Esencial',
+    badge: 'Esencial',
     badgeColor: 'bg-purple-100 text-purple-700',
     priority: 1,
   },
@@ -54,7 +55,7 @@ const SETUP_STEPS = [
     tab: 'ajustes',
     icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.172-1.172a4 4 0 115.656 5.656L10 17.657',
     check: (data) => data.logo || data.descripcion,
-    badge: '🎨 Recomendado',
+    badge: 'Recomendado',
     badgeColor: 'bg-blue-50 text-blue-600',
     priority: 4,
   },
@@ -66,7 +67,7 @@ const SETUP_STEPS = [
     tab: null,
     icon: 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z',
     check: (data) => data.compartido,
-    badge: '🚀 Final',
+    badge: 'Final',
     badgeColor: 'bg-green-50 text-green-600',
     priority: 5,
   },
@@ -128,7 +129,7 @@ export default function GuidedSetup({ negocio, serviciosCount, empleadosCount, o
       {/* Copy toast */}
       {copyToast && (
         <div className="ns-copy-toast">
-          <span className="text-lg">✅</span>
+          <IconCheckCircle size={18} className="text-emerald-500" />
           <div>
             <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
             <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
@@ -156,7 +157,7 @@ export default function GuidedSetup({ negocio, serviciosCount, empleadosCount, o
 
           <div className="flex-1 min-w-0">
             <h3 className="text-sm md:text-base font-bold text-slate-900 tracking-tight">
-              {allDone ? '¡Configuración completa!' : '🤖 Configurá tu negocio paso a paso'}
+              {allDone ? '¡Configuración completa!' : 'Configurá tu negocio paso a paso'}
             </h3>
             <p className="text-[10px] md:text-xs text-slate-500 font-medium mt-0.5">
               {allDone

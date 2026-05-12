@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { IconCheckCircle, IconErrorCircle, IconRobot } from './NoniIcons'
 
 export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   const [guardando, setGuardando] = useState(false)
@@ -77,7 +78,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       {/* Celebration toast */}
       {showCelebration && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-emerald-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <span className="text-2xl">✅</span>
+          <IconCheckCircle size={24} className="text-emerald-500" />
           <div>
             <p className="text-sm font-bold text-slate-900">¡Horarios guardados!</p>
             <p className="text-[10px] text-slate-500 font-medium">Tus clientes ya pueden ver los turnos disponibles. ¡Compartí tu link!</p>
@@ -88,7 +89,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       {/* Error toast */}
       {showError && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-red-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <span className="text-2xl">❌</span>
+          <IconErrorCircle size={24} className="text-red-500" />
           <div>
             <p className="text-sm font-bold text-slate-900">Error al guardar</p>
             <p className="text-[10px] text-slate-500 font-medium">Verificá tu conexión a internet e intentá de nuevo</p>

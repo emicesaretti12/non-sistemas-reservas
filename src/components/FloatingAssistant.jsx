@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { IconRobot, IconCheckCircle, IconErrorCircle, IconCelebrate, IconBolt, IconChart, IconCalendar, IconPalette, IconRocket } from './NoniIcons'
 
 const ASSISTANT_KEY = 'ns_assistant_state_v2'
 const ROBOT_NAME = 'Noni'
@@ -77,11 +78,11 @@ const getContextualMessages = (tab, setupData, vocab) => {
     messages.push({
       id: 'welcome',
       priority: 1,
-      emoji: '👋',
+      emoji: 'bolt',
       title: '¡Hola! Soy Noni, tu asistente',
       text: 'Te voy a guiar paso a paso para configurar tu sistema de reservas. Hay 3 cosas esenciales que necesitás configurar: servicios, equipo y horarios. ¡Arranquemos!',
       cta: { label: 'Empezar →', tab: 'servicios' },
-      badge: '⚡ Empezar',
+      badge: 'Empezar',
     })
   }
 
@@ -89,11 +90,11 @@ const getContextualMessages = (tab, setupData, vocab) => {
     messages.push({
       id: 'need-staff',
       priority: 2,
-      emoji: '👥',
+      emoji: 'bolt',
       title: 'Bien, ya tenés servicios',
       text: 'Ahora necesitás agregar al menos un profesional. Los clientes van a poder elegir con quién reservar.',
       cta: { label: 'Agregar equipo →', tab: 'equipo' },
-      badge: '⚡ Siguiente paso',
+      badge: 'Siguiente paso',
     })
   }
 
@@ -101,11 +102,11 @@ const getContextualMessages = (tab, setupData, vocab) => {
     messages.push({
       id: 'need-hours',
       priority: 2,
-      emoji: '🕐',
+      emoji: 'calendar',
       title: 'Casi listo, faltan tus horarios',
       text: 'Definí qué días y en qué horarios atendés. Sin horarios configurados, los clientes no pueden ver turnos disponibles.',
       cta: { label: 'Configurar horarios →', tab: 'horarios' },
-      badge: '⚡ Último paso esencial',
+      badge: 'Último paso esencial',
     })
   }
 
@@ -113,11 +114,11 @@ const getContextualMessages = (tab, setupData, vocab) => {
     messages.push({
       id: 'share-link',
       priority: 2,
-      emoji: '🚀',
+      emoji: 'rocket',
       title: '¡Tu sistema está listo!',
       text: 'Ya podés compartir tu link de reservas. Envialo por WhatsApp a tus clientes para que empiecen a reservar solos, 24/7.',
       cta: { label: 'Copiar mi link', action: 'copy-link' },
-      badge: '🎉 ¡Listo!',
+      badge: '¡Listo!',
     })
   }
 
@@ -128,7 +129,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
         messages.push({
           id: 'monitor-intro',
           priority: 5,
-          emoji: '📊',
+          emoji: 'chart',
           title: 'Este es tu Monitor',
           text: 'Acá ves un resumen de tu negocio en tiempo real: turnos del día, ingresos, actividad reciente. Se actualiza solo cada vez que recibís una reserva.',
         })
@@ -139,7 +140,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'agenda-help',
         priority: 4,
-        emoji: '📅',
+        emoji: 'calendar',
         title: 'Gestión de turnos',
         text: setupData.hasTurnos
           ? 'Desde acá podés ver, confirmar o cancelar turnos. También podés crear turnos manualmente si un cliente te llama por teléfono.'
@@ -152,7 +153,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'services-help',
         priority: 3,
-        emoji: '⚡',
+        emoji: 'bolt',
         title: setupData.hasServicios ? 'Tus servicios' : '¿Qué es un servicio?',
         text: setupData.hasServicios
           ? 'Podés editar precios, duración y nombre en cualquier momento. Los cambios se reflejan al instante en tu app pública.'
@@ -164,7 +165,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'staff-help',
         priority: 3,
-        emoji: '👤',
+        emoji: 'robot',
         title: setupData.hasEmpleados ? 'Tu equipo' : '¿Para qué es el equipo?',
         text: setupData.hasEmpleados
           ? 'Podés agregar, editar o desactivar profesionales. Si trabajás solo, con un solo perfil alcanza.'
@@ -176,7 +177,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'hours-help',
         priority: 3,
-        emoji: '🕐',
+        emoji: 'calendar',
         title: setupData.hasHorarios ? 'Horarios configurados' : '¿Cómo funcionan los horarios?',
         text: setupData.hasHorarios
           ? 'Podés modificar días y horarios cuando quieras. Si tenés que cerrar un día especial, simplemente desactivá ese día.'
@@ -188,7 +189,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'inventory-help',
         priority: 5,
-        emoji: '📦',
+        emoji: 'clipboard',
         title: 'Control de stock',
         text: 'Acá controlás tus productos e insumos. Definí un stock mínimo y el sistema te avisa cuando se está acabando. Útil para barberías, estéticas, veterinarias, etc.',
       })
@@ -198,7 +199,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'clients-help',
         priority: 5,
-        emoji: '🧑‍🤝‍🧑',
+        emoji: 'robot',
         title: 'Base de clientes',
         text: 'Los clientes se agregan automáticamente cuando reservan. Acá ves su historial, frecuencia de visitas e ingresos totales. ¡Los VIP son los que más vuelven!',
       })
@@ -208,7 +209,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'reports-help',
         priority: 5,
-        emoji: '📈',
+        emoji: 'chart',
         title: 'Reportes y estadísticas',
         text: 'Visualizá ingresos, servicios más pedidos y rendimiento de tu equipo. Los datos se calculan a partir de tus turnos confirmados.',
       })
@@ -218,7 +219,7 @@ const getContextualMessages = (tab, setupData, vocab) => {
       messages.push({
         id: 'settings-help',
         priority: 4,
-        emoji: '🎨',
+        emoji: 'palette',
         title: 'Personalizá tu marca',
         text: 'Subí tu logo, elegí tu color, escribí tu bio y agregá tu Instagram. Todo esto lo ven tus clientes cuando abren tu link de reservas.',
       })
@@ -398,7 +399,7 @@ export default function FloatingAssistant({
       {/* Copy toast */}
       {copyToast && (
         <div className="ns-copy-toast">
-          <span className="text-lg">✅</span>
+          <IconCheckCircle size={20} className="text-emerald-500 shrink-0" />
           <div>
             <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
             <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
@@ -431,7 +432,7 @@ export default function FloatingAssistant({
                 exit={{ opacity: 0, x: 10 }}
                 className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-purple-100 px-4 py-3 whitespace-nowrap pointer-events-none"
               >
-                <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-purple-600">Noni</span> 🤖</p>
+                <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-purple-600">Noni</span></p>
                 <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tocame para empezar a configurar</p>
                 <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-purple-100 rotate-[-45deg]"></div>
               </motion.div>
@@ -518,7 +519,15 @@ export default function FloatingAssistant({
                       <span className="ns-assistant-msg-badge">{currentMessage.badge}</span>
                     )}
                     <div className="flex items-start gap-2.5">
-                      <span className="text-xl shrink-0 mt-0.5">{currentMessage.emoji}</span>
+                      <span className="w-6 h-6 shrink-0 mt-0.5 text-purple-500">
+                        {currentMessage.emoji === 'bolt' && <IconBolt size={20} />}
+                        {currentMessage.emoji === 'rocket' && <IconRocket size={20} />}
+                        {currentMessage.emoji === 'chart' && <IconChart size={20} />}
+                        {currentMessage.emoji === 'calendar' && <IconCalendar size={20} />}
+                        {currentMessage.emoji === 'palette' && <IconPalette size={20} />}
+                        {currentMessage.emoji === 'robot' && <IconRobot size={20} />}
+                        {currentMessage.emoji === 'clipboard' && <IconRobot size={20} />}
+                      </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-slate-900 leading-tight">{currentMessage.title}</p>
                         <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">{currentMessage.text}</p>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { RUBROS_DISPONIBLES, getVocabulario } from '../utils/vocabulario'
 import { motion, AnimatePresence } from 'framer-motion'
+import { IconCelebrate, IconCheckCircle } from './NoniIcons'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
@@ -151,14 +152,14 @@ function PhoneShell({ data }) {
 
 // ── Steps definition ───────────────────────────────────────────────────────
 const buildSteps = () => [
-  { id: 'nombre',      label: 'Nombre',     icon: '✏️',  q: '¿Cómo se llama tu negocio?',                                      type: 'text',     placeholder: 'Ej: Barbería Central' },
-  { id: 'rubro',       label: 'Rubro',      icon: '🏪',  q: '¿A qué rubro pertenece?',                                         type: 'options',  options: RUBROS_DISPONIBLES },
-  { id: 'color',       label: 'Color',      icon: '🎨',  q: '¿Cuál es tu color de marca?',                                     type: 'color' },
-  { id: 'logo',        label: 'Logo',       icon: '🖼️',  q: 'Subí tu logo (podés hacerlo después)',                            type: 'logo' },
-  { id: 'descripcion', label: 'Slogan',     icon: '💬',  q: '¿Una frase corta que describa tu negocio?',                       type: 'textarea', placeholder: 'Ej: Los mejores cortes de la ciudad' },
-  { id: 'instagram',   label: 'Instagram',  icon: '📸',  q: '¿Tu cuenta de Instagram?',                                        type: 'instagram', placeholder: 'tu_cuenta' },
-  { id: 'servicio',    label: 'Servicio',   icon: '⚡',  q: 'Agregá tu primer servicio',                                       type: 'servicio' },
-  { id: 'staff',       label: 'Equipo',     icon: '👤',  q: '¿Cómo se llama tu profesional principal?',                        type: 'staff' },
+  { id: 'nombre',      label: 'Nombre',     q: '¿Cómo se llama tu negocio?',                                      type: 'text',     placeholder: 'Ej: Barbería Central' },
+  { id: 'rubro',       label: 'Rubro',      q: '¿A qué rubro pertenece?',                                         type: 'options',  options: RUBROS_DISPONIBLES },
+  { id: 'color',       label: 'Color',      q: '¿Cuál es tu color de marca?',                                     type: 'color' },
+  { id: 'logo',        label: 'Logo',       q: 'Subí tu logo (podés hacerlo después)',                            type: 'logo' },
+  { id: 'descripcion', label: 'Slogan',     q: '¿Una frase corta que describa tu negocio?',                       type: 'textarea', placeholder: 'Ej: Los mejores cortes de la ciudad' },
+  { id: 'instagram',   label: 'Instagram',  q: '¿Tu cuenta de Instagram?',                                        type: 'instagram', placeholder: 'tu_cuenta' },
+  { id: 'servicio',    label: 'Servicio',   q: 'Agregá tu primer servicio',                                       type: 'servicio' },
+  { id: 'staff',       label: 'Equipo',     q: '¿Cómo se llama tu profesional principal?',                        type: 'staff' },
 ]
 
 // ── Main component ─────────────────────────────────────────────────────────
@@ -289,15 +290,21 @@ export default function OnboardingWizard({ session, onComplete }) {
             {data.logo_url ? <img src={data.logo_url} className="w-full h-full object-cover" /> : <span className="text-white text-4xl font-black">{data.nombre[0]?.toUpperCase()}</span>}
           </motion.div>
           <div>
-            <h1 className="text-4xl font-black text-white tracking-tight">¡Listo! 🎉</h1>
+            <h1 className="text-4xl font-black text-white tracking-tight flex items-center justify-center gap-3">¡Listo! <IconCelebrate size={32} className="text-amber-400" /></h1>
             <p className="text-slate-400 mt-2">Tu plataforma está activa en producción.</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:border-white/30 transition-all"
-            onClick={() => { navigator.clipboard.writeText(link); alert('Copiado!') }}>
+            onClick={() => { navigator.clipboard.writeText(link) }}>
             <code className="text-sm text-sky-400 block truncate">{link}</code>
             <p className="text-[10px] text-white/30 mt-2 uppercase tracking-widest">Tocar para copiar</p>
           </div>
-          <button onClick={onComplete} className="w-full py-4 rounded-2xl text-white font-black text-sm uppercase tracking-widest" style={{background:data.color}}>
+          <button onClick={() => {
+            // Ensure tour, assistant & guided setup show for new accounts
+            localStorage.removeItem('ns_tour_completed_v2')
+            localStorage.removeItem('ns_assistant_v2')
+            localStorage.removeItem('ns_bubble_shown')
+            onComplete()
+          }} className="w-full py-4 rounded-2xl text-white font-black text-sm uppercase tracking-widest" style={{background:data.color}}>
             Ir al Dashboard →
           </button>
         </motion.div>
