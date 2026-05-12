@@ -346,7 +346,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             {sug?.descripcion && (
               <button onClick={() => setInput(sug.descripcion)}
                 className="w-full text-left px-4 py-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-300 text-sm font-medium hover:bg-sky-500/20 transition-all">
-                ✨ Sugerencia: "{sug.descripcion}"
+                Sugerencia: "{sug.descripcion}"
               </button>
             )}
             <textarea ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} rows={3} className={base + " resize-none"} />

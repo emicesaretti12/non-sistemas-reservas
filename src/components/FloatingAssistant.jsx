@@ -234,14 +234,14 @@ const getContextualMessages = (tab, setupData, vocab) => {
 
 // ── Quick Tips ──────────────────────────────────────────────────────────────
 const QUICK_TIPS = [
-  '💡 Compartí tu link de reservas en tu bio de Instagram para recibir reservas automáticas.',
-  '💡 Si un cliente te llama, podés crear el turno manualmente desde la Agenda.',
-  '💡 Los horarios que configurás definen qué turnos ven disponibles tus clientes.',
-  '💡 Podés cambiar precios y duración de servicios en cualquier momento.',
-  '💡 El color que elegís en Ajustes se refleja en la app que ven tus clientes.',
-  '💡 Los clientes VIP son los que visitaron 10 o más veces. ¡Cuidalos!',
-  '💡 Usá el inventario para trackear productos y recibir alertas de stock bajo.',
-  '💡 Podés desactivar un profesional temporalmente sin eliminarlo.',
+  'Tip: Compartí tu link de reservas en tu bio de Instagram para recibir reservas automáticas.',
+  'Tip: Si un cliente te llama, podés crear el turno manualmente desde la Agenda.',
+  'Tip: Los horarios que configurás definen qué turnos ven disponibles tus clientes.',
+  'Tip: Podés cambiar precios y duración de servicios en cualquier momento.',
+  'Tip: El color que elegís en Ajustes se refleja en la app que ven tus clientes.',
+  'Tip: Los clientes VIP son los que visitaron 10 o más veces. ¡Cuidalos!',
+  'Tip: Usá el inventario para trackear productos y recibir alertas de stock bajo.',
+  'Tip: Podés desactivar un profesional temporalmente sin eliminarlo.',
 ]
 
 // ── Main Component ──────────────────────────────────────────────────────────

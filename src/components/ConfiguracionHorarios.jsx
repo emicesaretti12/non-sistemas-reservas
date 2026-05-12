@@ -116,7 +116,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       {/* --- TIP EDUCATIVO — Solo si no hay horarios configurados --- */}
       {!Object.values(horarios).some(d => d.abierto) && (
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-2xl p-4 md:p-5 mb-4 md:mb-6 flex items-start gap-3">
-          <span className="text-2xl shrink-0">🤖</span>
+          <IconRobot size={24} className="text-purple-500 shrink-0" />
           <div>
             <p className="text-xs font-bold text-slate-900">¿Cómo funcionan los horarios?</p>
             <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">
