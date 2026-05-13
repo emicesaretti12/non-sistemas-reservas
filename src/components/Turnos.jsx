@@ -16,9 +16,16 @@ export default function Turnos({ negocioId, rubro, negocio }) {
   const [modalDiaAbierto, setModalDiaAbierto] = useState(false)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [guardando, setGuardando] = useState(false)
+  const [toast, setToast] = useState({ show: false, msg: '', type: 'success' })
+  const [confirmDialog, setConfirmDialog] = useState({ show: false, id: null })
   const [nuevoTurno, setNuevoTurno] = useState({
     cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00'
   })
+
+  const showToast = (msg, type = 'success') => {
+    setToast({ show: true, msg, type })
+    setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000)
+  }
 
   // Unificamos el parseo ultra robusto de los strings de Supabase para toda la vista
   const safeParseDate = (dbString) => {
@@ -93,9 +100,11 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       if (e.message?.includes('JWT') || e.message?.includes('expired')) {
         const { error: refreshErr } = await supabase.auth.refreshSession()
         if (refreshErr) {
-          alert('Tu sesión expiró. Serás redirigido al login.')
-          await supabase.auth.signOut()
-          window.location.href = '/login'
+          showToast('Tu sesión expiró. Serás redirigido al login.', 'error')
+          setTimeout(async () => {
+            await supabase.auth.signOut()
+            window.location.href = '/login'
+          }, 2000)
         } else {
           // Reintentar la carga tras refresh exitoso
           bootSmartAgenda()
@@ -213,7 +222,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         .eq('estado', 'confirmado')
 
       if (colision && colision.length > 0) {
-        alert("Ese horario ya fue reservado para este empleado. Elija otro.")
+        showToast("Ese horario ya fue reservado para este empleado. Elija otro.", 'error')
         setGuardando(false)
         return
       }
@@ -232,44 +241,50 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       if (error) throw error
       
       dispararGoogleCalendar(nuevoTurno, serv, emp)
+      showToast("Turno agendado con éxito")
       setModalAbierto(false)
       setNuevoTurno({ cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00' })
       bootSmartAgenda()
     } catch (err) {
-      alert("Error al agendar: " + err.message)
+      showToast("Error al agendar: " + err.message, 'error')
     } finally {
       setGuardando(false)
     }
   }
 
-  async function cancelarTurno(id) {
-    if (confirm('¿Estás seguro de que deseas cancelar y eliminar este turno?')) {
-      const { error } = await supabase.from('turnos').delete().eq('id', id)
-      
-      if (error) {
-        // Si el JWT expiró, intentar refrescar la sesión y reintentar
-        if (error.message?.includes('JWT') || error.code === '401' || error.message?.includes('expired')) {
-          const { error: refreshErr } = await supabase.auth.refreshSession()
-          if (refreshErr) {
-            alert('Tu sesión expiró. Serás redirigido al login.')
-            await supabase.auth.signOut()
-            window.location.href = '/login'
-            return
-          }
-          // Reintentar tras refresh exitoso
-          const { error: retryErr } = await supabase.from('turnos').delete().eq('id', id)
-          if (retryErr) {
-            alert('Error al eliminar el turno: ' + retryErr.message)
-            return
-          }
-        } else {
-          alert('Error al eliminar el turno: ' + error.message)
+  async function confirmarYCancelarTurno() {
+    const id = confirmDialog.id
+    setConfirmDialog({ show: false, id: null })
+    
+    const { error } = await supabase.from('turnos').delete().eq('id', id)
+    
+    if (error) {
+      if (error.message?.includes('JWT') || error.code === '401' || error.message?.includes('expired')) {
+        const { error: refreshErr } = await supabase.auth.refreshSession()
+        if (refreshErr) {
+          showToast('Tu sesión expiró. Serás redirigido al login.', 'error')
+          setTimeout(() => {
+            supabase.auth.signOut().then(() => window.location.href = '/login')
+          }, 2000)
           return
         }
+        const { error: retryErr } = await supabase.from('turnos').delete().eq('id', id)
+        if (retryErr) {
+          showToast('Error al eliminar el turno: ' + retryErr.message, 'error')
+          return
+        }
+      } else {
+        showToast('Error al eliminar el turno: ' + error.message, 'error')
+        return
       }
-      
-      bootSmartAgenda()
     }
+    
+    showToast("Turno cancelado exitosamente")
+    bootSmartAgenda()
+  }
+
+  function cancelarTurno(id) {
+    setConfirmDialog({ show: true, id })
   }
 
   // ── Marcar estado del turno (completado / no_show) ──
@@ -277,7 +292,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const label = nuevoEstado === 'completado' ? 'completado' : 'no-show'
     const { error } = await supabase.from('turnos').update({ estado: nuevoEstado }).eq('id', id)
     if (error) {
-      alert(`Error al marcar como ${label}: ${error.message}`)
+      showToast(`Error al marcar como ${label}: ${error.message}`, 'error')
       return
     }
     bootSmartAgenda()
@@ -785,6 +800,35 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                  </button>
               </form>
            </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE CANCELACIÓN */}
+      {confirmDialog.show && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-6 m-4 animate-in zoom-in-95 duration-300">
+            <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-4">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 className="text-xl font-black tracking-tight text-slate-900 mb-2">¿Cancelar turno?</h3>
+            <p className="text-sm font-medium text-slate-500 mb-6 leading-relaxed">Esta acción eliminará el turno de la agenda y no se puede deshacer.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDialog({ show: false, id: null })} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Volver</button>
+              <button onClick={confirmarYCancelarTurno} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest text-white bg-red-500 hover:bg-red-600 transition-colors shadow-md shadow-red-500/20">Sí, Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST NOTIFICATIONS */}
+      {toast.show && (
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-8 fade-in duration-300 ${toast.type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white'}`}>
+          {toast.type === 'success' ? (
+            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+          ) : (
+            <svg className="w-5 h-5 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          )}
+          <span className="text-xs font-bold tracking-wide">{toast.msg}</span>
         </div>
       )}
 
