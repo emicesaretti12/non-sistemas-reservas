@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from '../contexts/ToastContext'
+import { useConfirm } from '../contexts/ConfirmContext'
 
 // Explicit class map — Tailwind JIT cannot detect dynamically-built class names
 const tipoMovClasses = {
@@ -10,6 +12,8 @@ const tipoMovClasses = {
 }
 
 export default function Inventario({ negocioId, rubro }) {
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirm()
   const vocab = getVocabulario(rubro)
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -85,14 +89,15 @@ export default function Inventario({ negocioId, rubro }) {
       }
       cerrarModal()
       cargar()
+      showToast('Producto guardado con éxito')
     } catch (e) {
-      alert('Error: ' + e.message)
+      showToast('Error: ' + e.message, 'error')
     } finally { setGuardando(false) }
   }
 
   async function registrarMovimiento(e) {
     e.preventDefault()
-    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) return alert('Cantidad inválida')
+    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) return showToast('Cantidad inválida', 'error')
     setGuardando(true)
     try {
       const cant = parseInt(movForm.cantidad)
@@ -115,14 +120,23 @@ export default function Inventario({ negocioId, rubro }) {
       setModalMovimiento(null)
       setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' })
       cargar()
-    } catch (e) { alert('Error: ' + e.message) }
+      showToast('Movimiento registrado')
+    } catch (e) { showToast('Error: ' + e.message, 'error') }
     finally { setGuardando(false) }
   }
 
   async function eliminar(id) {
-    if (!confirm('¿Desactivar este producto del inventario?')) return
-    await supabase.from('inventario').update({ activo: false }).eq('id', id)
-    cargar()
+    showConfirm({
+      title: 'Desactivar Producto',
+      message: '¿Desactivar este producto del inventario?',
+      confirmText: 'Desactivar',
+      isDestructive: true,
+      onConfirm: async () => {
+        await supabase.from('inventario').update({ activo: false }).eq('id', id)
+        cargar()
+        showToast('Producto desactivado')
+      }
+    })
   }
 
   function abrirEdicion(item) {
@@ -152,7 +166,7 @@ export default function Inventario({ negocioId, rubro }) {
       if (data.secure_url) {
         setCatForm(prev => ({ ...prev, imagen_url: data.secure_url.replace('/upload/', '/upload/q_auto,f_auto,w_600/') }))
       }
-    } catch { alert('Error al subir imagen') }
+    } catch { showToast('Error al subir imagen', 'error') }
     finally { setSubiendoImg(false) }
   }
 
@@ -169,7 +183,8 @@ export default function Inventario({ negocioId, rubro }) {
       }
       cerrarCatModal()
       cargar()
-    } catch (e) { alert('Error: ' + e.message) }
+      showToast('Catálogo actualizado')
+    } catch (e) { showToast('Error: ' + e.message, 'error') }
     finally { setGuardando(false) }
   }
 
@@ -186,9 +201,17 @@ export default function Inventario({ negocioId, rubro }) {
   }
 
   async function eliminarCatalogo(id) {
-    if (!confirm('¿Eliminar este producto del catálogo?')) return
-    await supabase.from('catalogo_productos').delete().eq('id', id)
-    cargar()
+    showConfirm({
+      title: 'Eliminar del Catálogo',
+      message: '¿Eliminar este producto del catálogo?',
+      confirmText: 'Eliminar',
+      isDestructive: true,
+      onConfirm: async () => {
+        await supabase.from('catalogo_productos').delete().eq('id', id)
+        cargar()
+        showToast('Producto eliminado del catálogo')
+      }
+    })
   }
 
   const getNivelStock = (item) => {

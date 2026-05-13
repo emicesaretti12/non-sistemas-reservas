@@ -26,7 +26,12 @@ import DashboardTour, { useTour } from './DashboardTour'
 // Asistente Flotante "Noni"
 import FloatingAssistant from './FloatingAssistant'
 
+import { useToast } from '../contexts/ToastContext'
+import { useConfirm } from '../contexts/ConfirmContext'
+
 export default function Dashboard({ session }) {
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirm()
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
   const [loading, setLoading] = useState(true)
   const [negocio, setNegocio] = useState(null)
@@ -215,26 +220,33 @@ export default function Dashboard({ session }) {
     const negocioTarget = todosLosNegocios.find(n => n.id === id)
     const accion = nuevoEstado === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR'
     
-    if (!confirm(`¿Confirma que desea ${accion} a "${negocioTarget?.nombre || id}"?`)) return
+    showConfirm({
+      title: `¿${accion} Negocio?`,
+      message: `¿Confirma que desea ${accion} a "${negocioTarget?.nombre || id}"?`,
+      confirmText: accion,
+      isDestructive: nuevoEstado === 'suspendido',
+      onConfirm: async () => {
+        const { data, error } = await supabase
+          .from('negocios')
+          .update({ estado_suscripcion: nuevoEstado })
+          .eq('id', id)
+          .select()
+        
+        if (error) {
+          console.error('Error de RLS/Supabase:', error)
+          showToast(`Error al ${accion.toLowerCase()}: ${error.message}`, 'error')
+          return
+        }
 
-    const { data, error, count } = await supabase
-      .from('negocios')
-      .update({ estado_suscripcion: nuevoEstado })
-      .eq('id', id)
-      .select()
-    
-    if (error) {
-      console.error('Error de RLS/Supabase:', error)
-      alert(`Error al ${accion.toLowerCase()}: ${error.message}\n\nAsegurate de haber ejecutado el script SQL de permisos de admin (sql_admin_fix.sql) en tu panel de Supabase.`)
-      return
-    }
+        if (!data || data.length === 0) {
+          showToast(`No se pudo ${accion.toLowerCase()} el negocio debido a políticas de seguridad.`, 'error')
+          return
+        }
 
-    if (!data || data.length === 0) {
-      alert(`No se pudo ${accion.toLowerCase()} el negocio. Las políticas de seguridad (RLS) de Supabase están bloqueando la acción.\n\nSolución: Ejecutá el archivo sql_admin_fix.sql en Supabase SQL Editor.`)
-      return
-    }
-
-    cargarConsolaMaestra()
+        cargarConsolaMaestra()
+        showToast(`Negocio ${accion.toLowerCase()} correctamente`)
+      }
+    })
   }
 
   /**
@@ -419,7 +431,7 @@ export default function Dashboard({ session }) {
         if (tipo === 'portada') setPortadaUrl(urlOptimizada)
       }
     } catch (error) {
-      alert("Error en el servidor de imágenes. Intente nuevamente.")
+      showToast("Error en el servidor de imágenes. Intente nuevamente.", "error")
     } finally {
       if (tipo === 'logo') setSubiendoLogo(false)
       if (tipo === 'portada') setSubiendoPortada(false)
@@ -454,7 +466,7 @@ export default function Dashboard({ session }) {
 
     if (!error) {
       setNegocio({ ...negocio, ...fullPayload })
-      alert("Configuración guardada con éxito.")
+      showToast("Configuración guardada con éxito.")
     } else {
       console.warn('Guardado completo falló, intentando por partes:', error.message)
       
@@ -487,12 +499,13 @@ export default function Dashboard({ session }) {
       }
       
       if (!e2) {
-        alert(contactoGuardado 
+        showToast(contactoGuardado 
           ? "Configuración guardada con éxito." 
-          : "Marca guardada. Para guardar datos de contacto, ejecutá el SQL de migración (sql_mapa_url.sql) en Supabase."
+          : "Marca guardada. Para guardar datos de contacto, ejecutá el SQL de migración.",
+          contactoGuardado ? "success" : "warning"
         )
       } else {
-        alert("Hubo un error al guardar. Revisá tu conexión e intentá de nuevo.")
+        showToast("Hubo un error al guardar. Revisá tu conexión e intentá de nuevo.", "error")
       }
     }
     setGuardandoPerfil(false)

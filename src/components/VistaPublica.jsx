@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, esGastronomia } from '../utils/vocabulario'
+import { useToast } from '../contexts/ToastContext'
 
 export default function VistaPublica() {
+  const { showToast } = useToast()
   const { id } = useParams()
   
   // --- CORE DATA STATE ---
@@ -259,7 +261,7 @@ export default function VistaPublica() {
         .eq('estado', 'confirmado')
 
       if (colision && colision.length > 0) {
-        alert("Este horario acaba de ser reservado. Por favor, selecciona otro.")
+        showToast("Este horario acaba de ser reservado. Por favor, selecciona otro.", "error")
         setPaso(3)
         const diaActual = diasCalendario.find(d => d.full === reserva.fecha)
         if (diaActual) handleDateSelect(diaActual)
@@ -290,7 +292,7 @@ export default function VistaPublica() {
       setPaso(5)
 
     } catch (err) {
-      alert("Ocurrió un error al procesar la solicitud. Reintente.")
+      showToast("Ocurrió un error al procesar la solicitud. Reintente.", "error")
     } finally {
       setGuardando(false)
     }

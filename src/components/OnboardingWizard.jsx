@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient'
 import { RUBROS_DISPONIBLES, getVocabulario } from '../utils/vocabulario'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IconCelebrate, IconCheckCircle } from './NoniIcons'
+import { useToast } from '../contexts/ToastContext'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
@@ -164,6 +165,7 @@ const buildSteps = () => [
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function OnboardingWizard({ session, onComplete }) {
+  const { showToast } = useToast()
   const steps = buildSteps()
   const [stepIdx, setStepIdx] = useState(0)
   const [data, setData] = useState({
@@ -254,7 +256,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       }
       setDone(true)
     } catch(e) {
-      alert('Error al crear: ' + e.message)
+      showToast('Error al crear: ' + e.message, 'error')
       createdRef.current = false
     } finally {
       setSaving(false)
@@ -275,7 +277,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       const j = await r.json()
       if (j.secure_url) next({ logo_url: j.secure_url.replace('/upload/', '/upload/q_auto,f_auto,w_400/') })
       else throw new Error('Sin URL')
-    } catch { alert('Error al subir. Intentá de nuevo.') }
+    } catch { showToast('Error al subir. Intentá de nuevo.', 'error') }
     finally { setUploading(false) }
   }
 
@@ -294,7 +296,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             <p className="text-slate-400 mt-2">Tu plataforma está activa en producción.</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:border-white/30 transition-all"
-            onClick={() => { navigator.clipboard.writeText(link) }}>
+            onClick={() => { navigator.clipboard.writeText(link); showToast('Enlace copiado al portapapeles'); }}>
             <code className="text-sm text-sky-400 block truncate">{link}</code>
             <p className="text-[10px] text-white/30 mt-2 uppercase tracking-widest">Tocar para copiar</p>
           </div>
