@@ -20,6 +20,19 @@ import OnboardingWizard from './OnboardingWizard'
 // Panel de Configuración Guiada Post-Onboarding
 import GuidedSetup from './GuidedSetup'
 
+// Hooks globales
+import { useToast } from './Toast'
+import { useConfirm } from '../contexts/ConfirmContext'
+
+// Iconos
+import { IconCheckCircle } from './NoniIcons'
+
+// Componentes del Dashboard
+import DashboardTour, { useTour } from './DashboardTour'
+import FloatingAssistant from './FloatingAssistant'
+import NotificationCenter from './NotificationCenter'
+import GlobalSearch from './GlobalSearch'
+
 export default function Dashboard({ session }) {
   const { showToast } = useToast()
   const { showConfirm } = useConfirm()
@@ -76,6 +89,13 @@ export default function Dashboard({ session }) {
 
   // --- ESTADOS: DISTRIBUCIÓN SEMANAL ---
   const [distribucionSemanal, setDistribucionSemanal] = useState([0, 0, 0, 0, 0, 0, 0])
+
+  // --- ESTADOS: UI ---
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [copyToast, setCopyToast] = useState(false)
+
+  // --- TOUR GUIADO ---
+  const tour = useTour()
 
   const navigate = useNavigate()
 
