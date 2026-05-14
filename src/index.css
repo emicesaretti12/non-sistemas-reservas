@@ -1038,3 +1038,232 @@ body {
 [id] {
   scroll-margin-top: 80px;
 }
+
+/* ============================================================
+   LOGIN SCREEN — SKY BLUE NATIVE APP DESIGN
+   ============================================================ */
+
+/* Shell */
+.ns-login-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated gradient background */
+.ns-login-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #020b18 0%, #0a1e3d 30%, #0e3a6e 60%, #0c2d54 100%);
+  background-size: 300% 300%;
+  animation: ns-gradient-shift 12s ease infinite;
+}
+
+/* Floating orbs */
+.ns-login-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  animation: ns-blob 14s ease-in-out infinite, ns-float 7s ease-in-out infinite;
+  will-change: transform, border-radius;
+}
+.ns-login-orb-1 {
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, #38bdf8 0%, #0ea5e9 60%, transparent 100%);
+  top: -8%; left: -8%;
+}
+.ns-login-orb-2 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, #7dd3fc 0%, #38bdf8 60%, transparent 100%);
+  bottom: -5%; right: -8%;
+  animation-delay: 3s;
+}
+.ns-login-orb-3 {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, #bae6fd 0%, #7dd3fc 60%, transparent 100%);
+  top: 45%; left: 55%;
+  animation-delay: 6s;
+}
+
+/* Glass card */
+.ns-login-card {
+  background: rgba(8, 20, 40, 0.65);
+  backdrop-filter: blur(40px) saturate(160%);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  border-radius: 2.5rem;
+  padding: 2rem 1.75rem;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(125, 211, 252, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ns-login-card:hover {
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(125, 211, 252, 0.12);
+}
+@media (min-width: 768px) {
+  .ns-login-card {
+    padding: 3rem 2.75rem;
+    border-radius: 3rem;
+  }
+}
+
+/* Logo */
+.ns-login-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px; height: 56px;
+  border-radius: 1.2rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0284c7, #38bdf8, #7dd3fc);
+  box-shadow: 0 8px 32px rgba(14, 165, 233, 0.35);
+  animation: ns-float 5s ease-in-out infinite, ns-login-logo-glow 4s ease-in-out infinite;
+}
+@keyframes ns-login-logo-glow {
+  0%, 100% { box-shadow: 0 8px 32px rgba(14, 165, 233, 0.3); }
+  50% { box-shadow: 0 8px 48px rgba(56, 189, 248, 0.55); }
+}
+@media (min-width: 768px) {
+  .ns-login-logo {
+    width: 68px; height: 68px;
+    border-radius: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Social buttons */
+.ns-login-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(14, 165, 233, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 12px;
+  color: rgba(186, 230, 253, 0.85);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+}
+.ns-login-social-btn:hover {
+  background: rgba(14, 165, 233, 0.14);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+}
+.ns-login-social-btn:active {
+  transform: scale(0.97);
+}
+.ns-login-social-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (min-width: 768px) {
+  .ns-login-social-btn {
+    gap: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    border-radius: 1.2rem;
+  }
+}
+
+/* Divider bg match */
+.ns-login-divider-bg {
+  background: rgba(8, 20, 40, 0.7);
+}
+
+/* Input fields */
+.ns-login-input {
+  width: 100%;
+  padding: 13px 18px;
+  background: rgba(14, 165, 233, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 0.9rem;
+  outline: none;
+  font-weight: 600;
+  font-size: 13px;
+  color: white;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ns-login-input::placeholder {
+  color: rgba(186, 230, 253, 0.25);
+}
+.ns-login-input:focus {
+  border-color: #38bdf8;
+  background: rgba(14, 165, 233, 0.1);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+}
+@media (min-width: 768px) {
+  .ns-login-input {
+    padding: 16px 20px;
+    font-size: 14px;
+    border-radius: 1.1rem;
+  }
+}
+
+/* Submit button */
+.ns-login-submit-btn {
+  width: 100%;
+  padding: 15px 24px;
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #0ea5e9 100%);
+  background-size: 200% 200%;
+  color: white;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-top: 1.25rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 32px rgba(14, 165, 233, 0.3);
+  animation: ns-gradient-shift 4s ease infinite;
+}
+.ns-login-submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  animation: ns-wave 3s ease-in-out infinite;
+}
+.ns-login-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 44px rgba(14, 165, 233, 0.4);
+}
+.ns-login-submit-btn:active {
+  transform: scale(0.98);
+}
+.ns-login-submit-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+@media (min-width: 768px) {
+  .ns-login-submit-btn {
+    padding: 17px 28px;
+    font-size: 12px;
+    border-radius: 1.15rem;
+    margin-top: 1.5rem;
+  }
+}

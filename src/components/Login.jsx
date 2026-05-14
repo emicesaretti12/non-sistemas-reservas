@@ -339,9 +339,9 @@ export default function Login() {
   }
 
   const configUI = {
-    login:     { titulo: 'Bienvenido',     subtitulo: 'Accedé al panel de Non Sistemas.',    btn: 'Entrar al entorno'    },
-    registro:  { titulo: 'Crear Cuenta',     subtitulo: 'Desplegá tu infraestructura hoy.',    btn: 'Aprovisionar servidor'},
-    recuperar: { titulo: 'Recuperar Acceso', subtitulo: 'Ingresá tu correo para restablecer.', btn: 'Enviar protocolo'     },
+    login:     { titulo: 'Bienvenido',       subtitulo: 'Iniciá sesión en Non Sistemas.',       btn: 'Iniciar Sesión'       },
+    registro:  { titulo: 'Crear Cuenta',     subtitulo: 'Registrate y empezá a gestionar.',     btn: 'Crear mi cuenta'      },
+    recuperar: { titulo: 'Recuperar Acceso', subtitulo: 'Te enviaremos un enlace seguro.',      btn: 'Enviar enlace'        },
   }
 
   const renderPasswordMeter = () => {
@@ -355,8 +355,8 @@ export default function Login() {
     ]
 
     return (
-      <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4 animate-in fade-in duration-300 shadow-inner">
-        <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-3">Requisitos de Seguridad</p>
+      <div className="mt-4 bg-sky-950/40 border border-sky-400/20 rounded-2xl p-4 ns-fade-up shadow-inner backdrop-blur-sm">
+        <p className="text-[10px] font-bold text-sky-300/60 uppercase tracking-widest mb-3">Requisitos de Seguridad</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {rules.map(rule => (
             <div key={rule.id} className="flex items-center gap-2">
@@ -403,32 +403,26 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-4 md:p-6 relative overflow-hidden ns-animated-bg bg-slate-950">
-      {/* EXTREMA OPTIMIZACIÓN MÓVIL: Los Orbes (filter: blur) queman la GPU del celular y causan lag al tipear. Los ocultamos en móvil. */}
-      <div className="hidden md:block ns-orb w-[500px] h-[500px] bg-purple-600/30 -top-[5%] -left-[10%]" />
-      <div className="hidden md:block ns-orb w-[400px] h-[400px] bg-cyan-400/20 -bottom-[5%] -right-[10%]" style={{ animationDelay: '3s' }} />
-      <div className="hidden md:block ns-orb w-[250px] h-[250px] bg-indigo-500/20 top-[50%] left-[60%]" style={{ animationDelay: '6s' }} />
+    <div className="ns-login-shell">
+      {/* Gradient background */}
+      <div className="ns-login-bg" />
+      {/* Floating orbs — hidden on mobile for perf */}
+      <div className="hidden md:block ns-login-orb ns-login-orb-1" />
+      <div className="hidden md:block ns-login-orb ns-login-orb-2" />
+      <div className="hidden md:block ns-login-orb ns-login-orb-3" />
 
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)', backgroundSize: '32px 32px' }}
-      />
+      <div className="w-full max-w-[420px] z-10 ns-fade-up px-1">
+        <div className="ns-login-card">
 
-      <div className="w-full max-w-[440px] z-10 ns-fade-up">
-        <div className="ns-glass-dark rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] transition-all duration-500 relative overflow-hidden border border-white/5">
-
-          <div className="text-center mb-6 md:mb-8 relative z-10">
-            <div
-              className="inline-flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-[1.8rem] mb-4 md:mb-6 ns-float relative overflow-hidden shadow-2xl"
-              style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}
-            >
-              <span className="text-white font-black text-xl md:text-3xl italic tracking-tighter relative z-10">NS</span>
-              <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+          {/* Header */}
+          <div className="text-center mb-7 md:mb-9 relative z-10">
+            <div className="ns-login-logo">
+              <span className="text-white font-black text-xl md:text-2xl italic tracking-tighter relative z-10">NS</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h1 className="text-[26px] md:text-[32px] font-black text-white tracking-tight leading-none">
               {configUI[mode].titulo}
             </h1>
-            <p className="text-white/40 mt-1 md:mt-2 font-medium text-[11px] md:text-sm transition-opacity duration-300">
+            <p className="text-sky-200/50 mt-2 font-semibold text-xs md:text-[13px] tracking-wide">
               {configUI[mode].subtitulo}
             </p>
           </div>
@@ -473,7 +467,7 @@ export default function Login() {
                   onClick={() => handleSocialLogin('google')}
                   disabled={loading || cooldown > 0}
                   type="button"
-                  className="flex items-center justify-center gap-2 md:gap-3 py-3 md:py-3.5 px-3 md:px-4 bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-white/80 text-xs md:text-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm group"
+                  className="ns-login-social-btn group"
                 >
                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -487,7 +481,7 @@ export default function Login() {
                   onClick={() => handleSocialLogin('github')}
                   disabled={loading || cooldown > 0}
                   type="button"
-                  className="flex items-center justify-center gap-2 md:gap-3 py-3 md:py-3.5 px-3 md:px-4 bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-white/80 text-xs md:text-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm group"
+                  className="ns-login-social-btn group"
                 >
                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4 invert group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
@@ -496,13 +490,13 @@ export default function Login() {
                 </button>
               </div>
 
-              <div className="relative mb-4 md:mb-6">
+              <div className="relative mb-5 md:mb-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/10" />
+                  <span className="w-full border-t border-sky-300/10" />
                 </div>
-                <div className="relative flex justify-center text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-white/30">
-                  <span className="px-3 md:px-4" style={{ background: 'rgba(15, 10, 30, 0.8)' }}>
-                    Operar con E-Mail
+                <div className="relative flex justify-center text-[8px] md:text-[9px] font-black uppercase tracking-[0.35em] text-sky-200/30">
+                  <span className="px-4 ns-login-divider-bg">
+                    o con email
                   </span>
                 </div>
               </div>
@@ -525,7 +519,7 @@ export default function Login() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 md:px-5 py-3 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-[1.2rem] focus:border-[#6c5ce7] focus:bg-white/10 outline-none transition-all font-semibold text-white placeholder:text-white/20 focus:shadow-[0_0_0_4px_rgba(108,92,231,0.15)] text-xs md:text-sm pl-11 md:pl-14"
+                  className="ns-login-input pl-11 md:pl-14"
                   placeholder="admin@empresa.com"
                   disabled={loading || cooldown > 0}
                   autoComplete="email"
@@ -543,7 +537,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => cambiarModo('recuperar')}
-                      className="text-[9px] md:text-[10px] font-black text-[#a29bfe] hover:text-white transition-colors"
+                      className="text-[9px] md:text-[10px] font-black text-sky-400 hover:text-white transition-colors"
                     >
                       ¿Perdiste tu llave?
                     </button>
@@ -560,7 +554,7 @@ export default function Login() {
                     required={mode !== 'recuperar'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 md:px-5 py-3 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-[1.2rem] focus:border-[#6c5ce7] focus:bg-white/10 outline-none transition-all font-semibold text-white placeholder:text-white/20 focus:shadow-[0_0_0_4px_rgba(108,92,231,0.15)] text-xs md:text-sm pl-11 md:pl-14"
+                    className="ns-login-input pl-11 md:pl-14 pr-10 md:pr-12"
                     placeholder="••••••••••••"
                     disabled={loading || cooldown > 0}
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
@@ -603,10 +597,10 @@ export default function Login() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`w-full px-4 md:px-5 py-3 md:py-4 bg-white/5 border rounded-xl md:rounded-[1.2rem] outline-none transition-all font-semibold text-white placeholder:text-white/20 text-xs md:text-sm pl-11 md:pl-14 ${
+                    className={`ns-login-input pl-11 md:pl-14 ${
                       confirmPassword.length > 0 && password !== confirmPassword
                         ? 'border-red-500/50 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.15)]'
-                        : 'border-white/10 focus:border-[#6c5ce7] focus:bg-white/10 focus:shadow-[0_0_0_4px_rgba(108,92,231,0.15)]'
+                        : ''
                     }`}
                     placeholder="Repetir clave exacta"
                     disabled={loading || cooldown > 0}
@@ -624,7 +618,7 @@ export default function Login() {
                     id="terms"
                     checked={acceptTerms}
                     onChange={(e) => setAcceptTerms(e.target.checked)}
-                    className="peer appearance-none w-3.5 h-3.5 md:w-4 md:h-4 border border-white/20 rounded bg-white/5 checked:bg-[#6c5ce7] checked:border-[#6c5ce7] transition-all cursor-pointer"
+                    className="peer appearance-none w-3.5 h-3.5 md:w-4 md:h-4 border border-white/20 rounded bg-white/5 checked:bg-sky-500 checked:border-sky-500 transition-all cursor-pointer"
                     disabled={cooldown > 0}
                   />
                   <svg className="absolute w-2.5 h-2.5 md:w-3 md:h-3 text-white left-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -633,9 +627,9 @@ export default function Login() {
                 </div>
                 <label htmlFor="terms" className="text-[9px] md:text-[10px] font-medium text-white/50 leading-tight cursor-pointer select-none">
                   Entiendo y acepto los{' '}
-                  <a href="#" className="text-[#a29bfe] hover:underline">Términos de Servicio</a>{' '}
+                  <a href="#" className="text-sky-400 hover:underline">Términos de Servicio</a>{' '}
                   y la{' '}
-                  <a href="#" className="text-[#a29bfe] hover:underline">Política de Privacidad</a>{' '}
+                  <a href="#" className="text-sky-400 hover:underline">Política de Privacidad</a>{' '}
                   respecto al tratamiento de datos.
                 </label>
               </div>
@@ -644,41 +638,40 @@ export default function Login() {
             <button
               type="submit"
               disabled={botonDeshabilitado}
-              className="ns-shimmer-btn w-full text-white font-black py-3.5 md:py-4 rounded-xl md:rounded-[1.2rem] shadow-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] text-[10px] md:text-[11px] uppercase tracking-[0.2em] mt-4 md:mt-6 hover:shadow-[0_12px_40px_rgba(108,92,231,0.3)]"
-              style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}
+              className="ns-login-submit-btn"
             >
               {renderBotonTexto()}
             </button>
           </form>
 
-          <div className="mt-6 md:mt-8 text-center relative z-10 border-t border-white/5 pt-4 md:pt-6">
+          <div className="mt-7 md:mt-8 text-center relative z-10 border-t border-sky-300/10 pt-5 md:pt-6">
             {mode === 'recuperar' ? (
               <button
                 type="button"
                 onClick={() => cambiarModo('login')}
-                className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                className="text-[10px] md:text-[11px] font-bold text-sky-300/50 hover:text-white transition-colors"
               >
-                Volver a la consola
+                ← Volver al login
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
-                className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                className="text-[10px] md:text-[11px] font-bold text-sky-300/50 hover:text-white transition-colors"
               >
-                {mode === 'login' ? 'Aprovisionar un nuevo entorno' : '¿Ya posees una cuenta? Iniciar Sesión'}
+                {mode === 'login' ? '¿No tenés cuenta? Crear una gratis' : '¿Ya tenés cuenta? Iniciá sesión'}
               </button>
             )}
           </div>
         </div>
 
-        {/* BADGE DE SEGURIDAD EXTREMA */}
-        <div className="mt-6 md:mt-10 flex flex-col items-center gap-3 relative z-10 pb-4 md:pb-8">
-          <div className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/50">
-            <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em]">Cifrado de Extremo a Extremo (SSL)</span>
+        {/* Footer badge */}
+        <div className="mt-8 flex flex-col items-center gap-2.5 relative z-10 pb-6">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-sky-300/10 bg-sky-950/30 backdrop-blur-md text-sky-200/40">
+            <svg className="w-3.5 h-3.5 text-sky-400/70" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em]">Conexión segura SSL</span>
           </div>
-          <p className="text-[8px] md:text-[9px] font-black text-white/30 uppercase tracking-[0.4em] opacity-80 mt-2">
+          <p className="text-[8px] md:text-[9px] font-bold text-sky-200/20 uppercase tracking-[0.3em]">
             Non Sistemas • Salsipuedes, CBA
           </p>
         </div>
