@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
+import { ToastProvider } from './components/Toast'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import VistaPublica from './components/VistaPublica'
@@ -54,6 +55,7 @@ function App() {
   }
 
   return (
+    <ToastProvider>
     <BrowserRouter>
       <Routes>
         {/* LANDING PAGE: Página de venta pública */}
@@ -84,6 +86,7 @@ function App() {
         <Route path="*" element={<Navigate to={session ? "/admin" : "/"} replace />} />
       </Routes>
     </BrowserRouter>
+    </ToastProvider>
   )
 }
 

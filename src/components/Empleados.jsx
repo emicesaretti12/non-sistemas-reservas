@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
 
 export default function Empleados({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
+  const toast = useToast()
   const [loading, setLoading] = useState(true)
   const [especialistas, setEspecialistas] = useState([])
   
@@ -71,7 +73,7 @@ export default function Empleados({ negocioId, rubro }) {
         setForm({ ...form, foto_url: urlOptimizada })
       }
     } catch (error) {
-      alert("Error al subir la imagen. Intente nuevamente.")
+      toast.error('Error al subir la imagen. Intenté nuevamente.')
     } finally {
       setSubiendoFoto(false)
     }
@@ -141,9 +143,9 @@ export default function Empleados({ negocioId, rubro }) {
     } catch (error) {
       console.error("Payload rechazado por Supabase:", error)
       if (error.code === '42501' || error.message.includes('403')) {
-        alert("Error 403: La base de datos bloqueó la acción. Ejecutá el script SQL de sincronización.")
+        toast.error('Error 403: La base de datos bloqueó la acción. Ejecutá el script SQL.')
       } else {
-        alert(`Error del servidor: ${error.message}`)
+        toast.error(`Error del servidor: ${error.message}`)
       }
     } finally {
       setGuardando(false)
@@ -161,7 +163,7 @@ export default function Empleados({ negocioId, rubro }) {
       if (!error) {
         setEspecialistas(especialistas.filter(e => e.id !== id))
       } else {
-        alert("No se puede eliminar un recurso con agendas activas.")
+        toast.error('No se puede eliminar un recurso con agendas activas.')
       }
     }
   }

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { useToast } from './Toast'
 
 export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   const [guardando, setGuardando] = useState(false)
+  const toast = useToast()
 
   // Estructura base de la semana (por si el negocio es nuevo y no tiene horarios aún)
   const defaultHorarios = {
@@ -54,11 +56,11 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
 
       if (error) throw error
       
-      alert("Horarios comerciales actualizados con éxito. La agenda pública ha sido modificada.")
+      toast.success('Horarios actualizados con éxito')
       if (onUpdate) onUpdate() // Llama a la función del padre (Dashboard) para refrescar datos
       
     } catch (error) {
-      alert("Hubo un error al guardar los horarios. Verifique su conexión.")
+      toast.error('Error al guardar los horarios. Verificá tu conexión.')
       console.error(error.message)
     } finally {
       setGuardando(false)

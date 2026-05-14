@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
 
 // Explicit class map — Tailwind JIT cannot detect dynamically-built class names
 const tipoMovClasses = {
@@ -11,6 +12,7 @@ const tipoMovClasses = {
 
 export default function Inventario({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
+  const toast = useToast()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -86,13 +88,13 @@ export default function Inventario({ negocioId, rubro }) {
       cerrarModal()
       cargar()
     } catch (e) {
-      alert('Error: ' + e.message)
+      toast.error('Error: ' + e.message)
     } finally { setGuardando(false) }
   }
 
   async function registrarMovimiento(e) {
     e.preventDefault()
-    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) return alert('Cantidad inválida')
+    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) { toast.warning('Cantidad inválida'); return }
     setGuardando(true)
     try {
       const cant = parseInt(movForm.cantidad)
@@ -115,7 +117,7 @@ export default function Inventario({ negocioId, rubro }) {
       setModalMovimiento(null)
       setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' })
       cargar()
-    } catch (e) { alert('Error: ' + e.message) }
+    } catch (e) { toast.error('Error: ' + e.message) }
     finally { setGuardando(false) }
   }
 
@@ -152,7 +154,7 @@ export default function Inventario({ negocioId, rubro }) {
       if (data.secure_url) {
         setCatForm(prev => ({ ...prev, imagen_url: data.secure_url.replace('/upload/', '/upload/q_auto,f_auto,w_600/') }))
       }
-    } catch { alert('Error al subir imagen') }
+    } catch { toast.error('Error al subir imagen') }
     finally { setSubiendoImg(false) }
   }
 
@@ -169,7 +171,7 @@ export default function Inventario({ negocioId, rubro }) {
       }
       cerrarCatModal()
       cargar()
-    } catch (e) { alert('Error: ' + e.message) }
+    } catch (e) { toast.error('Error: ' + e.message) }
     finally { setGuardando(false) }
   }
 

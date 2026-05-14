@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
 
 export default function Servicios({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
+  const toast = useToast()
   const [loading, setLoading] = useState(true)
   const [servicios, setServicios] = useState([])
   
@@ -98,7 +100,7 @@ export default function Servicios({ negocioId, rubro }) {
 
     } catch (error) {
       console.error("Supabase Error:", error)
-      alert(`Error del servidor: ${error.message}`)
+      toast.error(`Error del servidor: ${error.message}`)
     } finally {
       setGuardando(false)
     }
@@ -113,7 +115,7 @@ export default function Servicios({ negocioId, rubro }) {
         .eq('negocio_id', negocioId)
 
       if (error) {
-        alert(`Error al eliminar: ${error.message}`)
+        toast.error(`Error al eliminar: ${error.message}`)
       } else {
         setServicios(servicios.filter(s => s.id !== id))
       }
