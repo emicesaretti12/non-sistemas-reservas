@@ -99,6 +99,55 @@ export default function Dashboard({ session }) {
 
   const navigate = useNavigate()
 
+  // --- UTILIDADES DE EXPORTACIÓN ---
+  function exportToCSV(data, filename, columns) {
+    const header = columns.map(c => c.label).join(',')
+    const rows = data.map(row =>
+      columns.map(c => {
+        const val = typeof c.key === 'function' ? c.key(row) : row[c.key]
+        return `"${String(val ?? '').replace(/"/g, '""')}"`
+      }).join(',')
+    )
+    const csv = [header, ...rows].join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${filename}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function exportReportPDF({ title, negocioNombre, sections }) {
+    // Generate a printable HTML report and trigger print dialog
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title} - ${negocioNombre}</title>
+    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#0f172a}
+    h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#64748b;border-bottom:1px solid #e2e8f0;padding-bottom:8px}
+    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;flex:1;text-align:center}
+    .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#f1f5f9;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+    td{padding:8px 12px;border-bottom:1px solid #f1f5f9}.meta{font-size:11px;color:#94a3b8;margin-top:4px}</style></head><body>
+    <h1>${title}</h1><p class="meta">${negocioNombre} — ${new Date().toLocaleDateString('es-ES', { day:'numeric',month:'long',year:'numeric' })}</p>`
+    + sections.map(s => {
+      let content = `<h2>${s.title}</h2>`
+      if (s.type === 'kpi') {
+        content += '<div class="kpi-grid">' + s.data.map(k => `<div class="kpi"><div class="val">${k.value}</div><div class="lbl">${k.label}</div></div>`).join('') + '</div>'
+      } else if (s.type === 'table' && s.data) {
+        content += '<table><thead><tr>' + s.columns.map(c => `<th>${c.label}</th>`).join('') + '</tr></thead><tbody>'
+        + s.data.map(row => '<tr>' + s.columns.map(c => {
+          const val = typeof c.key === 'function' ? c.key(row) : row[c.key]
+          return `<td>${val ?? ''}</td>`
+        }).join('') + '</tr>').join('') + '</tbody></table>'
+      }
+      return content
+    }).join('')
+    + '</body></html>'
+    const w = window.open('', '_blank')
+    w.document.write(html)
+    w.document.close()
+    w.print()
+  }
+
   useEffect(() => {
     if (session) {
       inicializarPanel()
@@ -1314,7 +1363,7 @@ export default function Dashboard({ session }) {
                               { key: 'frecuencia', label: 'Frecuencia' },
                               { key: (c) => c.servicios.join(', '), label: 'Servicios' },
                             ])
-                            toast.success('Archivo CSV descargado')
+                            showToast('Archivo CSV descargado')
                           }} className="ns-export-btn" title="Exportar CSV">
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             CSV
