@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
+import { IconRobot, IconCelebrate, IconErrorCircle } from './NoniIcons'
 
 export default function Servicios({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
