@@ -34,7 +34,7 @@ import NotificationCenter from './NotificationCenter'
 import GlobalSearch from './GlobalSearch'
 
 export default function Dashboard({ session }) {
-  const { showToast } = useToast()
+  const showToast = useToast()
   const { showConfirm } = useConfirm()
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
   const [loading, setLoading] = useState(true)
