@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
+import { IconRobot, IconCelebrate, IconErrorCircle } from './NoniIcons'
 
 export default function Empleados({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
@@ -74,7 +76,7 @@ export default function Empleados({ negocioId, rubro }) {
         setForm({ ...form, foto_url: urlOptimizada })
       }
     } catch (error) {
-      alert("Error al subir la imagen. Intente nuevamente.")
+      toast.error("Error al subir la imagen. Intente nuevamente.")
     } finally {
       setSubiendoFoto(false)
     }
@@ -150,29 +152,28 @@ export default function Empleados({ negocioId, rubro }) {
     } catch (error) {
       console.error("Payload rechazado por Supabase:", error)
       if (error.code === '42501' || error.message.includes('403')) {
-        alert("Error 403: La base de datos bloqueó la acción. Ejecutá el script SQL de sincronización.")
+        toast.error("Error 403: La base de datos bloqueó la acción. Ejecutá el script SQL de sincronización.")
       } else {
-        alert(`Error del servidor: ${error.message}`)
+        toast.error(`Error del servidor: ${error.message}`)
       }
-      setTimeout(() => setShowError(''), 5000)
     } finally {
       setGuardando(false)
     }
   }
 
   async function eliminarEspecialista(id) {
-    if (confirm('¿Desea dar de baja a este especialista/recurso?')) {
-      const { error } = await supabase
-        .from('empleados')
-        .delete()
-        .eq('id', id)
-        .eq('negocio_id', negocioId)
+    if (!window.confirm('¿Desea dar de baja a este especialista/recurso?')) return
+    const { error } = await supabase
+      .from('empleados')
+      .delete()
+      .eq('id', id)
+      .eq('negocio_id', negocioId)
 
-      if (!error) {
-        setEspecialistas(especialistas.filter(e => e.id !== id))
-      } else {
-        alert("No se puede eliminar un recurso con agendas activas.")
-      }
+    if (!error) {
+      toast.success('Especialista eliminado correctamente')
+      setEspecialistas(especialistas.filter(e => e.id !== id))
+    } else {
+      toast.error("No se puede eliminar un recurso con agendas activas.")
     }
   }
 

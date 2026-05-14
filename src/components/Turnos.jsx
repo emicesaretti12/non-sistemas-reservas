@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
+import { IconRobot } from './NoniIcons'
 
 export default function Turnos({ negocioId, rubro, negocio }) {
   const vocab = getVocabulario(rubro)
@@ -16,16 +18,10 @@ export default function Turnos({ negocioId, rubro, negocio }) {
   const [modalDiaAbierto, setModalDiaAbierto] = useState(false)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [guardando, setGuardando] = useState(false)
-  const [toast, setToast] = useState({ show: false, msg: '', type: 'success' })
   const [confirmDialog, setConfirmDialog] = useState({ show: false, id: null })
   const [nuevoTurno, setNuevoTurno] = useState({
     cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00'
   })
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ show: true, msg, type })
-    setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000)
-  }
 
   // Unificamos el parseo ultra robusto de los strings de Supabase para toda la vista
   const safeParseDate = (dbString) => {
@@ -96,15 +92,13 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       setTodosLosTurnos(data || [])
     } catch (e) {
       console.error("Smart Agenda Error:", e.message)
-      // Si JWT expiró, intentar renovar sesión
       if (e.message?.includes('JWT') || e.message?.includes('expired')) {
         const { error: refreshErr } = await supabase.auth.refreshSession()
         if (refreshErr) {
-          alert('Tu sesión expiró. Serás redirigido al login.')
+          toast.error('Tu sesión expiró. Serás redirigido al login.')
           await supabase.auth.signOut()
           window.location.href = '/login'
         } else {
-          // Reintentar la carga tras refresh exitoso
           bootSmartAgenda()
           return
         }
@@ -112,6 +106,57 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function marcarEstado(id, estado) {
+    const { error } = await supabase.from('turnos').update({ estado }).eq('id', id)
+    if (error) {
+      toast.error('Error al actualizar el estado del turno')
+    } else {
+      const msg = estado === 'completado' ? 'Turno marcado como atendido' :
+                  estado === 'no_show'    ? 'Turno marcado como no presentado' :
+                                           'Turno revertido a confirmado'
+      toast.success(msg)
+      bootSmartAgenda()
+    }
+  }
+
+  function enviarRecordatorio(t) {
+    const tDate = safeParseDate(t.fecha_hora)
+    const horaStr  = tDate ? tDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+    const fechaStr = tDate ? tDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
+    const negocioNombre = negocio?.nombre || 'nuestro local'
+    const msg = encodeURIComponent(
+      `Hola ${t.cliente_nombre}! Te recordamos tu turno para el ${fechaStr} a las ${horaStr} en ${negocioNombre}. ¡Te esperamos!`
+    )
+    const phone = t.cliente_telefono?.replace(/[^0-9]/g, '')
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank')
+    supabase.from('turnos').update({ recordatorio_enviado: true }).eq('id', t.id)
+      .then(() => bootSmartAgenda())
+  }
+
+  async function confirmarYCancelarTurno() {
+    const id = confirmDialog.id
+    setConfirmDialog({ show: false, id: null })
+    const { error } = await supabase.from('turnos').delete().eq('id', id)
+    if (error) {
+      if (error.message?.includes('JWT') || error.code === '401' || error.message?.includes('expired')) {
+        const { error: refreshErr } = await supabase.auth.refreshSession()
+        if (refreshErr) {
+          toast.error('Tu sesión expiró. Serás redirigido al login.')
+          await supabase.auth.signOut()
+          window.location.href = '/login'
+          return
+        }
+        const { error: retryErr } = await supabase.from('turnos').delete().eq('id', id)
+        if (retryErr) { toast.error('Error al eliminar el turno: ' + retryErr.message); return }
+      } else {
+        toast.error('Error al eliminar el turno: ' + error.message)
+        return
+      }
+    }
+    toast.success('Turno cancelado correctamente')
+    bootSmartAgenda()
   }
 
   const dispararGoogleCalendar = (turnoRaw, servicioData, empleadoData) => {
@@ -220,7 +265,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         .eq('estado', 'confirmado')
 
       if (colision && colision.length > 0) {
-        alert("Ese horario ya fue reservado para este empleado. Elija otro.")
+        toast.warning("Ese horario ya fue reservado para este empleado. Elija otro.")
         setGuardando(false)
         return
       }
@@ -239,45 +284,19 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       if (error) throw error
 
       dispararGoogleCalendar(nuevoTurno, serv, emp)
-      showToast("Turno agendado con éxito")
+      toast.success("Turno agendado con éxito")
       setModalAbierto(false)
       setNuevoTurno({ cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00' })
       bootSmartAgenda()
     } catch (err) {
-      alert("Error al agendar: " + err.message)
+      toast.error("Error al agendar: " + err.message)
     } finally {
       setGuardando(false)
     }
   }
 
-  async function cancelarTurno(id) {
-    if (confirm('¿Estás seguro de que deseas cancelar y eliminar este turno?')) {
-      const { error } = await supabase.from('turnos').delete().eq('id', id)
-
-      if (error) {
-        // Si el JWT expiró, intentar refrescar la sesión y reintentar
-        if (error.message?.includes('JWT') || error.code === '401' || error.message?.includes('expired')) {
-          const { error: refreshErr } = await supabase.auth.refreshSession()
-          if (refreshErr) {
-            alert('Tu sesión expiró. Serás redirigido al login.')
-            await supabase.auth.signOut()
-            window.location.href = '/login'
-            return
-          }
-          // Reintentar tras refresh exitoso
-          const { error: retryErr } = await supabase.from('turnos').delete().eq('id', id)
-          if (retryErr) {
-            alert('Error al eliminar el turno: ' + retryErr.message)
-            return
-          }
-        } else {
-          alert('Error al eliminar el turno: ' + error.message)
-          return
-        }
-      }
-
-      bootSmartAgenda()
-    }
+  function cancelarTurno(id) {
+    setConfirmDialog({ show: true, id })
   }
 
   const extraeHoraSegura = (fechaString) => {
@@ -785,17 +804,6 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         </div>
       )}
 
-      {/* TOAST NOTIFICATIONS */}
-      {toast.show && (
-        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-8 fade-in duration-300 ${toast.type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white'}`}>
-          {toast.type === 'success' ? (
-            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-          ) : (
-            <svg className="w-5 h-5 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          )}
-          <span className="text-xs font-bold tracking-wide">{toast.msg}</span>
-        </div>
-      )}
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }

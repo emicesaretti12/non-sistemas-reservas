@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { useToast } from './Toast'
+import { useConfirm } from '../contexts/ConfirmContext'
 
 // Explicit class map — Tailwind JIT cannot detect dynamically-built class names
 const tipoMovClasses = {
@@ -10,10 +12,9 @@ const tipoMovClasses = {
 }
 
 export default function Inventario({ negocioId, rubro }) {
-  const { showToast } = useToast()
+  const toast = useToast()
   const { showConfirm } = useConfirm()
   const vocab = getVocabulario(rubro)
-  const toast = useToast()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -88,15 +89,18 @@ export default function Inventario({ negocioId, rubro }) {
       }
       cerrarModal()
       cargar()
-      showToast('Producto guardado con éxito')
+      toast.success('Producto guardado con éxito')
     } catch (e) {
-      alert('Error: ' + e.message)
+      toast.error('Error: ' + e.message)
     } finally { setGuardando(false) }
   }
 
   async function registrarMovimiento(e) {
     e.preventDefault()
-    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) return alert('Cantidad inválida')
+    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) {
+      toast.warning('Cantidad inválida')
+      return
+    }
     setGuardando(true)
     try {
       const cant = parseInt(movForm.cantidad)
@@ -119,7 +123,7 @@ export default function Inventario({ negocioId, rubro }) {
       setModalMovimiento(null)
       setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' })
       cargar()
-    } catch (e) { alert('Error: ' + e.message) }
+    } catch (e) { toast.error('Error: ' + e.message) }
     finally { setGuardando(false) }
   }
 
@@ -132,7 +136,7 @@ export default function Inventario({ negocioId, rubro }) {
       onConfirm: async () => {
         await supabase.from('inventario').update({ activo: false }).eq('id', id)
         cargar()
-        showToast('Producto desactivado')
+        toast.success('Producto desactivado')
       }
     })
   }
@@ -164,7 +168,7 @@ export default function Inventario({ negocioId, rubro }) {
       if (data.secure_url) {
         setCatForm(prev => ({ ...prev, imagen_url: data.secure_url.replace('/upload/', '/upload/q_auto,f_auto,w_600/') }))
       }
-    } catch { alert('Error al subir imagen') }
+    } catch { toast.error('Error al subir imagen') }
     finally { setSubiendoImg(false) }
   }
 
@@ -181,7 +185,7 @@ export default function Inventario({ negocioId, rubro }) {
       }
       cerrarCatModal()
       cargar()
-    } catch (e) { alert('Error: ' + e.message) }
+    } catch (e) { toast.error('Error: ' + e.message) }
     finally { setGuardando(false) }
   }
 
@@ -206,7 +210,7 @@ export default function Inventario({ negocioId, rubro }) {
       onConfirm: async () => {
         await supabase.from('catalogo_productos').delete().eq('id', id)
         cargar()
-        showToast('Producto eliminado del catálogo')
+        toast.success('Producto eliminado del catálogo')
       }
     })
   }

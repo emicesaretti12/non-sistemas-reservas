@@ -7,7 +7,6 @@ import Dashboard from './components/Dashboard'
 import VistaPublica from './components/VistaPublica'
 import ActualizarClave from './components/ActualizarClave'
 import LandingPage from './components/LandingPage'
-import { ToastProvider } from './contexts/ToastContext'
 import { ConfirmProvider } from './contexts/ConfirmContext'
 
 function App() {
@@ -57,36 +56,40 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* LANDING PAGE: Página de venta pública */}
-        <Route path="/" element={session ? <Navigate to="/admin" replace /> : <LandingPage />} />
+    <ToastProvider>
+      <ConfirmProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* LANDING PAGE: Página de venta pública */}
+            <Route path="/" element={session ? <Navigate to="/admin" replace /> : <LandingPage />} />
 
-        {/* RUTA PÚBLICA NUEVA CON NOMBRE: Debe estar arriba para que no la atrape el "*" */}
-        <Route path="/app/:slug/:id" element={<VistaPublica />} />
+            {/* RUTA PÚBLICA NUEVA CON NOMBRE: Debe estar arriba para que no la atrape el "*" */}
+            <Route path="/app/:slug/:id" element={<VistaPublica />} />
 
-        {/* RUTA PÚBLICA LEGACY: Se mantiene por compatibilidad de links viejos */}
-        <Route path="/app/:id" element={<VistaPublica />} />
+            {/* RUTA PÚBLICA LEGACY: Se mantiene por compatibilidad de links viejos */}
+            <Route path="/app/:id" element={<VistaPublica />} />
 
-        {/* RECUPERAR CLAVE */}
-        <Route path="/actualizar-clave" element={<ActualizarClave />} />
+            {/* RECUPERAR CLAVE */}
+            <Route path="/actualizar-clave" element={<ActualizarClave />} />
 
-        {/* LOGIN: Si hay sesión, te manda al admin automáticamente */}
-        <Route
-          path="/login"
-          element={!session ? <Login /> : <Navigate to="/admin" replace />}
-        />
+            {/* LOGIN: Si hay sesión, te manda al admin automáticamente */}
+            <Route
+              path="/login"
+              element={!session ? <Login /> : <Navigate to="/admin" replace />}
+            />
 
-        {/* ADMIN: Si NO hay sesión, te manda al login */}
-        <Route
-          path="/admin"
-          element={session ? <Dashboard session={session} /> : <Navigate to="/login" replace />}
-        />
+            {/* ADMIN: Si NO hay sesión, te manda al login */}
+            <Route
+              path="/admin"
+              element={session ? <Dashboard session={session} /> : <Navigate to="/login" replace />}
+            />
 
-        {/* RUTA POR DEFECTO: Siempre al final */}
-        <Route path="*" element={<Navigate to={session ? "/admin" : "/"} replace />} />
-      </Routes>
-    </BrowserRouter>
+            {/* RUTA POR DEFECTO: Siempre al final */}
+            <Route path="*" element={<Navigate to={session ? "/admin" : "/"} replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ConfirmProvider>
+    </ToastProvider>
   )
 }
 
