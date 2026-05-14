@@ -109,25 +109,24 @@ export default function Servicios({ negocioId, rubro }) {
 
     } catch (error) {
       console.error("Supabase Error:", error)
-      alert(`Error del servidor: ${error.message}`)
+      toast.showToast(`Error del servidor: ${error.message}`, 'error')
     } finally {
       setGuardando(false)
     }
   }
 
   async function eliminarServicio(id) {
-    if (confirm('¿Desea eliminar este servicio? Ya no estará disponible para nuevas reservas.')) {
-      const { error } = await supabase
-        .from('servicios')
-        .delete()
-        .eq('id', id)
-        .eq('negocio_id', negocioId)
+    if (!window.confirm('¿Desea eliminar este servicio?')) return
+    const { error } = await supabase
+      .from('servicios')
+      .delete()
+      .eq('id', id)
+      .eq('negocio_id', negocioId)
 
-      if (error) {
-        alert(`Error al eliminar: ${error.message}`)
-      } else {
-        setServicios(servicios.filter(s => s.id !== id))
-      }
+    if (error) {
+      toast.showToast(`Error al eliminar: ${error.message}`, 'error')
+    } else {
+      setServicios(servicios.filter(s => s.id !== id))
     }
   }
 

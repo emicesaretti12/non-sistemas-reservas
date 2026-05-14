@@ -532,7 +532,7 @@ export default function Dashboard({ session }) {
 
     if (!error) {
       setNegocio({ ...negocio, ...fullPayload })
-      alert("Configuración guardada con éxito.")
+      showToast("Configuración guardada con éxito.")
     } else {
       console.warn('Guardado completo falló, intentando por partes:', error.message)
 
@@ -565,12 +565,12 @@ export default function Dashboard({ session }) {
       }
 
       if (!e2) {
-        alert(contactoGuardado
+        showToast(contactoGuardado
           ? "Configuración guardada con éxito."
-          : "Marca guardada. Para guardar datos de contacto, ejecutá el SQL de migración (sql_mapa_url.sql) en Supabase."
+          : "Marca guardada. Para datos de contacto, ejecutá el SQL de migración."
         )
       } else {
-        alert("Hubo un error al guardar. Revisá tu conexión e intentá de nuevo.")
+        showToast("Hubo un error al guardar. Revisá tu conexión.", "error")
       }
     }
     setGuardandoPerfil(false)
@@ -1267,7 +1267,7 @@ export default function Dashboard({ session }) {
                     {[
                       { label: vocab.accionNueva, icon: 'M12 4v16m8-8H4', action: () => setTab('agenda') },
                       { label: vocab.accionServicio, icon: 'M12 4v16m8-8H4', action: () => setTab('servicios') },
-                      { label: 'Copiar Link', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3', action: () => { navigator.clipboard.writeText(publicLink); alert('Link copiado') } },
+                      { label: 'Copiar Link', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3', action: () => { navigator.clipboard.writeText(publicLink); showToast('¡Link copiado!') } },
                       { label: 'Ver App Pública', icon: 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14', action: () => window.open(publicLink, '_blank') }
                     ].map((a, i) => (
                       <button key={i} onClick={a.action} className="bg-white p-4 rounded-[1.2rem] border border-slate-200 shadow-sm flex flex-col items-center gap-2.5 hover:border-slate-400 hover:shadow-md transition-all active:scale-95 group">
@@ -1318,7 +1318,7 @@ export default function Dashboard({ session }) {
                       <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">{vocab.linkDescripcion}</p>
                       <div className="flex items-center bg-white/10 border border-white/10 rounded-xl p-3 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
                         navigator.clipboard.writeText(publicLink);
-                        alert("Link copiado")
+                        showToast("¡Link copiado!")
                       }}>
                         <code className="text-[9px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{publicLink}</code>
                         <svg className="w-4 h-4 ml-2 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
@@ -1615,7 +1615,7 @@ export default function Dashboard({ session }) {
                       <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
                       <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => {
                         navigator.clipboard.writeText(publicLink)
-                        alert("Link copiado al portapapeles")
+                        showToast("¡Link copiado!")
                       }}>
                         <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
                         <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
