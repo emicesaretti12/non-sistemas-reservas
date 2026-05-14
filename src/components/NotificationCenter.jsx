@@ -45,7 +45,7 @@ export default function NotificationCenter({ negocioId, rubro }) {
           type: 'new_booking',
           title: '🔔 Nueva Reserva',
           message: `${turno.cliente_nombre} reservó un turno`,
-          time: new Date(turno.created_at || Date.now()),
+          time: new Date(turno.fecha_hora || Date.now()),
           read: false,
         }
         setNotifications(prev => [newNotif, ...prev].slice(0, 20))
@@ -63,9 +63,9 @@ export default function NotificationCenter({ negocioId, rubro }) {
     try {
       const { data } = await supabase
         .from('turnos')
-        .select('id, cliente_nombre, fecha_hora, servicios(nombre), created_at')
+        .select('id, cliente_nombre, fecha_hora, servicios(nombre)')
         .eq('negocio_id', negocioId)
-        .order('created_at', { ascending: false })
+        .order('fecha_hora', { ascending: false })
         .limit(15)
 
       if (data) {
@@ -77,12 +77,12 @@ export default function NotificationCenter({ negocioId, rubro }) {
           type: 'new_booking',
           title: 'Reserva',
           message: `${t.cliente_nombre} — ${t.servicios?.nombre || vocab.servicio}`,
-          time: new Date(t.created_at || t.fecha_hora),
-          read: new Date(t.created_at || t.fecha_hora) < twentyFourHoursAgo,
+          time: new Date(t.fecha_hora),
+          read: new Date(t.fecha_hora) < twentyFourHoursAgo,
         })))
 
         const recentCount = data.filter(t => {
-          const d = new Date(t.created_at || t.fecha_hora)
+          const d = new Date(t.fecha_hora)
           return d >= twentyFourHoursAgo
         }).length
         setUnreadCount(Math.min(recentCount, 9))
