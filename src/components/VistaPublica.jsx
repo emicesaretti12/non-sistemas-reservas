@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, esGastronomia } from '../utils/vocabulario'
-import { useToast } from '../contexts/ToastContext'
+import { useToast } from './Toast'
 
 export default function VistaPublica() {
-  const { showToast } = useToast()
+  const showToast = useToast()
   const { id } = useParams()
   
   // --- CORE DATA STATE ---

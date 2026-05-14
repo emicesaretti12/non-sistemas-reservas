@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient'
 import { RUBROS_DISPONIBLES, getVocabulario } from '../utils/vocabulario'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IconCelebrate, IconCheckCircle } from './NoniIcons'
-import { useToast } from '../contexts/ToastContext'
+import { useToast } from './Toast'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
@@ -165,7 +165,7 @@ const buildSteps = () => [
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function OnboardingWizard({ session, onComplete }) {
-  const { showToast } = useToast()
+  const showToast = useToast()
   const steps = buildSteps()
   const [stepIdx, setStepIdx] = useState(0)
   const [data, setData] = useState({
