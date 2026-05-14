@@ -19,7 +19,7 @@ function TypingIndicator() {
       {[0, 1, 2].map(i => (
         <motion.div
           key={i}
-          className="w-1.5 h-1.5 bg-purple-400 rounded-full"
+          className="w-1.5 h-1.5 bg-sky-400 rounded-full"
           animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
           transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
         />
@@ -39,25 +39,25 @@ function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = f
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Glow behind head */}
       <motion.circle
-        cx="24" cy="25" r="18" fill="#6c5ce7" opacity="0.08"
+        cx="24" cy="25" r="18" fill="#0ea5e9" opacity="0.08"
         animate={{ scale: speaking ? [1, 1.1, 1] : 1 }}
         transition={{ repeat: speaking ? Infinity : 0, duration: 1.5 }}
       />
       {/* Antenna */}
       <motion.line
         x1="24" y1="4" x2="24" y2="12"
-        stroke="#6c5ce7" strokeWidth="2" strokeLinecap="round"
+        stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round"
         animate={{ y1: speaking ? 2 : 4 }}
         transition={{ repeat: speaking ? Infinity : 0, repeatType: 'reverse', duration: 0.4 }}
       />
       <motion.circle
-        cx="24" cy="3" r="2.5" fill="#a29bfe"
-        animate={{ scale: speaking ? [1, 1.4, 1] : [1, 1.15, 1], fill: speaking ? ['#a29bfe', '#6c5ce7', '#a29bfe'] : '#a29bfe' }}
+        cx="24" cy="3" r="2.5" fill="#38bdf8"
+        animate={{ scale: speaking ? [1, 1.4, 1] : [1, 1.15, 1], fill: speaking ? ['#38bdf8', '#0ea5e9', '#38bdf8'] : '#38bdf8' }}
         transition={{ repeat: Infinity, duration: speaking ? 0.6 : 2 }}
       />
       {/* Head */}
       <rect x="8" y="12" width="32" height="26" rx="8" fill="url(#robotGrad)" />
-      <rect x="8" y="12" width="32" height="26" rx="8" stroke="#6c5ce7" strokeWidth="1.5" fill="none" />
+      <rect x="8" y="12" width="32" height="26" rx="8" stroke="#0ea5e9" strokeWidth="1.5" fill="none" />
       {/* Visor / Face plate */}
       <rect x="12" y="17" width="24" height="14" rx="5" fill="#1e1e2e" opacity="0.9" />
       {/* Eye glow */}
@@ -87,20 +87,20 @@ function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = f
         transition={{ repeat: speaking ? Infinity : 0, duration: 0.4 }}
       />
       {/* Ears */}
-      <motion.rect x="4" y="20" width="5" height="8" rx="2" fill="#6c5ce7"
+      <motion.rect x="4" y="20" width="5" height="8" rx="2" fill="#0ea5e9"
         animate={speaking ? { x: [4, 3, 4] } : {}}
         transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
       />
-      <motion.rect x="39" y="20" width="5" height="8" rx="2" fill="#6c5ce7"
+      <motion.rect x="39" y="20" width="5" height="8" rx="2" fill="#0ea5e9"
         animate={speaking ? { x: [39, 40, 39] } : {}}
         transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
       />
       {/* Body hint */}
-      <rect x="16" y="38" width="16" height="6" rx="3" fill="#6c5ce7" opacity="0.5" />
+      <rect x="16" y="38" width="16" height="6" rx="3" fill="#0ea5e9" opacity="0.5" />
       <defs>
         <linearGradient id="robotGrad" x1="8" y1="12" x2="40" y2="38">
-          <stop offset="0%" stopColor="#ede9fe" />
-          <stop offset="100%" stopColor="#c4b5fd" />
+          <stop offset="0%" stopColor="#e0f2fe" />
+          <stop offset="100%" stopColor="#7dd3fc" />
         </linearGradient>
       </defs>
     </svg>
@@ -540,11 +540,11 @@ export default function FloatingAssistant({
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-purple-100 px-4 py-3 whitespace-nowrap pointer-events-none"
+                className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-sky-100 px-4 py-3 whitespace-nowrap pointer-events-none"
               >
-                <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-purple-600">Noni</span></p>
+                <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-sky-600">Noni</span></p>
                 <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tocame para empezar a configurar</p>
-                <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-purple-100 rotate-[-45deg]"></div>
+                <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-sky-100 rotate-[-45deg]"></div>
               </motion.div>
             )}
             {/* Progress badge */}
@@ -572,7 +572,7 @@ export default function FloatingAssistant({
             className="ns-assistant-panel"
           >
             {/* Header — Gradient with greeting */}
-            <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #00cec9 100%)' }}>
+            <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #0ea5e9 100%)' }}>
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-2 right-4 w-24 h-24 border border-white/30 rounded-full" />
                 <div className="absolute -bottom-4 -left-4 w-16 h-16 border border-white/20 rounded-full" />
@@ -612,12 +612,12 @@ export default function FloatingAssistant({
               <div className="px-5 pt-1 pb-2">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Progreso de configuración</span>
-                  <span className="text-[9px] font-black text-purple-600">{progress}%</span>
+                  <span className="text-[9px] font-black text-sky-600">{progress}%</span>
                 </div>
                 <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #6c5ce7, #a29bfe, #00cec9)' }}
+                    style={{ background: 'linear-gradient(90deg, #0284c7, #38bdf8, #0ea5e9)' }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1, ease: 'easeOut' }}
@@ -642,7 +642,7 @@ export default function FloatingAssistant({
                       <span className="ns-assistant-msg-badge">{currentMessage.badge}</span>
                     )}
                     <div className="flex items-start gap-2.5">
-                      <div className="w-7 h-7 shrink-0 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500">
+                      <div className="w-7 h-7 shrink-0 rounded-lg bg-sky-50 flex items-center justify-center text-sky-500">
                         {currentMessage.emoji === 'bolt' && <IconBolt size={16} />}
                         {currentMessage.emoji === 'rocket' && <IconRocket size={16} />}
                         {currentMessage.emoji === 'chart' && <IconChart size={16} />}
@@ -676,7 +676,7 @@ export default function FloatingAssistant({
                       <button
                         key={i}
                         onClick={() => setMessageIdx(i)}
-                        className={`h-1.5 rounded-full transition-all ${i === messageIdx ? 'w-4 bg-purple-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'}`}
+                        className={`h-1.5 rounded-full transition-all ${i === messageIdx ? 'w-4 bg-sky-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'}`}
                       />
                     ))}
                   </div>
