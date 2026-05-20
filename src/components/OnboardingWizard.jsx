@@ -515,8 +515,7 @@ export default function OnboardingWizard({ session, onComplete }) {
         <AnimatePresence mode="wait">
           <motion.div key={step.id} initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{duration:.25}} className="flex-1">
             <div className="mb-8">
-              <span className="text-4xl">{step.icon}</span>
-              <h2 className="text-3xl font-black text-white tracking-tight mt-4 leading-tight">{step.q}</h2>
+              <h2 className="text-3xl font-black text-white tracking-tight leading-tight">{step.q}</h2>
             </div>
             {renderInput()}
           </motion.div>
