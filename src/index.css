@@ -5,114 +5,38 @@
    Premium CSS Variables, Animations & Utilities
    ============================================================ */
 
-/* ---------- Design Tokens — Noni Celeste System (Light) ---------- */
-:root,
-:root[data-theme="light"] {
-  --ns-bg: #F4F7FB;
-  --ns-bg-strong: #E8EFF7;
-  --ns-surface: #FFFFFF;
-  --ns-surface-hover: #F1F5F9;
-  --ns-surface-alt: #F8FAFC;
-  --ns-border: #DCE3EC;
-  --ns-border-strong: #C3CCD8;
-  --ns-border-hover: #94A3B8;
-
-  --ns-text: #0B1220;
-  --ns-text-secondary: #334155;
-  --ns-text-muted: #64748B;
-  --ns-text-inverse: #FFFFFF;
-
-  --ns-primary: #0EA5E9;
-  --ns-primary-hover: #0284C7;
-  --ns-primary-dark: #0369A1;
-  --ns-primary-deep: #075985;
-  --ns-primary-light: #38BDF8;
-  --ns-primary-soft: #7DD3FC;
-  --ns-primary-bg: #E0F2FE;
-  --ns-primary-bg-strong: #BAE6FD;
-  --ns-accent: #06B6D4;
-  --ns-accent-bg: #CFFAFE;
-
-  --ns-success: #059669;
-  --ns-success-bg: #D1FAE5;
-  --ns-danger: #DC2626;
-  --ns-danger-bg: #FEE2E2;
-  --ns-warning: #D97706;
-  --ns-warning-bg: #FEF3C7;
-
-  --ns-gradient-1: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%);
-  --ns-gradient-deep: linear-gradient(135deg, #0369A1 0%, #0EA5E9 50%, #38BDF8 100%);
-  --ns-gradient-hero: linear-gradient(135deg, #0B1220 0%, #0F172A 60%, #0B2D4F 100%);
-  --ns-gradient-card: linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(248,250,252,0.88) 100%);
-
-  --ns-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --ns-shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
-  --ns-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.07), 0 2px 6px rgba(15, 23, 42, 0.04);
-  --ns-shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.10), 0 6px 16px rgba(15, 23, 42, 0.05);
-  --ns-shadow-glow: 0 0 0 6px rgba(14, 165, 233, 0.12), 0 12px 32px rgba(14, 165, 233, 0.25);
-  --ns-shadow-focus: 0 0 0 4px rgba(14, 165, 233, 0.16);
-
-  --ns-radius-sm: 8px;
-  --ns-radius-md: 12px;
-  --ns-radius-lg: 18px;
-  --ns-radius-xl: 24px;
-  --ns-radius-2xl: 32px;
-
-  --ns-font-sans: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
-  --ns-font-display: 'Fraunces', 'Inter Tight', Georgia, serif;
-  --ns-font-serif: 'Fraunces', Georgia, serif;
-  --ns-font-mono: 'JetBrains Mono', ui-monospace, monospace;
-
-  color-scheme: light;
-}
-
-/* ---------- Dark mode tokens ---------- */
-:root[data-theme="dark"] {
-  --ns-bg: #04070D;
-  --ns-bg-strong: #0A101C;
-  --ns-surface: #0E1626;
-  --ns-surface-hover: #131E33;
-  --ns-surface-alt: #0A111E;
-  --ns-border: #1E2A40;
-  --ns-border-strong: #2A3A55;
-  --ns-border-hover: #475569;
-
-  --ns-text: #F1F5F9;
-  --ns-text-secondary: #CBD5E1;
-  --ns-text-muted: #94A3B8;
-  --ns-text-inverse: #0F172A;
-
-  --ns-primary: #38BDF8;
-  --ns-primary-hover: #7DD3FC;
-  --ns-primary-dark: #0EA5E9;
-  --ns-primary-deep: #0284C7;
-  --ns-primary-light: #7DD3FC;
-  --ns-primary-soft: #BAE6FD;
-  --ns-primary-bg: rgba(14, 165, 233, 0.12);
-  --ns-primary-bg-strong: rgba(14, 165, 233, 0.22);
-  --ns-accent: #22D3EE;
-  --ns-accent-bg: rgba(34, 211, 238, 0.12);
-
-  --ns-success: #34D399;
-  --ns-success-bg: rgba(16, 185, 129, 0.14);
-  --ns-danger: #F87171;
-  --ns-danger-bg: rgba(220, 38, 38, 0.14);
-  --ns-warning: #FBBF24;
-  --ns-warning-bg: rgba(217, 119, 6, 0.14);
-
-  --ns-gradient-1: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%);
-  --ns-gradient-deep: linear-gradient(135deg, #075985 0%, #0EA5E9 50%, #38BDF8 100%);
-  --ns-gradient-hero: linear-gradient(135deg, #020617 0%, #0B1B36 60%, #0E2A52 100%);
-  --ns-gradient-card: linear-gradient(180deg, rgba(15,22,38,0.95) 0%, rgba(10,17,30,0.85) 100%);
-
-  --ns-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --ns-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
-  --ns-shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
-  --ns-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55), 0 8px 20px rgba(0, 0, 0, 0.35);
-  --ns-shadow-glow: 0 0 0 6px rgba(56, 189, 248, 0.18), 0 12px 32px rgba(14, 165, 233, 0.4);
-  --ns-shadow-focus: 0 0 0 4px rgba(56, 189, 248, 0.25);
-
-  color-scheme: dark;
+/* ---------- Design Tokens ---------- */
+:root {
+  --ns-bg: #f4f2ff;
+  --ns-surface: #ffffff;
+  --ns-surface-hover: #faf9ff;
+  --ns-border: #e8e5f3;
+  --ns-border-hover: #d4d0e6;
+  --ns-text: #1e1b32;
+  --ns-text-secondary: #6b6589;
+  --ns-text-muted: #9b95b3;
+  --ns-primary: #6c5ce7;
+  --ns-primary-light: #a29bfe;
+  --ns-primary-dark: #4834d4;
+  --ns-primary-bg: #ede9ff;
+  --ns-accent: #00cec9;
+  --ns-accent-bg: #e0fffe;
+  --ns-success: #00b894;
+  --ns-success-bg: #e0fff8;
+  --ns-danger: #ff6b6b;
+  --ns-danger-bg: #ffe8e8;
+  --ns-warning: #fdcb6e;
+  --ns-gradient-1: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #00cec9 100%);
+  --ns-gradient-hero: linear-gradient(135deg, #0f0a1e 0%, #1a1040 40%, #2d1b69 100%);
+  --ns-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  --ns-shadow-sm: 0 2px 8px rgba(108, 92, 231, 0.06);
+  --ns-shadow-md: 0 8px 32px rgba(108, 92, 231, 0.1);
+  --ns-shadow-lg: 0 24px 64px rgba(108, 92, 231, 0.14);
+  --ns-shadow-glow: 0 0 40px rgba(108, 92, 231, 0.2);
+  --ns-radius-sm: 12px;
+  --ns-radius-md: 20px;
+  --ns-radius-lg: 28px;
+  --ns-radius-xl: 36px;
 }
 
 /* ---------- Global Reset & Base ---------- */
@@ -129,17 +53,15 @@ html {
 }
 
 body {
-  font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--ns-bg);
   color: var(--ns-text);
-  font-feature-settings: 'ss01', 'cv11', 'liga';
   margin: 0;
   min-height: 100vh;
   /* Modern viewport unit for mobile */
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
-  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 #root {
@@ -270,11 +192,11 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.15);
   }
 
   50% {
-    box-shadow: 0 0 40px rgba(14, 165, 233, 0.35);
+    box-shadow: 0 0 40px rgba(108, 92, 231, 0.35);
   }
 }
 
@@ -518,10 +440,10 @@ body {
 
 /* Glass Card */
 .ns-glass {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .ns-glass-dark {
@@ -622,7 +544,7 @@ body {
 .ns-input:focus {
   border-color: var(--ns-primary);
   background: white;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
 }
 
 /* Premium Button */
@@ -644,9 +566,9 @@ body {
 }
 
 .ns-btn-primary:hover {
-  background: var(--ns-primary-hover);
+  background: var(--ns-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 12px 32px rgba(108, 92, 231, 0.3);
 }
 
 .ns-btn-primary:active {
@@ -750,7 +672,7 @@ body {
 .ns-tab.active {
   background: var(--ns-primary);
   color: white;
-  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
 }
 
 /* Toggle Switch */
@@ -821,10 +743,10 @@ body {
   left: 0;
   right: 0;
   z-index: 80;
-  background: color-mix(in srgb, var(--ns-surface) 92%, transparent);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-top: 1px solid var(--ns-border);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding: 4px 2px;
   padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   display: flex;
@@ -846,7 +768,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--ns-text-muted);
+  color: #94a3b8;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -863,7 +785,7 @@ body {
 }
 
 .ns-bottom-nav-item.active {
-  color: var(--ns-primary);
+  color: #0f172a;
 }
 
 .ns-bottom-nav-item.active svg {
@@ -898,15 +820,15 @@ body {
 
 /* Settings section card */
 .ns-settings-card {
-  background: var(--ns-surface);
-  border: 1px solid var(--ns-border);
+  background: white;
+  border: 1px solid #e2e8f0;
   border-radius: 24px;
   overflow: hidden;
 }
 
 .ns-settings-card-header {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--ns-border);
+  border-bottom: 1px solid #f1f5f9;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -917,7 +839,7 @@ body {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: var(--ns-text);
+  color: #0f172a;
 }
 
 .ns-settings-row {
@@ -926,7 +848,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid var(--ns-border);
+  border-bottom: 1px solid #f8fafc;
   transition: background 0.2s;
 }
 
@@ -935,7 +857,7 @@ body {
 }
 
 .ns-settings-row:hover {
-  background: var(--ns-surface-hover);
+  background: #f8fafc;
 }
 
 /* Client list card */
@@ -1014,7 +936,7 @@ body {
 
 /* Animated gradient text */
 .ns-hero-gradient {
-  background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 30%, #06B6D4 60%, #0EA5E9 100%);
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 30%, #00cec9 60%, #6c5ce7 100%);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1070,7 +992,7 @@ body {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #0EA5E9, #38BDF8, #06B6D4);
+  background: linear-gradient(90deg, #6c5ce7, #a29bfe, #00cec9);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1281,7 +1203,7 @@ body {
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ns-login-input::placeholder {
-  color: rgba(186, 230, 253, 0.25);
+  color: rgba(186, 230, 253, 0.55);
 }
 .ns-login-input:focus {
   border-color: #38bdf8;
@@ -1684,142 +1606,4 @@ body {
 /* Mobile content area */
 .ns-mobile-content-area {
   min-height: 50vh;
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   NONI · NEW PREMIUM UTILITIES (theme-aware)
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Themed surfaces */
-.ns-bg-app { background-color: var(--ns-bg); color: var(--ns-text); }
-.ns-card {
-  background: var(--ns-surface);
-  border: 1px solid var(--ns-border);
-  border-radius: var(--ns-radius-lg);
-  box-shadow: var(--ns-shadow-sm);
-}
-.ns-card-soft {
-  background: var(--ns-surface);
-  border: 1px solid var(--ns-border);
-  border-radius: var(--ns-radius-xl);
-  box-shadow: var(--ns-shadow-md);
-}
-
-/* Brand button (celeste filled) */
-.ns-btn-celeste {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 22px;
-  background: var(--ns-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  border: none;
-  border-radius: var(--ns-radius-md);
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 8px 22px rgba(14, 165, 233, 0.28);
-}
-.ns-btn-celeste:hover {
-  background: var(--ns-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(14, 165, 233, 0.35);
-}
-.ns-btn-celeste:active { transform: translateY(0); }
-.ns-btn-celeste:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none; }
-
-/* Outline variant */
-.ns-btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 18px;
-  background: transparent;
-  color: var(--ns-text);
-  font-weight: 600;
-  font-size: 13px;
-  border: 1px solid var(--ns-border-strong);
-  border-radius: var(--ns-radius-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.ns-btn-outline:hover {
-  border-color: var(--ns-primary);
-  color: var(--ns-primary);
-  background: var(--ns-primary-bg);
-}
-
-/* Input theme-aware */
-.ns-input-clean {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--ns-surface);
-  border: 1.5px solid var(--ns-border);
-  border-radius: var(--ns-radius-md);
-  color: var(--ns-text);
-  font-size: 14px;
-  font-weight: 500;
-  outline: none;
-  transition: all 0.2s ease;
-}
-.ns-input-clean::placeholder { color: var(--ns-text-muted); }
-.ns-input-clean:focus {
-  border-color: var(--ns-primary);
-  box-shadow: var(--ns-shadow-focus);
-}
-
-/* Brand text accent */
-.ns-text-brand { color: var(--ns-primary); }
-.ns-text-on-brand { color: #fff; }
-.ns-bg-brand { background-color: var(--ns-primary); color: #fff; }
-.ns-bg-brand-soft { background-color: var(--ns-primary-bg); color: var(--ns-primary-deep); }
-
-/* Premium label */
-.ns-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--ns-font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ns-primary);
-}
-
-/* Glass on dark hero */
-.ns-hero-glass {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-}
-
-/* Auto-color override for old hardcoded #1A1814/#161412/#F5F2EA backgrounds in dark mode */
-:root[data-theme="dark"] .ns-auto-invert-bg { background-color: var(--ns-bg) !important; }
-:root[data-theme="dark"] .ns-auto-invert-card { background-color: var(--ns-surface) !important; color: var(--ns-text) !important; }
-
-/* Improved scrollbar */
-:root[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--ns-border-strong); }
-:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: var(--ns-primary); }
-
-/* Selection color */
-:root[data-theme="dark"] ::selection { background: var(--ns-primary); color: #04070D; }
-
-/* Loading bar keyframe */
-@keyframes loadingBar {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
-}
-
-/* Slow ping for subtle UI accents */
-@keyframes ns-pulse-soft {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.06); }
-}
-.ns-pulse-soft { animation: ns-pulse-soft 2.2s ease-in-out infinite; }
+}

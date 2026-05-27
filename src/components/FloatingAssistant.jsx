@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { IconRobot, IconCheckCircle, IconErrorCircle, IconCelebrate, IconBolt, IconChart, IconCalendar, IconPalette, IconRocket } from './NoniIcons'
+import { IconRobot, IconCheckCircle, IconBolt, IconChart, IconCalendar, IconPalette, IconRocket, IconClipboard } from './NoniIcons'
 
 const ASSISTANT_KEY = 'ns_assistant_state_v2'
 const ROBOT_NAME = 'Noni'
@@ -17,11 +16,10 @@ function TypingIndicator() {
   return (
     <div className="flex items-center gap-1 px-3 py-2">
       {[0, 1, 2].map(i => (
-        <motion.div
+        <div
           key={i}
-          className="w-1.5 h-1.5 bg-sky-400 rounded-full"
-          animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
-          transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
+          className="w-1.5 h-1.5 bg-sky-400 rounded-full ns-typing-dot"
+          style={{ animationDelay: `${i * 0.15}s` }}
         />
       ))}
     </div>
@@ -38,23 +36,10 @@ function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = f
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Glow behind head */}
-      <motion.circle
-        cx="24" cy="25" r="18" fill="#0ea5e9" opacity="0.08"
-        animate={{ scale: speaking ? [1, 1.1, 1] : 1 }}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 1.5 }}
-      />
+      <circle cx="24" cy="25" r="18" fill="#0ea5e9" opacity="0.08" className={speaking ? 'ns-robot-glow' : ''} />
       {/* Antenna */}
-      <motion.line
-        x1="24" y1="4" x2="24" y2="12"
-        stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round"
-        animate={{ y1: speaking ? 2 : 4 }}
-        transition={{ repeat: speaking ? Infinity : 0, repeatType: 'reverse', duration: 0.4 }}
-      />
-      <motion.circle
-        cx="24" cy="3" r="2.5" fill="#38bdf8"
-        animate={{ scale: speaking ? [1, 1.4, 1] : [1, 1.15, 1], fill: speaking ? ['#38bdf8', '#0ea5e9', '#38bdf8'] : '#38bdf8' }}
-        transition={{ repeat: Infinity, duration: speaking ? 0.6 : 2 }}
-      />
+      <line x1="24" y1="4" x2="24" y2="12" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="24" cy="3" r="2.5" fill="#38bdf8" className="ns-robot-antenna" />
       {/* Head */}
       <rect x="8" y="12" width="32" height="26" rx="8" fill="url(#robotGrad)" />
       <rect x="8" y="12" width="32" height="26" rx="8" stroke="#0ea5e9" strokeWidth="1.5" fill="none" />
@@ -64,37 +49,16 @@ function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = f
       <circle cx="19" cy="24" r="4" fill="#00cec9" opacity="0.15" />
       <circle cx="29" cy="24" r="4" fill="#00cec9" opacity="0.15" />
       {/* Eyes */}
-      <motion.ellipse
-        cx="19" cy="24" rx="2.5"
-        fill="#00cec9"
-        animate={{ ry: getEyeRy() }}
-        transition={{ duration: 0.1 }}
-      />
-      <motion.ellipse
-        cx="29" cy="24" rx="2.5"
-        fill="#00cec9"
-        animate={{ ry: getEyeRy(), scale: speaking ? [1, 1.15, 1] : 1 }}
-        transition={{ duration: 0.1, scale: { repeat: speaking ? Infinity : 0, duration: 0.6 } }}
-      />
+      <ellipse cx="19" cy="24" rx="2.5" ry={getEyeRy()} fill="#00cec9" style={{ transition: 'ry 0.1s' }} />
+      <ellipse cx="29" cy="24" rx="2.5" ry={getEyeRy()} fill="#00cec9" style={{ transition: 'ry 0.1s' }} />
       {/* Mouth */}
-      <motion.path
+      <path
         d={speaking ? "M20 28 Q24 31 28 28" : mood === 'happy' ? "M20 28 Q24 30.5 28 28" : "M20 28 Q24 29 28 28"}
-        stroke="#00cec9"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        fill="none"
-        animate={speaking ? { d: ["M20 28 Q24 32 28 28", "M20 28 Q24 26 28 28", "M20 28 Q24 32 28 28"] } : {}}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 0.4 }}
+        stroke="#00cec9" strokeWidth="1.5" strokeLinecap="round" fill="none"
       />
       {/* Ears */}
-      <motion.rect x="4" y="20" width="5" height="8" rx="2" fill="#0ea5e9"
-        animate={speaking ? { x: [4, 3, 4] } : {}}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
-      />
-      <motion.rect x="39" y="20" width="5" height="8" rx="2" fill="#0ea5e9"
-        animate={speaking ? { x: [39, 40, 39] } : {}}
-        transition={{ repeat: speaking ? Infinity : 0, duration: 0.5 }}
-      />
+      <rect x="4" y="20" width="5" height="8" rx="2" fill="#0ea5e9" />
+      <rect x="39" y="20" width="5" height="8" rx="2" fill="#0ea5e9" />
       {/* Body hint */}
       <rect x="16" y="38" width="16" height="6" rx="3" fill="#0ea5e9" opacity="0.5" />
       <defs>
@@ -395,22 +359,6 @@ export default function FloatingAssistant({
     }
   }, [open, messageIdx, tab])
 
-  // Auto-open the assistant for new users when setup is not complete
-  useEffect(() => {
-    try {
-      const seen = localStorage.getItem('noni_assistant_first_seen')
-      const setupIncomplete = !setupData.hasServicios || !setupData.hasEmpleados || !setupData.hasHorarios
-      if (!seen && setupIncomplete && !dismissed) {
-        const timer = setTimeout(() => {
-          setOpen(true)
-          setShowBubble(false)
-          localStorage.setItem('noni_assistant_first_seen', '1')
-        }, 900)
-        return () => clearTimeout(timer)
-      }
-    } catch { /* noop */ }
-  }, [setupData.hasServicios, setupData.hasEmpleados, setupData.hasHorarios, dismissed])
-
   // Auto-show pulse for new users
   useEffect(() => {
     if (!setupData.hasServicios || !setupData.hasEmpleados || !setupData.hasHorarios) {
@@ -478,17 +426,15 @@ export default function FloatingAssistant({
 
   if (dismissed) {
     return (
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="ns-assistant-reshow"
+      <button
+        className="ns-assistant-reshow ns-fade-up"
         onClick={() => { setDismissed(false); setOpen(true); localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed: false, minimized: false })) }}
         title="Mostrar a Noni"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </motion.button>
+      </button>
     )
   }
 
@@ -534,218 +480,190 @@ export default function FloatingAssistant({
       )}
 
       {/* ── Floating Button ───────────────────────────────────────── */}
-      <AnimatePresence>
-        {!open && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            onClick={() => { setOpen(true); setShowPulse(false); setShowBubble(false) }}
-            className="ns-assistant-fab"
-            title={`${ROBOT_NAME} — Tu asistente`}
-          >
-            {/* Pulse ring */}
-            {showPulse && !allDone && (
-              <span className="ns-assistant-pulse" />
-            )}
-            <RobotAvatar size={36} speaking={false} mood={mood} blinking={blinking} />
-            {/* Speech bubble tooltip */}
-            {showBubble && (
-              <motion.div
-                initial={{ opacity: 0, x: 10, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 10 }}
-                className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-sky-100 px-4 py-3 whitespace-nowrap pointer-events-none"
-              >
-                <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-sky-600">Noni</span></p>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tocame para empezar a configurar</p>
-                <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-sky-100 rotate-[-45deg]"></div>
-              </motion.div>
-            )}
-            {/* Progress badge */}
-            {!allDone && (
-              <span className="ns-assistant-badge">
-                {completedCount}/{totalSteps}
-              </span>
-            )}
-            {allDone && (
-              <span className="ns-assistant-badge ns-assistant-badge--done">✓</span>
-            )}
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {!open && (
+        <button
+          onClick={() => { setOpen(true); setShowPulse(false); setShowBubble(false) }}
+          className="ns-assistant-fab ns-scale-in"
+          title={`${ROBOT_NAME} — Tu asistente`}
+        >
+          {/* Pulse ring */}
+          {showPulse && !allDone && (
+            <span className="ns-assistant-pulse" />
+          )}
+          <RobotAvatar size={36} speaking={false} mood={mood} blinking={blinking} />
+          {/* Speech bubble tooltip */}
+          {showBubble && (
+            <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-sky-100 px-4 py-3 whitespace-nowrap pointer-events-none ns-fade-up">
+              <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-sky-600">Noni</span></p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tocame para empezar a configurar</p>
+              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-sky-100 rotate-[-45deg]"></div>
+            </div>
+          )}
+          {/* Progress badge */}
+          {!allDone && (
+            <span className="ns-assistant-badge">
+              {completedCount}/{totalSteps}
+            </span>
+          )}
+          {allDone && (
+            <span className="ns-assistant-badge ns-assistant-badge--done">✓</span>
+          )}
+        </button>
+      )}
 
       {/* ── Panel ─────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            ref={panelRef}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="ns-assistant-panel"
-          >
-            {/* Header — Gradient with greeting */}
-            <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #0ea5e9 100%)' }}>
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-2 right-4 w-24 h-24 border border-white/30 rounded-full" />
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 border border-white/20 rounded-full" />
+      {open && (
+        <div
+          ref={panelRef}
+          className="ns-assistant-panel ns-scale-in"
+        >
+          {/* Header — Gradient with greeting */}
+          <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #0ea5e9 100%)' }}>
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-2 right-4 w-24 h-24 border border-white/30 rounded-full" />
+              <div className="absolute -bottom-4 -left-4 w-16 h-16 border border-white/20 rounded-full" />
+            </div>
+            <div className="relative px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                  <RobotAvatar size={28} speaking={speaking} mood="happy" blinking={blinking} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-white tracking-tight">{ROBOT_NAME}</h4>
+                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">
+                    {speaking ? 'Escribiendo...' : 'Tu asistente'}
+                  </p>
+                </div>
               </div>
-              <div className="relative px-5 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                    <RobotAvatar size={28} speaking={speaking} mood="happy" blinking={blinking} />
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
+                  title="Minimizar"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {/* Greeting bar */}
+            <div className="px-5 pb-3">
+              <p className="text-[11px] text-white/80 font-medium">{getGreeting(negocioNombre)}</p>
+            </div>
+          </div>
+
+          {/* Progress Bar (only show if not all done) */}
+          {!allDone && (
+            <div className="px-5 pt-1 pb-2">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Progreso de configuración</span>
+                <span className="text-[9px] font-black text-sky-600">{progress}%</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-1000 ease-out"
+                  style={{ background: 'linear-gradient(90deg, #0284c7, #38bdf8, #0ea5e9)', width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Message — Chat bubble style */}
+          <div className="ns-assistant-body">
+            {isTyping && <TypingIndicator />}
+            {!isTyping && currentMessage && (
+              <div key={currentMessage.id} className="ns-assistant-message ns-fade-up">
+                {currentMessage.badge && (
+                  <span className="ns-assistant-msg-badge">{currentMessage.badge}</span>
+                )}
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 shrink-0 rounded-lg bg-sky-50 flex items-center justify-center text-sky-500">
+                    {currentMessage.emoji === 'bolt' && <IconBolt size={16} />}
+                    {currentMessage.emoji === 'rocket' && <IconRocket size={16} />}
+                    {currentMessage.emoji === 'chart' && <IconChart size={16} />}
+                    {currentMessage.emoji === 'calendar' && <IconCalendar size={16} />}
+                    {currentMessage.emoji === 'palette' && <IconPalette size={16} />}
+                    {currentMessage.emoji === 'robot' && <IconRobot size={16} />}
+                    {currentMessage.emoji === 'clipboard' && <IconClipboard size={16} />}
                   </div>
-                  <div>
-                    <h4 className="text-sm font-black text-white tracking-tight">{ROBOT_NAME}</h4>
-                    <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">
-                      {speaking ? 'Escribiendo...' : 'Tu asistente'}
-                    </p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 leading-tight">{currentMessage.title}</p>
+                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">{currentMessage.text}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                {currentMessage.cta && (
                   <button
-                    onClick={() => setOpen(false)}
-                    className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
-                    title="Minimizar"
+                    onClick={() => handleCta(currentMessage.cta)}
+                    className="ns-assistant-cta mt-3"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    {currentMessage.cta.label}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Message navigation */}
+            {messages.length > 1 && (
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex gap-1">
+                  {messages.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setMessageIdx(i)}
+                      className={`h-1.5 rounded-full transition-all ${i === messageIdx ? 'w-4 bg-sky-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'}`}
+                    />
+                  ))}
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setMessageIdx(i => Math.max(0, i - 1))}
+                    disabled={messageIdx === 0}
+                    className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-all"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  <button
+                    onClick={() => setMessageIdx(i => Math.min(messages.length - 1, i + 1))}
+                    disabled={messageIdx === messages.length - 1}
+                    className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-all"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
                 </div>
               </div>
-              {/* Greeting bar */}
-              <div className="px-5 pb-3">
-                <p className="text-[11px] text-white/80 font-medium">{getGreeting(negocioNombre)}</p>
-              </div>
-            </div>
-
-            {/* Progress Bar (only show if not all done) */}
-            {!allDone && (
-              <div className="px-5 pt-1 pb-2">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Progreso de configuración</span>
-                  <span className="text-[9px] font-black text-sky-600">{progress}%</span>
-                </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #0284c7, #38bdf8, #0ea5e9)' }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
             )}
+          </div>
 
-            {/* Message — Chat bubble style */}
-            <div className="ns-assistant-body">
-              {isTyping && <TypingIndicator />}
-              {!isTyping && currentMessage && (
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentMessage.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    className="ns-assistant-message"
-                  >
-                    {currentMessage.badge && (
-                      <span className="ns-assistant-msg-badge">{currentMessage.badge}</span>
-                    )}
-                    <div className="flex items-start gap-2.5">
-                      <div className="w-7 h-7 shrink-0 rounded-lg bg-sky-50 flex items-center justify-center text-sky-500">
-                        {currentMessage.emoji === 'bolt' && <IconBolt size={16} />}
-                        {currentMessage.emoji === 'rocket' && <IconRocket size={16} />}
-                        {currentMessage.emoji === 'chart' && <IconChart size={16} />}
-                        {currentMessage.emoji === 'calendar' && <IconCalendar size={16} />}
-                        {currentMessage.emoji === 'palette' && <IconPalette size={16} />}
-                        {currentMessage.emoji === 'robot' && <IconRobot size={16} />}
-                        {currentMessage.emoji === 'clipboard' && <IconRobot size={16} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-900 leading-tight">{currentMessage.title}</p>
-                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">{currentMessage.text}</p>
-                      </div>
-                    </div>
-                    {currentMessage.cta && (
-                      <button
-                        onClick={() => handleCta(currentMessage.cta)}
-                        className="ns-assistant-cta mt-3"
-                      >
-                        {currentMessage.cta.label}
-                      </button>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              )}
+          {/* Quick Tip */}
+          <div className="ns-assistant-tip">
+            <p className="text-[10px] text-slate-400 font-medium leading-relaxed">{quickTip}</p>
+          </div>
 
-              {/* Message navigation */}
-              {messages.length > 1 && (
-                <div className="flex items-center justify-between mt-3">
-                  <div className="flex gap-1">
-                    {messages.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setMessageIdx(i)}
-                        className={`h-1.5 rounded-full transition-all ${i === messageIdx ? 'w-4 bg-sky-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'}`}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setMessageIdx(i => Math.max(0, i - 1))}
-                      disabled={messageIdx === 0}
-                      className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-all"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </button>
-                    <button
-                      onClick={() => setMessageIdx(i => Math.min(messages.length - 1, i + 1))}
-                      disabled={messageIdx === messages.length - 1}
-                      className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-all"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Tip */}
-            <div className="ns-assistant-tip">
-              <p className="text-[10px] text-slate-400 font-medium leading-relaxed">{quickTip}</p>
-            </div>
-
-            {/* Footer Actions */}
-            <div className="ns-assistant-footer">
-              <button
-                onClick={() => { onStartTour?.(); setOpen(false) }}
-                className="ns-assistant-footer-btn"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Tour guiado
-              </button>
-              <button
-                onClick={() => { setDismissed(true); setOpen(false) }}
-                className="ns-assistant-footer-btn ns-assistant-footer-btn--muted"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Ocultar
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Footer Actions */}
+          <div className="ns-assistant-footer">
+            <button
+              onClick={() => { onStartTour?.(); setOpen(false) }}
+              className="ns-assistant-footer-btn"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Tour guiado
+            </button>
+            <button
+              onClick={() => { setDismissed(true); setOpen(false) }}
+              className="ns-assistant-footer-btn ns-assistant-footer-btn--muted"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Ocultar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

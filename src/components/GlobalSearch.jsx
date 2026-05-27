@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 /**
- * GLOBAL SEARCH (Cmd+K) — Omnibar de búsqueda rápida para el Dashboard.
- * Busca en: clientes, servicios, empleados, turnos, acciones.
+ * GLOBAL SEARCH (Cmd+K) — Omnibar de búsqueda con datos reales.
+ * Busca en: clientes, servicios, empleados, turnos recientes + acciones de navegación.
  */
-export default function GlobalSearch({ negocio, session, onNavigate, onClose }) {
+export default function GlobalSearch({ negocio, session, onNavigate, onClose, clientes = [], servicios = [], empleados = [] }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [selectedIdx, setSelectedIdx] = useState(0)
@@ -13,6 +13,13 @@ export default function GlobalSearch({ negocio, session, onNavigate, onClose }) 
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
+
+  // Cerrar con Escape o click fuera
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
 
   // Acciones estáticas siempre disponibles
   const ACCIONES = [
@@ -35,13 +42,76 @@ export default function GlobalSearch({ negocio, session, onNavigate, onClose }) 
       return
     }
 
-    const q = query.toLowerCase()
-    const filtered = ACCIONES.filter(a =>
+    const q = query.toLowerCase().trim()
+    const matched = []
+
+    // Buscar en clientes reales
+    if (clientes.length > 0) {
+      const clienteResults = clientes
+        .filter(c =>
+          c.nombre?.toLowerCase().includes(q) ||
+          c.telefono?.toLowerCase().includes(q) ||
+          c.email?.toLowerCase().includes(q)
+        )
+        .slice(0, 4)
+        .map(c => ({
+          type: 'cliente',
+          label: c.nombre,
+          desc: `${c.telefono || 'Sin teléfono'} · ${c.visitas} visitas · ${c.frecuencia}`,
+          icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+          tab: 'clientes',
+          data: c,
+        }))
+      matched.push(...clienteResults)
+    }
+
+    // Buscar en servicios reales
+    if (servicios.length > 0) {
+      const servicioResults = servicios
+        .filter(s =>
+          s.nombre?.toLowerCase().includes(q) ||
+          s.descripcion?.toLowerCase().includes(q)
+        )
+        .slice(0, 3)
+        .map(s => ({
+          type: 'servicio',
+          label: s.nombre,
+          desc: `$${s.precio?.toLocaleString() || 0} · ${s.duracion_minutos || 0} min`,
+          icon: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
+          tab: 'servicios',
+          data: s,
+        }))
+      matched.push(...servicioResults)
+    }
+
+    // Buscar en empleados reales
+    if (empleados.length > 0) {
+      const empResults = empleados
+        .filter(e =>
+          e.nombre?.toLowerCase().includes(q) ||
+          e.especialidad?.toLowerCase().includes(q)
+        )
+        .slice(0, 3)
+        .map(e => ({
+          type: 'empleado',
+          label: e.nombre,
+          desc: e.especialidad || 'Staff',
+          icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+          tab: 'equipo',
+          data: e,
+        }))
+      matched.push(...empResults)
+    }
+
+    // Buscar en acciones
+    const accionResults = ACCIONES.filter(a =>
       a.label.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q)
-    )
-    setResults(filtered.slice(0, 8))
+    ).slice(0, 4)
+    matched.push(...accionResults)
+
+    setResults(matched.slice(0, 10))
     setSelectedIdx(0)
-  }, [query])
+  }, [query, clientes, servicios, empleados])
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
@@ -75,8 +145,26 @@ export default function GlobalSearch({ negocio, session, onNavigate, onClose }) 
     onClose()
   }
 
+  // Agrupar resultados por tipo
+  const typeLabels = {
+    cliente: '👤 Clientes',
+    servicio: '✂️ Servicios',
+    empleado: '👥 Equipo',
+    accion: '⚡ Acciones',
+  }
+
+  const typeBadgeColors = {
+    cliente: 'bg-blue-100 text-blue-600',
+    servicio: 'bg-purple-100 text-purple-600',
+    empleado: 'bg-emerald-100 text-emerald-600',
+    accion: 'bg-slate-100 text-slate-600',
+  }
+
+  // Detectar cambio de grupo para separadores
+  let lastType = null
+
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-[15vh] bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-[12vh] bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
       <div
         className="w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 slide-in-from-top-4 duration-300"
         onClick={(e) => e.stopPropagation()}
@@ -89,7 +177,7 @@ export default function GlobalSearch({ negocio, session, onNavigate, onClose }) 
           <input
             ref={inputRef}
             type="text"
-            placeholder="Buscar acción, cliente, servicio..."
+            placeholder="Buscar cliente, servicio, empleado o acción..."
             className="flex-1 outline-none text-sm font-medium text-slate-900 placeholder:text-slate-400"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -99,37 +187,58 @@ export default function GlobalSearch({ negocio, session, onNavigate, onClose }) 
         </div>
 
         {/* Results */}
-        <div className="max-h-[50vh] overflow-y-auto py-2">
+        <div className="max-h-[50vh] overflow-y-auto py-1">
           {results.length === 0 ? (
             <div className="px-5 py-8 text-center">
+              <svg className="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <p className="text-sm font-medium text-slate-400">Sin resultados para "{query}"</p>
+              <p className="text-[10px] text-slate-300 mt-1">Probá con otro término de búsqueda</p>
             </div>
           ) : (
-            results.map((item, idx) => (
-              <button
-                key={idx}
-                className={`w-full text-left px-5 py-3 flex items-center gap-3 transition-colors ${
-                  idx === selectedIdx ? 'bg-slate-50' : 'hover:bg-slate-50/50'
-                }`}
-                onClick={() => handleSelect(item)}
-                onMouseEnter={() => setSelectedIdx(idx)}
-              >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                  idx === selectedIdx ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'
-                } transition-colors`}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d={item.icon} strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+            results.map((item, idx) => {
+              const showSeparator = item.type !== lastType
+              lastType = item.type
+              return (
+                <div key={idx}>
+                  {showSeparator && query.trim() && (
+                    <div className="px-5 pt-3 pb-1">
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${typeBadgeColors[item.type]?.split(' ')[1] || 'text-slate-400'}`}>
+                        {typeLabels[item.type] || item.type}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    className={`w-full text-left px-5 py-2.5 flex items-center gap-3 transition-colors ${
+                      idx === selectedIdx ? 'bg-slate-50' : 'hover:bg-slate-50/50'
+                    }`}
+                    onClick={() => handleSelect(item)}
+                    onMouseEnter={() => setSelectedIdx(idx)}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      idx === selectedIdx ? 'bg-slate-900 text-white' : `${typeBadgeColors[item.type]?.split(' ')[0] || 'bg-slate-100'} ${typeBadgeColors[item.type]?.split(' ')[1] || 'text-slate-500'}`
+                    } transition-colors`}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d={item.icon} strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-900 truncate">{item.label}</p>
+                      <p className="text-[10px] font-medium text-slate-400 truncate">{item.desc}</p>
+                    </div>
+                    {item.type !== 'accion' && (
+                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest shrink-0 ${typeBadgeColors[item.type] || 'bg-slate-100 text-slate-400'}`}>
+                        {item.type}
+                      </span>
+                    )}
+                    {idx === selectedIdx && (
+                      <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-[8px] font-bold text-slate-400 uppercase tracking-widest shrink-0">ENTER</kbd>
+                    )}
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate">{item.label}</p>
-                  <p className="text-[10px] font-medium text-slate-400 truncate">{item.desc}</p>
-                </div>
-                {idx === selectedIdx && (
-                  <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-[8px] font-bold text-slate-400 uppercase tracking-widest shrink-0">ENTER</kbd>
-                )}
-              </button>
-            ))
+              )
+            })
           )}
         </div>
 
@@ -143,7 +252,9 @@ export default function GlobalSearch({ negocio, session, onNavigate, onClose }) 
               <kbd className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400">↵</kbd> Seleccionar
             </span>
           </div>
-          <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Non Sistemas</span>
+          <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+            {results.length} resultado{results.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
     </div>
