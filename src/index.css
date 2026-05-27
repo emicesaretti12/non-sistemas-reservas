@@ -5,38 +5,41 @@
    Premium CSS Variables, Animations & Utilities
    ============================================================ */
 
-/* ---------- Design Tokens ---------- */
+/* ---------- Design Tokens — Editorial Industrial ---------- */
 :root {
-  --ns-bg: #f4f2ff;
-  --ns-surface: #ffffff;
-  --ns-surface-hover: #faf9ff;
-  --ns-border: #e8e5f3;
-  --ns-border-hover: #d4d0e6;
-  --ns-text: #1e1b32;
-  --ns-text-secondary: #6b6589;
-  --ns-text-muted: #9b95b3;
-  --ns-primary: #6c5ce7;
-  --ns-primary-light: #a29bfe;
-  --ns-primary-dark: #4834d4;
-  --ns-primary-bg: #ede9ff;
-  --ns-accent: #00cec9;
-  --ns-accent-bg: #e0fffe;
-  --ns-success: #00b894;
-  --ns-success-bg: #e0fff8;
-  --ns-danger: #ff6b6b;
-  --ns-danger-bg: #ffe8e8;
-  --ns-warning: #fdcb6e;
-  --ns-gradient-1: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #00cec9 100%);
-  --ns-gradient-hero: linear-gradient(135deg, #0f0a1e 0%, #1a1040 40%, #2d1b69 100%);
-  --ns-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-  --ns-shadow-sm: 0 2px 8px rgba(108, 92, 231, 0.06);
-  --ns-shadow-md: 0 8px 32px rgba(108, 92, 231, 0.1);
-  --ns-shadow-lg: 0 24px 64px rgba(108, 92, 231, 0.14);
-  --ns-shadow-glow: 0 0 40px rgba(108, 92, 231, 0.2);
-  --ns-radius-sm: 12px;
-  --ns-radius-md: 20px;
-  --ns-radius-lg: 28px;
-  --ns-radius-xl: 36px;
+  --ns-bg: #F5F2EA;
+  --ns-surface: #FFFFFF;
+  --ns-surface-hover: #FBF8F1;
+  --ns-border: #E5E0D5;
+  --ns-border-hover: #D0CABB;
+  --ns-text: #1A1814;
+  --ns-text-secondary: #57534E;
+  --ns-text-muted: #78716C;
+  --ns-primary: #FF4F00;
+  --ns-primary-light: #FF6B35;
+  --ns-primary-dark: #D63E00;
+  --ns-primary-bg: #FFF1EA;
+  --ns-accent: #FF4F00;
+  --ns-accent-bg: #FFE8DC;
+  --ns-success: #059669;
+  --ns-success-bg: #D1FAE5;
+  --ns-danger: #DC2626;
+  --ns-danger-bg: #FEE2E2;
+  --ns-warning: #D97706;
+  --ns-gradient-1: linear-gradient(135deg, #FF4F00 0%, #FF8A3D 100%);
+  --ns-gradient-hero: linear-gradient(135deg, #161412 0%, #1A1814 100%);
+  --ns-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+  --ns-shadow-sm: 0 1px 2px rgba(26, 24, 20, 0.04), 0 2px 8px rgba(26, 24, 20, 0.04);
+  --ns-shadow-md: 0 4px 12px rgba(26, 24, 20, 0.06), 0 8px 24px rgba(26, 24, 20, 0.04);
+  --ns-shadow-lg: 0 12px 32px rgba(26, 24, 20, 0.08), 0 24px 64px rgba(26, 24, 20, 0.06);
+  --ns-shadow-glow: 0 0 32px rgba(255, 79, 0, 0.18);
+  --ns-radius-sm: 6px;
+  --ns-radius-md: 10px;
+  --ns-radius-lg: 14px;
+  --ns-radius-xl: 18px;
+  --ns-font-sans: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
+  --ns-font-serif: 'Fraunces', Georgia, serif;
+  --ns-font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 /* ---------- Global Reset & Base ---------- */
@@ -53,8 +56,9 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--ns-bg);
+  font-feature-settings: 'ss01', 'cv11', 'liga';
   color: var(--ns-text);
   margin: 0;
   min-height: 100vh;
@@ -743,10 +747,10 @@ body {
   left: 0;
   right: 0;
   z-index: 80;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(245, 242, 234, 0.95);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid rgba(26, 24, 20, 0.08);
   padding: 4px 2px;
   padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   display: flex;
@@ -768,7 +772,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #A8A29E;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -785,7 +789,7 @@ body {
 }
 
 .ns-bottom-nav-item.active {
-  color: #0f172a;
+  color: #FF4F00;
 }
 
 .ns-bottom-nav-item.active svg {

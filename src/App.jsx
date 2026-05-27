@@ -32,25 +32,35 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Mientras comprobamos la sesión, mostramos un splash animado
+  // Mientras comprobamos la sesión, mostramos un splash editorial
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center ns-animated-bg relative overflow-hidden">
-        {/* Animated orbs */}
-        <div className="ns-orb w-[300px] h-[300px] bg-purple-500/30 top-[10%] left-[20%]"></div>
-        <div className="ns-orb w-[200px] h-[200px] bg-cyan-400/20 bottom-[20%] right-[15%]" style={{ animationDelay: '2s' }}></div>
-
-        <div className="relative z-10 flex flex-col items-center gap-6 ns-scale-in">
+      <div className="min-h-dvh flex items-center justify-center bg-[#F5F2EA] text-[#1A1814]" data-testid="splash-screen" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
+        <div className="flex flex-col items-center gap-6">
           {/* Logo */}
-          <div className="w-20 h-20 rounded-[1.5rem] bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl ns-float">
-            <span className="text-white font-black text-2xl italic tracking-tighter">NS</span>
+          <div className="relative">
+            <div className="w-12 h-12 rounded-md bg-[#161412] flex items-center justify-center">
+              <span className="text-[#F5F2EA] font-black text-xl tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+            </div>
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#FF4F00] animate-pulse" />
           </div>
 
-          {/* Spinner */}
-          <div className="ns-spinner" style={{ borderColor: 'rgba(255,255,255,0.15)', borderTopColor: '#a29bfe' }}></div>
+          {/* Subtle progress bar */}
+          <div className="w-40 h-px bg-stone-300 overflow-hidden">
+            <div className="h-full bg-[#FF4F00] animate-[loadingBar_1.2s_ease-in-out_infinite]" style={{ width: '40%' }}></div>
+          </div>
 
-          <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.4em]">Cargando plataforma...</p>
+          <p className="text-stone-500 text-[10px] font-medium uppercase tracking-[0.35em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            Cargando · Noni
+          </p>
         </div>
+
+        <style>{`
+          @keyframes loadingBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+          }
+        `}</style>
       </div>
     )
   }

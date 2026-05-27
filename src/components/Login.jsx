@@ -4,8 +4,7 @@ import { supabase } from '../supabaseClient'
 const COOLDOWN_SEGUNDOS = 60
 
 export default function Login() {
-  // --- ESTADOS DEL FORMULARIO Y NAVEGACIÓN ---
-  const [mode, setMode] = useState('login') // 'login' | 'registro' | 'recuperar'
+  const [mode, setMode] = useState('login')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -14,46 +13,42 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-
-  // --- ESTADOS DE ALERTAS Y SEGURIDAD ---
   const [mensaje, setMensaje] = useState(null)
 
-  // --- RATE LIMIT: COOLDOWN CLIENT-SIDE ---
-  const [cooldown, setCooldown] = useState(0) // segundos restantes
+  const [cooldown, setCooldown] = useState(0)
+  const [now, setNow] = useState(new Date())
   const cooldownRef = useRef(null)
+  const initRef = useRef(false)
 
-  /**
-   * ANTI-ERRORES: CAPA 1 - Limpieza de caché al montar la vista.
-   * Destruye tokens residuales SOLO si no hay un token OAuth/email válido en la URL.
-   * (El signOut agresivo previo causaba el error "Session from the future / clock skew"
-   *  al invalidar tokens de confirmación de email antes de que Supabase los procesara.)
-   */
   useEffect(() => {
-    // 2. Atrapar errores de OAuth (Google/Github) que vienen pegados en la URL tras el redireccionamiento
+    if (initRef.current) return
+    initRef.current = true
+
     const hash = window.location.hash.substring(1)
     const queryParams = new URLSearchParams(window.location.search)
     const errorDesc = new URLSearchParams(hash).get('error_description') || queryParams.get('error_description')
     const hasAuthToken = hash.includes('access_token') || hash.includes('refresh_token') || queryParams.get('code')
 
-    // 1. Solo purgar sesión si NO hay tokens válidos en la URL (para no romper flujos OAuth/email)
     if (!hasAuthToken) {
       supabase.auth.signOut().catch(() => {})
     }
-    
+
     if (errorDesc) {
       const errorReal = decodeURIComponent(errorDesc.replace(/\+/g, ' '))
-      let textoTratado = errorReal
-      
+      let texto = errorReal
       if (errorReal.includes('Database error saving new user')) {
-         textoTratado = 'Falla de Integración: Existe un "Trigger" dañado en tu base de datos de Supabase que impide crear la cuenta de Google. Revisá "Triggers" en tu Supabase.'
+        texto = 'No pudimos crear tu cuenta. Verificá la configuración o contactá soporte.'
       }
-      
-      setMensaje({ tipo: 'error', texto: `Error del Servidor: ${textoTratado}` })
-      // Limpiar la URL para que no quede el error al recargar
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMensaje({ tipo: 'error', texto })
       window.history.replaceState(null, '', window.location.pathname)
     }
+  }, [])
 
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000 * 30)
     return () => {
+      clearInterval(id)
       if (cooldownRef.current) clearInterval(cooldownRef.current)
     }
   }, [])
@@ -66,70 +61,48 @@ export default function Login() {
     setAcceptTerms(false)
   }
 
-  /**
-   * OPTIMIZACIÓN: Evaluar fuerza de la contraseña con useMemo (Evita re-renders).
-   */
   const passwordStrength = useMemo(() => {
     if (mode !== 'registro' || !password) return 0
-    let score = 0
-    if (password.length >= 8) score += 1
-    if (/[A-Z]/.test(password)) score += 1
-    if (/[0-9]/.test(password)) score += 1
-    if (/[^A-Za-z0-9]/.test(password)) score += 1
-    return score
+    let s = 0
+    if (password.length >= 8) s++
+    if (/[A-Z]/.test(password)) s++
+    if (/[0-9]/.test(password)) s++
+    if (/[^A-Za-z0-9]/.test(password)) s++
+    return s
   }, [password, mode])
 
-  const isValidEmail = useCallback((email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  }, [])
+  const isValidEmail = useCallback((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e), [])
 
   const esRateLimit = useCallback((msg) => {
-    const lower = msg.toLowerCase()
-    return (
-      lower.includes('rate limit') ||
-      lower.includes('too many requests') ||
-      lower.includes('over_email_send_rate_limit') ||
-      lower.includes('email rate limit exceeded') ||
-      lower.includes('for security purposes') ||
-      lower.includes('you can only request this')
-    )
+    const l = msg.toLowerCase()
+    return l.includes('rate limit') || l.includes('too many requests') ||
+      l.includes('over_email_send_rate_limit') || l.includes('email rate limit exceeded') ||
+      l.includes('for security purposes') || l.includes('you can only request this')
   }, [])
 
-  const extraerSegundosDeEspera = useCallback((msg) => {
-    const match = msg.match(/after (\d+) second/i)
-    if (match) return Math.max(parseInt(match[1], 10), COOLDOWN_SEGUNDOS)
-    return COOLDOWN_SEGUNDOS
+  const extraerSegundos = useCallback((msg) => {
+    const m = msg.match(/after (\d+) second/i)
+    return m ? Math.max(parseInt(m[1], 10), COOLDOWN_SEGUNDOS) : COOLDOWN_SEGUNDOS
   }, [])
 
   const traducirError = useCallback((errorMsg) => {
     const msg = errorMsg.toLowerCase()
-    if (esRateLimit(errorMsg)) {
-      return `Demasiados intentos. Esperá ${COOLDOWN_SEGUNDOS} segundos antes de volver a intentarlo.`
-    }
-    if (msg.includes('invalid login credentials')) return 'Credenciales incorrectas. Verificá tu correo y contraseña.'
-    if (msg.includes('user already registered')) return 'El correo electrónico ya posee una cuenta activa.'
-    if (msg.includes('email link is invalid') || msg.includes('token has expired')) return 'El token de seguridad ha expirado. Solicitá un nuevo enlace.'
-    if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return 'Debés confirmar tu correo electrónico antes de iniciar sesión.'
-    if (msg.includes('signup disabled')) return 'El registro está deshabilitado temporalmente.'
-    if (msg.includes('weak password')) return 'La contraseña es demasiado débil según las políticas del servidor.'
-    if (msg.includes('redirect') || msg.includes('not allowed')) return 'URL de redirección no permitida. Revisá la configuración de Supabase.'
-    return `Error: ${errorMsg}`
+    if (esRateLimit(errorMsg)) return `Demasiados intentos. Esperá ${COOLDOWN_SEGUNDOS} segundos.`
+    if (msg.includes('invalid login credentials')) return 'Email o contraseña incorrectos.'
+    if (msg.includes('user already registered')) return 'Este email ya está registrado. Iniciá sesión.'
+    if (msg.includes('email link is invalid') || msg.includes('token has expired')) return 'El enlace expiró. Solicitá uno nuevo.'
+    if (msg.includes('email not confirmed')) return 'Confirmá tu email antes de iniciar sesión.'
+    if (msg.includes('signup disabled')) return 'Los registros están deshabilitados temporalmente.'
+    if (msg.includes('weak password')) return 'La contraseña es demasiado débil.'
+    return errorMsg
   }, [esRateLimit])
 
-  /**
-   * COOLDOWN TIMER: Activa el bloqueo temporal del botón de acción
-   * para evitar abuso de rate-limit en Supabase Auth.
-   */
-  const activarCooldown = useCallback((segundos) => {
-    setCooldown(segundos)
+  const activarCooldown = useCallback((s) => {
+    setCooldown(s)
     if (cooldownRef.current) clearInterval(cooldownRef.current)
     cooldownRef.current = setInterval(() => {
       setCooldown(prev => {
-        if (prev <= 1) {
-          clearInterval(cooldownRef.current)
-          cooldownRef.current = null
-          return 0
-        }
+        if (prev <= 1) { clearInterval(cooldownRef.current); cooldownRef.current = null; return 0 }
         return prev - 1
       })
     }, 1000)
@@ -139,441 +112,442 @@ export default function Login() {
     if (cooldown > 0) return
     setLoading(true)
     setMensaje(null)
-
     try {
-      // ANTI-ERRORES: CAPA 2 - Limpieza forzada antes del auth
       await supabase.auth.signOut()
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/admin`,
           ...(provider === 'google' && {
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'select_account',
-            },
+            queryParams: { access_type: 'offline', prompt: 'select_account' },
           }),
         },
       })
-
       if (error) {
-        setMensaje({ tipo: 'error', texto: `Error en pasarela ${provider}: ${error.message}` })
+        setMensaje({ tipo: 'error', texto: `${provider}: ${error.message}` })
         setLoading(false)
       }
     } catch (err) {
-      setMensaje({ tipo: 'error', texto: `Error inesperado: ${err.message}` })
+      setMensaje({ tipo: 'error', texto: err.message })
       setLoading(false)
     }
   }
 
   const handleAuth = async (e) => {
     e.preventDefault()
-
     if (cooldown > 0) return
-
     setMensaje(null)
 
     const cleanEmail = email.trim().toLowerCase()
+    if (!cleanEmail) return setMensaje({ tipo: 'error', texto: 'Ingresá tu correo.' })
+    if (!isValidEmail(cleanEmail)) return setMensaje({ tipo: 'error', texto: 'El formato del correo no es válido.' })
 
-    if (!cleanEmail) {
-      return setMensaje({ tipo: 'error', texto: 'Se requiere una dirección de correo electrónico.' })
-    }
-    if (!isValidEmail(cleanEmail)) {
-      return setMensaje({ tipo: 'error', texto: 'El formato del correo ingresado no es válido.' })
-    }
     if (mode === 'registro') {
-      if (password.length === 0) {
-        return setMensaje({ tipo: 'error', texto: 'Debés ingresar una contraseña.' })
-      }
-      if (passwordStrength < 3) {
-        return setMensaje({ tipo: 'error', texto: 'La clave es demasiado débil. Usá letras mayúsculas, números y símbolos.' })
-      }
-      if (password !== confirmPassword) {
-        return setMensaje({ tipo: 'error', texto: 'Las contraseñas de seguridad no coinciden.' })
-      }
-      if (!acceptTerms) {
-        return setMensaje({ tipo: 'error', texto: 'Es obligatorio aceptar los Términos y Condiciones.' })
-      }
+      if (!password) return setMensaje({ tipo: 'error', texto: 'Ingresá una contraseña.' })
+      if (passwordStrength < 3) return setMensaje({ tipo: 'error', texto: 'Tu contraseña es débil. Sumá mayúsculas, números o símbolos.' })
+      if (password !== confirmPassword) return setMensaje({ tipo: 'error', texto: 'Las contraseñas no coinciden.' })
+      if (!acceptTerms) return setMensaje({ tipo: 'error', texto: 'Aceptá los términos para continuar.' })
     }
-    if (mode === 'login' && password.length === 0) {
-      return setMensaje({ tipo: 'error', texto: 'Debés ingresar tu contraseña de acceso.' })
-    }
+    if (mode === 'login' && !password) return setMensaje({ tipo: 'error', texto: 'Ingresá tu contraseña.' })
 
     setLoading(true)
-
-    let hasRedirected = false;
+    let hasRedirected = false
 
     try {
-      // ANTI-ERRORES: CAPA 2 - Destruimos token en memoria justo antes de actuar.
       await supabase.auth.signOut()
 
-      // ─────────────────────────────────────────────
-      // MODO: REGISTRO
-      // ─────────────────────────────────────────────
       if (mode === 'registro') {
         const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/admin`,
-          },
+          email: cleanEmail, password,
+          options: { emailRedirectTo: `${window.location.origin}/admin` },
         })
-
         if (error) {
           if (esRateLimit(error.message)) {
-            const segundos = extraerSegundosDeEspera(error.message)
-            activarCooldown(segundos)
-            return setMensaje({
-              tipo: 'error',
-              texto: `Límite de registros alcanzado. Esperá ${segundos} segundos antes de intentar nuevamente.`,
-            })
+            const s = extraerSegundos(error.message); activarCooldown(s)
+            return setMensaje({ tipo: 'error', texto: `Demasiados registros. Esperá ${s} segundos.` })
           }
           throw error
         }
-
-        // Usuario fantasma (identities vacío)
         if (data?.user && data.user.identities && data.user.identities.length === 0) {
-          return setMensaje({
-            tipo: 'error',
-            texto: 'El correo electrónico ya posee una cuenta activa.',
-          })
+          return setMensaje({ tipo: 'error', texto: 'Este email ya está registrado.' })
         }
-
         if (data?.user && !data.session) {
-          setMensaje({
-            tipo: 'exito',
-            texto: '¡Registro exitoso! Revisá tu bandeja de entrada (o spam) para confirmar tu cuenta.',
-          })
-          setMode('login')
-          setPassword('')
-          setConfirmPassword('')
+          setMensaje({ tipo: 'exito', texto: 'Cuenta creada. Revisá tu email para confirmarla.' })
+          setMode('login'); setPassword(''); setConfirmPassword('')
           return
         }
-
         if (data?.session) {
-          setMensaje({ tipo: 'exito', texto: '¡Cuenta creada! Preparando entorno...' })
-          hasRedirected = true;
-          setTimeout(() => {
-            window.location.href = '/admin'
-          }, 800)
+          setMensaje({ tipo: 'exito', texto: 'Bienvenido. Preparando tu workspace...' })
+          hasRedirected = true
+          setTimeout(() => { window.location.href = '/admin' }, 500)
           return
         }
-
-        setMensaje({ tipo: 'error', texto: 'Respuesta inesperada del servidor. Intentá nuevamente.' })
-
-      // ─────────────────────────────────────────────
-      // MODO: LOGIN
-      // ─────────────────────────────────────────────
       } else if (mode === 'login') {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        })
-
+        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
         if (error) {
           if (esRateLimit(error.message)) {
-            const segundos = extraerSegundosDeEspera(error.message)
-            activarCooldown(segundos)
-            return setMensaje({
-              tipo: 'error',
-              texto: `Demasiados intentos de login. Esperá ${segundos} segundos.`,
-            })
+            const s = extraerSegundos(error.message); activarCooldown(s)
+            return setMensaje({ tipo: 'error', texto: `Demasiados intentos. Esperá ${s} segundos.` })
           }
           throw error
         }
-
-        if (!data.session) {
-          throw new Error('No se pudo establecer sesión. Verificá tus credenciales.')
-        }
-
-        setMensaje({ tipo: 'exito', texto: 'Credenciales validadas. Entrando...' })
-        hasRedirected = true;
-        // ANTI-ERRORES: CAPA 3 - Redirección dura.
-        setTimeout(() => {
-          window.location.href = '/admin'
-        }, 500)
-
-      // ─────────────────────────────────────────────
-      // MODO: RECUPERAR CONTRASEÑA
-      // ─────────────────────────────────────────────
+        if (!data.session) throw new Error('No se pudo iniciar sesión.')
+        setMensaje({ tipo: 'exito', texto: 'Acceso confirmado.' })
+        hasRedirected = true
+        setTimeout(() => { window.location.href = '/admin' }, 400)
       } else if (mode === 'recuperar') {
         const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
           redirectTo: `${window.location.origin}/actualizar-clave`,
         })
-
         if (error) {
           if (esRateLimit(error.message)) {
-            const segundos = extraerSegundosDeEspera(error.message)
-            activarCooldown(segundos)
-            return setMensaje({
-              tipo: 'error',
-              texto: `Demasiados intentos de recuperación. Esperá ${segundos} segundos antes de solicitar el enlace.`,
-            })
-          }
-          if (
-            error.message.toLowerCase().includes('redirect') ||
-            error.message.toLowerCase().includes('not allowed')
-          ) {
-            throw new Error('URL de redirección no permitida. Revisá Authentication → URL Configuration en Supabase.')
+            const s = extraerSegundos(error.message); activarCooldown(s)
+            return setMensaje({ tipo: 'error', texto: `Esperá ${s} segundos antes de pedir otro enlace.` })
           }
           throw error
         }
-
-        setMensaje({
-          tipo: 'exito',
-          texto: 'Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.',
-        })
+        setMensaje({ tipo: 'exito', texto: 'Si el email está registrado, te enviamos las instrucciones.' })
         activarCooldown(30)
-        setMode('login')
-        setPassword('')
+        setMode('login'); setPassword('')
       }
-
     } catch (error) {
       setMensaje({ tipo: 'error', texto: traducirError(error.message) })
     } finally {
-      if (!hasRedirected) {
-        setLoading(false)
-      }
+      if (!hasRedirected) setLoading(false)
     }
   }
 
   const configUI = {
-    login:     { titulo: 'Bienvenido',       subtitulo: 'Iniciá sesión en Non Sistemas.',       btn: 'Iniciar Sesión'       },
-    registro:  { titulo: 'Crear Cuenta',     subtitulo: 'Registrate y empezá a gestionar.',     btn: 'Crear mi cuenta'      },
-    recuperar: { titulo: 'Recuperar Acceso', subtitulo: 'Te enviaremos un enlace seguro.',      btn: 'Enviar enlace'        },
+    login: { titulo: 'Acceder a tu', acento: 'panel.', subtitulo: 'Continuá donde quedaste.', btn: 'Iniciar sesión' },
+    registro: { titulo: 'Empezar', acento: 'gratis.', subtitulo: 'Tu cuenta en menos de un minuto.', btn: 'Crear cuenta' },
+    recuperar: { titulo: 'Recuperar', acento: 'acceso.', subtitulo: 'Te enviamos un enlace por email.', btn: 'Enviar enlace' },
   }
 
-  const renderPasswordMeter = () => {
-    if (mode !== 'registro') return null
-    
-    const rules = [
-      { id: 'length', text: 'Mínimo 8 caracteres', test: password.length >= 8 },
-      { id: 'upper', text: 'Una letra mayúscula', test: /[A-Z]/.test(password) },
-      { id: 'num', text: 'Un número', test: /[0-9]/.test(password) },
-      { id: 'spec', text: 'Un símbolo (@, #, !, etc.)', test: /[^A-Za-z0-9]/.test(password) }
-    ]
+  // Mock ticker — schedule
+  const horaAhora = useMemo(() => now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }), [now])
+  const fechaHoy = useMemo(() => now.toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' }).replace(/^./, c => c.toUpperCase()), [now])
 
+  const renderPasswordMeter = () => {
+    if (mode !== 'registro' || !password) return null
+    const rules = [
+      { id: 'length', text: '8+ caracteres', test: password.length >= 8 },
+      { id: 'upper', text: 'Mayúscula', test: /[A-Z]/.test(password) },
+      { id: 'num', text: 'Número', test: /[0-9]/.test(password) },
+      { id: 'spec', text: 'Símbolo', test: /[^A-Za-z0-9]/.test(password) },
+    ]
     return (
-      <div className="mt-4 bg-sky-950/40 border border-sky-400/20 rounded-2xl p-4 ns-fade-up shadow-inner backdrop-blur-sm">
-        <p className="text-[10px] font-bold text-sky-300/60 uppercase tracking-widest mb-3">Requisitos de Seguridad</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {rules.map(rule => (
-            <div key={rule.id} className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors ${rule.test ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/30'}`}>
-                {rule.test ? (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                ) : (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                )}
-              </div>
-              <span className={`text-[10px] md:text-xs font-semibold ${rule.test ? 'text-emerald-400' : 'text-white/40'}`}>{rule.text}</span>
-            </div>
-          ))}
-        </div>
+      <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1" data-testid="password-strength-meter">
+        {rules.map(r => (
+          <span key={r.id} className={`inline-flex items-center gap-1 text-[10px] font-medium tracking-wide ${r.test ? 'text-emerald-700' : 'text-stone-400'}`}>
+            <span className={`w-1 h-1 rounded-full ${r.test ? 'bg-emerald-600' : 'bg-stone-300'}`} />
+            {r.text}
+          </span>
+        ))}
       </div>
     )
   }
 
   const botonDeshabilitado =
-    loading ||
-    cooldown > 0 ||
+    loading || cooldown > 0 ||
     (mode === 'registro' && (!acceptTerms || password !== confirmPassword || passwordStrength < 3))
 
   const renderBotonTexto = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center gap-2 md:gap-3">
-          <div className="ns-spinner-sm" style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: 'white' }} />
-          <span>Procesando...</span>
-        </div>
-      )
-    }
-    if (cooldown > 0) {
-      return (
-        <div className="flex items-center justify-center gap-2">
-          <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <circle cx="12" cy="12" r="10" /><path strokeLinecap="round" d="M12 6v6l4 2" />
-          </svg>
-          <span>Esperá {cooldown}s para reintentar</span>
-        </div>
-      )
-    }
-    return <span>{configUI[mode].btn}</span>
+    if (loading) return (
+      <div className="flex items-center justify-center gap-2.5">
+        <div className="w-3.5 h-3.5 border-[1.5px] border-white/40 border-t-white rounded-full animate-spin" />
+        <span>Procesando</span>
+      </div>
+    )
+    if (cooldown > 0) return <span>Esperá {cooldown}s</span>
+    return (
+      <span className="flex items-center justify-center gap-2">
+        {configUI[mode].btn}
+        <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </span>
+    )
   }
 
   return (
-    <div className="ns-login-shell">
-      {/* Gradient background */}
-      <div className="ns-login-bg" />
-      {/* Floating orbs — hidden on mobile for perf */}
-      <div className="hidden md:block ns-login-orb ns-login-orb-1" />
-      <div className="hidden md:block ns-login-orb ns-login-orb-2" />
-      <div className="hidden md:block ns-login-orb ns-login-orb-3" />
+    <div
+      className="min-h-dvh w-full flex bg-[#F5F2EA] text-[#1A1814]"
+      style={{ fontFamily: '"Inter Tight", "Inter", -apple-system, sans-serif' }}
+      data-testid="login-screen"
+    >
+      {/* ═══════════════════ LEFT — EDITORIAL CHARCOAL ═══════════════════ */}
+      <aside className="hidden lg:flex lg:w-[52%] xl:w-[55%] relative overflow-hidden flex-col text-[#F5F2EA]" style={{ background: '#161412' }}>
+        {/* Film grain + warm gradient */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at top left, rgba(255,77,0,0.08) 0%, transparent 40%), radial-gradient(ellipse at bottom right, rgba(255,200,140,0.04) 0%, transparent 50%)'
+        }} />
+        <div className="absolute inset-0 opacity-[0.035] pointer-events-none mix-blend-overlay" style={{
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
+        }} />
 
-      <div className="w-full max-w-[420px] z-10 ns-fade-up px-1">
-        <div className="ns-login-card">
+        <div className="relative z-10 flex flex-col justify-between h-full px-12 xl:px-16 py-10">
+          {/* ─── TOP STRIP ─── */}
+          <header className="flex items-start justify-between">
+            <a href="/" className="group flex items-center gap-3" data-testid="brand-link">
+              <div className="relative">
+                <div className="w-9 h-9 rounded-md bg-[#F5F2EA] flex items-center justify-center">
+                  <span className="text-[#161412] font-black text-[15px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+                </div>
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#FF4F00]" />
+              </div>
+              <div className="leading-none">
+                <p className="font-bold text-[16px] tracking-tight">Noni<span className="text-[#FF4F00]">.</span></p>
+                <p className="text-[9px] font-medium uppercase tracking-[0.3em] text-stone-400 mt-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Non Sistemas</p>
+              </div>
+            </a>
 
-          {/* Header */}
-          <div className="text-center mb-7 md:mb-9 relative z-10">
-            <div className="ns-login-logo">
-              <span className="text-white font-black text-xl md:text-2xl italic tracking-tighter relative z-10">NS</span>
+            <div className="text-right text-[10px] font-medium uppercase tracking-[0.25em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+              <p>Est. MMXXIV</p>
+              <p className="mt-1 text-stone-500">Salsipuedes · Argentina</p>
             </div>
-            <h1 className="text-[26px] md:text-[32px] font-black text-white tracking-tight leading-none">
-              {configUI[mode].titulo}
+          </header>
+
+          {/* ─── EDITORIAL HEADLINE ─── */}
+          <div className="my-10 xl:my-16">
+            {/* Section marker */}
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#FF4F00]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>N°01</span>
+              <div className="h-px w-12 bg-stone-700" />
+              <span className="text-[10px] uppercase tracking-[0.3em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Operaciones</span>
+            </div>
+
+            <h1 className="text-[clamp(2.8rem,5.5vw,4.6rem)] leading-[0.95] tracking-[-0.04em] font-light text-[#F5F2EA]" style={{ fontFamily: '"Fraunces", serif' }}>
+              Tu jornada,<br />
+              <em className="font-light text-[#FF6B35] italic">orquestada</em><br />
+              <span className="font-bold">al detalle.</span>
             </h1>
-            <p className="text-sky-200/50 mt-2 font-semibold text-xs md:text-[13px] tracking-wide">
+
+            <p className="mt-7 text-[15px] leading-[1.65] text-stone-300/85 max-w-md font-light">
+              Reservas, equipo, inventario, métricas. Una plataforma que respira al ritmo de tu negocio. <span className="text-stone-400">Sin fricción. Sin atajos. Sin AI-slop.</span>
+            </p>
+          </div>
+
+          {/* ─── LIVE OPS MOCK PANEL ─── */}
+          <div className="border border-stone-800 rounded-lg overflow-hidden bg-[#1F1B17]/60 backdrop-blur-sm">
+            {/* Bar header */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-stone-800/80 bg-[#0F0D0B]/60">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF4F00] animate-pulse" />
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-300" style={{ fontFamily: '"JetBrains Mono", monospace' }}>En vivo</p>
+              </div>
+              <p className="text-[10px] font-medium text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{fechaHoy} · {horaAhora}</p>
+            </div>
+            {/* Rows */}
+            <ul className="divide-y divide-stone-800/60">
+              {[
+                { h: '09:30', s: 'Corte + Barba', c: 'M. Álvarez', t: 'Confirmado' },
+                { h: '11:00', s: 'Coloración', c: 'L. Pereyra', t: 'En curso' },
+                { h: '14:15', s: 'Manicura', c: 'P. Romero', t: 'Pendiente' },
+              ].map((r, i) => (
+                <li key={i} className="grid grid-cols-[60px_1fr_auto] items-center gap-3 px-4 py-2.5 hover:bg-stone-900/30 transition-colors">
+                  <span className="text-[12px] font-bold text-[#FF6B35]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{r.h}</span>
+                  <div>
+                    <p className="text-[12px] font-semibold text-stone-200 leading-tight">{r.s}</p>
+                    <p className="text-[10px] text-stone-500 mt-0.5">{r.c}</p>
+                  </div>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm ${
+                    r.t === 'En curso' ? 'bg-emerald-500/15 text-emerald-400' :
+                    r.t === 'Confirmado' ? 'bg-stone-700/40 text-stone-300' :
+                    'bg-amber-500/10 text-amber-400'
+                  }`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>{r.t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ─── FOOTER STRIP ─── */}
+          <footer className="mt-10 pt-5 border-t border-stone-800/60 flex items-center justify-between text-[10px] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <div className="flex items-center gap-4">
+              <span>v2.4.0</span>
+              <span className="w-1 h-1 rounded-full bg-stone-700" />
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Servicios operativos
+              </span>
+            </div>
+            <span>© {new Date().getFullYear()} · Hecho con oficio</span>
+          </footer>
+        </div>
+      </aside>
+
+      {/* ═══════════════════ RIGHT — FORM ═══════════════════ */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 sm:px-10 lg:px-14 relative">
+        {/* Mobile brand strip */}
+        <div className="lg:hidden w-full max-w-[420px] flex items-center justify-between mb-10" data-testid="brand-mobile">
+          <a href="/" className="flex items-center gap-2.5">
+            <div className="relative">
+              <div className="w-9 h-9 rounded-md bg-[#161412] flex items-center justify-center">
+                <span className="text-[#F5F2EA] font-black text-[15px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+              </div>
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#FF4F00]" />
+            </div>
+            <div className="leading-none">
+              <p className="font-bold text-[15px] tracking-tight text-[#161412]">Noni<span className="text-[#FF4F00]">.</span></p>
+              <p className="text-[8px] font-medium uppercase tracking-[0.25em] text-stone-500 mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Non Sistemas</p>
+            </div>
+          </a>
+          <span className="text-[9px] font-medium uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{horaAhora}</span>
+        </div>
+
+        <div className="w-full max-w-[420px]">
+          {/* ─── HEADER ─── */}
+          <div className="mb-9">
+            <div className="flex items-center gap-2.5 mb-5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#FF4F00]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                {mode === 'login' ? 'N°02' : mode === 'registro' ? 'N°00' : 'N°03'}
+              </span>
+              <div className="h-px flex-1 bg-stone-300" />
+              <span className="text-[10px] uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                {mode === 'login' ? 'Acceso' : mode === 'registro' ? 'Registro' : 'Recuperar'}
+              </span>
+            </div>
+
+            <h2 className="text-[44px] sm:text-[52px] leading-[0.95] tracking-[-0.035em] font-light text-[#1A1814]" style={{ fontFamily: '"Fraunces", serif' }} data-testid="login-title">
+              {configUI[mode].titulo}{' '}
+              <em className="italic font-medium text-[#FF4F00]">{configUI[mode].acento}</em>
+            </h2>
+            <p className="text-stone-600 mt-3 text-[14px] font-medium" data-testid="login-subtitle">
               {configUI[mode].subtitulo}
             </p>
           </div>
 
+          {/* ─── MENSAJE ─── */}
           {mensaje && (
-            <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-[11px] md:text-sm font-medium leading-relaxed ns-fade-down relative z-10 flex items-start gap-3 shadow-xl border ${
-              mensaje.tipo === 'error'
-                ? 'bg-[#2A1115]/90 text-red-200 border-red-500/30'
-                : 'bg-[#112A1F]/90 text-emerald-200 border-emerald-500/30'
-            }`}>
+            <div
+              role="alert"
+              data-testid={`alert-${mensaje.tipo}`}
+              className={`mb-6 p-3.5 text-[13px] font-medium flex items-start gap-3 border-l-2 ${
+                mensaje.tipo === 'error'
+                  ? 'bg-red-50/70 text-red-800 border-red-500'
+                  : 'bg-emerald-50/70 text-emerald-800 border-emerald-500'
+              }`}
+            >
               <div className="shrink-0 mt-0.5">
-                 {mensaje.tipo === 'error' ? (
-                   <svg className="w-5 h-5 md:w-6 md:h-6 text-red-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                 ) : (
-                   <svg className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                 )}
+                {mensaje.tipo === 'error' ? (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                )}
               </div>
               <div className="flex-1">
-                 <h4 className={`font-bold tracking-tight mb-1 ${mensaje.tipo === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
-                   {mensaje.tipo === 'error' ? 'Atención Requerida' : 'Operación Exitosa'}
-                 </h4>
-                 <p className="opacity-90">{mensaje.texto}</p>
-                 
-                 {cooldown > 0 && mensaje.tipo === 'error' && (
-                   <div className="mt-3">
-                     <div className="h-1 w-full bg-red-900/40 rounded-full overflow-hidden">
-                       <div
-                         className="h-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] transition-all duration-1000 ease-linear"
-                         style={{ width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%` }}
-                       />
-                     </div>
-                   </div>
-                 )}
+                <p>{mensaje.texto}</p>
+                {cooldown > 0 && mensaje.tipo === 'error' && (
+                  <div className="mt-2 h-px w-full bg-red-200 overflow-hidden">
+                    <div className="h-full bg-red-500 transition-all duration-1000 ease-linear" style={{ width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%` }} />
+                  </div>
+                )}
               </div>
             </div>
           )}
 
+          {/* ─── SOCIAL ─── */}
           {mode !== 'recuperar' && (
-            <div className="animate-in fade-in duration-500 relative z-10">
-              <div className="grid grid-cols-2 gap-2.5 md:gap-3 mb-4 md:mb-6">
+            <>
+              <div className="grid grid-cols-2 gap-2 mb-6">
                 <button
+                  type="button"
                   onClick={() => handleSocialLogin('google')}
                   disabled={loading || cooldown > 0}
-                  type="button"
-                  className="ns-login-social-btn group"
+                  data-testid="google-login-btn"
+                  className="group flex items-center justify-center gap-2 px-3 py-3 border border-stone-300 bg-white/40 hover:bg-white hover:border-stone-400 transition-all text-[13px] font-semibold text-stone-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
-                  <span>Continuar con Google</span>
+                  <span>Google</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSocialLogin('github')}
                   disabled={loading || cooldown > 0}
-                  type="button"
-                  className="ns-login-social-btn group"
+                  data-testid="github-login-btn"
+                  className="group flex items-center justify-center gap-2 px-3 py-3 border border-stone-300 bg-white/40 hover:bg-white hover:border-stone-400 transition-all text-[13px] font-semibold text-stone-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4 invert group-hover:scale-110 transition-transform flex-shrink-0" viewBox="0 0 24 24">
-                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                   </svg>
                   <span>GitHub</span>
                 </button>
               </div>
-
-              <div className="relative mb-5 md:mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-sky-300/10" />
-                </div>
-                <div className="relative flex justify-center text-[8px] md:text-[9px] font-black uppercase tracking-[0.35em] text-sky-200/30">
-                  <span className="px-4 ns-login-divider-bg">
-                    o con email
-                  </span>
-                </div>
+              <div className="relative mb-6 flex items-center gap-3">
+                <div className="flex-1 h-px bg-stone-300" />
+                <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>O con email</span>
+                <div className="flex-1 h-px bg-stone-300" />
               </div>
-            </div>
+            </>
           )}
 
-          <form onSubmit={handleAuth} className="space-y-3 md:space-y-4 relative z-10">
+          {/* ─── FORM ─── */}
+          <form onSubmit={handleAuth} className="space-y-5" data-testid="auth-form">
+            {/* Email */}
             <div>
-              <label className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase ml-1 tracking-widest mb-1 md:mb-1.5 block">
-                Correo Electrónico
+              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-stone-700 mb-2" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                Email
               </label>
-              <div className="relative flex items-center group">
-                <div className="absolute left-3 md:left-4 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white/5 flex items-center justify-center transition-colors duration-300 group-focus-within:bg-white text-white/30 group-focus-within:text-black">
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="ns-login-input pl-11 md:pl-14"
-                  placeholder="admin@empresa.com"
-                  disabled={loading || cooldown > 0}
-                  autoComplete="email"
-                />
-              </div>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@empresa.com"
+                disabled={loading || cooldown > 0}
+                autoComplete="email"
+                data-testid="email-input"
+                className="w-full px-0 pb-2.5 pt-1 bg-transparent border-0 border-b border-stone-400 text-[15px] font-medium text-[#1A1814] placeholder:text-stone-400 outline-none transition-colors focus:border-[#FF4F00] disabled:opacity-50"
+              />
             </div>
 
+            {/* Password */}
             {mode !== 'recuperar' && (
-              <div className="relative animate-in fade-in zoom-in-[0.98] duration-300">
-                <div className="flex justify-between items-center mb-1 md:mb-1.5 ml-1 mr-1">
-                  <label className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest block">
-                    Credencial Maestra
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-stone-700" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                    Contraseña
                   </label>
                   {mode === 'login' && (
                     <button
                       type="button"
                       onClick={() => cambiarModo('recuperar')}
-                      className="text-[9px] md:text-[10px] font-black text-sky-400 hover:text-white transition-colors"
+                      data-testid="forgot-password-link"
+                      className="text-[10px] font-semibold text-stone-600 hover:text-[#FF4F00] transition-colors underline underline-offset-4 decoration-stone-300 hover:decoration-[#FF4F00]"
                     >
-                      ¿Perdiste tu llave?
+                      ¿La olvidaste?
                     </button>
                   )}
                 </div>
-                <div className="relative flex items-center group">
-                  <div className="absolute left-3 md:left-4 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white/5 flex items-center justify-center transition-colors duration-300 group-focus-within:bg-white text-white/30 group-focus-within:text-black">
-                    <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                      <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
+                <div className="relative">
                   <input
+                    id="password"
                     type={showPassword ? 'text' : 'password'}
-                    required={mode !== 'recuperar'}
+                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="ns-login-input pl-11 md:pl-14 pr-10 md:pr-12"
-                    placeholder="••••••••••••"
+                    placeholder="••••••••"
                     disabled={loading || cooldown > 0}
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    data-testid="password-input"
+                    className="w-full pr-9 pb-2.5 pt-1 bg-transparent border-0 border-b border-stone-400 text-[15px] font-medium text-[#1A1814] placeholder:text-stone-400 outline-none transition-colors focus:border-[#FF4F00] disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 md:right-4 text-white/30 hover:text-white p-1 transition-colors"
-                    aria-label="Mostrar contraseña"
+                    data-testid="toggle-password-visibility"
+                    aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
+                    className="absolute right-0 top-1 text-stone-400 hover:text-[#FF4F00] p-1 transition-colors"
                   >
                     {showPassword ? (
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                      </svg>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
                     ) : (
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     )}
                   </button>
                 </div>
@@ -581,101 +555,94 @@ export default function Login() {
               </div>
             )}
 
+            {/* Confirmar */}
             {mode === 'registro' && (
-              <div className="relative animate-in slide-in-from-top-4 fade-in duration-500 pt-1 md:pt-0">
-                <label className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase ml-1 tracking-widest mb-1 md:mb-1.5 block">
-                  Confirmar Credencial
+              <div>
+                <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-stone-700 mb-2" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                  Confirmar contraseña
                 </label>
-                <div className="relative flex items-center group">
-                  <div className="absolute left-3 md:left-4 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white/5 flex items-center justify-center transition-colors duration-300 group-focus-within:bg-white text-white/30 group-focus-within:text-black">
-                    <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                      <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`ns-login-input pl-11 md:pl-14 ${
-                      confirmPassword.length > 0 && password !== confirmPassword
-                        ? 'border-red-500/50 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.15)]'
-                        : ''
-                    }`}
-                    placeholder="Repetir clave exacta"
-                    disabled={loading || cooldown > 0}
-                    autoComplete="new-password"
-                  />
-                </div>
+                <input
+                  id="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repetí la contraseña"
+                  disabled={loading || cooldown > 0}
+                  autoComplete="new-password"
+                  data-testid="confirm-password-input"
+                  className={`w-full px-0 pb-2.5 pt-1 bg-transparent border-0 border-b text-[15px] font-medium text-[#1A1814] placeholder:text-stone-400 outline-none transition-colors disabled:opacity-50 ${
+                    confirmPassword.length > 0 && password !== confirmPassword
+                      ? 'border-red-500 focus:border-red-600'
+                      : 'border-stone-400 focus:border-[#FF4F00]'
+                  }`}
+                />
               </div>
             )}
 
+            {/* Terms */}
             {mode === 'registro' && (
-              <div className="flex items-start gap-2.5 md:gap-3 mt-3 md:mt-4 animate-in fade-in duration-500">
-                <div className="relative flex items-center mt-0.5">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    checked={acceptTerms}
-                    onChange={(e) => setAcceptTerms(e.target.checked)}
-                    className="peer appearance-none w-3.5 h-3.5 md:w-4 md:h-4 border border-white/20 rounded bg-white/5 checked:bg-sky-500 checked:border-sky-500 transition-all cursor-pointer"
-                    disabled={cooldown > 0}
-                  />
-                  <svg className="absolute w-2.5 h-2.5 md:w-3 md:h-3 text-white left-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <label htmlFor="terms" className="text-[9px] md:text-[10px] font-medium text-white/50 leading-tight cursor-pointer select-none">
-                  Entiendo y acepto los{' '}
-                  <a href="#" className="text-sky-400 hover:underline">Términos de Servicio</a>{' '}
-                  y la{' '}
-                  <a href="#" className="text-sky-400 hover:underline">Política de Privacidad</a>{' '}
-                  respecto al tratamiento de datos.
-                </label>
-              </div>
+              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-2">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  disabled={cooldown > 0}
+                  data-testid="terms-checkbox"
+                  className="mt-0.5 w-3.5 h-3.5 rounded-none border-stone-400 text-[#FF4F00] focus:ring-[#FF4F00] focus:ring-offset-0 focus:ring-1 cursor-pointer accent-[#FF4F00]"
+                />
+                <span className="text-[12px] text-stone-700 leading-snug">
+                  Acepto los <a href="#" className="text-[#FF4F00] underline underline-offset-4 decoration-stone-300 hover:decoration-[#FF4F00] font-semibold">Términos</a> y la <a href="#" className="text-[#FF4F00] underline underline-offset-4 decoration-stone-300 hover:decoration-[#FF4F00] font-semibold">Política de Privacidad</a>.
+                </span>
+              </label>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={botonDeshabilitado}
-              className="ns-login-submit-btn"
+              data-testid="submit-btn"
+              className="group w-full py-3.5 mt-3 bg-[#1A1814] hover:bg-[#FF4F00] text-[#F5F2EA] text-[13px] font-bold tracking-wide uppercase transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#FF4F00]/40 focus:ring-offset-2 focus:ring-offset-[#F5F2EA] active:translate-y-px"
+              style={{ fontFamily: '"JetBrains Mono", monospace', letterSpacing: '0.1em' }}
             >
               {renderBotonTexto()}
             </button>
           </form>
 
-          <div className="mt-7 md:mt-8 text-center relative z-10 border-t border-sky-300/10 pt-5 md:pt-6">
+          {/* ─── SWITCH ─── */}
+          <div className="mt-8 pt-5 border-t border-stone-300">
             {mode === 'recuperar' ? (
               <button
                 type="button"
                 onClick={() => cambiarModo('login')}
-                className="text-[10px] md:text-[11px] font-bold text-sky-300/50 hover:text-white transition-colors"
+                data-testid="back-to-login"
+                className="text-[12px] font-semibold text-stone-700 hover:text-[#FF4F00] transition-colors inline-flex items-center gap-1.5"
               >
-                ← Volver al login
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                Volver al inicio de sesión
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
-                className="text-[10px] md:text-[11px] font-bold text-sky-300/50 hover:text-white transition-colors"
-              >
-                {mode === 'login' ? '¿No tenés cuenta? Crear una gratis' : '¿Ya tenés cuenta? Iniciá sesión'}
-              </button>
+              <p className="text-[12px] text-stone-600">
+                {mode === 'login' ? '¿Primera vez por acá?' : '¿Ya tenés cuenta?'}{' '}
+                <button
+                  type="button"
+                  onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
+                  data-testid="switch-mode-link"
+                  className="font-bold text-[#FF4F00] hover:text-[#1A1814] transition-colors underline underline-offset-4 decoration-[#FF4F00]/40 hover:decoration-[#1A1814]/40"
+                >
+                  {mode === 'login' ? 'Creá una cuenta' : 'Iniciá sesión'}
+                </button>
+              </p>
             )}
           </div>
-        </div>
 
-        {/* Footer badge */}
-        <div className="mt-8 flex flex-col items-center gap-2.5 relative z-10 pb-6">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-sky-300/10 bg-sky-950/30 backdrop-blur-md text-sky-200/40">
-            <svg className="w-3.5 h-3.5 text-sky-400/70" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em]">Conexión segura SSL</span>
+          {/* Mobile footer */}
+          <div className="lg:hidden mt-12 pt-5 border-t border-stone-300 flex items-center justify-between text-[9px] uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <span>© {new Date().getFullYear()} Non Sistemas</span>
+            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />Online</span>
           </div>
-          <p className="text-[8px] md:text-[9px] font-bold text-sky-200/20 uppercase tracking-[0.3em]">
-            Non Sistemas • Salsipuedes, CBA
-          </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
