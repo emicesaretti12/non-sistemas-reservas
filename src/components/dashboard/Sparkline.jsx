@@ -2,7 +2,7 @@
  * Sparkline — micro SVG line chart with optional area fill
  * Usage: <Sparkline data={[12, 18, 9, 22, 30, 15, 28]} color="#FF4F00" />
  */
-export default function Sparkline({ data = [], color = '#FF4F00', height = 28, fill = true, strokeWidth = 1.5 }) {
+export default function Sparkline({ data = [], color = '#0EA5E9', height = 28, fill = true, strokeWidth = 1.5 }) {
   if (!data || data.length < 2) {
     return (
       <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full" style={{ height }}>

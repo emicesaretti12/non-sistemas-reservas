@@ -112,50 +112,50 @@ export default function SmartInsights({ stats, crmStats, clientes, actividadReci
   }
 
   const severityClasses = {
-    high: { bar: 'bg-[#FF4F00]', icon: 'text-[#FF4F00] bg-[#FFF1EA] border-[#FF4F00]/20', dot: 'bg-[#FF4F00]' },
+    high: { bar: 'bg-[#0EA5E9]', icon: 'text-[#0EA5E9] bg-[#E0F2FE] border-[#0EA5E9]/20', dot: 'bg-[#0EA5E9]' },
     medium: { bar: 'bg-amber-500', icon: 'text-amber-700 bg-amber-50 border-amber-200', dot: 'bg-amber-500' },
-    info: { bar: 'bg-stone-400', icon: 'text-stone-700 bg-stone-100 border-stone-300', dot: 'bg-stone-400' },
+    info: { bar: 'bg-slate-400', icon: 'text-slate-700 bg-slate-100 border-slate-300', dot: 'bg-slate-400' },
     success: { bar: 'bg-emerald-500', icon: 'text-emerald-700 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500' },
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-300/70 shadow-sm overflow-hidden" data-testid="smart-insights">
-      <div className="px-5 py-4 border-b border-stone-200/80 flex items-center justify-between">
+    <div className="bg-white rounded-xl border border-slate-300/70 shadow-sm overflow-hidden" data-testid="smart-insights">
+      <div className="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-[#1A1814] flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-[#FF4F00]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          <div className="w-7 h-7 rounded-md bg-[#0F172A] flex items-center justify-center">
+            <svg className="w-3.5 h-3.5 text-[#0EA5E9]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <div>
-            <h3 className="text-[13px] font-bold text-[#1A1814] tracking-tight leading-none">Smart Insights</h3>
-            <p className="text-[9px] font-medium text-stone-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <h3 className="text-[13px] font-bold text-[#0F172A] tracking-tight leading-none">Smart Insights</h3>
+            <p className="text-[9px] font-medium text-slate-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               {top.length} {top.length === 1 ? 'recomendación' : 'recomendaciones'}
             </p>
           </div>
         </div>
-        <span className="text-[9px] font-medium uppercase tracking-[0.22em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+        <span className="text-[9px] font-medium uppercase tracking-[0.22em] text-slate-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
           Auto · Tiempo real
         </span>
       </div>
 
-      <div className="divide-y divide-stone-200/70">
+      <div className="divide-y divide-slate-200/70">
         {top.map((insight, idx) => {
           const cls = severityClasses[insight.severity] || severityClasses.info
           return (
-            <div key={idx} className="px-5 py-4 flex items-start gap-3.5 group hover:bg-stone-50/50 transition-colors" data-testid={`insight-${idx}`}>
+            <div key={idx} className="px-5 py-4 flex items-start gap-3.5 group hover:bg-slate-50/50 transition-colors" data-testid={`insight-${idx}`}>
               <div className={`w-9 h-9 rounded-md border flex items-center justify-center shrink-0 ${cls.icon}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d={iconMap[insight.icon] || iconMap.check} />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold text-[#1A1814] tracking-tight leading-snug">{insight.titulo}</p>
-                <p className="text-[12px] text-stone-600 mt-0.5 leading-snug">{insight.texto}</p>
+                <p className="text-[13px] font-bold text-[#0F172A] tracking-tight leading-snug">{insight.titulo}</p>
+                <p className="text-[12px] text-slate-600 mt-0.5 leading-snug">{insight.texto}</p>
               </div>
               {insight.cta && insight.action && (
                 <button
                   onClick={insight.action}
                   data-testid={`insight-action-${idx}`}
-                  className="shrink-0 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#1A1814] hover:text-[#FF4F00] transition-colors py-1.5 px-3 border border-stone-300 rounded-md hover:border-[#FF4F00] hover:bg-[#FFF1EA]"
+                  className="shrink-0 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0F172A] hover:text-[#0EA5E9] transition-colors py-1.5 px-3 border border-slate-300 rounded-md hover:border-[#0EA5E9] hover:bg-[#E0F2FE]"
                   style={{ fontFamily: '"JetBrains Mono", monospace' }}
                 >
                   {insight.cta}

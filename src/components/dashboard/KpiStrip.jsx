@@ -52,7 +52,7 @@ export default function KpiStrip({ stats, clientes, actividadReciente, distribuc
       value: stats?.hoy || 0,
       format: (v) => v.toLocaleString('es-AR'),
       serie: turnosSerie,
-      color: '#FF4F00',
+      color: '#0EA5E9',
       delta: calcDelta(turnosSerie),
       hint: stats?.hoy === 0 ? 'Sin turnos por hoy' : null,
     },
@@ -72,7 +72,7 @@ export default function KpiStrip({ stats, clientes, actividadReciente, distribuc
       value: stats?.semana || 0,
       format: (v) => v.toLocaleString('es-AR'),
       serie: semanaSerie,
-      color: '#1A1814',
+      color: '#0F172A',
       delta: null,
       hint: stats?.semana === 0 ? 'Acumulado de la semana en curso' : null,
     },
@@ -89,12 +89,12 @@ export default function KpiStrip({ stats, clientes, actividadReciente, distribuc
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-stone-300/60 border border-stone-300/60 rounded-xl overflow-hidden shadow-sm" data-testid="kpi-strip">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-300/60 border border-slate-300/60 rounded-xl overflow-hidden shadow-sm" data-testid="kpi-strip">
       {kpis.map(k => (
-        <div key={k.id} className="bg-white p-4 md:p-5 relative group transition-colors hover:bg-stone-50/60" data-testid={`kpi-${k.id}`}>
+        <div key={k.id} className="bg-white p-4 md:p-5 relative group transition-colors hover:bg-slate-50/60" data-testid={`kpi-${k.id}`}>
           {/* Top row: label + delta */}
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[9px] font-bold text-stone-500 uppercase tracking-[0.22em] truncate" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.22em] truncate" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               {k.label}
             </p>
             {k.delta && (
@@ -108,7 +108,7 @@ export default function KpiStrip({ stats, clientes, actividadReciente, distribuc
           </div>
 
           {/* Big number */}
-          <p className="text-[28px] md:text-[34px] font-light tracking-[-0.03em] leading-none text-[#1A1814] mb-3" style={{ fontFamily: '"Fraunces", serif' }}>
+          <p className="text-[28px] md:text-[34px] font-light tracking-[-0.03em] leading-none text-[#0F172A] mb-3" style={{ fontFamily: '"Fraunces", serif' }}>
             {k.format(k.value)}
           </p>
 
@@ -117,7 +117,7 @@ export default function KpiStrip({ stats, clientes, actividadReciente, distribuc
 
           {/* Hint */}
           {k.hint && (
-            <p className="text-[10px] text-stone-400 mt-2 font-medium leading-tight">{k.hint}</p>
+            <p className="text-[10px] text-slate-400 mt-2 font-medium leading-tight">{k.hint}</p>
           )}
         </div>
       ))}

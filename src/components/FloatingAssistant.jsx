@@ -395,6 +395,22 @@ export default function FloatingAssistant({
     }
   }, [open, messageIdx, tab])
 
+  // Auto-open the assistant for new users when setup is not complete
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem('noni_assistant_first_seen')
+      const setupIncomplete = !setupData.hasServicios || !setupData.hasEmpleados || !setupData.hasHorarios
+      if (!seen && setupIncomplete && !dismissed) {
+        const timer = setTimeout(() => {
+          setOpen(true)
+          setShowBubble(false)
+          localStorage.setItem('noni_assistant_first_seen', '1')
+        }, 900)
+        return () => clearTimeout(timer)
+      }
+    } catch { /* noop */ }
+  }, [setupData.hasServicios, setupData.hasEmpleados, setupData.hasHorarios, dismissed])
+
   // Auto-show pulse for new users
   useEffect(() => {
     if (!setupData.hasServicios || !setupData.hasEmpleados || !setupData.hasHorarios) {
@@ -476,7 +492,7 @@ export default function FloatingAssistant({
     )
   }
 
-  const messages = getContextualMessages(tab, setupData, vocab)
+  const messages = getContextualMessages(tab, setupData, vocab, smartAlerts)
   const currentMessage = messages[messageIdx] || messages[0]
 
   // Calculate setup progress

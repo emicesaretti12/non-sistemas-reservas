@@ -39,6 +39,9 @@ import SmartInsights from './dashboard/SmartInsights'
 import TodayTimeline from './dashboard/TodayTimeline'
 import FloatingActionMenu from './dashboard/FloatingActionMenu'
 
+// Theme
+import { ThemeToggle } from '../contexts/ThemeContext'
+
 export default function Dashboard({ session }) {
   const showToast = useToast()
   const { showConfirm } = useConfirm()
@@ -695,16 +698,16 @@ export default function Dashboard({ session }) {
   ]
 
   if (loading) return (
-    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]' : 'bg-[#F5F2EA]'}`} data-testid="dashboard-loading" style={{ fontFamily: '"Inter Tight", sans-serif' }}>
+    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]' : 'bg-[#F8FAFC]'}`} data-testid="dashboard-loading" style={{ fontFamily: '"Inter Tight", sans-serif' }}>
       <div className="flex flex-col items-center gap-5">
         <div className="relative">
-          <div className={`w-11 h-11 rounded-md flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#F5F2EA]' : 'bg-[#161412]'}`}>
-            <span className={`font-black text-base tracking-tighter ${negocio?.es_admin_plataforma ? 'text-[#0A0A0B]' : 'text-[#F5F2EA]'}`} style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+          <div className={`w-11 h-11 rounded-md flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#F8FAFC]' : 'bg-[#0F172A]'}`}>
+            <span className={`font-black text-base tracking-tighter ${negocio?.es_admin_plataforma ? 'text-[#0A0A0B]' : 'text-[#F8FAFC]'}`} style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
           </div>
-          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#FF4F00] animate-pulse" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#0EA5E9] animate-pulse" />
         </div>
-        <div className={`w-32 h-px overflow-hidden ${negocio?.es_admin_plataforma ? 'bg-white/10' : 'bg-stone-300'}`}>
-          <div className="h-full bg-[#FF4F00]" style={{ width: '40%', animation: 'loadingBar 1.2s ease-in-out infinite' }}></div>
+        <div className={`w-32 h-px overflow-hidden ${negocio?.es_admin_plataforma ? 'bg-white/10' : 'bg-slate-300'}`}>
+          <div className="h-full bg-[#0EA5E9]" style={{ width: '40%', animation: 'loadingBar 1.2s ease-in-out infinite' }}></div>
         </div>
       </div>
       <style>{`@keyframes loadingBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }`}</style>
@@ -714,22 +717,22 @@ export default function Dashboard({ session }) {
   // ===== PANTALLA DE CUENTA SUSPENDIDA =====
   if (negocio && negocio.estado_suscripcion === 'suspendido' && !negocio.es_admin_plataforma) {
     return (
-      <div className="min-h-screen bg-[#F5F2EA] text-[#1A1814] font-sans antialiased flex flex-col" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
+      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans antialiased flex flex-col" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
         {/* Navbar editorial */}
-        <nav className="h-14 border-b bg-[#F5F2EA]/95 backdrop-blur-md border-stone-300/70 shadow-[0_1px_0_rgba(0,0,0,0.02)] flex items-center justify-between px-4 sticky top-0 z-50" style={{ fontFamily: '"Inter Tight", sans-serif' }}>
+        <nav className="h-14 border-b bg-[#F8FAFC]/95 backdrop-blur-md border-slate-300/70 shadow-[0_1px_0_rgba(0,0,0,0.02)] flex items-center justify-between px-4 sticky top-0 z-50" style={{ fontFamily: '"Inter Tight", sans-serif' }}>
           <div className="flex items-center gap-2.5">
             <div className="relative">
-              <div className="w-9 h-9 rounded-md bg-[#161412] flex items-center justify-center">
-                <span className="text-[#F5F2EA] font-black text-[14px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+              <div className="w-9 h-9 rounded-md bg-[#0F172A] flex items-center justify-center">
+                <span className="text-[#F8FAFC] font-black text-[14px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
               </div>
               <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
             </div>
             <div className="leading-none">
-              <p className="font-bold text-[14px] text-[#1A1814] tracking-tight">Noni<span className="text-red-500">.</span></p>
+              <p className="font-bold text-[14px] text-[#0F172A] tracking-tight">Noni<span className="text-red-500">.</span></p>
               <p className="text-[9px] font-medium tracking-[0.2em] uppercase text-red-600 mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Cuenta suspendida</p>
             </div>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="text-[11px] font-semibold uppercase tracking-widest text-stone-600 hover:text-[#1A1814] transition-colors px-3 py-2 hover:bg-stone-200/60 rounded-md" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Salir</button>
+          <button onClick={() => supabase.auth.signOut()} className="text-[11px] font-semibold uppercase tracking-widest text-slate-600 hover:text-[#0F172A] transition-colors px-3 py-2 hover:bg-slate-200/60 rounded-md" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Salir</button>
         </nav>
 
         {/* Contenido de bloqueo */}
@@ -822,7 +825,7 @@ export default function Dashboard({ session }) {
 
 
   return (
-    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F5F2EA] text-[#1A1814]'}`}>
+    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-[#0F172A]'}`}>
 
       {/* Copy-link toast */}
       {copyToast && (
@@ -836,25 +839,25 @@ export default function Dashboard({ session }) {
       )}
 
       {/* GLOBAL NAVBAR EDITORIAL */}
-      <nav className={`h-14 md:h-16 border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]/95 backdrop-blur-md border-white/5 shadow-2xl' : 'bg-[#F5F2EA]/95 backdrop-blur-md border-stone-300/70 shadow-[0_1px_0_rgba(0,0,0,0.02)]'}`} data-testid="dashboard-navbar" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
+      <nav className={`h-14 md:h-16 border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]/95 backdrop-blur-md border-white/5 shadow-2xl' : 'bg-[#F8FAFC]/95 backdrop-blur-md border-slate-300/70 shadow-[0_1px_0_rgba(0,0,0,0.02)]'}`} data-testid="dashboard-navbar" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
         <div className="flex items-center gap-2.5 md:gap-3">
           <div className="relative">
-            <div className={`w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#F5F2EA]' : 'bg-[#161412]'}`}>
-              <span className={`font-black text-[13px] md:text-[14px] tracking-tighter ${negocio?.es_admin_plataforma ? 'text-[#0A0A0B]' : 'text-[#F5F2EA]'}`} style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+            <div className={`w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#F8FAFC]' : 'bg-[#0F172A]'}`}>
+              <span className={`font-black text-[13px] md:text-[14px] tracking-tighter ${negocio?.es_admin_plataforma ? 'text-[#0A0A0B]' : 'text-[#F8FAFC]'}`} style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
             </div>
-            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#FF4F00]" />
+            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#0EA5E9]" />
           </div>
           <div className="hidden sm:block leading-none">
-            <p className={`font-bold text-[13px] md:text-[14px] tracking-tight ${negocio?.es_admin_plataforma ? 'text-white' : 'text-[#1A1814]'}`}>
-              Noni<span className="text-[#FF4F00]">.</span>
+            <p className={`font-bold text-[13px] md:text-[14px] tracking-tight ${negocio?.es_admin_plataforma ? 'text-white' : 'text-[#0F172A]'}`}>
+              Noni<span className="text-[#0EA5E9]">.</span>
             </p>
-            <p className={`text-[8px] md:text-[9px] font-medium uppercase tracking-[0.22em] mt-1 ${negocio?.es_admin_plataforma ? 'text-white/45' : 'text-stone-500'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <p className={`text-[8px] md:text-[9px] font-medium uppercase tracking-[0.22em] mt-1 ${negocio?.es_admin_plataforma ? 'text-white/45' : 'text-slate-500'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               {negocio?.es_admin_plataforma ? 'Nucleus Master' : (negocio?.nombre || 'Workspace')}
             </p>
           </div>
           {/* Mobile-only label */}
           <div className="sm:hidden leading-none">
-            <p className={`text-[10px] font-bold tracking-[0.18em] uppercase ${negocio?.es_admin_plataforma ? 'text-white/70' : 'text-stone-700'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <p className={`text-[10px] font-bold tracking-[0.18em] uppercase ${negocio?.es_admin_plataforma ? 'text-white/70' : 'text-slate-700'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               {negocio?.es_admin_plataforma ? 'Nucleus' : (negocio?.nombre?.slice(0, 14) || 'Panel')}
             </p>
           </div>
@@ -864,19 +867,20 @@ export default function Dashboard({ session }) {
             <>
               <NotificationCenter negocioId={negocio.id} rubro={negocio.rubro} />
 
-              <button onClick={() => setSearchOpen(true)} data-testid="global-search-btn" className="hidden md:flex items-center gap-2 px-3 py-2 bg-transparent hover:bg-stone-200/60 transition-all text-[11px] font-medium text-stone-600 border border-stone-300 rounded-md">
+              <button onClick={() => setSearchOpen(true)} data-testid="global-search-btn" className="hidden md:flex items-center gap-2 px-3 py-2 bg-transparent hover:bg-slate-200/60 transition-all text-[11px] font-medium text-slate-600 border border-slate-300 rounded-md">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 <span>Buscar</span>
-                <kbd className="hidden lg:inline-flex px-1.5 py-0.5 bg-stone-100 text-[9px] font-bold text-stone-500 border border-stone-300 rounded-sm" style={{ fontFamily: '"JetBrains Mono", monospace' }}>⌘K</kbd>
+                <kbd className="hidden lg:inline-flex px-1.5 py-0.5 bg-slate-100 text-[9px] font-bold text-slate-500 border border-slate-300 rounded-sm" style={{ fontFamily: '"JetBrains Mono", monospace' }}>⌘K</kbd>
               </button>
 
-              <button onClick={() => window.open(publicLink, '_blank')} data-testid="open-public-link-btn" className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold text-stone-700 hover:text-[#FF4F00] hover:bg-stone-200/60 border border-stone-300 transition-all rounded-md">
+              <button onClick={() => window.open(publicLink, '_blank')} data-testid="open-public-link-btn" className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold text-slate-700 hover:text-[#0EA5E9] hover:bg-slate-200/60 border border-slate-300 transition-all rounded-md">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 <span>Ver app</span>
               </button>
             </>
           )}
-          <button onClick={() => supabase.auth.signOut()} data-testid="signout-btn" className={`inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold transition-all rounded-md ${negocio?.es_admin_plataforma ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-stone-600 hover:text-[#1A1814] hover:bg-stone-200/60'}`}>
+          <ThemeToggle testId="theme-toggle-btn" className="!w-9 !h-9" />
+          <button onClick={() => supabase.auth.signOut()} data-testid="signout-btn" className={`inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold transition-all rounded-md ${negocio?.es_admin_plataforma ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#0F172A] hover:bg-slate-200/60'}`}>
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
             <span>Salir</span>
           </button>
@@ -975,7 +979,7 @@ export default function Dashboard({ session }) {
               <div className="sticky top-20 space-y-7">
                 {Object.entries(tabsGrouped).map(([groupName, items]) => (
                   <div key={groupName}>
-                    <p className="px-3 mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                    <p className="px-3 mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                       {groupName}
                     </p>
                     <nav className="space-y-0.5">
@@ -989,12 +993,12 @@ export default function Dashboard({ session }) {
                             data-testid={`sidebar-tab-${i.id}`}
                             className={`w-full group flex items-center gap-2.5 px-3 py-2 rounded-md transition-all relative ${
                               activo
-                                ? 'bg-[#1A1814] text-[#F5F2EA]'
-                                : 'text-stone-700 hover:bg-stone-200/60 hover:text-[#1A1814]'
+                                ? 'bg-[#0F172A] text-[#F8FAFC]'
+                                : 'text-slate-700 hover:bg-slate-200/60 hover:text-[#0F172A]'
                             }`}
                           >
-                            {activo && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#FF4F00] rounded-r" />}
-                            <svg className={`w-4 h-4 shrink-0 transition-colors ${activo ? 'text-[#FF4F00]' : 'text-stone-500 group-hover:text-[#1A1814]'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            {activo && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#0EA5E9] rounded-r" />}
+                            <svg className={`w-4 h-4 shrink-0 transition-colors ${activo ? 'text-[#0EA5E9]' : 'text-slate-500 group-hover:text-[#0F172A]'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                             <span className="text-[13px] font-semibold tracking-tight flex-1">{i.label}</span>
                             {/* Badge contador */}
                             {(() => {
@@ -1007,16 +1011,16 @@ export default function Dashboard({ session }) {
                               return (
                                 <span className={`text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded ${
                                   activo
-                                    ? 'bg-[#FF4F00] text-white'
+                                    ? 'bg-[#0EA5E9] text-white'
                                     : esAlerta
-                                      ? 'bg-[#FFF1EA] text-[#FF4F00] border border-[#FF4F00]/30'
-                                      : 'bg-stone-200 text-stone-700'
+                                      ? 'bg-[#E0F2FE] text-[#0EA5E9] border border-[#0EA5E9]/30'
+                                      : 'bg-slate-200 text-slate-700'
                                 }`} style={{ fontFamily: '"JetBrains Mono", monospace' }} data-testid={`badge-${i.id}`}>
                                   {badge > 99 ? '99+' : badge}
                                 </span>
                               )
                             })()}
-                            {activo && <svg className="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>}
+                            {activo && <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>}
                           </button>
                         )
                       })}
@@ -1025,10 +1029,10 @@ export default function Dashboard({ session }) {
                 ))}
 
                 {/* Sidebar footer */}
-                <div className="px-3 pt-5 border-t border-stone-300/70">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Tu workspace</p>
-                  <p className="text-[12px] font-semibold text-[#1A1814] truncate" title={negocio?.nombre}>{negocio?.nombre}</p>
-                  <p className="text-[10px] text-stone-500 truncate mt-0.5">{negocio?.rubro}</p>
+                <div className="px-3 pt-5 border-t border-slate-300/70">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Tu workspace</p>
+                  <p className="text-[12px] font-semibold text-[#0F172A] truncate" title={negocio?.nombre}>{negocio?.nombre}</p>
+                  <p className="text-[10px] text-slate-500 truncate mt-0.5">{negocio?.rubro}</p>
                 </div>
               </div>
             </aside>
@@ -1037,7 +1041,7 @@ export default function Dashboard({ session }) {
             <div className="space-y-5 md:space-y-7 min-w-0">
 
             {/* ─────── HERO COMPACTO EDITORIAL ─────── */}
-            <header className="relative overflow-hidden rounded-xl bg-[#161412] text-[#F5F2EA] px-5 md:px-7 py-5 md:py-6 animate-in fade-in duration-500">
+            <header className="relative overflow-hidden rounded-xl bg-[#0F172A] text-[#F8FAFC] px-5 md:px-7 py-5 md:py-6 animate-in fade-in duration-500">
               {/* Subtle grain */}
               <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{
                 backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
@@ -1053,7 +1057,7 @@ export default function Dashboard({ session }) {
                     </div>
                   ) : (
                     <div className="w-11 h-11 md:w-12 md:h-12 rounded-md bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                      <span className="text-[#F5F2EA] font-black text-lg tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>
+                      <span className="text-[#F8FAFC] font-black text-lg tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>
                         {negocio.nombre.charAt(0)}
                       </span>
                     </div>
@@ -1065,33 +1069,33 @@ export default function Dashboard({ session }) {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                       </span>
-                      <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-300/80" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-300/80" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                         Operativo · {new Date().toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' })}
                       </span>
                     </div>
                     <h2 className="text-[20px] md:text-[28px] font-light tracking-[-0.025em] leading-tight truncate" style={{ fontFamily: '"Fraunces", serif' }}>
-                      {tabActual.label} <em className="italic font-medium text-[#FF6B35]">·</em> <span className="font-bold">{negocio.nombre}</span>
+                      {tabActual.label} <em className="italic font-medium text-[#38BDF8]">·</em> <span className="font-bold">{negocio.nombre}</span>
                     </h2>
                   </div>
                 </div>
 
                 {/* Quick stat */}
                 <div className="hidden sm:flex flex-col items-end shrink-0 pl-3 border-l border-white/10">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Hoy</span>
-                  <p className="text-[20px] md:text-[24px] font-bold text-[#F5F2EA] leading-none mt-1" style={{ fontFamily: '"Fraunces", serif' }}>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Hoy</span>
+                  <p className="text-[20px] md:text-[24px] font-bold text-[#F8FAFC] leading-none mt-1" style={{ fontFamily: '"Fraunces", serif' }}>
                     {stats.hoy}
                   </p>
-                  <p className="text-[9px] text-stone-400 font-medium mt-0.5">{vocab.turnos}</p>
+                  <p className="text-[9px] text-slate-400 font-medium mt-0.5">{vocab.turnos}</p>
                 </div>
               </div>
             </header>
 
             {/* ─────── MOBILE TAB CHIP (current section + menú) ─────── */}
             <div className="flex md:hidden items-center gap-2">
-              <div className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg shadow-sm">
-                <svg className="w-4 h-4 text-[#FF4F00] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={tabActual.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <p className="text-[12px] font-bold text-[#1A1814] truncate flex-1">{tabActual.label}</p>
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+              <div className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg shadow-sm">
+                <svg className="w-4 h-4 text-[#0EA5E9] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={tabActual.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <p className="text-[12px] font-bold text-[#0F172A] truncate flex-1">{tabActual.label}</p>
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                   {tabActual.group}
                 </span>
               </div>
@@ -1099,7 +1103,7 @@ export default function Dashboard({ session }) {
                 onClick={() => setDrawerOpen(true)}
                 data-testid="mobile-menu-btn"
                 aria-label="Abrir menú"
-                className="shrink-0 w-11 h-11 flex items-center justify-center bg-[#1A1814] text-[#F5F2EA] rounded-lg active:scale-95 transition-transform"
+                className="shrink-0 w-11 h-11 flex items-center justify-center bg-[#0F172A] text-[#F8FAFC] rounded-lg active:scale-95 transition-transform"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -1153,39 +1157,39 @@ export default function Dashboard({ session }) {
                     }
 
                     return (
-                      <div className="bg-white rounded-xl border border-stone-300/70 shadow-sm overflow-hidden">
+                      <div className="bg-white rounded-xl border border-slate-300/70 shadow-sm overflow-hidden">
                         {/* Header */}
-                        <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-stone-200/80">
+                        <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-slate-200/80">
                           <div>
-                            <h3 className="text-[13px] font-bold text-[#1A1814] tracking-tight">Resumen de hoy</h3>
-                            <p className="text-[9px] font-medium text-stone-500 uppercase tracking-[0.25em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                            <h3 className="text-[13px] font-bold text-[#0F172A] tracking-tight">Resumen de hoy</h3>
+                            <p className="text-[9px] font-medium text-slate-500 uppercase tracking-[0.25em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                               {ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                           </div>
                           {countdown && (
-                            <span className="text-[9px] font-bold text-[#FF4F00] bg-[#FFF1EA] border border-[#FF4F00]/20 px-3 py-1.5 rounded-md uppercase tracking-[0.18em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                            <span className="text-[9px] font-bold text-[#0EA5E9] bg-[#E0F2FE] border border-[#0EA5E9]/20 px-3 py-1.5 rounded-md uppercase tracking-[0.18em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                               Próximo · {countdown}
                             </span>
                           )}
                         </div>
 
                         {/* Mini Stats */}
-                        <div className="grid grid-cols-4 divide-x divide-stone-200">
+                        <div className="grid grid-cols-4 divide-x divide-slate-200">
                           <div className="p-4 text-center">
-                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.turnos}</p>
-                            <p className="text-2xl font-bold text-[#1A1814] tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosHoyData.length + turnosPasados.length}</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.turnos}</p>
+                            <p className="text-2xl font-bold text-[#0F172A] tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosHoyData.length + turnosPasados.length}</p>
                           </div>
                           <div className="p-4 text-center">
-                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ingresos</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ingresos</p>
                             <p className="text-2xl font-bold text-emerald-700 tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>${ingresosDia.toLocaleString()}</p>
                           </div>
                           <div className="p-4 text-center">
-                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Atendidos</p>
-                            <p className="text-2xl font-bold text-stone-600 tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosPasados.length}</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Atendidos</p>
+                            <p className="text-2xl font-bold text-slate-600 tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosPasados.length}</p>
                           </div>
                           <div className="p-4 text-center">
-                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Pendientes</p>
-                            <p className="text-2xl font-bold text-[#FF4F00] tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosHoyData.length}</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Pendientes</p>
+                            <p className="text-2xl font-bold text-[#0EA5E9] tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosHoyData.length}</p>
                           </div>
                         </div>
 
@@ -1236,35 +1240,35 @@ export default function Dashboard({ session }) {
                     const numero = proximaCita.cliente_telefono?.replace(/[^0-9]/g, '') || ''
                     const hora = formatearHora(proximaCita.fecha_hora) || ''
                     return (
-                      <div className="bg-white rounded-xl border border-stone-300/70 shadow-sm overflow-hidden" data-testid="proxima-cita">
-                        <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-0 md:divide-x md:divide-stone-200">
+                      <div className="bg-white rounded-xl border border-slate-300/70 shadow-sm overflow-hidden" data-testid="proxima-cita">
+                        <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-0 md:divide-x md:divide-slate-200">
                           {/* Hora bloque */}
-                          <div className="px-5 py-4 md:py-5 bg-[#1A1814] text-[#F5F2EA] flex md:flex-col items-center md:items-start justify-between md:justify-center gap-2">
+                          <div className="px-5 py-4 md:py-5 bg-[#0F172A] text-[#F8FAFC] flex md:flex-col items-center md:items-start justify-between md:justify-center gap-2">
                             <div>
-                              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#FF6B35] mb-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.proximaCita}</p>
+                              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#38BDF8] mb-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.proximaCita}</p>
                               <p className="text-[32px] md:text-[38px] font-light leading-none tabular-nums tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{hora}</p>
                             </div>
                             {diffMin > 0 && diffMin < 1440 && (
-                              <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                              <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                                 {diffMin < 60 ? `En ${diffMin} min` : `En ${Math.floor(diffMin / 60)}h ${diffMin % 60}m`}
                               </span>
                             )}
                           </div>
                           {/* Info */}
                           <div className="px-5 py-4 md:py-5 flex-1 min-w-0 flex flex-col justify-center">
-                            <p className="text-[16px] md:text-[18px] font-bold text-[#1A1814] truncate" style={{ fontFamily: '"Fraunces", serif' }}>{proximaCita.cliente_nombre}</p>
+                            <p className="text-[16px] md:text-[18px] font-bold text-[#0F172A] truncate" style={{ fontFamily: '"Fraunces", serif' }}>{proximaCita.cliente_nombre}</p>
                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                              <span className="text-[10px] font-bold text-[#1A1814] bg-stone-100 border border-stone-300 px-2 py-0.5 rounded uppercase tracking-[0.18em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                              <span className="text-[10px] font-bold text-[#0F172A] bg-slate-100 border border-slate-300 px-2 py-0.5 rounded uppercase tracking-[0.18em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                                 {proximaCita.servicios?.nombre || vocab.servicio}
                               </span>
-                              <span className="text-[10px] text-stone-500 font-medium">{formatearFecha(proximaCita.fecha_hora)}</span>
+                              <span className="text-[10px] text-slate-500 font-medium">{formatearFecha(proximaCita.fecha_hora)}</span>
                               {proximaCita.empleados?.nombre && (
-                                <span className="text-[10px] text-stone-500 font-medium">· {proximaCita.empleados.nombre}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">· {proximaCita.empleados.nombre}</span>
                               )}
                             </div>
                           </div>
                           {/* Acciones */}
-                          <div className="px-5 py-4 md:py-5 flex md:flex-col items-center md:items-stretch justify-center gap-2 border-t md:border-t-0 border-stone-200">
+                          <div className="px-5 py-4 md:py-5 flex md:flex-col items-center md:items-stretch justify-center gap-2 border-t md:border-t-0 border-slate-200">
                             {numero && (
                               <a
                                 href={`https://wa.me/${numero}?text=${encodeURIComponent(`Hola ${proximaCita.cliente_nombre?.split(' ')[0]}, te recuerdo tu ${(proximaCita.servicios?.nombre || vocab.servicio).toLowerCase()} hoy a las ${hora} hs. ¡Te esperamos!`)}`}
@@ -1281,7 +1285,7 @@ export default function Dashboard({ session }) {
                             )}
                             <button
                               onClick={() => setTab('agenda')}
-                              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-[10px] font-bold uppercase tracking-[0.18em] bg-transparent border border-stone-300 text-stone-700 hover:bg-stone-100 transition-colors"
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-[10px] font-bold uppercase tracking-[0.18em] bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors"
                               style={{ fontFamily: '"JetBrains Mono", monospace' }}
                               data-testid="proxima-cita-ver"
                             >
@@ -1328,36 +1332,36 @@ export default function Dashboard({ session }) {
                       onClick={() => setTab('inventario')}
                       className={`text-left p-5 rounded-xl border shadow-sm flex items-center justify-between group transition-all ${
                         crmStats.stockBajo > 0
-                          ? 'bg-[#FFF1EA] border-[#FF4F00]/30 hover:border-[#FF4F00]'
-                          : 'bg-white border-stone-300/70 hover:border-stone-400'
+                          ? 'bg-[#E0F2FE] border-[#0EA5E9]/30 hover:border-[#0EA5E9]'
+                          : 'bg-white border-slate-300/70 hover:border-slate-400'
                       }`}
                       data-testid="widget-stock"
                     >
                       <div className="min-w-0">
-                        <p className={`text-[9px] font-bold uppercase tracking-[0.22em] mb-2 ${crmStats.stockBajo > 0 ? 'text-[#FF4F00]' : 'text-stone-500'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>Alertas de stock</p>
-                        <p className={`text-[32px] font-light tracking-[-0.03em] leading-none ${crmStats.stockBajo > 0 ? 'text-[#FF4F00]' : 'text-[#1A1814]'}`} style={{ fontFamily: '"Fraunces", serif' }}>{crmStats.stockBajo}</p>
-                        <p className={`text-[11px] mt-1.5 font-medium ${crmStats.stockBajo > 0 ? 'text-stone-700' : 'text-stone-500'}`}>
+                        <p className={`text-[9px] font-bold uppercase tracking-[0.22em] mb-2 ${crmStats.stockBajo > 0 ? 'text-[#0EA5E9]' : 'text-slate-500'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>Alertas de stock</p>
+                        <p className={`text-[32px] font-light tracking-[-0.03em] leading-none ${crmStats.stockBajo > 0 ? 'text-[#0EA5E9]' : 'text-[#0F172A]'}`} style={{ fontFamily: '"Fraunces", serif' }}>{crmStats.stockBajo}</p>
+                        <p className={`text-[11px] mt-1.5 font-medium ${crmStats.stockBajo > 0 ? 'text-slate-700' : 'text-slate-500'}`}>
                           {crmStats.stockBajo > 0 ? 'Reponé antes de que se agoten' : 'Inventario en orden'}
                         </p>
                       </div>
-                      <div className={`w-11 h-11 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${crmStats.stockBajo > 0 ? 'bg-[#FF4F00] text-white' : 'bg-stone-100 text-stone-400'}`}>
+                      <div className={`w-11 h-11 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${crmStats.stockBajo > 0 ? 'bg-[#0EA5E9] text-white' : 'bg-slate-100 text-slate-400'}`}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
                     </button>
 
                     <button
                       onClick={() => setTab('equipo')}
-                      className="text-left p-5 rounded-xl bg-white border border-stone-300/70 shadow-sm hover:border-stone-400 flex items-center justify-between group transition-all"
+                      className="text-left p-5 rounded-xl bg-white border border-slate-300/70 shadow-sm hover:border-slate-400 flex items-center justify-between group transition-all"
                       data-testid="widget-staff"
                     >
                       <div className="min-w-0">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] mb-2 text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Equipo activo</p>
-                        <p className="text-[32px] font-light tracking-[-0.03em] leading-none text-[#1A1814]" style={{ fontFamily: '"Fraunces", serif' }}>
-                          {crmStats.empleadosActivos}<span className="text-stone-400 text-[24px]"> / {crmStats.totalEmpleados}</span>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] mb-2 text-slate-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Equipo activo</p>
+                        <p className="text-[32px] font-light tracking-[-0.03em] leading-none text-[#0F172A]" style={{ fontFamily: '"Fraunces", serif' }}>
+                          {crmStats.empleadosActivos}<span className="text-slate-400 text-[24px]"> / {crmStats.totalEmpleados}</span>
                         </p>
-                        <p className="text-[11px] mt-1.5 font-medium text-stone-500">{vocab.empleados} disponibles</p>
+                        <p className="text-[11px] mt-1.5 font-medium text-slate-500">{vocab.empleados} disponibles</p>
                       </div>
-                      <div className="w-11 h-11 rounded-md bg-[#1A1814] text-[#F5F2EA] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                      <div className="w-11 h-11 rounded-md bg-[#0F172A] text-[#F8FAFC] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
                     </button>
@@ -1366,13 +1370,13 @@ export default function Dashboard({ session }) {
                   {/* ═══════════ DISTRIBUCIÓN SEMANAL + INFO STACK ═══════════ */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                     {/* Bar chart semanal */}
-                    <div className="md:col-span-2 bg-white p-5 rounded-xl border border-stone-300/70 shadow-sm" data-testid="weekly-chart">
+                    <div className="md:col-span-2 bg-white p-5 rounded-xl border border-slate-300/70 shadow-sm" data-testid="weekly-chart">
                       <div className="flex items-center justify-between mb-5">
                         <div>
-                          <h3 className="text-[13px] font-bold text-[#1A1814] tracking-tight">Distribución semanal</h3>
-                          <p className="text-[9px] font-medium text-stone-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.turnos} por día</p>
+                          <h3 className="text-[13px] font-bold text-[#0F172A] tracking-tight">Distribución semanal</h3>
+                          <p className="text-[9px] font-medium text-slate-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.turnos} por día</p>
                         </div>
-                        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.22em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.22em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                           Total: {distribucionSemanal.reduce((a, b) => a + b, 0)}
                         </span>
                       </div>
@@ -1382,14 +1386,14 @@ export default function Dashboard({ session }) {
                           const altura = Math.max(4, (val / maxSemanal) * 100)
                           return (
                             <div key={idx} className="flex-1 flex flex-col items-center gap-2 group/bar">
-                              <span className={`text-[10px] font-bold tabular-nums ${esHoy ? 'text-[#FF4F00]' : 'text-stone-500'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>{val || ''}</span>
+                              <span className={`text-[10px] font-bold tabular-nums ${esHoy ? 'text-[#0EA5E9]' : 'text-slate-500'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>{val || ''}</span>
                               <div className="w-full flex items-end" style={{ height: '100%' }}>
                                 <div
-                                  className={`w-full rounded-t transition-all duration-500 group-hover/bar:opacity-80 ${esHoy ? 'bg-[#FF4F00]' : 'bg-stone-300'}`}
+                                  className={`w-full rounded-t transition-all duration-500 group-hover/bar:opacity-80 ${esHoy ? 'bg-[#0EA5E9]' : 'bg-slate-300'}`}
                                   style={{ height: `${altura}%`, minHeight: '4px' }}
                                 />
                               </div>
-                              <span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${esHoy ? 'text-[#FF4F00]' : 'text-stone-400'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>{diasSemanaLabels[idx]}</span>
+                              <span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${esHoy ? 'text-[#0EA5E9]' : 'text-slate-400'}`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>{diasSemanaLabels[idx]}</span>
                             </div>
                           )
                         })}
@@ -1399,48 +1403,48 @@ export default function Dashboard({ session }) {
                     {/* Info cards stack */}
                     <div className="space-y-3 md:space-y-4">
                       {/* Servicio popular */}
-                      <div className="p-4 rounded-xl bg-white border border-stone-300/70 shadow-sm" data-testid="widget-popular">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-stone-500 mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.monitorPopular}</p>
-                        <p className="text-[16px] font-bold text-[#1A1814] truncate leading-tight" style={{ fontFamily: '"Fraunces", serif' }}>
+                      <div className="p-4 rounded-xl bg-white border border-slate-300/70 shadow-sm" data-testid="widget-popular">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.monitorPopular}</p>
+                        <p className="text-[16px] font-bold text-[#0F172A] truncate leading-tight" style={{ fontFamily: '"Fraunces", serif' }}>
                           {stats.popular !== '-' ? stats.popular : 'Sin datos aún'}
                         </p>
-                        <p className="text-[10px] text-stone-500 mt-1.5 font-medium">Tu mejor servicio este mes</p>
+                        <p className="text-[10px] text-slate-500 mt-1.5 font-medium">Tu mejor servicio este mes</p>
                       </div>
 
                       {/* Ingresos mes */}
-                      <div className="p-4 rounded-xl bg-[#1A1814] text-[#F5F2EA] shadow-sm relative overflow-hidden" data-testid="widget-mes">
+                      <div className="p-4 rounded-xl bg-[#0F172A] text-[#F8FAFC] shadow-sm relative overflow-hidden" data-testid="widget-mes">
                         <div className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,79,0,0.25) 0%, transparent 70%)' }} />
-                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-stone-400 mb-1.5 relative" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ingresos del mes</p>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400 mb-1.5 relative" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ingresos del mes</p>
                         <p className="text-[22px] font-bold leading-none relative" style={{ fontFamily: '"Fraunces", serif' }}>
                           ${stats.mesIngresos.toLocaleString('es-AR')}
                         </p>
-                        <p className="text-[10px] text-stone-400 mt-1.5 font-medium relative">Acumulado del mes en curso</p>
+                        <p className="text-[10px] text-slate-400 mt-1.5 font-medium relative">Acumulado del mes en curso</p>
                       </div>
 
                       {/* Ocupación */}
-                      <div className="p-4 rounded-xl bg-white border border-stone-300/70 shadow-sm" data-testid="widget-ocupacion">
+                      <div className="p-4 rounded-xl bg-white border border-slate-300/70 shadow-sm" data-testid="widget-ocupacion">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ocupación</p>
-                          <span className="text-[14px] font-bold text-[#1A1814] tabular-nums" style={{ fontFamily: '"Fraunces", serif' }}>{stats.tasaOcupacion}%</span>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ocupación</p>
+                          <span className="text-[14px] font-bold text-[#0F172A] tabular-nums" style={{ fontFamily: '"Fraunces", serif' }}>{stats.tasaOcupacion}%</span>
                         </div>
-                        <div className="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-[#FF4F00] to-[#FF8A3D] transition-all duration-700" style={{ width: `${stats.tasaOcupacion}%` }} />
+                        <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#0EA5E9] to-[#FF8A3D] transition-all duration-700" style={{ width: `${stats.tasaOcupacion}%` }} />
                         </div>
-                        <p className="text-[10px] text-stone-500 mt-2 font-medium">vs. capacidad semanal</p>
+                        <p className="text-[10px] text-slate-500 mt-2 font-medium">vs. capacidad semanal</p>
                       </div>
                     </div>
                   </div>
 
                   {/* ═══════════ ACCIONES RÁPIDAS ═══════════ */}
-                  <div className="bg-white rounded-xl border border-stone-300/70 shadow-sm p-5" data-testid="quick-actions">
+                  <div className="bg-white rounded-xl border border-slate-300/70 shadow-sm p-5" data-testid="quick-actions">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h3 className="text-[13px] font-bold text-[#1A1814] tracking-tight">Atajos rápidos</h3>
-                        <p className="text-[9px] font-medium text-stone-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                        <h3 className="text-[13px] font-bold text-[#0F172A] tracking-tight">Atajos rápidos</h3>
+                        <p className="text-[9px] font-medium text-slate-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                           Las acciones más usadas en un solo lugar
                         </p>
                       </div>
-                      <button onClick={() => setSearchOpen(true)} className="hidden md:flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500 hover:text-[#FF4F00] transition-colors" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                      <button onClick={() => setSearchOpen(true)} className="hidden md:flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:text-[#0EA5E9] transition-colors" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         Buscar · ⌘K
                       </button>
@@ -1452,13 +1456,13 @@ export default function Dashboard({ session }) {
                         { label: 'Copiar link público', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3', action: () => { navigator.clipboard.writeText(publicLink).catch(() => {}); showToast('¡Link copiado!') }, badge: 'L' },
                         { label: 'Ver agenda pública', icon: 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14', action: () => window.open(publicLink, '_blank'), badge: 'V' },
                       ].map((a, i) => (
-                        <button key={i} onClick={a.action} className="group relative text-left p-3 rounded-md border border-stone-300 hover:border-[#FF4F00] hover:bg-[#FFF1EA] transition-all active:scale-[0.98]" data-testid={`quick-action-${i}`}>
+                        <button key={i} onClick={a.action} className="group relative text-left p-3 rounded-md border border-slate-300 hover:border-[#0EA5E9] hover:bg-[#E0F2FE] transition-all active:scale-[0.98]" data-testid={`quick-action-${i}`}>
                           <div className="flex items-center gap-2 mb-1.5">
-                            <span className="w-7 h-7 rounded-md bg-[#1A1814] text-[#F5F2EA] group-hover:bg-[#FF4F00] flex items-center justify-center transition-colors shrink-0">
+                            <span className="w-7 h-7 rounded-md bg-[#0F172A] text-[#F8FAFC] group-hover:bg-[#0EA5E9] flex items-center justify-center transition-colors shrink-0">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d={a.icon} strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </span>
                           </div>
-                          <p className="text-[11px] font-bold text-[#1A1814] leading-tight">{a.label}</p>
+                          <p className="text-[11px] font-bold text-[#0F172A] leading-tight">{a.label}</p>
                         </button>
                       ))}
                     </div>
@@ -1466,29 +1470,29 @@ export default function Dashboard({ session }) {
 
                   {/* ═══════════ ACTIVIDAD RECIENTE — Editorial ═══════════ */}
                   {actividadReciente.length > 0 && (
-                    <div className="bg-white rounded-xl border border-stone-300/70 shadow-sm overflow-hidden" data-testid="recent-activity">
-                      <div className="px-5 py-4 border-b border-stone-200/80 flex items-center justify-between">
+                    <div className="bg-white rounded-xl border border-slate-300/70 shadow-sm overflow-hidden" data-testid="recent-activity">
+                      <div className="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between">
                         <div>
-                          <h4 className="text-[13px] font-bold text-[#1A1814] tracking-tight">Actividad reciente</h4>
-                          <p className="text-[9px] font-medium text-stone-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Últimos {Math.min(actividadReciente.length, 5)} movimientos</p>
+                          <h4 className="text-[13px] font-bold text-[#0F172A] tracking-tight">Actividad reciente</h4>
+                          <p className="text-[9px] font-medium text-slate-500 uppercase tracking-[0.22em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Últimos {Math.min(actividadReciente.length, 5)} movimientos</p>
                         </div>
-                        <button onClick={() => setTab('agenda')} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] text-stone-600 hover:text-[#FF4F00] transition-colors" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                        <button onClick={() => setTab('agenda')} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600 hover:text-[#0EA5E9] transition-colors" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                           Ver todo
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                         </button>
                       </div>
-                      <div className="divide-y divide-stone-200/70">
+                      <div className="divide-y divide-slate-200/70">
                         {actividadReciente.slice(0, 5).map((act, idx) => (
-                          <div key={idx} className="px-5 py-3 flex items-center gap-3 hover:bg-stone-50/50 transition-colors cursor-pointer" onClick={() => setTab('agenda')} data-testid={`activity-${idx}`}>
-                            <div className="w-9 h-9 rounded-md bg-stone-100 flex items-center justify-center shrink-0 text-[11px] font-bold text-[#1A1814] tabular-nums" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                          <div key={idx} className="px-5 py-3 flex items-center gap-3 hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => setTab('agenda')} data-testid={`activity-${idx}`}>
+                            <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center shrink-0 text-[11px] font-bold text-[#0F172A] tabular-nums" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                               {formatearHora(act.fecha_hora)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[12px] font-bold text-[#1A1814] truncate">{act.cliente_nombre}</p>
-                              <p className="text-[11px] text-stone-500 font-medium truncate">{act.servicios?.nombre || vocab.servicio} <span className="text-stone-400">·</span> {act.empleados?.nombre?.split(' ')[0] || vocab.fallbackStaff}</p>
+                              <p className="text-[12px] font-bold text-[#0F172A] truncate">{act.cliente_nombre}</p>
+                              <p className="text-[11px] text-slate-500 font-medium truncate">{act.servicios?.nombre || vocab.servicio} <span className="text-slate-400">·</span> {act.empleados?.nombre?.split(' ')[0] || vocab.fallbackStaff}</p>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className="text-[10px] font-medium text-stone-500">{formatearFechaRelativa(act.fecha_hora)}</p>
+                              <p className="text-[10px] font-medium text-slate-500">{formatearFechaRelativa(act.fecha_hora)}</p>
                             </div>
                           </div>
                         ))}
@@ -1497,7 +1501,7 @@ export default function Dashboard({ session }) {
                   )}
 
                   {/* ═══════════ LINK PÚBLICO — Card editorial dark ═══════════ */}
-                  <div id="tour-link" className="bg-[#161412] rounded-xl text-[#F5F2EA] relative overflow-hidden shadow-lg" data-testid="public-link-widget">
+                  <div id="tour-link" className="bg-[#0F172A] rounded-xl text-[#F8FAFC] relative overflow-hidden shadow-lg" data-testid="public-link-widget">
                     <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{
                       backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
                     }} />
@@ -1505,28 +1509,28 @@ export default function Dashboard({ session }) {
 
                     <div className="relative z-10 p-5 md:p-6">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#FF6B35]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Tu agenda online</span>
+                        <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#38BDF8]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Tu agenda online</span>
                         <span className="flex h-1.5 w-1.5 relative">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                         </span>
                       </div>
                       <h4 className="text-[22px] md:text-[26px] font-light tracking-[-0.025em] leading-tight mb-1" style={{ fontFamily: '"Fraunces", serif' }}>
-                        Recibí <em className="italic font-medium text-[#FF6B35]">reservas 24/7</em>
+                        Recibí <em className="italic font-medium text-[#38BDF8]">reservas 24/7</em>
                       </h4>
-                      <p className="text-stone-400 text-[12px] md:text-[13px] font-medium mb-4 max-w-md">{vocab.linkDescripcion}</p>
+                      <p className="text-slate-400 text-[12px] md:text-[13px] font-medium mb-4 max-w-md">{vocab.linkDescripcion}</p>
                       <div
                         onClick={() => { navigator.clipboard.writeText(publicLink).catch(() => {}); showToast("¡Link copiado!") }}
-                        className="flex items-center bg-black/40 border border-white/10 rounded-md p-3 cursor-pointer hover:border-[#FF4F00]/60 transition-all group"
+                        className="flex items-center bg-black/40 border border-white/10 rounded-md p-3 cursor-pointer hover:border-[#0EA5E9]/60 transition-all group"
                         data-testid="public-link-copy"
                       >
-                        <code className="text-[11px] md:text-[12px] text-[#FF6B35] truncate flex-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{publicLink}</code>
-                        <svg className="w-4 h-4 ml-2 text-stone-400 group-hover:text-[#FF4F00] transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3" /></svg>
+                        <code className="text-[11px] md:text-[12px] text-[#38BDF8] truncate flex-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{publicLink}</code>
+                        <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-[#0EA5E9] transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3" /></svg>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={() => window.open(publicLink, '_blank')}
-                          className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] bg-[#FF4F00] text-white rounded-md hover:bg-[#FF6B35] transition-colors flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] bg-[#0EA5E9] text-white rounded-md hover:bg-[#38BDF8] transition-colors flex items-center justify-center gap-1.5"
                           style={{ fontFamily: '"JetBrains Mono", monospace' }}
                           data-testid="public-link-open"
                         >
@@ -1535,7 +1539,7 @@ export default function Dashboard({ session }) {
                         </button>
                         <button
                           onClick={() => { const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`📅 Reservá tu ${vocab.turno || 'turno'} acá: ${publicLink}`)}`; window.open(whatsappUrl, '_blank') }}
-                          className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] bg-white/5 text-[#F5F2EA] border border-white/10 rounded-md hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] bg-white/5 text-[#F8FAFC] border border-white/10 rounded-md hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5"
                           style={{ fontFamily: '"JetBrains Mono", monospace' }}
                           data-testid="public-link-share"
                         >
@@ -1943,27 +1947,27 @@ export default function Dashboard({ session }) {
       {drawerOpen && negocio && !negocio.es_admin_plataforma && (
         <div className="md:hidden fixed inset-0 z-[90] flex" data-testid="mobile-drawer">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-[#1A1814]/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setDrawerOpen(false)} />
+          <div className="absolute inset-0 bg-[#0F172A]/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setDrawerOpen(false)} />
           {/* Panel */}
-          <div className="relative ml-auto w-[78%] max-w-[320px] bg-[#F5F2EA] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-300/70">
+          <div className="relative ml-auto w-[78%] max-w-[320px] bg-[#F8FAFC] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-300/70">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="w-8 h-8 rounded-md bg-[#161412] flex items-center justify-center">
-                    <span className="text-[#F5F2EA] font-black text-[13px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+                  <div className="w-8 h-8 rounded-md bg-[#0F172A] flex items-center justify-center">
+                    <span className="text-[#F8FAFC] font-black text-[13px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
                   </div>
-                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#FF4F00]" />
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#0EA5E9]" />
                 </div>
                 <div className="leading-none">
-                  <p className="font-bold text-[13px] text-[#1A1814] tracking-tight">Noni<span className="text-[#FF4F00]">.</span></p>
-                  <p className="text-[9px] font-medium uppercase tracking-[0.22em] mt-1 text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Menú</p>
+                  <p className="font-bold text-[13px] text-[#0F172A] tracking-tight">Noni<span className="text-[#0EA5E9]">.</span></p>
+                  <p className="text-[9px] font-medium uppercase tracking-[0.22em] mt-1 text-slate-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Menú</p>
                 </div>
               </div>
               <button
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Cerrar menú"
                 data-testid="drawer-close-btn"
-                className="w-9 h-9 flex items-center justify-center rounded-md text-stone-500 hover:bg-stone-200/70 hover:text-[#1A1814] transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-200/70 hover:text-[#0F172A] transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -1972,7 +1976,7 @@ export default function Dashboard({ session }) {
             <div className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
               {Object.entries(tabsGrouped).map(([groupName, items]) => (
                 <div key={groupName}>
-                  <p className="px-2 mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                  <p className="px-2 mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                     {groupName}
                   </p>
                   <nav className="space-y-0.5">
@@ -1984,11 +1988,11 @@ export default function Dashboard({ session }) {
                           onClick={() => { setTab(i.id); setDrawerOpen(false) }}
                           data-testid={`drawer-tab-${i.id}`}
                           className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md transition-all relative ${
-                            activo ? 'bg-[#1A1814] text-[#F5F2EA]' : 'text-stone-700 hover:bg-stone-200/60'
+                            activo ? 'bg-[#0F172A] text-[#F8FAFC]' : 'text-slate-700 hover:bg-slate-200/60'
                           }`}
                         >
-                          {activo && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#FF4F00] rounded-r" />}
-                          <svg className={`w-4 h-4 shrink-0 ${activo ? 'text-[#FF4F00]' : 'text-stone-500'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          {activo && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#0EA5E9] rounded-r" />}
+                          <svg className={`w-4 h-4 shrink-0 ${activo ? 'text-[#0EA5E9]' : 'text-slate-500'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                           <span className="text-[13px] font-semibold tracking-tight">{i.label}</span>
                         </button>
                       )
@@ -1998,10 +2002,10 @@ export default function Dashboard({ session }) {
               ))}
             </div>
 
-            <div className="px-5 py-4 border-t border-stone-300/70 bg-white/40">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Workspace</p>
-              <p className="text-[12px] font-semibold text-[#1A1814] truncate">{negocio?.nombre}</p>
-              <p className="text-[10px] text-stone-500 truncate mt-0.5">{negocio?.rubro}</p>
+            <div className="px-5 py-4 border-t border-slate-300/70 bg-white/40">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Workspace</p>
+              <p className="text-[12px] font-semibold text-[#0F172A] truncate">{negocio?.nombre}</p>
+              <p className="text-[10px] text-slate-500 truncate mt-0.5">{negocio?.rubro}</p>
             </div>
           </div>
         </div>
@@ -2021,7 +2025,7 @@ export default function Dashboard({ session }) {
                 <path d={item.d} strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span>{item.label}</span>
-              {tab === item.id && <div className="w-1 h-1 rounded-full bg-[#FF4F00] mt-px"></div>}
+              {tab === item.id && <div className="w-1 h-1 rounded-full bg-[#0EA5E9] mt-px"></div>}
             </button>
           ))}
           <button

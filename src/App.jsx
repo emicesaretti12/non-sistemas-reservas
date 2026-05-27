@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 import { ToastProvider } from './components/Toast'
+import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import VistaPublica from './components/VistaPublica'
@@ -9,21 +10,78 @@ import ActualizarClave from './components/ActualizarClave'
 import LandingPage from './components/LandingPage'
 import { ConfirmProvider } from './contexts/ConfirmContext'
 
-function App() {
+function Splash() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  return (
+    <div
+      className="min-h-dvh flex items-center justify-center"
+      style={{
+        background: isDark ? 'var(--ns-bg)' : 'var(--ns-bg)',
+        color: 'var(--ns-text)',
+        fontFamily: '"Inter Tight", "Inter", sans-serif',
+      }}
+      data-testid="splash-screen"
+    >
+      <div className="flex flex-col items-center gap-6">
+        {/* Logo */}
+        <div className="relative" data-testid="noni-logo">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+            style={{ background: 'var(--ns-gradient-deep)' }}
+          >
+            <span
+              className="text-white font-black text-2xl tracking-tighter"
+              style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
+            >
+              N
+            </span>
+          </div>
+          <span
+            className="absolute -top-1 -right-1 w-3 h-3 rounded-full ns-pulse-soft"
+            style={{ background: 'var(--ns-primary-light)', boxShadow: '0 0 18px var(--ns-primary)' }}
+          />
+        </div>
+
+        {/* Subtle progress bar */}
+        <div
+          className="w-44 h-[3px] overflow-hidden rounded-full"
+          style={{ background: 'var(--ns-border)' }}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{
+              background: 'var(--ns-gradient-1)',
+              width: '40%',
+              animation: 'loadingBar 1.2s ease-in-out infinite',
+            }}
+          />
+        </div>
+
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.35em]"
+          style={{ color: 'var(--ns-text-muted)', fontFamily: '"JetBrains Mono", monospace' }}
+        >
+          Cargando · Noni
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function AppShell() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Consultar sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setLoading(false)
     }).catch((e) => {
-      console.warn("Supabase Session Background Worker:", e.message)
+      console.warn('Supabase Session Background Worker:', e.message)
       setLoading(false)
     })
 
-    // Escuchar cambios en la autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setLoading(false)
@@ -32,74 +90,32 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Mientras comprobamos la sesión, mostramos un splash editorial
-  if (loading) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center bg-[#F5F2EA] text-[#1A1814]" data-testid="splash-screen" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
-        <div className="flex flex-col items-center gap-6">
-          {/* Logo */}
-          <div className="relative">
-            <div className="w-12 h-12 rounded-md bg-[#161412] flex items-center justify-center">
-              <span className="text-[#F5F2EA] font-black text-xl tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
-            </div>
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#FF4F00] animate-pulse" />
-          </div>
-
-          {/* Subtle progress bar */}
-          <div className="w-40 h-px bg-stone-300 overflow-hidden">
-            <div className="h-full bg-[#FF4F00] animate-[loadingBar_1.2s_ease-in-out_infinite]" style={{ width: '40%' }}></div>
-          </div>
-
-          <p className="text-stone-500 text-[10px] font-medium uppercase tracking-[0.35em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
-            Cargando · Noni
-          </p>
-        </div>
-
-        <style>{`
-          @keyframes loadingBar {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(350%); }
-          }
-        `}</style>
-      </div>
-    )
-  }
+  if (loading) return <Splash />
 
   return (
-    <ToastProvider>
-      <ConfirmProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* LANDING PAGE: Página de venta pública */}
-            <Route path="/" element={session ? <Navigate to="/admin" replace /> : <LandingPage />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={session ? <Navigate to="/admin" replace /> : <LandingPage />} />
+        <Route path="/app/:slug/:id" element={<VistaPublica />} />
+        <Route path="/app/:id" element={<VistaPublica />} />
+        <Route path="/actualizar-clave" element={<ActualizarClave />} />
+        <Route path="/login" element={!session ? <Login /> : <Navigate to="/admin" replace />} />
+        <Route path="/admin" element={session ? <Dashboard session={session} /> : <Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to={session ? '/admin' : '/'} replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
-            {/* RUTA PÚBLICA NUEVA CON NOMBRE: Debe estar arriba para que no la atrape el "*" */}
-            <Route path="/app/:slug/:id" element={<VistaPublica />} />
-
-            {/* RUTA PÚBLICA LEGACY: Se mantiene por compatibilidad de links viejos */}
-            <Route path="/app/:id" element={<VistaPublica />} />
-
-            {/* RECUPERAR CLAVE */}
-            <Route path="/actualizar-clave" element={<ActualizarClave />} />
-
-            {/* LOGIN: Si hay sesión, te manda al admin automáticamente */}
-            <Route
-              path="/login"
-              element={!session ? <Login /> : <Navigate to="/admin" replace />}
-            />
-
-            {/* ADMIN: Si NO hay sesión, te manda al login */}
-            <Route
-              path="/admin"
-              element={session ? <Dashboard session={session} /> : <Navigate to="/login" replace />}
-            />
-
-            {/* RUTA POR DEFECTO: Siempre al final */}
-            <Route path="*" element={<Navigate to={session ? "/admin" : "/"} replace />} />
-          </Routes>
-        </BrowserRouter>
-      </ConfirmProvider>
-    </ToastProvider>
+function App() {
+  return (
+    <ThemeProvider>
+      <ToastProvider>
+        <ConfirmProvider>
+          <AppShell />
+        </ConfirmProvider>
+      </ToastProvider>
+    </ThemeProvider>
   )
 }
 

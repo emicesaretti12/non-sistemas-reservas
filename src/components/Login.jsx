@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
+import { useTheme, ThemeToggle } from '../contexts/ThemeContext'
 
 const COOLDOWN_SEGUNDOS = 60
 
 export default function Login() {
-  const [mode, setMode] = useState('login')
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
 
+  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -26,8 +29,10 @@ export default function Login() {
 
     const hash = window.location.hash.substring(1)
     const queryParams = new URLSearchParams(window.location.search)
-    const errorDesc = new URLSearchParams(hash).get('error_description') || queryParams.get('error_description')
-    const hasAuthToken = hash.includes('access_token') || hash.includes('refresh_token') || queryParams.get('code')
+    const errorDesc =
+      new URLSearchParams(hash).get('error_description') || queryParams.get('error_description')
+    const hasAuthToken =
+      hash.includes('access_token') || hash.includes('refresh_token') || queryParams.get('code')
 
     if (!hasAuthToken) {
       supabase.auth.signOut().catch(() => {})
@@ -39,7 +44,6 @@ export default function Login() {
       if (errorReal.includes('Database error saving new user')) {
         texto = 'No pudimos crear tu cuenta. Verificá la configuración o contactá soporte.'
       }
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMensaje({ tipo: 'error', texto })
       window.history.replaceState(null, '', window.location.pathname)
     }
@@ -75,9 +79,14 @@ export default function Login() {
 
   const esRateLimit = useCallback((msg) => {
     const l = msg.toLowerCase()
-    return l.includes('rate limit') || l.includes('too many requests') ||
-      l.includes('over_email_send_rate_limit') || l.includes('email rate limit exceeded') ||
-      l.includes('for security purposes') || l.includes('you can only request this')
+    return (
+      l.includes('rate limit') ||
+      l.includes('too many requests') ||
+      l.includes('over_email_send_rate_limit') ||
+      l.includes('email rate limit exceeded') ||
+      l.includes('for security purposes') ||
+      l.includes('you can only request this')
+    )
   }, [])
 
   const extraerSegundos = useCallback((msg) => {
@@ -85,24 +94,33 @@ export default function Login() {
     return m ? Math.max(parseInt(m[1], 10), COOLDOWN_SEGUNDOS) : COOLDOWN_SEGUNDOS
   }, [])
 
-  const traducirError = useCallback((errorMsg) => {
-    const msg = errorMsg.toLowerCase()
-    if (esRateLimit(errorMsg)) return `Demasiados intentos. Esperá ${COOLDOWN_SEGUNDOS} segundos.`
-    if (msg.includes('invalid login credentials')) return 'Email o contraseña incorrectos.'
-    if (msg.includes('user already registered')) return 'Este email ya está registrado. Iniciá sesión.'
-    if (msg.includes('email link is invalid') || msg.includes('token has expired')) return 'El enlace expiró. Solicitá uno nuevo.'
-    if (msg.includes('email not confirmed')) return 'Confirmá tu email antes de iniciar sesión.'
-    if (msg.includes('signup disabled')) return 'Los registros están deshabilitados temporalmente.'
-    if (msg.includes('weak password')) return 'La contraseña es demasiado débil.'
-    return errorMsg
-  }, [esRateLimit])
+  const traducirError = useCallback(
+    (errorMsg) => {
+      const msg = errorMsg.toLowerCase()
+      if (esRateLimit(errorMsg)) return `Demasiados intentos. Esperá ${COOLDOWN_SEGUNDOS} segundos.`
+      if (msg.includes('invalid login credentials')) return 'Email o contraseña incorrectos.'
+      if (msg.includes('user already registered'))
+        return 'Este email ya está registrado. Iniciá sesión.'
+      if (msg.includes('email link is invalid') || msg.includes('token has expired'))
+        return 'El enlace expiró. Solicitá uno nuevo.'
+      if (msg.includes('email not confirmed')) return 'Confirmá tu email antes de iniciar sesión.'
+      if (msg.includes('signup disabled')) return 'Los registros están deshabilitados temporalmente.'
+      if (msg.includes('weak password')) return 'La contraseña es demasiado débil.'
+      return errorMsg
+    },
+    [esRateLimit]
+  )
 
   const activarCooldown = useCallback((s) => {
     setCooldown(s)
     if (cooldownRef.current) clearInterval(cooldownRef.current)
     cooldownRef.current = setInterval(() => {
-      setCooldown(prev => {
-        if (prev <= 1) { clearInterval(cooldownRef.current); cooldownRef.current = null; return 0 }
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current)
+          cooldownRef.current = null
+          return 0
+        }
         return prev - 1
       })
     }, 1000)
@@ -140,15 +158,23 @@ export default function Login() {
 
     const cleanEmail = email.trim().toLowerCase()
     if (!cleanEmail) return setMensaje({ tipo: 'error', texto: 'Ingresá tu correo.' })
-    if (!isValidEmail(cleanEmail)) return setMensaje({ tipo: 'error', texto: 'El formato del correo no es válido.' })
+    if (!isValidEmail(cleanEmail))
+      return setMensaje({ tipo: 'error', texto: 'El formato del correo no es válido.' })
 
     if (mode === 'registro') {
       if (!password) return setMensaje({ tipo: 'error', texto: 'Ingresá una contraseña.' })
-      if (passwordStrength < 3) return setMensaje({ tipo: 'error', texto: 'Tu contraseña es débil. Sumá mayúsculas, números o símbolos.' })
-      if (password !== confirmPassword) return setMensaje({ tipo: 'error', texto: 'Las contraseñas no coinciden.' })
-      if (!acceptTerms) return setMensaje({ tipo: 'error', texto: 'Aceptá los términos para continuar.' })
+      if (passwordStrength < 3)
+        return setMensaje({
+          tipo: 'error',
+          texto: 'Tu contraseña es débil. Sumá mayúsculas, números o símbolos.',
+        })
+      if (password !== confirmPassword)
+        return setMensaje({ tipo: 'error', texto: 'Las contraseñas no coinciden.' })
+      if (!acceptTerms)
+        return setMensaje({ tipo: 'error', texto: 'Aceptá los términos para continuar.' })
     }
-    if (mode === 'login' && !password) return setMensaje({ tipo: 'error', texto: 'Ingresá tu contraseña.' })
+    if (mode === 'login' && !password)
+      return setMensaje({ tipo: 'error', texto: 'Ingresá tu contraseña.' })
 
     setLoading(true)
     let hasRedirected = false
@@ -158,13 +184,18 @@ export default function Login() {
 
       if (mode === 'registro') {
         const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail, password,
+          email: cleanEmail,
+          password,
           options: { emailRedirectTo: `${window.location.origin}/admin` },
         })
         if (error) {
           if (esRateLimit(error.message)) {
-            const s = extraerSegundos(error.message); activarCooldown(s)
-            return setMensaje({ tipo: 'error', texto: `Demasiados registros. Esperá ${s} segundos.` })
+            const s = extraerSegundos(error.message)
+            activarCooldown(s)
+            return setMensaje({
+              tipo: 'error',
+              texto: `Demasiados registros. Esperá ${s} segundos.`,
+            })
           }
           throw error
         }
@@ -172,43 +203,67 @@ export default function Login() {
           return setMensaje({ tipo: 'error', texto: 'Este email ya está registrado.' })
         }
         if (data?.user && !data.session) {
-          setMensaje({ tipo: 'exito', texto: 'Cuenta creada. Revisá tu email para confirmarla.' })
-          setMode('login'); setPassword(''); setConfirmPassword('')
+          setMensaje({
+            tipo: 'exito',
+            texto: 'Cuenta creada. Revisá tu email para confirmarla.',
+          })
+          setMode('login')
+          setPassword('')
+          setConfirmPassword('')
           return
         }
         if (data?.session) {
           setMensaje({ tipo: 'exito', texto: 'Bienvenido. Preparando tu workspace...' })
           hasRedirected = true
-          setTimeout(() => { window.location.href = '/admin' }, 500)
+          setTimeout(() => {
+            window.location.href = '/admin'
+          }, 500)
           return
         }
       } else if (mode === 'login') {
-        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        })
         if (error) {
           if (esRateLimit(error.message)) {
-            const s = extraerSegundos(error.message); activarCooldown(s)
-            return setMensaje({ tipo: 'error', texto: `Demasiados intentos. Esperá ${s} segundos.` })
+            const s = extraerSegundos(error.message)
+            activarCooldown(s)
+            return setMensaje({
+              tipo: 'error',
+              texto: `Demasiados intentos. Esperá ${s} segundos.`,
+            })
           }
           throw error
         }
         if (!data.session) throw new Error('No se pudo iniciar sesión.')
         setMensaje({ tipo: 'exito', texto: 'Acceso confirmado.' })
         hasRedirected = true
-        setTimeout(() => { window.location.href = '/admin' }, 400)
+        setTimeout(() => {
+          window.location.href = '/admin'
+        }, 400)
       } else if (mode === 'recuperar') {
         const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
           redirectTo: `${window.location.origin}/actualizar-clave`,
         })
         if (error) {
           if (esRateLimit(error.message)) {
-            const s = extraerSegundos(error.message); activarCooldown(s)
-            return setMensaje({ tipo: 'error', texto: `Esperá ${s} segundos antes de pedir otro enlace.` })
+            const s = extraerSegundos(error.message)
+            activarCooldown(s)
+            return setMensaje({
+              tipo: 'error',
+              texto: `Esperá ${s} segundos antes de pedir otro enlace.`,
+            })
           }
           throw error
         }
-        setMensaje({ tipo: 'exito', texto: 'Si el email está registrado, te enviamos las instrucciones.' })
+        setMensaje({
+          tipo: 'exito',
+          texto: 'Si el email está registrado, te enviamos las instrucciones.',
+        })
         activarCooldown(30)
-        setMode('login'); setPassword('')
+        setMode('login')
+        setPassword('')
       }
     } catch (error) {
       setMensaje({ tipo: 'error', texto: traducirError(error.message) })
@@ -218,14 +273,37 @@ export default function Login() {
   }
 
   const configUI = {
-    login: { titulo: 'Acceder a tu', acento: 'panel.', subtitulo: 'Continuá donde quedaste.', btn: 'Iniciar sesión' },
-    registro: { titulo: 'Empezar', acento: 'gratis.', subtitulo: 'Tu cuenta en menos de un minuto.', btn: 'Crear cuenta' },
-    recuperar: { titulo: 'Recuperar', acento: 'acceso.', subtitulo: 'Te enviamos un enlace por email.', btn: 'Enviar enlace' },
+    login: {
+      titulo: 'Bienvenido de vuelta a',
+      acento: 'Noni',
+      subtitulo: 'Gestioná tu agenda, equipo y reservas desde un sólo lugar.',
+      btn: 'Iniciar sesión',
+    },
+    registro: {
+      titulo: 'Tu negocio merece',
+      acento: 'Noni',
+      subtitulo: 'Creá tu cuenta gratis en menos de un minuto.',
+      btn: 'Crear cuenta',
+    },
+    recuperar: {
+      titulo: 'Recuperá tu',
+      acento: 'acceso',
+      subtitulo: 'Te enviamos un enlace seguro para restablecer tu contraseña.',
+      btn: 'Enviar enlace',
+    },
   }
 
-  // Mock ticker — schedule
-  const horaAhora = useMemo(() => now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }), [now])
-  const fechaHoy = useMemo(() => now.toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' }).replace(/^./, c => c.toUpperCase()), [now])
+  const horaAhora = useMemo(
+    () => now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+    [now]
+  )
+  const fechaHoy = useMemo(
+    () =>
+      now
+        .toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' })
+        .replace(/^./, (c) => c.toUpperCase()),
+    [now]
+  )
 
   const renderPasswordMeter = () => {
     if (mode !== 'registro' || !password) return null
@@ -236,10 +314,17 @@ export default function Login() {
       { id: 'spec', text: 'Símbolo', test: /[^A-Za-z0-9]/.test(password) },
     ]
     return (
-      <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1" data-testid="password-strength-meter">
-        {rules.map(r => (
-          <span key={r.id} className={`inline-flex items-center gap-1 text-[10px] font-medium tracking-wide ${r.test ? 'text-emerald-700' : 'text-stone-400'}`}>
-            <span className={`w-1 h-1 rounded-full ${r.test ? 'bg-emerald-600' : 'bg-stone-300'}`} />
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5" data-testid="password-strength-meter">
+        {rules.map((r) => (
+          <span
+            key={r.id}
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold"
+            style={{ color: r.test ? 'var(--ns-success)' : 'var(--ns-text-muted)' }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full transition-colors"
+              style={{ background: r.test ? 'var(--ns-success)' : 'var(--ns-border-strong)' }}
+            />
             {r.text}
           </span>
         ))}
@@ -248,125 +333,249 @@ export default function Login() {
   }
 
   const botonDeshabilitado =
-    loading || cooldown > 0 ||
-    (mode === 'registro' && (!acceptTerms || password !== confirmPassword || passwordStrength < 3))
+    loading ||
+    cooldown > 0 ||
+    (mode === 'registro' &&
+      (!acceptTerms || password !== confirmPassword || passwordStrength < 3))
 
   const renderBotonTexto = () => {
-    if (loading) return (
-      <div className="flex items-center justify-center gap-2.5">
-        <div className="w-3.5 h-3.5 border-[1.5px] border-white/40 border-t-white rounded-full animate-spin" />
-        <span>Procesando</span>
-      </div>
-    )
+    if (loading)
+      return (
+        <span className="flex items-center justify-center gap-2.5">
+          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          <span>Procesando…</span>
+        </span>
+      )
     if (cooldown > 0) return <span>Esperá {cooldown}s</span>
     return (
       <span className="flex items-center justify-center gap-2">
         {configUI[mode].btn}
-        <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>
       </span>
     )
   }
 
+  // Theme-aware styles
+  const styles = {
+    shell: {
+      background: 'var(--ns-bg)',
+      color: 'var(--ns-text)',
+    },
+    asidePattern: {
+      background:
+        'radial-gradient(at 25% 15%, rgba(56, 189, 248, 0.45) 0%, transparent 55%), radial-gradient(at 80% 80%, rgba(8, 145, 178, 0.55) 0%, transparent 55%), linear-gradient(135deg, #075985 0%, #0C4A6E 50%, #0B1220 100%)',
+    },
+    grain: {
+      backgroundImage:
+        "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+    },
+  }
+
   return (
     <div
-      className="min-h-dvh w-full flex bg-[#F5F2EA] text-[#1A1814]"
-      style={{ fontFamily: '"Inter Tight", "Inter", -apple-system, sans-serif' }}
+      className="min-h-dvh w-full flex"
+      style={{ ...styles.shell, fontFamily: '"Inter Tight", "Inter", -apple-system, sans-serif' }}
       data-testid="login-screen"
     >
-      {/* ═══════════════════ LEFT — EDITORIAL CHARCOAL ═══════════════════ */}
-      <aside className="hidden lg:flex lg:w-[52%] xl:w-[55%] relative overflow-hidden flex-col text-[#F5F2EA]" style={{ background: '#161412' }}>
-        {/* Film grain + warm gradient */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse at top left, rgba(255,77,0,0.08) 0%, transparent 40%), radial-gradient(ellipse at bottom right, rgba(255,200,140,0.04) 0%, transparent 50%)'
-        }} />
-        <div className="absolute inset-0 opacity-[0.035] pointer-events-none mix-blend-overlay" style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
-        }} />
+      {/* ═══════════════════ LEFT — BRAND HERO ═══════════════════ */}
+      <aside
+        className="hidden lg:flex lg:w-[48%] xl:w-[52%] relative overflow-hidden flex-col text-white"
+        style={styles.asidePattern}
+      >
+        {/* Grain overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay"
+          style={styles.grain}
+        />
+        {/* Glow orbs */}
+        <div
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(56,189,248,0.45) 0%, rgba(56,189,248,0) 70%)',
+          }}
+        />
+        <div
+          className="absolute -bottom-40 -right-40 w-[480px] h-[480px] rounded-full pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(125,211,252,0.35) 0%, rgba(125,211,252,0) 70%)',
+          }}
+        />
 
         <div className="relative z-10 flex flex-col justify-between h-full px-12 xl:px-16 py-10">
-          {/* ─── TOP STRIP ─── */}
+          {/* TOP STRIP */}
           <header className="flex items-start justify-between">
             <a href="/" className="group flex items-center gap-3" data-testid="brand-link">
               <div className="relative">
-                <div className="w-9 h-9 rounded-md bg-[#F5F2EA] flex items-center justify-center">
-                  <span className="text-[#161412] font-black text-[15px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+                <div
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg"
+                  style={{
+                    background: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <span
+                    className="font-black text-xl tracking-tighter"
+                    style={{
+                      fontFamily: '"Fraunces", serif',
+                      fontStyle: 'italic',
+                      color: '#0369A1',
+                    }}
+                  >
+                    N
+                  </span>
                 </div>
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#FF4F00]" />
+                <span
+                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+                  style={{
+                    background: '#38BDF8',
+                    boxShadow: '0 0 16px rgba(56,189,248,0.8)',
+                  }}
+                />
               </div>
               <div className="leading-none">
-                <p className="font-bold text-[16px] tracking-tight">Noni<span className="text-[#FF4F00]">.</span></p>
-                <p className="text-[9px] font-medium uppercase tracking-[0.3em] text-stone-400 mt-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Non Sistemas</p>
+                <p className="font-bold text-[17px] tracking-tight text-white">
+                  Noni<span style={{ color: '#7DD3FC' }}>.</span>
+                </p>
+                <p
+                  className="text-[9px] font-semibold uppercase tracking-[0.32em] text-white/55 mt-1.5"
+                  style={{ fontFamily: '"JetBrains Mono", monospace' }}
+                >
+                  Sistema de reservas
+                </p>
               </div>
             </a>
 
-            <div className="text-right text-[10px] font-medium uppercase tracking-[0.25em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+            <div
+              className="text-right text-[10px] font-semibold uppercase tracking-[0.25em] text-white/55"
+              style={{ fontFamily: '"JetBrains Mono", monospace' }}
+            >
               <p>Est. MMXXIV</p>
-              <p className="mt-1 text-stone-500">Salsipuedes · Argentina</p>
+              <p className="mt-1 text-white/40">Salsipuedes · Argentina</p>
             </div>
           </header>
 
-          {/* ─── EDITORIAL HEADLINE ─── */}
+          {/* EDITORIAL HEADLINE */}
           <div className="my-10 xl:my-16">
-            {/* Section marker */}
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#FF4F00]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>N°01</span>
-              <div className="h-px w-12 bg-stone-700" />
-              <span className="text-[10px] uppercase tracking-[0.3em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Operaciones</span>
+            <div className="flex items-center gap-3 mb-8">
+              <span
+                className="text-[10px] font-bold uppercase tracking-[0.3em]"
+                style={{ fontFamily: '"JetBrains Mono", monospace', color: '#7DD3FC' }}
+              >
+                N°01 · Operaciones
+              </span>
+              <div className="h-px w-16" style={{ background: 'rgba(125,211,252,0.4)' }} />
             </div>
 
-            <h1 className="text-[clamp(2.8rem,5.5vw,4.6rem)] leading-[0.95] tracking-[-0.04em] font-light text-[#F5F2EA]" style={{ fontFamily: '"Fraunces", serif' }}>
-              Tu jornada,<br />
-              <em className="font-light text-[#FF6B35] italic">orquestada</em><br />
-              <span className="font-bold">al detalle.</span>
+            <h1
+              className="text-[clamp(2.6rem,5vw,4.4rem)] leading-[1.02] tracking-[-0.035em] font-light text-white"
+              style={{ fontFamily: '"Fraunces", serif' }}
+            >
+              Tu agenda,
+              <br />
+              <em className="font-light italic" style={{ color: '#7DD3FC' }}>
+                orquestada
+              </em>
+              <br />
+              <span className="font-bold text-white">al detalle.</span>
             </h1>
 
-            <p className="mt-7 text-[15px] leading-[1.65] text-stone-300/85 max-w-md font-light">
-              Reservas, equipo, inventario, métricas. Una plataforma que respira al ritmo de tu negocio. <span className="text-stone-400">Sin fricción. Sin atajos. Sin AI-slop.</span>
+            <p className="mt-7 text-[16px] leading-[1.65] text-white/75 max-w-md font-light">
+              Reservas, equipo, inventario y métricas. Una plataforma que respira al ritmo de tu
+              negocio.{' '}
+              <span className="text-white/55">Premium. Simple. Sin fricción.</span>
             </p>
           </div>
 
-          {/* ─── LIVE OPS MOCK PANEL ─── */}
-          <div className="border border-stone-800 rounded-lg overflow-hidden bg-[#1F1B17]/60 backdrop-blur-sm">
-            {/* Bar header */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-stone-800/80 bg-[#0F0D0B]/60">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF4F00] animate-pulse" />
-                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-300" style={{ fontFamily: '"JetBrains Mono", monospace' }}>En vivo</p>
+          {/* LIVE OPS MOCK PANEL */}
+          <div
+            className="rounded-2xl overflow-hidden ns-hero-glass"
+            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}
+          >
+            <div
+              className="flex items-center justify-between px-5 py-3 border-b border-white/10"
+              style={{ background: 'rgba(255,255,255,0.04)' }}
+            >
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="w-2 h-2 rounded-full ns-pulse-soft"
+                  style={{ background: '#38BDF8' }}
+                />
+                <p
+                  className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/85"
+                  style={{ fontFamily: '"JetBrains Mono", monospace' }}
+                >
+                  Agenda en vivo
+                </p>
               </div>
-              <p className="text-[10px] font-medium text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{fechaHoy} · {horaAhora}</p>
+              <p
+                className="text-[10px] font-semibold text-white/55"
+                style={{ fontFamily: '"JetBrains Mono", monospace' }}
+              >
+                {fechaHoy} · {horaAhora}
+              </p>
             </div>
-            {/* Rows */}
-            <ul className="divide-y divide-stone-800/60">
+            <ul className="divide-y divide-white/8">
               {[
                 { h: '09:30', s: 'Corte + Barba', c: 'M. Álvarez', t: 'Confirmado' },
                 { h: '11:00', s: 'Coloración', c: 'L. Pereyra', t: 'En curso' },
                 { h: '14:15', s: 'Manicura', c: 'P. Romero', t: 'Pendiente' },
               ].map((r, i) => (
-                <li key={i} className="grid grid-cols-[60px_1fr_auto] items-center gap-3 px-4 py-2.5 hover:bg-stone-900/30 transition-colors">
-                  <span className="text-[12px] font-bold text-[#FF6B35]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{r.h}</span>
+                <li
+                  key={i}
+                  className="grid grid-cols-[60px_1fr_auto] items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors"
+                >
+                  <span
+                    className="text-[12px] font-bold"
+                    style={{ fontFamily: '"JetBrains Mono", monospace', color: '#7DD3FC' }}
+                  >
+                    {r.h}
+                  </span>
                   <div>
-                    <p className="text-[12px] font-semibold text-stone-200 leading-tight">{r.s}</p>
-                    <p className="text-[10px] text-stone-500 mt-0.5">{r.c}</p>
+                    <p className="text-[12px] font-semibold text-white leading-tight">{r.s}</p>
+                    <p className="text-[10px] text-white/55 mt-0.5">{r.c}</p>
                   </div>
-                  <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm ${
-                    r.t === 'En curso' ? 'bg-emerald-500/15 text-emerald-400' :
-                    r.t === 'Confirmado' ? 'bg-stone-700/40 text-stone-300' :
-                    'bg-amber-500/10 text-amber-400'
-                  }`} style={{ fontFamily: '"JetBrains Mono", monospace' }}>{r.t}</span>
+                  <span
+                    className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+                    style={{
+                      fontFamily: '"JetBrains Mono", monospace',
+                      background:
+                        r.t === 'En curso'
+                          ? 'rgba(52, 211, 153, 0.18)'
+                          : r.t === 'Confirmado'
+                          ? 'rgba(56, 189, 248, 0.18)'
+                          : 'rgba(251, 191, 36, 0.18)',
+                      color:
+                        r.t === 'En curso'
+                          ? '#6EE7B7'
+                          : r.t === 'Confirmado'
+                          ? '#7DD3FC'
+                          : '#FCD34D',
+                    }}
+                  >
+                    {r.t}
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* ─── FOOTER STRIP ─── */}
-          <footer className="mt-10 pt-5 border-t border-stone-800/60 flex items-center justify-between text-[10px] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+          {/* FOOTER STRIP */}
+          <footer
+            className="mt-10 pt-5 border-t border-white/10 flex items-center justify-between text-[10px] text-white/50"
+            style={{ fontFamily: '"JetBrains Mono", monospace' }}
+          >
             <div className="flex items-center gap-4">
-              <span>v2.4.0</span>
-              <span className="w-1 h-1 rounded-full bg-stone-700" />
+              <span>v2.5.0</span>
+              <span className="w-1 h-1 rounded-full bg-white/30" />
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: '#34D399', boxShadow: '0 0 8px #34D399' }}
+                />
                 Servicios operativos
               </span>
             </div>
@@ -377,90 +586,189 @@ export default function Login() {
 
       {/* ═══════════════════ RIGHT — FORM ═══════════════════ */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 sm:px-10 lg:px-14 relative">
-        {/* Mobile brand strip */}
-        <div className="lg:hidden w-full max-w-[420px] flex items-center justify-between mb-10" data-testid="brand-mobile">
-          <a href="/" className="flex items-center gap-2.5">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-md bg-[#161412] flex items-center justify-center">
-                <span className="text-[#F5F2EA] font-black text-[15px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
-              </div>
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#FF4F00]" />
-            </div>
-            <div className="leading-none">
-              <p className="font-bold text-[15px] tracking-tight text-[#161412]">Noni<span className="text-[#FF4F00]">.</span></p>
-              <p className="text-[8px] font-medium uppercase tracking-[0.25em] text-stone-500 mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Non Sistemas</p>
-            </div>
-          </a>
-          <span className="text-[9px] font-medium uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{horaAhora}</span>
+        {/* Top right: theme toggle */}
+        <div className="absolute top-6 right-6 z-10">
+          <ThemeToggle testId="theme-toggle-btn" />
         </div>
 
-        <div className="w-full max-w-[420px]">
-          {/* ─── HEADER ─── */}
+        {/* Mobile brand strip */}
+        <div
+          className="lg:hidden w-full max-w-[420px] flex items-center justify-between mb-10"
+          data-testid="brand-mobile"
+        >
+          <a href="/" className="flex items-center gap-2.5">
+            <div className="relative">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+                style={{ background: 'var(--ns-gradient-deep)' }}
+              >
+                <span
+                  className="text-white font-black text-[17px] tracking-tighter"
+                  style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
+                >
+                  N
+                </span>
+              </div>
+              <span
+                className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                style={{ background: 'var(--ns-primary-light)' }}
+              />
+            </div>
+            <div className="leading-none">
+              <p
+                className="font-bold text-[16px] tracking-tight"
+                style={{ color: 'var(--ns-text)' }}
+              >
+                Noni<span style={{ color: 'var(--ns-primary)' }}>.</span>
+              </p>
+              <p
+                className="text-[9px] font-semibold uppercase tracking-[0.25em] mt-1"
+                style={{
+                  color: 'var(--ns-text-muted)',
+                  fontFamily: '"JetBrains Mono", monospace',
+                }}
+              >
+                Sistema de reservas
+              </p>
+            </div>
+          </a>
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.25em]"
+            style={{
+              color: 'var(--ns-text-muted)',
+              fontFamily: '"JetBrains Mono", monospace',
+            }}
+          >
+            {horaAhora}
+          </span>
+        </div>
+
+        <div className="w-full max-w-[440px]">
+          {/* HEADER */}
           <div className="mb-9">
-            <div className="flex items-center gap-2.5 mb-5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#FF4F00]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
-                {mode === 'login' ? 'N°02' : mode === 'registro' ? 'N°00' : 'N°03'}
+            <div className="flex items-center gap-3 mb-5">
+              <span
+                className="text-[10px] font-bold uppercase tracking-[0.3em]"
+                style={{
+                  fontFamily: '"JetBrains Mono", monospace',
+                  color: 'var(--ns-primary)',
+                }}
+              >
+                {mode === 'login' ? 'N°02 · Acceso' : mode === 'registro' ? 'N°00 · Registro' : 'N°03 · Recuperar'}
               </span>
-              <div className="h-px flex-1 bg-stone-300" />
-              <span className="text-[10px] uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
-                {mode === 'login' ? 'Acceso' : mode === 'registro' ? 'Registro' : 'Recuperar'}
-              </span>
+              <div className="h-px flex-1" style={{ background: 'var(--ns-border)' }} />
             </div>
 
-            <h2 className="text-[44px] sm:text-[52px] leading-[0.95] tracking-[-0.035em] font-light text-[#1A1814]" style={{ fontFamily: '"Fraunces", serif' }} data-testid="login-title">
+            <h2
+              className="text-[36px] sm:text-[44px] leading-[1.05] tracking-[-0.025em] font-light"
+              style={{ fontFamily: '"Fraunces", serif', color: 'var(--ns-text)' }}
+              data-testid="login-title"
+            >
               {configUI[mode].titulo}{' '}
-              <em className="italic font-medium text-[#FF4F00]">{configUI[mode].acento}</em>
+              <em className="italic font-semibold" style={{ color: 'var(--ns-primary)' }}>
+                {configUI[mode].acento}
+                {mode === 'login' || mode === 'registro' ? '.' : ''}
+              </em>
             </h2>
-            <p className="text-stone-600 mt-3 text-[14px] font-medium" data-testid="login-subtitle">
+            <p
+              className="mt-4 text-[15px] font-medium leading-relaxed"
+              style={{ color: 'var(--ns-text-secondary)' }}
+              data-testid="login-subtitle"
+            >
               {configUI[mode].subtitulo}
             </p>
           </div>
 
-          {/* ─── MENSAJE ─── */}
+          {/* MENSAJE */}
           {mensaje && (
             <div
               role="alert"
               data-testid={`alert-${mensaje.tipo}`}
-              className={`mb-6 p-3.5 text-[13px] font-medium flex items-start gap-3 border-l-2 ${
-                mensaje.tipo === 'error'
-                  ? 'bg-red-50/70 text-red-800 border-red-500'
-                  : 'bg-emerald-50/70 text-emerald-800 border-emerald-500'
-              }`}
+              className="mb-6 p-4 text-[13px] font-medium flex items-start gap-3 rounded-xl border"
+              style={{
+                background:
+                  mensaje.tipo === 'error' ? 'var(--ns-danger-bg)' : 'var(--ns-success-bg)',
+                color: mensaje.tipo === 'error' ? 'var(--ns-danger)' : 'var(--ns-success)',
+                borderColor:
+                  mensaje.tipo === 'error'
+                    ? 'color-mix(in srgb, var(--ns-danger) 30%, transparent)'
+                    : 'color-mix(in srgb, var(--ns-success) 30%, transparent)',
+              }}
             >
               <div className="shrink-0 mt-0.5">
                 {mensaje.tipo === 'error' ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
                 ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
                 )}
               </div>
               <div className="flex-1">
-                <p>{mensaje.texto}</p>
+                <p className="leading-snug">{mensaje.texto}</p>
                 {cooldown > 0 && mensaje.tipo === 'error' && (
-                  <div className="mt-2 h-px w-full bg-red-200 overflow-hidden">
-                    <div className="h-full bg-red-500 transition-all duration-1000 ease-linear" style={{ width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%` }} />
+                  <div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-white/40">
+                    <div
+                      className="h-full transition-all duration-1000 ease-linear"
+                      style={{
+                        width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%`,
+                        background: 'var(--ns-danger)',
+                      }}
+                    />
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* ─── SOCIAL ─── */}
+          {/* SOCIAL */}
           {mode !== 'recuperar' && (
             <>
-              <div className="grid grid-cols-2 gap-2 mb-6">
+              <div className="grid grid-cols-2 gap-2.5 mb-6">
                 <button
                   type="button"
                   onClick={() => handleSocialLogin('google')}
                   disabled={loading || cooldown > 0}
                   data-testid="google-login-btn"
-                  className="group flex items-center justify-center gap-2 px-3 py-3 border border-stone-300 bg-white/40 hover:bg-white hover:border-stone-400 transition-all text-[13px] font-semibold text-stone-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'var(--ns-surface)',
+                    border: '1.5px solid var(--ns-border)',
+                    color: 'var(--ns-text)',
+                  }}
+                  onMouseEnter={(e) =>
+                    !e.currentTarget.disabled &&
+                    (e.currentTarget.style.borderColor = 'var(--ns-primary)')
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--ns-border)')}
                 >
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853"
+                    />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335"
+                    />
                   </svg>
                   <span>Google</span>
                 </button>
@@ -469,7 +777,17 @@ export default function Login() {
                   onClick={() => handleSocialLogin('github')}
                   disabled={loading || cooldown > 0}
                   data-testid="github-login-btn"
-                  className="group flex items-center justify-center gap-2 px-3 py-3 border border-stone-300 bg-white/40 hover:bg-white hover:border-stone-400 transition-all text-[13px] font-semibold text-stone-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'var(--ns-surface)',
+                    border: '1.5px solid var(--ns-border)',
+                    color: 'var(--ns-text)',
+                  }}
+                  onMouseEnter={(e) =>
+                    !e.currentTarget.disabled &&
+                    (e.currentTarget.style.borderColor = 'var(--ns-primary)')
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--ns-border)')}
                 >
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
@@ -478,18 +796,33 @@ export default function Login() {
                 </button>
               </div>
               <div className="relative mb-6 flex items-center gap-3">
-                <div className="flex-1 h-px bg-stone-300" />
-                <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>O con email</span>
-                <div className="flex-1 h-px bg-stone-300" />
+                <div className="flex-1 h-px" style={{ background: 'var(--ns-border)' }} />
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-[0.3em]"
+                  style={{
+                    color: 'var(--ns-text-muted)',
+                    fontFamily: '"JetBrains Mono", monospace',
+                  }}
+                >
+                  O con email
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'var(--ns-border)' }} />
               </div>
             </>
           )}
 
-          {/* ─── FORM ─── */}
+          {/* FORM */}
           <form onSubmit={handleAuth} className="space-y-5" data-testid="auth-form">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-stone-700 mb-2" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+              <label
+                htmlFor="email"
+                className="block text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
+                style={{
+                  fontFamily: '"JetBrains Mono", monospace',
+                  color: 'var(--ns-text-secondary)',
+                }}
+              >
                 Email
               </label>
               <input
@@ -502,7 +835,7 @@ export default function Login() {
                 disabled={loading || cooldown > 0}
                 autoComplete="email"
                 data-testid="email-input"
-                className="w-full px-0 pb-2.5 pt-1 bg-transparent border-0 border-b border-stone-400 text-[15px] font-medium text-[#1A1814] placeholder:text-stone-400 outline-none transition-colors focus:border-[#FF4F00] disabled:opacity-50"
+                className="ns-input-clean disabled:opacity-50"
               />
             </div>
 
@@ -510,7 +843,14 @@ export default function Login() {
             {mode !== 'recuperar' && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-stone-700" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                  <label
+                    htmlFor="password"
+                    className="block text-[11px] font-bold uppercase tracking-[0.2em]"
+                    style={{
+                      fontFamily: '"JetBrains Mono", monospace',
+                      color: 'var(--ns-text-secondary)',
+                    }}
+                  >
                     Contraseña
                   </label>
                   {mode === 'login' && (
@@ -518,7 +858,8 @@ export default function Login() {
                       type="button"
                       onClick={() => cambiarModo('recuperar')}
                       data-testid="forgot-password-link"
-                      className="text-[10px] font-semibold text-stone-600 hover:text-[#FF4F00] transition-colors underline underline-offset-4 decoration-stone-300 hover:decoration-[#FF4F00]"
+                      className="text-[11px] font-semibold transition-colors underline-offset-4 hover:underline"
+                      style={{ color: 'var(--ns-primary)' }}
                     >
                       ¿La olvidaste?
                     </button>
@@ -535,19 +876,42 @@ export default function Login() {
                     disabled={loading || cooldown > 0}
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     data-testid="password-input"
-                    className="w-full pr-9 pb-2.5 pt-1 bg-transparent border-0 border-b border-stone-400 text-[15px] font-medium text-[#1A1814] placeholder:text-stone-400 outline-none transition-colors focus:border-[#FF4F00] disabled:opacity-50"
+                    className="ns-input-clean pr-11 disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     data-testid="toggle-password-visibility"
                     aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
-                    className="absolute right-0 top-1 text-stone-400 hover:text-[#FF4F00] p-1 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors"
+                    style={{ color: 'var(--ns-text-muted)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ns-primary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ns-text-muted)')}
                   >
                     {showPassword ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                        />
+                      </svg>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
                     )}
                   </button>
                 </div>
@@ -558,7 +922,14 @@ export default function Login() {
             {/* Confirmar */}
             {mode === 'registro' && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-stone-700 mb-2" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
+                  style={{
+                    fontFamily: '"JetBrains Mono", monospace',
+                    color: 'var(--ns-text-secondary)',
+                  }}
+                >
                   Confirmar contraseña
                 </label>
                 <input
@@ -571,28 +942,45 @@ export default function Login() {
                   disabled={loading || cooldown > 0}
                   autoComplete="new-password"
                   data-testid="confirm-password-input"
-                  className={`w-full px-0 pb-2.5 pt-1 bg-transparent border-0 border-b text-[15px] font-medium text-[#1A1814] placeholder:text-stone-400 outline-none transition-colors disabled:opacity-50 ${
+                  className="ns-input-clean disabled:opacity-50"
+                  style={
                     confirmPassword.length > 0 && password !== confirmPassword
-                      ? 'border-red-500 focus:border-red-600'
-                      : 'border-stone-400 focus:border-[#FF4F00]'
-                  }`}
+                      ? { borderColor: 'var(--ns-danger)' }
+                      : undefined
+                  }
                 />
               </div>
             )}
 
             {/* Terms */}
             {mode === 'registro' && (
-              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-2">
+              <label className="flex items-start gap-3 cursor-pointer select-none pt-1">
                 <input
                   type="checkbox"
                   checked={acceptTerms}
                   onChange={(e) => setAcceptTerms(e.target.checked)}
                   disabled={cooldown > 0}
                   data-testid="terms-checkbox"
-                  className="mt-0.5 w-3.5 h-3.5 rounded-none border-stone-400 text-[#FF4F00] focus:ring-[#FF4F00] focus:ring-offset-0 focus:ring-1 cursor-pointer accent-[#FF4F00]"
+                  className="mt-0.5 w-4 h-4 rounded cursor-pointer accent-sky-500"
                 />
-                <span className="text-[12px] text-stone-700 leading-snug">
-                  Acepto los <a href="#" className="text-[#FF4F00] underline underline-offset-4 decoration-stone-300 hover:decoration-[#FF4F00] font-semibold">Términos</a> y la <a href="#" className="text-[#FF4F00] underline underline-offset-4 decoration-stone-300 hover:decoration-[#FF4F00] font-semibold">Política de Privacidad</a>.
+                <span className="text-[12.5px] leading-snug" style={{ color: 'var(--ns-text-secondary)' }}>
+                  Acepto los{' '}
+                  <a
+                    href="#"
+                    className="font-semibold underline-offset-4 hover:underline"
+                    style={{ color: 'var(--ns-primary)' }}
+                  >
+                    Términos
+                  </a>{' '}
+                  y la{' '}
+                  <a
+                    href="#"
+                    className="font-semibold underline-offset-4 hover:underline"
+                    style={{ color: 'var(--ns-primary)' }}
+                  >
+                    Política de Privacidad
+                  </a>
+                  .
                 </span>
               </label>
             )}
@@ -602,44 +990,63 @@ export default function Login() {
               type="submit"
               disabled={botonDeshabilitado}
               data-testid="submit-btn"
-              className="group w-full py-3.5 mt-3 bg-[#1A1814] hover:bg-[#FF4F00] text-[#F5F2EA] text-[13px] font-bold tracking-wide uppercase transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#FF4F00]/40 focus:ring-offset-2 focus:ring-offset-[#F5F2EA] active:translate-y-px"
-              style={{ fontFamily: '"JetBrains Mono", monospace', letterSpacing: '0.1em' }}
+              className="ns-btn-celeste w-full mt-2"
+              style={{ marginTop: '8px' }}
             >
               {renderBotonTexto()}
             </button>
           </form>
 
-          {/* ─── SWITCH ─── */}
-          <div className="mt-8 pt-5 border-t border-stone-300">
+          {/* SWITCH */}
+          <div
+            className="mt-8 pt-5 border-t"
+            style={{ borderColor: 'var(--ns-border)' }}
+          >
             {mode === 'recuperar' ? (
               <button
                 type="button"
                 onClick={() => cambiarModo('login')}
                 data-testid="back-to-login"
-                className="text-[12px] font-semibold text-stone-700 hover:text-[#FF4F00] transition-colors inline-flex items-center gap-1.5"
+                className="text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5"
+                style={{ color: 'var(--ns-text-secondary)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ns-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ns-text-secondary)')}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
                 Volver al inicio de sesión
               </button>
             ) : (
-              <p className="text-[12px] text-stone-600">
+              <p className="text-[13px]" style={{ color: 'var(--ns-text-secondary)' }}>
                 {mode === 'login' ? '¿Primera vez por acá?' : '¿Ya tenés cuenta?'}{' '}
                 <button
                   type="button"
                   onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
                   data-testid="switch-mode-link"
-                  className="font-bold text-[#FF4F00] hover:text-[#1A1814] transition-colors underline underline-offset-4 decoration-[#FF4F00]/40 hover:decoration-[#1A1814]/40"
+                  className="font-bold underline-offset-4 hover:underline transition-colors"
+                  style={{ color: 'var(--ns-primary)' }}
                 >
-                  {mode === 'login' ? 'Creá una cuenta' : 'Iniciá sesión'}
+                  {mode === 'login' ? 'Creá una cuenta gratis' : 'Iniciá sesión'}
                 </button>
               </p>
             )}
           </div>
 
           {/* Mobile footer */}
-          <div className="lg:hidden mt-12 pt-5 border-t border-stone-300 flex items-center justify-between text-[9px] uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
-            <span>© {new Date().getFullYear()} Non Sistemas</span>
-            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />Online</span>
+          <div
+            className="lg:hidden mt-10 pt-5 border-t flex items-center justify-between text-[10px] uppercase tracking-[0.25em]"
+            style={{
+              borderColor: 'var(--ns-border)',
+              color: 'var(--ns-text-muted)',
+              fontFamily: '"JetBrains Mono", monospace',
+            }}
+          >
+            <span>© {new Date().getFullYear()} Noni</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--ns-success)' }} />
+              Online
+            </span>
           </div>
         </div>
       </main>
