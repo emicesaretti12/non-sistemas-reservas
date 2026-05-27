@@ -47,6 +47,7 @@ export default function Dashboard({ session }) {
 
   // --- ESTADOS: GESTIÓN DE NEGOCIO (OWNER) ---
   const [tab, setTab] = useState('inicio')
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [stats, setStats] = useState({ hoy: 0, ingresos: 0, popular: '-', semana: 0, mesIngresos: 0, tasaOcupacion: 0 })
 
   // Lógica Granular de Carga
@@ -658,25 +659,33 @@ export default function Dashboard({ session }) {
   const _tabClientes = vocab?.tabClientes || 'Clientes'
 
   const tabsConfig = [
-    { id: 'inicio', label: 'Monitor', d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-    { id: 'agenda', label: 'Agenda', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-    { id: 'reportes', label: 'Reportes', d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-    { id: 'servicios', label: _tabServicios, d: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z' },
-    { id: 'equipo', label: _tabStaff, d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-    { id: 'horarios', label: 'Horarios', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { id: 'inventario', label: 'Inventario', d: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-    { id: 'clientes', label: _tabClientes, d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-    { id: 'flyer', label: 'Flyer', d: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-    { id: 'ajustes', label: 'Ajustes', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+    { id: 'inicio', label: 'Monitor', group: 'Operación', d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+    { id: 'agenda', label: 'Agenda', group: 'Operación', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { id: 'clientes', label: _tabClientes, group: 'Operación', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+    { id: 'servicios', label: _tabServicios, group: 'Catálogo', d: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z' },
+    { id: 'equipo', label: _tabStaff, group: 'Catálogo', d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+    { id: 'horarios', label: 'Horarios', group: 'Catálogo', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { id: 'inventario', label: 'Inventario', group: 'Catálogo', d: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+    { id: 'reportes', label: 'Reportes', group: 'Análisis', d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+    { id: 'flyer', label: 'Flyer', group: 'Análisis', d: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { id: 'ajustes', label: 'Ajustes', group: 'Sistema', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
   ]
 
-  // Bottom nav: 5 items para acceso rápido en móvil (por ID, no por índice)
+  // Agrupación para sidebar desktop
+  const tabsGrouped = tabsConfig.reduce((acc, t) => {
+    if (!acc[t.group]) acc[t.group] = []
+    acc[t.group].push(t)
+    return acc
+  }, {})
+
+  const tabActual = tabsConfig.find(t => t.id === tab) || tabsConfig[0]
+
+  // Bottom nav: 4 items principales + botón "Más" que abre el drawer con todos los demás
   const bottomNavTabs = [
     tabsConfig.find(t => t.id === 'inicio'),
     tabsConfig.find(t => t.id === 'agenda'),
-    tabsConfig.find(t => t.id === 'reportes'),
     tabsConfig.find(t => t.id === 'clientes'),
-    tabsConfig.find(t => t.id === 'ajustes'),
+    tabsConfig.find(t => t.id === 'reportes'),
   ]
 
   if (loading) return (
@@ -878,7 +887,7 @@ export default function Dashboard({ session }) {
         />
       )}
 
-      <main className={`max-w-7xl mx-auto p-4 md:p-8 ${!negocio?.es_admin_plataforma && negocio ? 'ns-has-bottom-nav' : ''}`}>
+      <main className={`max-w-[1400px] mx-auto p-4 md:p-8 ${!negocio?.es_admin_plataforma && negocio ? 'ns-has-bottom-nav' : ''}`}>
 
         {!negocio ? (
           /* ESCENARIO: ONBOARDING WIZARD GUIADO */
@@ -951,51 +960,125 @@ export default function Dashboard({ session }) {
           </div>
         ) : (
           /* ==========================================================
-             VISTA: DASHBOARD BUSINESS (OWNER) — MOBILE FIRST COMPLETO
+             VISTA: DASHBOARD BUSINESS (OWNER) — EDITORIAL LAYOUT
              ========================================================== */
-          <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
+          <div className="md:grid md:grid-cols-[240px_1fr] md:gap-7 lg:gap-10 animate-in fade-in duration-500" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
 
-            {/* BRAND HERO — COMPACTO EN MOBILE */}
-            <header className="ns-hero-compact relative overflow-hidden rounded-[1.3rem] md:rounded-[2.5rem] text-white group animate-in fade-in duration-500" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${colorPrimario} 150%)` }}>
-              <div className="relative z-10 flex items-start justify-between gap-3 md:gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 md:mb-4 opacity-70">
-                    <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-green-500"></span>
-                    </span>
-                    <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
+            {/* ═════════════ SIDEBAR — DESKTOP ═════════════ */}
+            <aside id="tour-tabs" className="hidden md:block">
+              <div className="sticky top-20 space-y-7">
+                {Object.entries(tabsGrouped).map(([groupName, items]) => (
+                  <div key={groupName}>
+                    <p className="px-3 mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                      {groupName}
+                    </p>
+                    <nav className="space-y-0.5">
+                      {items.map(i => {
+                        const activo = tab === i.id
+                        return (
+                          <button
+                            key={i.id}
+                            id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined}
+                            onClick={() => setTab(i.id)}
+                            data-testid={`sidebar-tab-${i.id}`}
+                            className={`w-full group flex items-center gap-2.5 px-3 py-2 rounded-md transition-all relative ${
+                              activo
+                                ? 'bg-[#1A1814] text-[#F5F2EA]'
+                                : 'text-stone-700 hover:bg-stone-200/60 hover:text-[#1A1814]'
+                            }`}
+                          >
+                            {activo && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#FF4F00] rounded-r" />}
+                            <svg className={`w-4 h-4 shrink-0 transition-colors ${activo ? 'text-[#FF4F00]' : 'text-stone-500 group-hover:text-[#1A1814]'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            <span className="text-[13px] font-semibold tracking-tight">{i.label}</span>
+                            {activo && <svg className="w-3 h-3 ml-auto text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>}
+                          </button>
+                        )
+                      })}
+                    </nav>
                   </div>
-                  <h2 className="text-xl md:text-5xl font-bold tracking-tighter leading-tight truncate">{negocio.nombre}</h2>
-                  <p className="text-[10px] md:text-lg mt-0.5 md:mt-3 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
+                ))}
+
+                {/* Sidebar footer */}
+                <div className="px-3 pt-5 border-t border-stone-300/70">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Tu workspace</p>
+                  <p className="text-[12px] font-semibold text-[#1A1814] truncate" title={negocio?.nombre}>{negocio?.nombre}</p>
+                  <p className="text-[10px] text-stone-500 truncate mt-0.5">{negocio?.rubro}</p>
                 </div>
-                {logoUrl && (
-                  <div className="w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0 bg-white/10">
-                    <img src={logoUrl} className="w-full h-full object-cover" alt="Logo" />
-                  </div>
-                )}
               </div>
-              <div className="absolute -top-20 -right-20 md:-top-32 md:-right-32 w-64 h-64 md:w-96 md:h-96 bg-white/10 rounded-full blur-[80px] md:blur-[120px] group-hover:scale-110 transition-transform duration-1000"></div>
+            </aside>
+
+            {/* ═════════════ MAIN CONTENT ═════════════ */}
+            <div className="space-y-5 md:space-y-7 min-w-0">
+
+            {/* ─────── HERO COMPACTO EDITORIAL ─────── */}
+            <header className="relative overflow-hidden rounded-xl bg-[#161412] text-[#F5F2EA] px-5 md:px-7 py-5 md:py-6 animate-in fade-in duration-500">
+              {/* Subtle grain */}
+              <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
+              }} />
+              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,79,0,0.18) 0%, transparent 70%)' }} />
+
+              <div className="relative z-10 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                  {/* Avatar / logo */}
+                  {logoUrl ? (
+                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-md overflow-hidden border border-white/15 shrink-0">
+                      <img src={logoUrl} className="w-full h-full object-cover" alt="Logo" />
+                    </div>
+                  ) : (
+                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-md bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                      <span className="text-[#F5F2EA] font-black text-lg tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>
+                        {negocio.nombre.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="flex h-1.5 w-1.5 relative shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-300/80" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                        Operativo · {new Date().toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' })}
+                      </span>
+                    </div>
+                    <h2 className="text-[20px] md:text-[28px] font-light tracking-[-0.025em] leading-tight truncate" style={{ fontFamily: '"Fraunces", serif' }}>
+                      {tabActual.label} <em className="italic font-medium text-[#FF6B35]">·</em> <span className="font-bold">{negocio.nombre}</span>
+                    </h2>
+                  </div>
+                </div>
+
+                {/* Quick stat */}
+                <div className="hidden sm:flex flex-col items-end shrink-0 pl-3 border-l border-white/10">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Hoy</span>
+                  <p className="text-[20px] md:text-[24px] font-bold text-[#F5F2EA] leading-none mt-1" style={{ fontFamily: '"Fraunces", serif' }}>
+                    {stats.hoy}
+                  </p>
+                  <p className="text-[9px] text-stone-400 font-medium mt-0.5">{vocab.turnos}</p>
+                </div>
+              </div>
             </header>
 
-            {/* TAB SELECTOR — DESKTOP: Grid flexible que envuelve */}
-            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-1.5 p-1.5 bg-white border border-slate-200 rounded-2xl no-scrollbar shadow-sm">
-              {tabsConfig.map(i => (
-                <button key={i.id} id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined} onClick={() => setTab(i.id)} className={`px-5 py-2.5 rounded-xl flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${tab === i.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d} /></svg>
-                  {i.label}
-                </button>
-              ))}
-            </div>
-
-            {/* MOBILE TAB PILLS — Tabs no incluidos en el bottom nav */}
-            <div className="flex md:hidden flex-wrap gap-1.5 no-scrollbar">
-              {tabsConfig.filter(t => !bottomNavTabs.find(bn => bn.id === t.id)).map(i => (
-                <button key={i.id} onClick={() => setTab(i.id)} className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest transition-all border ${tab === i.id ? 'bg-slate-900 text-white shadow-lg border-slate-900' : 'text-slate-500 hover:text-slate-900 bg-white border-slate-200'}`}>
-                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d} /></svg>
-                  {i.label}
-                </button>
-              ))}
+            {/* ─────── MOBILE TAB CHIP (current section + menú) ─────── */}
+            <div className="flex md:hidden items-center gap-2">
+              <div className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg shadow-sm">
+                <svg className="w-4 h-4 text-[#FF4F00] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={tabActual.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <p className="text-[12px] font-bold text-[#1A1814] truncate flex-1">{tabActual.label}</p>
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                  {tabActual.group}
+                </span>
+              </div>
+              <button
+                onClick={() => setDrawerOpen(true)}
+                data-testid="mobile-menu-btn"
+                aria-label="Abrir menú"
+                className="shrink-0 w-11 h-11 flex items-center justify-center bg-[#1A1814] text-[#F5F2EA] rounded-lg active:scale-95 transition-transform"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             </div>
 
             {/* AREA DE CONTENIDO PRINCIPAL */}
@@ -1044,39 +1127,39 @@ export default function Dashboard({ session }) {
                     }
 
                     return (
-                      <div className="bg-gradient-to-br from-white to-slate-50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+                      <div className="bg-white rounded-xl border border-stone-300/70 shadow-sm overflow-hidden">
                         {/* Header */}
-                        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+                        <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-stone-200/80">
                           <div>
-                            <h3 className="text-sm font-black text-slate-900 tracking-tight">Resumen de hoy</h3>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                            <h3 className="text-[13px] font-bold text-[#1A1814] tracking-tight">Resumen de hoy</h3>
+                            <p className="text-[9px] font-medium text-stone-500 uppercase tracking-[0.25em] mt-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
                               {ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                           </div>
                           {countdown && (
-                            <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest animate-pulse">
-                              Próximo {countdown}
+                            <span className="text-[9px] font-bold text-[#FF4F00] bg-[#FFF1EA] border border-[#FF4F00]/20 px-3 py-1.5 rounded-md uppercase tracking-[0.18em]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                              Próximo · {countdown}
                             </span>
                           )}
                         </div>
 
                         {/* Mini Stats */}
-                        <div className="grid grid-cols-4 gap-px bg-slate-100 mx-5 rounded-xl overflow-hidden mb-4">
-                          <div className="bg-white p-3 text-center">
-                            <p className="text-lg font-black text-slate-900">{turnosHoyData.length + turnosPasados.length}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{vocab.turnos}</p>
+                        <div className="grid grid-cols-4 divide-x divide-stone-200">
+                          <div className="p-4 text-center">
+                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>{vocab.turnos}</p>
+                            <p className="text-2xl font-bold text-[#1A1814] tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosHoyData.length + turnosPasados.length}</p>
                           </div>
-                          <div className="bg-white p-3 text-center">
-                            <p className="text-lg font-black text-emerald-600">${ingresosDia.toLocaleString()}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Ingresos</p>
+                          <div className="p-4 text-center">
+                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Ingresos</p>
+                            <p className="text-2xl font-bold text-emerald-700 tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>${ingresosDia.toLocaleString()}</p>
                           </div>
-                          <div className="bg-white p-3 text-center">
-                            <p className="text-lg font-black text-blue-600">{turnosPasados.length}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Atendidos</p>
+                          <div className="p-4 text-center">
+                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Atendidos</p>
+                            <p className="text-2xl font-bold text-stone-600 tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosPasados.length}</p>
                           </div>
-                          <div className="bg-white p-3 text-center">
-                            <p className="text-lg font-black text-purple-600">{turnosHoyData.length}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Pendientes</p>
+                          <div className="p-4 text-center">
+                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] mb-1.5" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Pendientes</p>
+                            <p className="text-2xl font-bold text-[#FF4F00] tracking-tight" style={{ fontFamily: '"Fraunces", serif' }}>{turnosHoyData.length}</p>
                           </div>
                         </div>
 
@@ -1611,7 +1694,7 @@ export default function Dashboard({ session }) {
                       <div>
                         <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ubicación — Google Maps</label>
                         <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
-                        <p className="text-[9px] text-slate-400 mt-1.5 ml-1 font-medium">Abrí Google Maps, buscá tu negocio, tocá "Compartir" y pegá el link acá.</p>
+                        <p className="text-[9px] text-slate-400 mt-1.5 ml-1 font-medium">Abrí Google Maps, buscá tu negocio, tocá &quot;Compartir&quot; y pegá el link acá.</p>
                         {mapaUrl && (
                           <div className="mt-3 rounded-xl overflow-hidden border border-slate-200 h-40">
                             <iframe
@@ -1746,25 +1829,105 @@ export default function Dashboard({ session }) {
 
             </div>
           </div>
+          </div>
         )}
       </main>
 
+      {/* ====== MOBILE NAV DRAWER ====== */}
+      {drawerOpen && negocio && !negocio.es_admin_plataforma && (
+        <div className="md:hidden fixed inset-0 z-[90] flex" data-testid="mobile-drawer">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-[#1A1814]/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setDrawerOpen(false)} />
+          {/* Panel */}
+          <div className="relative ml-auto w-[78%] max-w-[320px] bg-[#F5F2EA] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300" style={{ fontFamily: '"Inter Tight", "Inter", sans-serif' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-300/70">
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-md bg-[#161412] flex items-center justify-center">
+                    <span className="text-[#F5F2EA] font-black text-[13px] tracking-tighter" style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}>N</span>
+                  </div>
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#FF4F00]" />
+                </div>
+                <div className="leading-none">
+                  <p className="font-bold text-[13px] text-[#1A1814] tracking-tight">Noni<span className="text-[#FF4F00]">.</span></p>
+                  <p className="text-[9px] font-medium uppercase tracking-[0.22em] mt-1 text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Menú</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Cerrar menú"
+                data-testid="drawer-close-btn"
+                className="w-9 h-9 flex items-center justify-center rounded-md text-stone-500 hover:bg-stone-200/70 hover:text-[#1A1814] transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+              {Object.entries(tabsGrouped).map(([groupName, items]) => (
+                <div key={groupName}>
+                  <p className="px-2 mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-500" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                    {groupName}
+                  </p>
+                  <nav className="space-y-0.5">
+                    {items.map(i => {
+                      const activo = tab === i.id
+                      return (
+                        <button
+                          key={i.id}
+                          onClick={() => { setTab(i.id); setDrawerOpen(false) }}
+                          data-testid={`drawer-tab-${i.id}`}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md transition-all relative ${
+                            activo ? 'bg-[#1A1814] text-[#F5F2EA]' : 'text-stone-700 hover:bg-stone-200/60'
+                          }`}
+                        >
+                          {activo && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#FF4F00] rounded-r" />}
+                          <svg className={`w-4 h-4 shrink-0 ${activo ? 'text-[#FF4F00]' : 'text-stone-500'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          <span className="text-[13px] font-semibold tracking-tight">{i.label}</span>
+                        </button>
+                      )
+                    })}
+                  </nav>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-5 py-4 border-t border-stone-300/70 bg-white/40">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-1" style={{ fontFamily: '"JetBrains Mono", monospace' }}>Workspace</p>
+              <p className="text-[12px] font-semibold text-[#1A1814] truncate">{negocio?.nombre}</p>
+              <p className="text-[10px] text-stone-500 truncate mt-0.5">{negocio?.rubro}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ====== BOTTOM NAVIGATION BAR — MOBILE ONLY ====== */}
       {negocio && !negocio.es_admin_plataforma && (
-        <nav className="ns-bottom-nav md:hidden">
+        <nav className="ns-bottom-nav md:hidden" data-testid="bottom-nav">
           {bottomNavTabs.map(item => (
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
+              data-testid={`bottom-nav-${item.id}`}
               className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
             >
               <svg fill="none" stroke="currentColor" strokeWidth={tab === item.id ? "2.5" : "2"} viewBox="0 0 24 24">
                 <path d={item.d} strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span>{item.label}</span>
-              {tab === item.id && <div className="w-1 h-1 rounded-full bg-slate-900 mt-px"></div>}
+              {tab === item.id && <div className="w-1 h-1 rounded-full bg-[#FF4F00] mt-px"></div>}
             </button>
           ))}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            data-testid="bottom-nav-more"
+            className="ns-bottom-nav-item"
+          >
+            <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <span>Más</span>
+          </button>
         </nav>
       )}
 
