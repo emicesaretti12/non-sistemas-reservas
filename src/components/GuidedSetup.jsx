@@ -141,13 +141,13 @@ export default function GuidedSetup({
       )}
 
       <div
-        className="relative overflow-hidden rounded-2xl md:rounded-3xl border transition-all duration-500"
+        className="relative overflow-hidden rounded-2xl md:rounded-3xl transition-all duration-500"
         style={{
           background: allDone
-            ? 'linear-gradient(135deg, var(--ns-success-bg) 0%, var(--ns-surface) 75%)'
-            : 'linear-gradient(135deg, var(--ns-primary-bg) 0%, var(--ns-surface) 60%)',
-          borderColor: allDone ? 'color-mix(in srgb, var(--ns-success) 30%, transparent)' : 'var(--ns-primary-bg-strong)',
-          boxShadow: 'var(--ns-shadow-md)',
+            ? 'linear-gradient(135deg, #0f172a 0%, #064e3b 150%)'
+            : 'linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255,255,255,0.04) inset',
         }}
       >
         {/* Header */}
@@ -161,7 +161,9 @@ export default function GuidedSetup({
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md"
               style={{
-                background: allDone ? 'var(--ns-success)' : 'var(--ns-gradient-deep)',
+                background: allDone
+                  ? 'linear-gradient(135deg, #059669, #10b981)'
+                  : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               }}
             >
               <span
@@ -172,11 +174,10 @@ export default function GuidedSetup({
               </span>
             </div>
             <span
-              className="absolute -top-1 -right-1 w-3 h-3 rounded-full ns-pulse-soft"
+              className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
               style={{
-                background: allDone ? 'var(--ns-success)' : 'var(--ns-primary-light)',
-                boxShadow: '0 0 12px currentColor',
-                color: allDone ? 'var(--ns-success)' : 'var(--ns-primary)',
+                background: allDone ? '#10b981' : '#818cf8',
+                boxShadow: allDone ? '0 0 12px #10b981' : '0 0 12px #818cf8',
               }}
             />
           </div>
@@ -187,14 +188,13 @@ export default function GuidedSetup({
               className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
-                color: 'var(--ns-primary)',
+                color: allDone ? '#34d399' : '#a5b4fc',
               }}
             >
               {allDone ? 'Asistente · Listo' : 'Noni · Tu asistente'}
             </p>
             <h3
-              className="text-base md:text-lg font-bold tracking-tight leading-tight"
-              style={{ color: 'var(--ns-text)' }}
+              className="text-base md:text-lg font-bold tracking-tight leading-tight text-white"
             >
               {allDone
                 ? '¡Configuración completa!'
@@ -202,7 +202,7 @@ export default function GuidedSetup({
             </h3>
             <p
               className="text-[11px] md:text-[12px] mt-1 font-medium"
-              style={{ color: 'var(--ns-text-secondary)' }}
+              style={{ color: '#94a3b8' }}
             >
               {allDone
                 ? 'Tu sistema está 100% operativo. ¡A recibir reservas!'
@@ -216,13 +216,13 @@ export default function GuidedSetup({
           <div className="flex items-center gap-3 shrink-0">
             <div className="relative w-12 h-12">
               <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
-                <circle cx="24" cy="24" r="20" fill="none" stroke="var(--ns-border)" strokeWidth="3" />
+                <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
                 <circle
                   cx="24"
                   cy="24"
                   r="20"
                   fill="none"
-                  stroke={allDone ? 'var(--ns-success)' : 'var(--ns-primary)'}
+                  stroke={allDone ? '#10b981' : '#818cf8'}
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 20}`}
@@ -231,15 +231,14 @@ export default function GuidedSetup({
                 />
               </svg>
               <span
-                className="absolute inset-0 flex items-center justify-center text-[12px] font-black"
-                style={{ color: 'var(--ns-text)' }}
+                className="absolute inset-0 flex items-center justify-center text-[12px] font-black text-white"
               >
                 {allDone ? '✓' : `${completedSteps.length}/${totalSteps}`}
               </span>
             </div>
             <svg
               className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
-              style={{ color: 'var(--ns-text-muted)' }}
+              style={{ color: 'rgba(255,255,255,0.4)' }}
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
@@ -252,12 +251,14 @@ export default function GuidedSetup({
 
         {/* Progress bar */}
         <div className="px-5 md:px-7">
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)' }}>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
             <div
               className="h-full rounded-full transition-all duration-1000"
               style={{
                 width: `${progress}%`,
-                background: allDone ? 'var(--ns-success)' : 'var(--ns-gradient-1)',
+                background: allDone
+                  ? 'linear-gradient(90deg, #059669, #34d399)'
+                  : 'linear-gradient(90deg, #6366f1, #818cf8, #06b6d4)',
               }}
             />
           </div>
@@ -282,16 +283,16 @@ export default function GuidedSetup({
                     className="flex items-center gap-3 p-3 md:p-4 rounded-xl border transition-all duration-300"
                     style={{
                       background: done
-                        ? 'var(--ns-success-bg)'
+                        ? 'rgba(16, 185, 129, 0.08)'
                         : isNext
-                        ? 'var(--ns-primary-bg)'
-                        : 'var(--ns-surface)',
+                        ? 'rgba(99, 102, 241, 0.1)'
+                        : 'rgba(255, 255, 255, 0.03)',
                       borderColor: done
-                        ? 'color-mix(in srgb, var(--ns-success) 30%, transparent)'
+                        ? 'rgba(16, 185, 129, 0.25)'
                         : isNext
-                        ? 'var(--ns-primary)'
-                        : 'var(--ns-border)',
-                      boxShadow: isNext ? '0 0 0 3px color-mix(in srgb, var(--ns-primary) 15%, transparent)' : 'none',
+                        ? 'rgba(99, 102, 241, 0.4)'
+                        : 'rgba(255, 255, 255, 0.06)',
+                      boxShadow: isNext ? '0 0 0 3px rgba(99, 102, 241, 0.12)' : 'none',
                       cursor: done ? 'default' : 'pointer',
                     }}
                     onClick={() => {
@@ -303,14 +304,14 @@ export default function GuidedSetup({
                   >
                     {/* Check / Number */}
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 text-white font-black"
+                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 font-black"
                       style={{
                         background: done
-                          ? 'var(--ns-success)'
+                          ? '#10b981'
                           : isNext
-                          ? 'var(--ns-primary)'
-                          : 'var(--ns-primary-bg-strong)',
-                        color: done ? '#fff' : isNext ? '#fff' : 'var(--ns-primary-deep)',
+                          ? '#6366f1'
+                          : 'rgba(99, 102, 241, 0.15)',
+                        color: done || isNext ? '#fff' : '#a5b4fc',
                       }}
                     >
                       {done ? (
@@ -334,7 +335,7 @@ export default function GuidedSetup({
                         <p
                           className="text-[13px] font-bold"
                           style={{
-                            color: done ? 'var(--ns-success)' : 'var(--ns-text)',
+                            color: done ? '#34d399' : '#e2e8f0',
                             textDecoration: done ? 'line-through' : 'none',
                             opacity: done ? 0.7 : 1,
                           }}
@@ -346,15 +347,15 @@ export default function GuidedSetup({
                             className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
                             style={{
                               background: step.badge === 'Esencial'
-                                ? 'var(--ns-primary-bg-strong)'
+                                ? 'rgba(99, 102, 241, 0.15)'
                                 : step.badge === 'Final'
-                                ? 'var(--ns-success-bg)'
-                                : 'var(--ns-accent-bg)',
+                                ? 'rgba(16, 185, 129, 0.12)'
+                                : 'rgba(6, 182, 212, 0.12)',
                               color: step.badge === 'Esencial'
-                                ? 'var(--ns-primary-deep)'
+                                ? '#a5b4fc'
                                 : step.badge === 'Final'
-                                ? 'var(--ns-success)'
-                                : 'var(--ns-primary)',
+                                ? '#34d399'
+                                : '#67e8f9',
                             }}
                           >
                             {step.badge}
@@ -363,7 +364,7 @@ export default function GuidedSetup({
                       </div>
                       <p
                         className="text-[11px] font-medium mt-0.5"
-                        style={{ color: done ? 'var(--ns-success)' : 'var(--ns-text-muted)' }}
+                        style={{ color: done ? '#34d399' : '#64748b' }}
                       >
                         {done ? 'Completado ✓' : step.desc}
                       </p>
@@ -382,9 +383,9 @@ export default function GuidedSetup({
                               data-testid="guided-share-copy"
                               className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
                               style={{
-                                background: 'var(--ns-primary-bg)',
-                                color: 'var(--ns-primary)',
-                                border: '1px solid var(--ns-primary-bg-strong)',
+                                background: 'rgba(99, 102, 241, 0.12)',
+                                color: '#a5b4fc',
+                                border: '1px solid rgba(99, 102, 241, 0.2)',
                               }}
                             >
                               Copiar
@@ -396,7 +397,7 @@ export default function GuidedSetup({
                               }}
                               data-testid="guided-share-wa"
                               className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-white transition-all"
-                              style={{ background: 'var(--ns-success)' }}
+                              style={{ background: '#10b981' }}
                             >
                               WhatsApp
                             </button>
@@ -410,8 +411,8 @@ export default function GuidedSetup({
                               }}
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
                               style={{
-                                background: 'var(--ns-surface-hover)',
-                                color: 'var(--ns-text-muted)',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                color: '#64748b',
                               }}
                               title="Más info"
                             >
@@ -430,8 +431,11 @@ export default function GuidedSetup({
                                   if (step.tab) onNavigate?.(step.tab)
                                 }}
                                 data-testid={`guided-step-go-${step.id}`}
-                                className="ns-btn-celeste text-[10px] py-1.5 px-3 ns-pulse-soft"
-                                style={{ boxShadow: '0 4px 14px rgba(14,165,233,0.35)' }}
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-white transition-all animate-pulse"
+                                style={{
+                                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                  boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
+                                }}
                               >
                                 Ir
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24">
@@ -441,7 +445,7 @@ export default function GuidedSetup({
                             ) : (
                               <svg
                                 className="w-4 h-4"
-                                style={{ color: 'var(--ns-text-muted)' }}
+                                style={{ color: '#475569' }}
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -461,13 +465,13 @@ export default function GuidedSetup({
                     <div
                       className="ml-12 mt-2 mb-1 p-3.5 rounded-xl border animate-in slide-in-from-top-2 duration-300"
                       style={{
-                        background: 'var(--ns-primary-bg)',
-                        borderColor: 'var(--ns-primary-bg-strong)',
+                        background: 'rgba(99, 102, 241, 0.08)',
+                        borderColor: 'rgba(99, 102, 241, 0.15)',
                       }}
                     >
                       <p
                         className="text-[12px] font-medium leading-relaxed"
-                        style={{ color: 'var(--ns-primary-deep)' }}
+                        style={{ color: '#c7d2fe' }}
                       >
                         {step.descLong}
                       </p>
@@ -475,7 +479,7 @@ export default function GuidedSetup({
                         <button
                           onClick={() => onNavigate?.(step.tab)}
                           className="mt-2 text-[10px] font-bold uppercase tracking-widest transition-colors"
-                          style={{ color: 'var(--ns-primary)' }}
+                          style={{ color: '#a5b4fc' }}
                         >
                           Ir a {step.title.toLowerCase()} →
                         </button>
@@ -492,9 +496,12 @@ export default function GuidedSetup({
         {!allDone && (
           <div
             className="px-5 md:px-7 py-2.5 border-t flex items-center justify-between text-[11px]"
-            style={{ borderColor: 'var(--ns-border)', background: 'var(--ns-surface-alt)' }}
+            style={{
+              borderColor: 'rgba(255, 255, 255, 0.06)',
+              background: 'rgba(0, 0, 0, 0.15)',
+            }}
           >
-            <span style={{ color: 'var(--ns-text-muted)' }}>
+            <span style={{ color: '#64748b' }}>
               💡 Configuralo ahora — toma menos de 5 minutos
             </span>
             <button
@@ -502,8 +509,8 @@ export default function GuidedSetup({
                 setDismissed(true)
                 onDismiss?.()
               }}
-              className="text-[10px] font-bold uppercase tracking-widest transition-colors"
-              style={{ color: 'var(--ns-text-muted)' }}
+              className="text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-white"
+              style={{ color: '#64748b' }}
               data-testid="guided-setup-dismiss"
             >
               Ocultar
