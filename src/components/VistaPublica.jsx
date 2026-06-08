@@ -392,7 +392,7 @@ export default function VistaPublica() {
   }
 
   return (
-    <div className="min-h-screen text-[#1D1D1F] font-sans antialiased selection:bg-zinc-900 selection:text-white relative overflow-x-hidden bg-[#FDFDFC]" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="min-h-screen text-[#1D1D1F] font-sans antialiased selection:bg-zinc-900 selection:text-white relative overflow-x-hidden bg-[#FDFDFC]" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light' }}>
       
       {/* BAÑO DE COLOR (Sutil resplandor de fondo) */}
       <div className="absolute top-0 inset-x-0 h-[60vh] pointer-events-none z-0" style={{ background: `linear-gradient(to bottom, ${accentUltraSoft}, transparent)` }}></div>

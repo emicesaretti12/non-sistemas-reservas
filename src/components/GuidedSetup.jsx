@@ -5,6 +5,8 @@ import { IconCheckCircle } from './NoniIcons'
  * GuidedSetup — Panel del asistente de configuración guiada post-onboarding.
  * Es el "asistente Noni" que aparece al ingresar al dashboard hasta que el
  * usuario completa todos los pasos de configuración de su negocio.
+ *
+ * Tema CLARO — consistente con el resto del dashboard.
  */
 
 const SETUP_STEPS = [
@@ -144,10 +146,10 @@ export default function GuidedSetup({
         className="relative overflow-hidden rounded-2xl md:rounded-3xl transition-all duration-500"
         style={{
           background: allDone
-            ? 'linear-gradient(135deg, #0f172a 0%, #064e3b 150%)'
-            : 'linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255,255,255,0.04) inset',
+            ? 'linear-gradient(135deg, #ffffff 0%, #ecfdf5 160%)'
+            : '#ffffff',
+          border: allDone ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.06)',
         }}
       >
         {/* Header */}
@@ -176,7 +178,7 @@ export default function GuidedSetup({
             <span
               className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
               style={{
-                background: allDone ? '#10b981' : '#818cf8',
+                background: allDone ? '#10b981' : '#6366f1',
                 boxShadow: allDone ? '0 0 12px #10b981' : '0 0 12px #818cf8',
               }}
             />
@@ -188,13 +190,13 @@ export default function GuidedSetup({
               className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
-                color: allDone ? '#34d399' : '#a5b4fc',
+                color: allDone ? '#059669' : '#6366f1',
               }}
             >
               {allDone ? 'Asistente · Listo' : 'Noni · Tu asistente'}
             </p>
             <h3
-              className="text-base md:text-lg font-bold tracking-tight leading-tight text-white"
+              className="text-base md:text-lg font-bold tracking-tight leading-tight text-slate-900"
             >
               {allDone
                 ? '¡Configuración completa!'
@@ -202,7 +204,7 @@ export default function GuidedSetup({
             </h3>
             <p
               className="text-[11px] md:text-[12px] mt-1 font-medium"
-              style={{ color: '#94a3b8' }}
+              style={{ color: '#64748b' }}
             >
               {allDone
                 ? 'Tu sistema está 100% operativo. ¡A recibir reservas!'
@@ -216,13 +218,13 @@ export default function GuidedSetup({
           <div className="flex items-center gap-3 shrink-0">
             <div className="relative w-12 h-12">
               <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
-                <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#e2e8f0" strokeWidth="3" />
                 <circle
                   cx="24"
                   cy="24"
                   r="20"
                   fill="none"
-                  stroke={allDone ? '#10b981' : '#818cf8'}
+                  stroke={allDone ? '#10b981' : '#6366f1'}
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 20}`}
@@ -231,14 +233,14 @@ export default function GuidedSetup({
                 />
               </svg>
               <span
-                className="absolute inset-0 flex items-center justify-center text-[12px] font-black text-white"
+                className="absolute inset-0 flex items-center justify-center text-[12px] font-black text-slate-700"
               >
                 {allDone ? '✓' : `${completedSteps.length}/${totalSteps}`}
               </span>
             </div>
             <svg
               className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              style={{ color: '#94a3b8' }}
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
@@ -251,7 +253,7 @@ export default function GuidedSetup({
 
         {/* Progress bar */}
         <div className="px-5 md:px-7">
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
             <div
               className="h-full rounded-full transition-all duration-1000"
               style={{
@@ -283,16 +285,16 @@ export default function GuidedSetup({
                     className="flex items-center gap-3 p-3 md:p-4 rounded-xl border transition-all duration-300"
                     style={{
                       background: done
-                        ? 'rgba(16, 185, 129, 0.08)'
+                        ? '#ecfdf5'
                         : isNext
-                        ? 'rgba(99, 102, 241, 0.1)'
-                        : 'rgba(255, 255, 255, 0.03)',
+                        ? '#eef2ff'
+                        : '#f8fafc',
                       borderColor: done
-                        ? 'rgba(16, 185, 129, 0.25)'
+                        ? '#a7f3d0'
                         : isNext
-                        ? 'rgba(99, 102, 241, 0.4)'
-                        : 'rgba(255, 255, 255, 0.06)',
-                      boxShadow: isNext ? '0 0 0 3px rgba(99, 102, 241, 0.12)' : 'none',
+                        ? '#c7d2fe'
+                        : '#e2e8f0',
+                      boxShadow: isNext ? '0 0 0 3px rgba(99, 102, 241, 0.10)' : 'none',
                       cursor: done ? 'default' : 'pointer',
                     }}
                     onClick={() => {
@@ -310,8 +312,8 @@ export default function GuidedSetup({
                           ? '#10b981'
                           : isNext
                           ? '#6366f1'
-                          : 'rgba(99, 102, 241, 0.15)',
-                        color: done || isNext ? '#fff' : '#a5b4fc',
+                          : '#e2e8f0',
+                        color: done || isNext ? '#fff' : '#64748b',
                       }}
                     >
                       {done ? (
@@ -335,9 +337,9 @@ export default function GuidedSetup({
                         <p
                           className="text-[13px] font-bold"
                           style={{
-                            color: done ? '#34d399' : '#e2e8f0',
+                            color: done ? '#059669' : '#1e293b',
                             textDecoration: done ? 'line-through' : 'none',
-                            opacity: done ? 0.7 : 1,
+                            opacity: done ? 0.85 : 1,
                           }}
                         >
                           {step.title}
@@ -347,15 +349,15 @@ export default function GuidedSetup({
                             className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
                             style={{
                               background: step.badge === 'Esencial'
-                                ? 'rgba(99, 102, 241, 0.15)'
+                                ? '#eef2ff'
                                 : step.badge === 'Final'
-                                ? 'rgba(16, 185, 129, 0.12)'
-                                : 'rgba(6, 182, 212, 0.12)',
+                                ? '#ecfdf5'
+                                : '#ecfeff',
                               color: step.badge === 'Esencial'
-                                ? '#a5b4fc'
+                                ? '#4f46e5'
                                 : step.badge === 'Final'
-                                ? '#34d399'
-                                : '#67e8f9',
+                                ? '#059669'
+                                : '#0891b2',
                             }}
                           >
                             {step.badge}
@@ -364,7 +366,7 @@ export default function GuidedSetup({
                       </div>
                       <p
                         className="text-[11px] font-medium mt-0.5"
-                        style={{ color: done ? '#34d399' : '#64748b' }}
+                        style={{ color: done ? '#059669' : '#64748b' }}
                       >
                         {done ? 'Completado ✓' : step.desc}
                       </p>
@@ -383,9 +385,9 @@ export default function GuidedSetup({
                               data-testid="guided-share-copy"
                               className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
                               style={{
-                                background: 'rgba(99, 102, 241, 0.12)',
-                                color: '#a5b4fc',
-                                border: '1px solid rgba(99, 102, 241, 0.2)',
+                                background: '#eef2ff',
+                                color: '#4f46e5',
+                                border: '1px solid #c7d2fe',
                               }}
                             >
                               Copiar
@@ -411,7 +413,7 @@ export default function GuidedSetup({
                               }}
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
                               style={{
-                                background: 'rgba(255, 255, 255, 0.05)',
+                                background: '#f1f5f9',
                                 color: '#64748b',
                               }}
                               title="Más info"
@@ -445,7 +447,7 @@ export default function GuidedSetup({
                             ) : (
                               <svg
                                 className="w-4 h-4"
-                                style={{ color: '#475569' }}
+                                style={{ color: '#94a3b8' }}
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -465,13 +467,13 @@ export default function GuidedSetup({
                     <div
                       className="ml-12 mt-2 mb-1 p-3.5 rounded-xl border animate-in slide-in-from-top-2 duration-300"
                       style={{
-                        background: 'rgba(99, 102, 241, 0.08)',
-                        borderColor: 'rgba(99, 102, 241, 0.15)',
+                        background: '#eef2ff',
+                        borderColor: '#c7d2fe',
                       }}
                     >
                       <p
                         className="text-[12px] font-medium leading-relaxed"
-                        style={{ color: '#c7d2fe' }}
+                        style={{ color: '#3730a3' }}
                       >
                         {step.descLong}
                       </p>
@@ -479,7 +481,7 @@ export default function GuidedSetup({
                         <button
                           onClick={() => onNavigate?.(step.tab)}
                           className="mt-2 text-[10px] font-bold uppercase tracking-widest transition-colors"
-                          style={{ color: '#a5b4fc' }}
+                          style={{ color: '#4f46e5' }}
                         >
                           Ir a {step.title.toLowerCase()} →
                         </button>
@@ -497,8 +499,8 @@ export default function GuidedSetup({
           <div
             className="px-5 md:px-7 py-2.5 border-t flex items-center justify-between text-[11px]"
             style={{
-              borderColor: 'rgba(255, 255, 255, 0.06)',
-              background: 'rgba(0, 0, 0, 0.15)',
+              borderColor: '#e2e8f0',
+              background: '#f8fafc',
             }}
           >
             <span style={{ color: '#64748b' }}>
@@ -509,8 +511,8 @@ export default function GuidedSetup({
                 setDismissed(true)
                 onDismiss?.()
               }}
-              className="text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-white"
-              style={{ color: '#64748b' }}
+              className="text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-slate-900"
+              style={{ color: '#94a3b8' }}
               data-testid="guided-setup-dismiss"
             >
               Ocultar

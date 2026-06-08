@@ -791,7 +791,7 @@ export default function Dashboard({ session }) {
 
 
   return (
-    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`}>
+    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'}`} style={{ colorScheme: negocio?.es_admin_plataforma ? 'dark' : 'light' }}>
 
       {/* Copy-link toast */}
       {copyToast && (
@@ -925,27 +925,28 @@ export default function Dashboard({ session }) {
              ========================================================== */
           <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
 
-            {/* BRAND HERO — COMPACTO EN MOBILE */}
-            <header className="ns-hero-compact relative overflow-hidden rounded-[1.3rem] md:rounded-[2.5rem] text-white group animate-in fade-in duration-500" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${colorPrimario} 150%)` }}>
+            {/* BRAND HERO — COMPACTO EN MOBILE (modo claro) */}
+            <header className="ns-hero-compact relative overflow-hidden rounded-[1.3rem] md:rounded-[2.5rem] text-slate-900 group animate-in fade-in duration-500 bg-white border border-slate-200 shadow-sm">
+              <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5" style={{ background: `linear-gradient(90deg, ${colorPrimario}, transparent)` }}></div>
               <div className="relative z-10 flex items-start justify-between gap-3 md:gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 md:mb-4 opacity-70">
+                  <div className="flex items-center gap-2 mb-1.5 md:mb-4">
                     <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-green-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-emerald-500"></span>
                     </span>
-                    <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em]">Operativo</span>
+                    <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-slate-400">Operativo</span>
                   </div>
-                  <h2 className="text-xl md:text-5xl font-bold tracking-tighter leading-tight truncate">{negocio.nombre}</h2>
-                  <p className="text-[10px] md:text-lg mt-0.5 md:mt-3 opacity-80 font-medium tracking-tight">{negocio.rubro}</p>
+                  <h2 className="text-xl md:text-5xl font-bold tracking-tighter leading-tight truncate text-slate-900">{negocio.nombre}</h2>
+                  <p className="text-[10px] md:text-lg mt-0.5 md:mt-3 font-medium tracking-tight text-slate-500">{negocio.rubro}</p>
                 </div>
                 {logoUrl && (
-                  <div className="w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg shrink-0 bg-white/10">
+                  <div className="w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl overflow-hidden border border-slate-200 shadow-md shrink-0 bg-slate-50">
                     <img src={logoUrl} className="w-full h-full object-cover" alt="Logo" />
                   </div>
                 )}
               </div>
-              <div className="absolute -top-20 -right-20 md:-top-32 md:-right-32 w-64 h-64 md:w-96 md:h-96 bg-white/10 rounded-full blur-[80px] md:blur-[120px] group-hover:scale-110 transition-transform duration-1000"></div>
+              <div className="absolute -top-20 -right-20 md:-top-32 md:-right-32 w-64 h-64 md:w-96 md:h-96 rounded-full blur-[80px] md:blur-[120px] opacity-[0.08] group-hover:scale-110 transition-transform duration-1000" style={{ background: colorPrimario }}></div>
             </header>
 
             {/* TAB SELECTOR — DESKTOP: Grid flexible que envuelve */}
@@ -1311,20 +1312,20 @@ export default function Dashboard({ session }) {
                     </div>
                   )}
 
-                  {/* LINK PÚBLICO WIDGET */}
-                  <div id="tour-link" className="bg-slate-900 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
+                  {/* LINK PÚBLICO WIDGET (modo claro) */}
+                  <div id="tour-link" className="bg-white border border-slate-200 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-slate-900 relative overflow-hidden shadow-sm">
                     <div className="relative z-10">
-                      <h4 className="text-lg md:text-xl font-bold tracking-tight mb-1 md:mb-3">Link de Reservas</h4>
-                      <p className="text-slate-400 text-[11px] md:text-sm font-medium mb-4">{vocab.linkDescripcion}</p>
-                      <div className="flex items-center bg-white/10 border border-white/10 rounded-xl p-3 cursor-pointer hover:bg-white/20 transition-all group" onClick={() => {
+                      <h4 className="text-lg md:text-xl font-bold tracking-tight mb-1 md:mb-3 text-slate-900">Link de Reservas</h4>
+                      <p className="text-slate-500 text-[11px] md:text-sm font-medium mb-4">{vocab.linkDescripcion}</p>
+                      <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => {
                         navigator.clipboard.writeText(publicLink);
                         showToast("¡Link copiado!")
                       }}>
-                        <code className="text-[9px] md:text-[11px] text-blue-300 font-mono truncate flex-1">{publicLink}</code>
-                        <svg className="w-4 h-4 ml-2 text-white/30 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                        <code className="text-[9px] md:text-[11px] font-mono truncate flex-1" style={{ color: colorPrimario }}>{publicLink}</code>
+                        <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-700 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
                       </div>
                     </div>
-                    <div className="absolute -top-16 -right-16 w-48 h-48 bg-white/5 rounded-full blur-[60px]"></div>
+                    <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-[60px] opacity-[0.08]" style={{ background: colorPrimario }}></div>
                   </div>
                 </div>
               )}
