@@ -1057,9 +1057,9 @@ export default function Dashboard({ session }) {
             )}
 
             {/* TAB SELECTOR — DESKTOP: Grid flexible que envuelve */}
-            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-1.5 p-1.5 bg-white border border-slate-200 rounded-2xl no-scrollbar shadow-sm">
+            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-1.5 p-1.5 bg-white/[0.03] border border-white/10 rounded-2xl no-scrollbar">
               {tabsConfig.map(i => (
-                <button key={i.id} id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined} onClick={() => setTab(i.id)} className={`px-5 py-2.5 rounded-xl flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${tab === i.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
+                <button key={i.id} id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined} onClick={() => setTab(i.id)} className={`nh-tab ${tab === i.id ? 'active' : ''}`}>
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d} /></svg>
                   {i.label}
                 </button>
@@ -1069,7 +1069,7 @@ export default function Dashboard({ session }) {
             {/* MOBILE TAB PILLS — Tabs no incluidos en el bottom nav */}
             <div className="flex md:hidden flex-wrap gap-1.5 no-scrollbar">
               {tabsConfig.filter(t => !bottomNavTabs.find(bn => bn.id === t.id)).map(i => (
-                <button key={i.id} onClick={() => setTab(i.id)} className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest transition-all border ${tab === i.id ? 'bg-slate-900 text-white shadow-lg border-slate-900' : 'text-slate-500 hover:text-slate-900 bg-white border-slate-200'}`}>
+                <button key={i.id} onClick={() => setTab(i.id)} className={`nh-tab ${tab === i.id ? 'active' : ''}`}>
                   <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={i.d} /></svg>
                   {i.label}
                 </button>
