@@ -935,6 +935,395 @@ body {
 }
 
 /* ============================================================
+   DASHBOARD HOME — DARK COMMAND CENTER (mobile-first)
+   ============================================================ */
+
+/* Dark canvas for the owner dashboard */
+.ns-owner-dark {
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(255, 255, 255, 0.04), transparent 60%),
+    #0a0c12;
+  color: #e8eaed;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Glassy navbar (dark) */
+.ns-nav-dark {
+  background: rgba(10, 12, 18, 0.82);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Cards */
+.nh-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.022));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 22px;
+  box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+}
+
+/* Hero */
+.nh-hero {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nh-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nh-logo-letter {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 800;
+  font-size: 26px;
+}
+
+.nh-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nh-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .nh-title { font-size: 32px; }
+  .nh-logo { width: 60px; height: 60px; }
+}
+
+.nh-date {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 3px;
+}
+
+.nh-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #34d399;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  animation: nh-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.nh-live-dot--green { background: #34d399; }
+
+@keyframes nh-ping {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+.nh-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: all 0.2s;
+}
+.nh-icon-btn svg { width: 18px; height: 18px; }
+.nh-icon-btn:active { transform: scale(0.92); }
+.nh-icon-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+/* Metric tiles */
+.nh-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  text-align: left;
+  transition: all 0.2s;
+  min-height: 92px;
+  justify-content: space-between;
+}
+.nh-metric:active { transform: scale(0.97); }
+.nh-metric:hover { border-color: rgba(255, 255, 255, 0.16); }
+
+.nh-metric-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+.nh-metric-value {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.nh-metric-value--sm { font-size: 22px; }
+.nh-metric-foot {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@media (min-width: 768px) {
+  .nh-metric-value { font-size: 40px; }
+  .nh-metric-value--sm { font-size: 28px; }
+}
+
+/* Section header */
+.nh-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+}
+.nh-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.nh-section-sub {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.38);
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+.nh-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.2s;
+}
+.nh-link:hover { color: #fff; }
+
+/* Next appointment */
+.nh-next-time {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.nh-pill {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+/* WhatsApp button */
+.nh-wa-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  transition: all 0.2s;
+}
+.nh-wa-btn--sm { width: 36px; height: 36px; border-radius: 11px; }
+.nh-wa-btn:active { transform: scale(0.9); }
+.nh-wa-btn:hover { background: #25d366; color: #fff; }
+.nh-wa-btn.is-sent { background: #059669; color: #fff; border-color: transparent; }
+
+/* Rows */
+.nh-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+}
+.nh-row-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 44px;
+  flex-shrink: 0;
+}
+
+/* Empty state icon */
+.nh-empty-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nh-mini-cta {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* Available slots */
+.nh-count-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+.nh-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: rgba(52, 211, 153, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.16);
+  transition: all 0.2s;
+}
+.nh-slot:active { transform: scale(0.95); }
+.nh-slot:hover { background: rgba(52, 211, 153, 0.14); border-color: rgba(52, 211, 153, 0.4); }
+.nh-slot-time {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.nh-slot-sub {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #34d399;
+}
+.nh-notice {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  transition: all 0.2s;
+}
+.nh-notice:hover:not(.nh-notice--static) { color: #fff; border-color: rgba(255, 255, 255, 0.25); }
+
+/* Quick actions */
+.nh-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 6px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.2s;
+}
+.nh-action:active { transform: scale(0.94); }
+.nh-action:hover { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); }
+.nh-action-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+.nh-action-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* Dark bottom nav variant */
+.ns-bottom-nav--dark {
+  background: rgba(10, 12, 18, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.5);
+}
+.ns-bottom-nav--dark .ns-bottom-nav-item { color: rgba(255, 255, 255, 0.4); }
+.ns-bottom-nav--dark .ns-bottom-nav-item.active { color: #fff; }
+
+/* Dark tab pills */
+.nh-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 13px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.2s;
+}
+.nh-tab:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.nh-tab.active { color: #0a0c12; background: #fff; border-color: #fff; }
+.nh-tab svg { width: 14px; height: 14px; }
+
+
+/* ============================================================
    LANDING PAGE — PRO SaaS STYLES
    ============================================================ */
 
@@ -1549,4 +1938,4 @@ body {
 .ns-mobile-content-area {
   min-height: 50vh;
 }
-
+
