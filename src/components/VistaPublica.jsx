@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, esGastronomia } from '../utils/vocabulario'
+import { getEstadoSuscripcion } from '../utils/suscripcion'
 import { useToast } from './Toast'
 
 export default function VistaPublica() {
@@ -322,8 +323,8 @@ export default function VistaPublica() {
     </div>
   )
 
-  // Negocio suspendido — vista pública bloqueada
-  if (negocio && negocio.estado_suscripcion === 'suspendido') {
+  // Negocio sin acceso (prueba vencida o suspendido) — vista pública bloqueada
+  if (negocio && !getEstadoSuscripcion(negocio).acceso) {
     return (
       <div className="min-h-screen bg-[#FDFDFC] flex items-center justify-center p-6 font-sans">
         <div className="text-center max-w-sm">

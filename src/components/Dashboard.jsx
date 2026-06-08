@@ -27,6 +27,9 @@ import { useConfirm } from '../contexts/ConfirmContext'
 // Iconos
 import { IconCheckCircle } from './NoniIcons'
 
+// Suscripción / planes
+import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN } from '../utils/suscripcion'
+
 // Componentes del Dashboard
 import DashboardTour, { useTour } from './DashboardTour'
 import FloatingAssistant from './FloatingAssistant'
@@ -266,7 +269,10 @@ export default function Dashboard({ session }) {
 
     if (data) {
       setTodosLosNegocios(data)
-      const activos = data.filter(n => n.estado_suscripcion === 'activo').length
+      const activos = data.filter(n => {
+        const s = getEstadoSuscripcion(n)
+        return s.estado === 'activo' || s.estado === 'trial'
+      }).length
       const rubrosCount = data.reduce((acc, n) => {
         acc[n.rubro] = (acc[n.rubro] || 0) + 1
         return acc
@@ -281,36 +287,58 @@ export default function Dashboard({ session }) {
     }
   }
 
-  async function gestionarSuscripcion(id, estadoActual) {
-    const nuevoEstado = estadoActual === 'activo' ? 'suspendido' : 'activo'
-    const negocioTarget = todosLosNegocios.find(n => n.id === id)
-    const accion = nuevoEstado === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR'
-
+  async function registrarPago(neg) {
+    const nuevoVenc = calcularNuevoVencimiento(neg)
     showConfirm({
-      title: `¿${accion} Negocio?`,
-      message: `¿Confirma que desea ${accion} a "${negocioTarget?.nombre || id}"?`,
-      confirmText: accion,
-      isDestructive: nuevoEstado === 'suspendido',
+      title: 'Registrar pago (+30 días)',
+      message: `¿Confirmás que "${neg?.nombre || neg.id}" pagó? Quedará activo hasta el ${nuevoVenc.toLocaleDateString('es-AR')}.`,
+      confirmText: 'Activar 30 días',
       onConfirm: async () => {
         const { data, error } = await supabase
           .from('negocios')
-          .update({ estado_suscripcion: nuevoEstado })
-          .eq('id', id)
+          .update({ estado_suscripcion: 'activo', fecha_vencimiento: nuevoVenc.toISOString() })
+          .eq('id', neg.id)
           .select()
 
         if (error) {
           console.error('Error de RLS/Supabase:', error)
-          showToast(`Error al ${accion.toLowerCase()}: ${error.message}`, 'error')
+          showToast(`Error al activar: ${error.message}`, 'error')
           return
         }
-
         if (!data || data.length === 0) {
-          showToast(`No se pudo ${accion.toLowerCase()} el negocio debido a políticas de seguridad.`, 'error')
+          showToast('No se pudo activar el negocio (políticas de seguridad).', 'error')
           return
         }
-
         cargarConsolaMaestra()
-        showToast(`Negocio ${accion.toLowerCase()} correctamente`)
+        showToast('Pago registrado · +30 días de acceso')
+      }
+    })
+  }
+
+  async function suspenderNegocio(neg) {
+    showConfirm({
+      title: '¿Suspender Negocio?',
+      message: `¿Suspender a "${neg?.nombre || neg.id}"? Perderá acceso al panel y a recibir reservas.`,
+      confirmText: 'Suspender',
+      isDestructive: true,
+      onConfirm: async () => {
+        const { data, error } = await supabase
+          .from('negocios')
+          .update({ estado_suscripcion: 'suspendido' })
+          .eq('id', neg.id)
+          .select()
+
+        if (error) {
+          console.error('Error de RLS/Supabase:', error)
+          showToast(`Error al suspender: ${error.message}`, 'error')
+          return
+        }
+        if (!data || data.length === 0) {
+          showToast('No se pudo suspender el negocio (políticas de seguridad).', 'error')
+          return
+        }
+        cargarConsolaMaestra()
+        showToast('Negocio suspendido')
       }
     })
   }
@@ -639,7 +667,7 @@ export default function Dashboard({ session }) {
         nombre: nombreNegocio,
         rubro: rubroSeleccionado,
         color_primario: '#0f172a',
-        estado_suscripcion: 'activo',
+        estado_suscripcion: 'trial',
         es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL ? (session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL) : false
       }])
       .select().single()
@@ -685,10 +713,12 @@ export default function Dashboard({ session }) {
     </div>
   )
 
-  // ===== PANTALLA DE CUENTA SUSPENDIDA =====
-  if (negocio && negocio.estado_suscripcion === 'suspendido' && !negocio.es_admin_plataforma) {
+  // ===== BLOQUEO POR SUSCRIPCIÓN (prueba vencida o cuenta suspendida) =====
+  const accesoSub = negocio ? getEstadoSuscripcion(negocio) : { acceso: true, estado: 'activo', diasRestantes: null, vence: null, enTrial: false }
+  if (negocio && !accesoSub.acceso && !negocio.es_admin_plataforma) {
+    const esVencido = accesoSub.estado === 'vencido'
     return (
-      <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased flex flex-col">
+      <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased flex flex-col" style={{ colorScheme: 'light' }}>
         {/* Navbar mínimo */}
         <nav className="h-14 border-b bg-white/90 backdrop-blur-md border-slate-200 shadow-sm flex items-center justify-between px-4 sticky top-0 z-50">
           <div className="flex items-center gap-2">
@@ -696,38 +726,62 @@ export default function Dashboard({ session }) {
               <span className="text-white font-black text-[9px] italic">NS</span>
             </div>
             <div className="h-3 w-px mx-1 bg-slate-200"></div>
-            <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-slate-400">Cuenta Suspendida</p>
+            <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-slate-400">{esVencido ? 'Suscripción Vencida' : 'Cuenta Suspendida'}</p>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-opacity">Salir</button>
+          <button onClick={() => supabase.auth.signOut()} className="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-opacity" data-testid="blocked-logout">Salir</button>
         </nav>
 
         {/* Contenido de bloqueo */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-md w-full text-center animate-in zoom-in-95 duration-700">
-            {/* Icono de bloqueo */}
-            <div className="w-20 h-20 mx-auto mb-6 rounded-[1.5rem] bg-red-50 border-2 border-red-100 flex items-center justify-center">
-              <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+          <div className="max-w-md w-full text-center animate-in zoom-in-95 duration-700" data-testid="subscription-blocked">
+            {/* Icono */}
+            <div className={`w-20 h-20 mx-auto mb-6 rounded-[1.5rem] border-2 flex items-center justify-center ${esVencido ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'}`}>
+              {esVencido ? (
+                <svg className="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              ) : (
+                <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              )}
             </div>
 
             {/* Mensaje principal */}
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 mb-2">Cuenta Suspendida</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 mb-2">
+              {esVencido ? (accesoSub.enTrial ? 'Tu prueba gratis terminó' : 'Tu suscripción venció') : 'Cuenta Suspendida'}
+            </h2>
             <p className="text-sm text-slate-500 font-medium leading-relaxed mb-8 max-w-sm mx-auto">
-              Tu cuenta de <span className="font-bold text-slate-700">{negocio.nombre}</span> fue suspendida por el administrador de la plataforma.
-              Mientras esté suspendida, no podés acceder al panel de gestión ni recibir nuevas reservas.
+              {esVencido ? (
+                <>Para seguir usando <span className="font-bold text-slate-700">{negocio.nombre}</span> y recibir reservas, activá el plan {PLAN.nombre}. Escribinos y te reactivamos la cuenta al instante.</>
+              ) : (
+                <>Tu cuenta de <span className="font-bold text-slate-700">{negocio.nombre}</span> fue suspendida por el administrador. Mientras esté suspendida no podés acceder al panel ni recibir reservas.</>
+              )}
             </p>
+
+            {/* Plan card (solo vencido) */}
+            {esVencido && (
+              <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5 mb-4 text-left">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Plan {PLAN.nombre}</span>
+                  <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-widest">{accesoSub.enTrial ? 'Prueba finalizada' : 'Vencido'}</span>
+                </div>
+                <div className="flex items-end gap-1">
+                  <span className="text-3xl font-black tracking-tighter text-slate-900">${PLAN.precio.toLocaleString('es-AR')}</span>
+                  <span className="text-xs text-slate-400 font-bold mb-1">/mes</span>
+                </div>
+                <ul className="mt-3 space-y-1.5">
+                  {['Reservas online ilimitadas', 'CRM de clientes + reportes', 'App de reservas con tu marca', 'Soporte por WhatsApp'].map(x => (
+                    <li key={x} className="flex items-center gap-2 text-[12px] text-slate-600 font-medium">
+                      <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      {x}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Info card */}
             <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5 mb-4 text-left space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negocio</span>
                 <span className="text-sm font-bold text-slate-900">{negocio.nombre}</span>
-              </div>
-              <div className="h-px bg-slate-100"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</span>
-                <span className="text-[10px] font-black text-red-500 bg-red-50 px-2.5 py-1 rounded-lg uppercase tracking-widest">Suspendido</span>
               </div>
               <div className="h-px bg-slate-100"></div>
               <div className="flex items-center justify-between">
@@ -739,17 +793,25 @@ export default function Dashboard({ session }) {
             {/* Acciones */}
             <div className="space-y-3">
               <a
-                href={`mailto:soporte@nonsistemas.com?subject=Cuenta suspendida: ${negocio.nombre}&body=Hola, mi cuenta ${negocio.nombre} (ID: ${negocio.id}) fue suspendida. Solicito la reactivación.`}
-                className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95"
+                href={whatsappActivacion(negocio, session.user.email)}
+                target="_blank" rel="noopener noreferrer"
+                data-testid="blocked-activate-cta"
+                className="w-full py-4 rounded-xl bg-emerald-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Contactar Soporte
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                {esVencido ? 'Activar mi plan' : 'Contactar al administrador'}
               </a>
               <button
-                onClick={() => supabase.auth.signOut()}
-                className="w-full py-4 rounded-xl bg-white border border-slate-200 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 transition-all active:scale-95"
+                onClick={() => window.location.reload()}
+                className="w-full py-4 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 transition-all active:scale-95"
               >
-                Cerrar Sesión
+                Ya pagué · Actualizar
+              </button>
+              <button
+                onClick={() => supabase.auth.signOut()}
+                className="w-full py-3 text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-slate-600 transition-all"
+              >
+                Cerrar sesión
               </button>
             </div>
           </div>
@@ -894,12 +956,22 @@ export default function Dashboard({ session }) {
                 </div>
               </div>
               <div className="space-y-3">
-                {negociosFiltrados.map(n => (
+                {negociosFiltrados.map(n => {
+                  const sn = getEstadoSuscripcion(n)
+                  const badge = sn.estado === 'admin' ? { t: 'Admin', c: 'bg-white/10 text-white' }
+                    : sn.estado === 'trial' ? { t: `Prueba · ${sn.diasRestantes}d`, c: 'bg-indigo-500/15 text-indigo-300' }
+                    : sn.estado === 'activo' ? { t: `Activo${sn.diasRestantes != null ? ` · ${sn.diasRestantes}d` : ''}`, c: 'bg-green-500/15 text-green-400' }
+                    : sn.estado === 'vencido' ? { t: 'Vencido', c: 'bg-amber-500/15 text-amber-400' }
+                    : { t: 'Suspendido', c: 'bg-red-500/15 text-red-400' }
+                  return (
                   <div key={n.id} className="bg-white/5 border border-white/5 hover:border-white/15 transition-all p-4 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 group">
                     <div className="flex items-center gap-4 md:gap-6 w-full">
                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white text-black flex items-center justify-center font-black text-lg md:text-xl shadow-xl transition-transform group-hover:rotate-6 shrink-0">{n.nombre.charAt(0)}</div>
                       <div className="overflow-hidden flex-1">
-                        <p className="font-bold text-white text-base md:text-lg tracking-tight leading-none truncate">{n.nombre}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-white text-base md:text-lg tracking-tight leading-none truncate">{n.nombre}</p>
+                          <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${badge.c}`}>{badge.t}</span>
+                        </div>
                         <div className="flex items-center gap-2 md:gap-3 mt-2">
                           <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{n.rubro}</span>
                           <span className="text-[8px] md:text-[9px] font-mono text-white/20 uppercase hidden sm:inline">• {n.id.slice(0, 8)}</span>
@@ -910,12 +982,18 @@ export default function Dashboard({ session }) {
                       <button onClick={() => { const slug = n.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
                         <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </button>
-                      <button onClick={() => gestionarSuscripcion(n.id, n.estado_suscripcion)} className={`flex-1 md:flex-none px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all ${n.estado_suscripcion === 'activo' ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white'}`}>
-                        {n.estado_suscripcion === 'activo' ? 'Suspender' : 'Activar'}
-                      </button>
+                      {sn.estado !== 'admin' && (
+                        <>
+                          <button onClick={() => registrarPago(n)} className="flex-1 md:flex-none px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white" title="Registrar pago (+30 días)">+30 días</button>
+                          {sn.acceso && (
+                            <button onClick={() => suspenderNegocio(n)} className="flex-1 md:flex-none px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white">Suspender</button>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -924,6 +1002,35 @@ export default function Dashboard({ session }) {
              VISTA: DASHBOARD BUSINESS (OWNER) — MOBILE FIRST COMPLETO
              ========================================================== */
           <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
+
+            {/* BANNER DE SUSCRIPCIÓN (prueba activa o suscripción por vencer) */}
+            {(accesoSub.estado === 'trial' || (accesoSub.estado === 'activo' && accesoSub.diasRestantes != null && accesoSub.diasRestantes <= 5)) && (
+              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-indigo-50 border-indigo-200' : 'bg-amber-50 border-amber-200'}`} data-testid="subscription-banner">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-indigo-500' : 'bg-amber-500'}`}>
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-indigo-900' : 'text-amber-900'}`}>
+                      {accesoSub.estado === 'trial'
+                        ? `Prueba gratis · te ${accesoSub.diasRestantes === 1 ? 'queda 1 día' : `quedan ${accesoSub.diasRestantes} días`}`
+                        : `Tu plan vence en ${accesoSub.diasRestantes === 1 ? '1 día' : `${accesoSub.diasRestantes} días`}`}
+                    </p>
+                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-indigo-500' : 'text-amber-600'}`}>
+                      Plan {PLAN.nombre} · ${PLAN.precio.toLocaleString('es-AR')}/mes · activá para no perder el acceso
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={whatsappActivacion(negocio, session.user.email)}
+                  target="_blank" rel="noopener noreferrer"
+                  data-testid="subscription-banner-cta"
+                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-amber-500 hover:bg-amber-600'}`}
+                >
+                  {accesoSub.estado === 'trial' ? 'Activar plan' : 'Renovar'}
+                </a>
+              </div>
+            )}
 
             {/* BRAND HERO — COMPACTO EN MOBILE (modo claro) */}
             <header className="ns-hero-compact relative overflow-hidden rounded-[1.3rem] md:rounded-[2.5rem] text-slate-900 group animate-in fade-in duration-500 bg-white border border-slate-200 shadow-sm">
@@ -1678,14 +1785,57 @@ export default function Dashboard({ session }) {
                     <div className="ns-settings-row">
                       <div>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</p>
-                        <p className={`text-sm font-bold mt-0.5 ${negocio.estado_suscripcion === 'activo' ? 'text-green-600' : 'text-red-500'}`}>{negocio.estado_suscripcion === 'activo' ? 'Activo' : 'Suspendido'}</p>
+                        <p className={`text-sm font-bold mt-0.5 ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'text-indigo-600' : 'text-green-600') : 'text-red-500'}`}>{etiquetaEstado(accesoSub.estado)}{accesoSub.diasRestantes != null ? ` · ${accesoSub.diasRestantes}d` : ''}</p>
                       </div>
-                      <span className={`w-2.5 h-2.5 rounded-full ${negocio.estado_suscripcion === 'activo' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                      <span className={`w-2.5 h-2.5 rounded-full ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'bg-indigo-500' : 'bg-green-500') : 'bg-red-500'}`}></span>
                     </div>
                     <div className="ns-settings-row">
                       <div>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID del Negocio</p>
                         <p className="text-[10px] font-mono text-slate-500 mt-0.5 break-all">{negocio.id}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN: SUSCRIPCIÓN / PLAN */}
+                  <div className="ns-settings-card" data-testid="subscription-card">
+                    <div className="ns-settings-card-header">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <h4>Suscripción</h4>
+                    </div>
+                    <div className="p-4 md:p-5">
+                      <div className="rounded-2xl border border-slate-200 overflow-hidden">
+                        <div className="p-5 bg-gradient-to-br from-slate-50 to-white">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Plan {PLAN.nombre}</span>
+                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${accesoSub.estado === 'trial' ? 'text-indigo-600 bg-indigo-50' : accesoSub.acceso ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'}`}>{etiquetaEstado(accesoSub.estado)}</span>
+                          </div>
+                          <div className="flex items-end gap-1 mb-1">
+                            <span className="text-3xl font-black tracking-tighter text-slate-900">${PLAN.precio.toLocaleString('es-AR')}</span>
+                            <span className="text-xs text-slate-400 font-bold mb-1">/mes</span>
+                          </div>
+                          {accesoSub.diasRestantes != null ? (
+                            <p className="text-[12px] font-medium text-slate-500">
+                              {accesoSub.estado === 'trial' ? 'Prueba gratis · ' : 'Activo · '}
+                              te {accesoSub.diasRestantes === 1 ? 'queda 1 día' : `quedan ${accesoSub.diasRestantes} días`}
+                              {accesoSub.vence ? ` (hasta ${new Date(accesoSub.vence).toLocaleDateString('es-AR')})` : ''}
+                            </p>
+                          ) : (
+                            <p className="text-[12px] font-medium text-slate-500">Todo incluido: reservas, CRM, reportes e inventario.</p>
+                          )}
+                        </div>
+                        <div className="p-4 border-t border-slate-100">
+                          <a
+                            href={whatsappActivacion(negocio, session.user.email)}
+                            target="_blank" rel="noopener noreferrer"
+                            data-testid="subscription-card-cta"
+                            className="w-full py-3 rounded-xl bg-emerald-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-sm flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            {accesoSub.estado === 'activo' ? 'Renovar suscripción' : 'Activar plan'}
+                          </a>
+                          <p className="text-[10px] text-slate-400 text-center mt-2 font-medium">Activación manual · te respondemos al toque</p>
+                        </div>
                       </div>
                     </div>
                   </div>

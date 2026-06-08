@@ -228,7 +228,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       if (!id) {
         const { data: neg, error } = await supabase.from('negocios').insert([{
           owner_id: session.user.id, nombre: finalData.nombre, rubro: finalData.rubro,
-          color_primario: finalData.color, estado_suscripcion: 'activo',
+          color_primario: finalData.color, estado_suscripcion: 'trial',
           es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL
             ? session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL : false
         }]).select().single()
