@@ -155,9 +155,9 @@ export default function Servicios({ negocioId, rubro }) {
         </div>
       )}
 
-      <header className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-4 md:mb-6 shrink-0">
+      <header className="flex items-center justify-between bg-gradient-to-br from-slate-800/40 to-slate-900/20 p-6 rounded-[2rem] shadow-lg border border-slate-700/40 mb-4 md:mb-6 shrink-0 backdrop-blur-sm">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">{vocab.servicioPlural}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-white leading-none">{vocab.servicioPlural}</h2>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1.5">
             {servicios.length} {vocab.servicios} configurados
           </p>
@@ -177,30 +177,30 @@ export default function Servicios({ negocioId, rubro }) {
             <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
           </div>
         ) : servicios.length === 0 ? (
-          <div className="bg-white rounded-[2rem] border border-purple-100 p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
+          <div className="bg-slate-700/20 rounded-[2rem] border border-slate-600/40 p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-50 rounded-full blur-[40px]"></div>
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-50 rounded-full blur-[30px]"></div>
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-[40px]"></div>
+            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-500/10 rounded-full blur-[30px]"></div>
 
             {/* Robot emoji */}
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm relative z-10">
-              <IconRobot size={28} className="text-purple-500" />
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center mb-4 shadow-sm relative z-10 border border-purple-500/30">
+              <IconRobot size={28} className="text-purple-400" />
             </div>
 
-            <h3 className="text-base font-bold text-slate-900 tracking-tight relative z-10">¡Empezá creando tu primer {vocab.servicio}!</h3>
-            <p className="text-xs text-slate-500 mt-2 max-w-[320px] leading-relaxed font-medium relative z-10">
-              Un {vocab.servicio} es lo que ofrecés a tus clientes. Cada uno tiene un <strong className="text-slate-700">nombre</strong>, un <strong className="text-slate-700">precio</strong> y <strong className="text-slate-700">cuánto dura</strong>. Tus clientes lo ven cuando abren tu link de reservas.
+            <h3 className="text-base font-bold text-white tracking-tight relative z-10">¡Empezá creando tu primer {vocab.servicio}!</h3>
+            <p className="text-xs text-slate-400 mt-2 max-w-[320px] leading-relaxed font-medium relative z-10">
+              Un {vocab.servicio} es lo que ofrecés a tus clientes. Cada uno tiene un <strong className="text-slate-200">nombre</strong>, un <strong className="text-slate-200">precio</strong> y <strong className="text-slate-200">cuánto dura</strong>. Tus clientes lo ven cuando abren tu link de reservas.
             </p>
 
             {/* Example cards */}
             <div className="mt-5 w-full max-w-[300px] space-y-2 relative z-10">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ejemplo:</p>
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center justify-between">
+              <div className="bg-slate-700/40 rounded-xl p-3 border border-slate-600/50 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-slate-700">Consulta General</p>
+                  <p className="text-xs font-bold text-white">Consulta General</p>
                   <p className="text-[9px] text-slate-400 font-medium">30 min</p>
                 </div>
-                <span className="text-sm font-black text-slate-900">$3500</span>
+                <span className="text-sm font-black text-green-300">$3500</span>
               </div>
             </div>
 
@@ -217,13 +217,13 @@ export default function Servicios({ negocioId, rubro }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
             {servicios.map((srv) => (
-              <div key={srv.id} className="bg-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-slate-100 flex flex-col justify-between gap-4 group hover:border-slate-300 transition-all">
+              <div key={srv.id} className="bg-slate-700/30 rounded-[1.5rem] p-5 md:p-6 shadow-lg border border-slate-600/50 flex flex-col justify-between gap-4 group hover:border-slate-500 transition-all">
 
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-lg text-slate-900 leading-tight">{srv.nombre}</h4>
+                    <h4 className="font-bold text-lg text-white leading-tight">{srv.nombre}</h4>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 text-[10px] font-bold text-slate-500 tracking-widest uppercase border border-slate-100">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-700/40 text-[10px] font-bold text-slate-300 tracking-widest uppercase border border-slate-600/50">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {srv.duracion_minutos} min
                       </span>
@@ -231,15 +231,15 @@ export default function Servicios({ negocioId, rubro }) {
                   </div>
 
                   <div className="text-right">
-                    <span className="text-lg font-black text-slate-900 tracking-tighter">${srv.precio}</span>
+                    <span className="text-lg font-black text-green-300 tracking-tighter">${srv.precio}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-4 border-t border-slate-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-2 rounded-xl bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                <div className="flex items-center gap-2 pt-4 border-t border-slate-600/30 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-2 rounded-xl bg-slate-700/40 text-[10px] font-bold uppercase tracking-widest text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors">
                     Editar
                   </button>
-                  <button onClick={() => eliminarServicio(srv.id)} className="w-10 h-10 rounded-xl bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0">
+                  <button onClick={() => eliminarServicio(srv.id)} className="w-10 h-10 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0 border border-red-500/30">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
                   </button>
                 </div>

@@ -1108,10 +1108,10 @@ export default function Dashboard({ session }) {
               {tab === 'clientes' && (
                 <div className="space-y-4 animate-in fade-in duration-700">
                   {/* HEADER + BÚSQUEDA */}
-                  <header className="flex flex-col gap-3 bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
+                  <header className="flex flex-col gap-3 bg-gradient-to-br from-slate-800/40 to-slate-900/20 p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-lg border border-slate-700/40 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">{vocab.clientePlural}</h2>
+                        <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-white leading-none">{vocab.clientePlural}</h2>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">{clientes.length} registrados</p>
                       </div>
                       {/* EXPORT BUTTONS */}
@@ -1166,27 +1166,27 @@ export default function Dashboard({ session }) {
 
                     {/* STATS RÁPIDOS DE CLIENTES */}
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-slate-50 rounded-xl p-3 text-center">
-                        <p className="text-lg md:text-2xl font-black text-slate-900">{clientes.length}</p>
+                      <div className="bg-slate-700/30 rounded-xl p-3 text-center border border-slate-600/30">
+                        <p className="text-lg md:text-2xl font-black text-white">{clientes.length}</p>
                         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Total</p>
                       </div>
-                      <div className="bg-amber-50 rounded-xl p-3 text-center">
-                        <p className="text-lg md:text-2xl font-black text-amber-600">{clientesVIP + clientesFrecuentes}</p>
-                        <p className="text-[8px] font-bold text-amber-500 uppercase tracking-widest">Recurrentes</p>
+                      <div className="bg-amber-500/20 rounded-xl p-3 text-center border border-amber-500/30">
+                        <p className="text-lg md:text-2xl font-black text-amber-300">{clientesVIP + clientesFrecuentes}</p>
+                        <p className="text-[8px] font-bold text-amber-400 uppercase tracking-widest">Recurrentes</p>
                       </div>
-                      <div className="bg-green-50 rounded-xl p-3 text-center">
-                        <p className="text-lg md:text-2xl font-black text-green-600">${totalIngresosClientes.toLocaleString()}</p>
-                        <p className="text-[8px] font-bold text-green-500 uppercase tracking-widest">Facturado</p>
+                      <div className="bg-green-500/20 rounded-xl p-3 text-center border border-green-500/30">
+                        <p className="text-lg md:text-2xl font-black text-green-300">${totalIngresosClientes.toLocaleString()}</p>
+                        <p className="text-[8px] font-bold text-green-400 uppercase tracking-widest">Facturado</p>
                       </div>
                     </div>
 
                     {/* BÚSQUEDA + ORDENAR */}
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <input type="text" placeholder="Buscar cliente..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:bg-white focus:border-slate-400 transition-all font-medium" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <input type="text" placeholder="Buscar cliente..." className="w-full bg-slate-700/30 border border-slate-600/50 rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:bg-slate-700/50 focus:border-slate-500 transition-all font-medium text-white placeholder-slate-400" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
                       </div>
-                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 outline-none cursor-pointer appearance-none">
+                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} className="bg-slate-700/30 border border-slate-600/50 rounded-xl px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-300 outline-none cursor-pointer appearance-none">
                         <option value="visitas">Visitas</option>
                         <option value="nombre">Nombre</option>
                         <option value="reciente">Reciente</option>
@@ -1200,10 +1200,10 @@ export default function Dashboard({ session }) {
                       <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
                     </div>
                   ) : clientesFiltrados.length === 0 ? (
-                    <div className="bg-white rounded-[1.5rem] border border-dashed border-slate-300 p-12 flex flex-col items-center text-center">
-                      <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Sin clientes</h3>
-                      <p className="text-[11px] font-medium text-slate-500 mt-2 max-w-[250px]">Los clientes aparecerán automáticamente cuando recibas tu primera reserva.</p>
+                    <div className="bg-slate-700/20 rounded-[1.5rem] border border-dashed border-slate-600/40 p-12 flex flex-col items-center text-center">
+                      <svg className="w-12 h-12 text-slate-600 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Sin clientes</h3>
+                      <p className="text-[11px] font-medium text-slate-400 mt-2 max-w-[250px]">Los clientes aparecerán automáticamente cuando recibas tu primera reserva.</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -1214,7 +1214,7 @@ export default function Dashboard({ session }) {
                           </div>
                           <div className="flex-1 overflow-hidden">
                             <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-sm text-slate-900 truncate">{c.nombre}</h4>
+                              <h4 className="font-bold text-sm text-white truncate">{c.nombre}</h4>
                               <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 ${c.frecuencia === 'VIP' ? 'bg-amber-100 text-amber-700' :
                                   c.frecuencia === 'Frecuente' ? 'bg-blue-50 text-blue-600' :
                                     c.frecuencia === 'Regular' ? 'bg-slate-100 text-slate-500' :
@@ -1225,14 +1225,14 @@ export default function Dashboard({ session }) {
                               <span className="text-[10px] font-bold text-slate-400 tracking-wide">{c.telefono}</span>
                               {c.email && (
                                 <>
-                                  <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                  <span className="w-1 h-1 bg-slate-600 rounded-full"></span>
                                   <span className="text-[10px] font-medium text-slate-400 truncate">{c.email}</span>
                                 </>
                               )}
                             </div>
                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                              <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
-                              <span className="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase tracking-widest">${c.ingresoTotal.toLocaleString()}</span>
+                              <span className="text-[9px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded uppercase tracking-widest border border-blue-500/30">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
+                              <span className="text-[9px] font-bold text-green-300 bg-green-500/20 px-2 py-0.5 rounded uppercase tracking-widest border border-green-500/30">${c.ingresoTotal.toLocaleString()}</span>
                               <span className="text-[9px] text-slate-400 font-medium">Última: {formatearFechaRelativa(c.ultimaVisita)}</span>
                             </div>
                           </div>

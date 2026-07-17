@@ -416,7 +416,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
   }
 
   return (
-    <div className="flex flex-col max-w-2xl mx-auto bg-[#F8FAFC] rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden relative">
+    <div className="flex flex-col max-w-2xl mx-auto bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-[2.5rem] shadow-lg border border-slate-700/40 overflow-hidden relative">
 
       {loading && (
         <div className="absolute top-4 right-4 z-50">
@@ -425,9 +425,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       )}
 
       {/* VISTA PRINCIPAL: CALENDARIO PANORÁMICO */}
-      <div className="flex-1 px-3 py-5 md:px-8 md:py-8 bg-[#F8FAFC] overflow-y-auto no-scrollbar w-full">
+      <div className="flex-1 px-3 py-5 md:px-8 md:py-8 bg-transparent overflow-y-auto no-scrollbar w-full">
         <div className="mb-5 md:mb-8 px-1 md:px-2">
-          <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900 leading-none">
+          <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-white leading-none">
             Agenda
           </h1>
           <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1 md:mt-2">
@@ -440,9 +440,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         </div>
 
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 px-2 w-full">
-          <button onClick={() => setFiltroEmpleado('todos')} className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border transition-all shrink-0 ${filtroEmpleado === 'todos' ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>{vocab.filtroTodos}</button>
+          <button onClick={() => setFiltroEmpleado('todos')} className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border transition-all shrink-0 ${filtroEmpleado === 'todos' ? 'bg-purple-600 border-purple-600 text-white shadow-lg' : 'bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-700/50'}`}>{vocab.filtroTodos}</button>
           {empleados.map(e => (
-            <button key={e.id} onClick={() => setFiltroEmpleado(e.id)} className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border transition-all flex items-center gap-2 shrink-0 ${filtroEmpleado === e.id ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
+            <button key={e.id} onClick={() => setFiltroEmpleado(e.id)} className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border transition-all flex items-center gap-2 shrink-0 ${filtroEmpleado === e.id ? 'bg-purple-600 border-purple-600 text-white shadow-lg' : 'bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-700/50'}`}>
               <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 bg-slate-200">
                 {e.foto_url && <img src={e.foto_url} className="object-cover h-full w-full" />}
               </div>
@@ -475,13 +475,13 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                   const fechaStr = tDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
                   const esHoy = tDate.toDateString() === new Date().toDateString()
                   return (
-                    <div key={t.id} className="bg-white rounded-xl p-3 border border-slate-100 shadow-sm flex items-center gap-3 hover:shadow-md transition-all">
-                      <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${esHoy ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-600'}`}>
+                    <div key={t.id} className="bg-slate-700/30 rounded-xl p-3 border border-slate-600/50 shadow-sm flex items-center gap-3 hover:shadow-md transition-all">
+                      <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${esHoy ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-slate-700/40 text-slate-400 border border-slate-600/30'}`}>
                         <span className="text-sm font-black leading-none">{horaStr}</span>
                         <span className="text-[8px] font-bold uppercase tracking-wider mt-0.5 opacity-60">{esHoy ? 'Hoy' : fechaStr}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-900 truncate">{t.cliente_nombre}</p>
+                        <p className="text-sm font-bold text-white truncate">{t.cliente_nombre}</p>
                         <p className="text-[10px] text-slate-400 font-medium truncate">
                           {t.servicios?.nombre} · {t.empleados?.nombre?.split(' ')[0] || vocab.fallbackStaff}
                         </p>
