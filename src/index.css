@@ -12,31 +12,35 @@
   --ns-surface-hover: #1e2028;
   --ns-border: rgba(255, 255, 255, 0.08);
   --ns-border-hover: rgba(255, 255, 255, 0.16);
-  --ns-text: #e8eaed;
-  --ns-text-secondary: #8b8fa3;
-  --ns-text-muted: #555872;
+  --ns-text: #f8fafc;
+  --ns-text-secondary: #94a3b8;
+  --ns-text-muted: #64748b;
   --ns-primary: #6c5ce7;
   --ns-primary-light: #a29bfe;
   --ns-primary-dark: #4834d4;
   --ns-primary-bg: rgba(108, 92, 231, 0.12);
   --ns-accent: #00cec9;
   --ns-accent-bg: rgba(0, 206, 201, 0.1);
-  --ns-success: #00b894;
-  --ns-success-bg: rgba(0, 184, 148, 0.1);
-  --ns-danger: #ff6b6b;
-  --ns-danger-bg: rgba(255, 107, 107, 0.1);
-  --ns-warning: #fdcb6e;
+  --ns-success: #10b981;
+  --ns-success-bg: rgba(16, 185, 129, 0.1);
+  --ns-danger: #ef4444;
+  --ns-danger-bg: rgba(239, 68, 68, 0.1);
+  --ns-warning: #f59e0b;
   --ns-gradient-1: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #00cec9 100%);
   --ns-gradient-hero: linear-gradient(135deg, #0f0a1e 0%, #1a1040 40%, #2d1b69 100%);
   --ns-gradient-card: linear-gradient(180deg, rgba(24, 26, 32, 0.95) 0%, rgba(24, 26, 32, 0.85) 100%);
   --ns-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --ns-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --ns-shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.45);
+  --ns-shadow-md: 0 12px 32px rgba(0, 0, 0, 0.3);
+  --ns-shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.4);
   --ns-shadow-glow: 0 0 40px rgba(108, 92, 231, 0.2);
-  --ns-radius-sm: 14px;
-  --ns-radius-md: 22px;
+  --ns-radius-sm: 16px;
+  --ns-radius-md: 24px;
   --ns-radius-lg: 32px;
-  --ns-radius-xl: 40px;
+  --ns-radius-xl: 48px;
+  
+  /* Safe Area for Mobile */
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sat: env(safe-area-inset-top, 0px);
 }
 
 /* ---------- Global Reset & Base ---------- */
@@ -796,18 +800,30 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 80;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
-  padding: 6px 4px;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+  background: rgba(15, 17, 23, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 10px;
+  padding-bottom: calc(8px + var(--sab));
   display: flex;
-  align-items: stretch;
-  justify-content: space-around;
-  gap: 0;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Floating Bottom Nav Style for Mobile */
+@media (max-width: 767px) {
+  .ns-bottom-nav {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: 8px;
+    background: rgba(24, 26, 32, 0.9);
+  }
 }
 
 .ns-bottom-nav-item {
@@ -839,8 +855,8 @@ body {
 }
 
 .ns-bottom-nav-item.active {
-  color: #0f172a;
-  background: rgba(108, 92, 231, 0.12);
+  color: #fff;
+  background: var(--ns-primary-bg);
 }
 
 .ns-bottom-nav-item.active svg {
@@ -852,8 +868,16 @@ body {
 }
 
 /* Add safe-area padding for mobile body when bottom nav is present */
-.ns-has-bottom-nav {
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+@media (max-width: 767px) {
+  .ns-has-bottom-nav {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 768px) {
+  .ns-has-bottom-nav {
+    padding-bottom: 0;
+  }
 }
 
 /* ============================================================
@@ -985,6 +1009,10 @@ body {
 }
 
 /* Mobile-specific enhancements */
+.ns-mobile-content-area {
+  min-height: auto;
+}
+
 @media (max-width: 767px) {
   .ns-mobile-content-area {
     min-height: calc(100vh - 56px - 80px);
@@ -993,6 +1021,12 @@ body {
   /* Turnos FAB above bottom nav */
   .ns-fab-mobile {
     bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 12px) !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .ns-mobile-content-area {
+    min-height: auto;
   }
 }
 

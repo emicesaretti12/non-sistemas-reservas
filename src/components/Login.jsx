@@ -382,111 +382,63 @@ export default function Login() {
       {/* ═══════════════════ LEFT — BRAND HERO ═══════════════════ */}
       <aside
         className="hidden lg:flex lg:w-[48%] xl:w-[52%] relative overflow-hidden flex-col text-white"
-        style={styles.asidePattern}
+        style={{ background: '#0f1117' }}
       >
+        {/* Background Gradients */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/20 blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-violet-600/20 blur-[120px]" />
+        </div>
+        
         {/* Grain overlay */}
         <div
-          className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay"
+          className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
           style={styles.grain}
         />
-        {/* Glow orbs */}
-        <div
-          className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(56,189,248,0.45) 0%, rgba(56,189,248,0) 70%)',
-          }}
-        />
-        <div
-          className="absolute -bottom-40 -right-40 w-[480px] h-[480px] rounded-full pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(125,211,252,0.35) 0%, rgba(125,211,252,0) 70%)',
-          }}
-        />
 
-        <div className="relative z-10 flex flex-col justify-between h-full px-12 xl:px-16 py-10">
+        <div className="relative z-10 flex flex-col justify-between h-full px-16 py-12">
           {/* TOP STRIP */}
           <header className="flex items-start justify-between">
-            <a href="/" className="group flex items-center gap-3" data-testid="brand-link">
-              <div className="relative">
-                <div
-                  className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg"
-                  style={{
-                    background: 'rgba(255,255,255,0.95)',
-                    backdropFilter: 'blur(8px)',
-                  }}
-                >
-                  <span
-                    className="font-black text-xl tracking-tighter"
-                    style={{
-                      fontFamily: '"Fraunces", serif',
-                      fontStyle: 'italic',
-                      color: '#0369A1',
-                    }}
-                  >
-                    N
-                  </span>
-                </div>
-                <span
-                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                  style={{
-                    background: '#38BDF8',
-                    boxShadow: '0 0 16px rgba(56,189,248,0.8)',
-                  }}
-                />
+            <a href="/" className="group flex items-center gap-4">
+              <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/40 border border-white/20 transform group-hover:rotate-6 transition-transform">
+                <span className="text-white font-black text-xl italic tracking-tighter">N</span>
               </div>
               <div className="leading-none">
-                <p className="font-bold text-[17px] tracking-tight text-white">
-                  Noni<span style={{ color: '#7DD3FC' }}>.</span>
+                <p className="font-black text-2xl tracking-tighter text-white">
+                  Noni<span className="text-indigo-500">.</span>
                 </p>
-                <p
-                  className="text-[9px] font-semibold uppercase tracking-[0.32em] text-white/55 mt-1.5"
-                  style={{ fontFamily: '"JetBrains Mono", monospace' }}
-                >
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mt-1">
                   Sistema de reservas
                 </p>
               </div>
             </a>
 
-            <div
-              className="text-right text-[10px] font-semibold uppercase tracking-[0.25em] text-white/55"
-              style={{ fontFamily: '"JetBrains Mono", monospace' }}
-            >
+            <div className="text-right text-[10px] font-black uppercase tracking-[0.3em] text-white/20">
               <p>Est. MMXXIV</p>
-              <p className="mt-1 text-white/40">Salsipuedes · Argentina</p>
+              <p className="mt-1">Salsipuedes · Argentina</p>
             </div>
           </header>
 
           {/* EDITORIAL HEADLINE */}
-          <div className="my-10 xl:my-16">
-            <div className="flex items-center gap-3 mb-8">
-              <span
-                className="text-[10px] font-bold uppercase tracking-[0.3em]"
-                style={{ fontFamily: '"JetBrains Mono", monospace', color: '#7DD3FC' }}
-              >
+          <div className="my-auto max-w-2xl">
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-[11px] font-black uppercase tracking-[0.4em] text-indigo-500">
                 N°01 · Operaciones
               </span>
-              <div className="h-px w-16" style={{ background: 'rgba(125,211,252,0.4)' }} />
+              <div className="h-px w-20 bg-white/10" />
             </div>
 
-            <h1
-              className="text-[clamp(2.6rem,5vw,4.4rem)] leading-[1.02] tracking-[-0.035em] font-light text-white"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
+            <h1 className="text-7xl xl:text-8xl font-black tracking-tighter text-white leading-[0.9] mb-8">
               Tu agenda,
               <br />
-              <em className="font-light italic" style={{ color: '#7DD3FC' }}>
-                orquestada
-              </em>
+              <span className="text-indigo-500 italic">orquestada</span>
               <br />
-              <span className="font-bold text-white">al detalle.</span>
+              al detalle.
             </h1>
 
-            <p className="mt-7 text-[16px] leading-[1.65] text-white/75 max-w-md font-light">
-              Reservas, equipo, inventario y métricas. Una plataforma que respira al ritmo de tu
-              negocio.{' '}
-              <span className="text-white/55">Premium. Simple. Sin fricción.</span>
+            <p className="text-xl leading-relaxed text-white/40 max-w-lg font-bold">
+              Reservas, equipo e inventario. Una plataforma diseñada para el ritmo de tu negocio.
+              <span className="block mt-4 text-white/20">Premium. Simple. Sin fricción.</span>
             </p>
           </div>
 
@@ -645,36 +597,22 @@ export default function Login() {
 
         <div className="w-full max-w-[440px]">
           {/* HEADER */}
-          <div className="mb-9">
-            <div className="flex items-center gap-3 mb-5">
-              <span
-                className="text-[10px] font-bold uppercase tracking-[0.3em]"
-                style={{
-                  fontFamily: '"JetBrains Mono", monospace',
-                  color: 'var(--ns-primary)',
-                }}
-              >
+          <div className="mb-10">
+            <div className="flex items-center gap-4 mb-6">
+              <span className="text-[11px] font-black uppercase tracking-[0.4em] text-indigo-500">
                 {mode === 'login' ? 'N°02 · Acceso' : mode === 'registro' ? 'N°00 · Registro' : 'N°03 · Recuperar'}
               </span>
-              <div className="h-px flex-1" style={{ background: 'var(--ns-border)' }} />
+              <div className="h-px flex-1 bg-white/5" />
             </div>
 
-            <h2
-              className="text-[36px] sm:text-[44px] leading-[1.05] tracking-[-0.025em] font-light"
-              style={{ fontFamily: '"Fraunces", serif', color: 'var(--ns-text)' }}
-              data-testid="login-title"
-            >
+            <h2 className="text-5xl sm:text-6xl font-black tracking-tighter text-white leading-[0.9] mb-4">
               {configUI[mode].titulo}{' '}
-              <em className="italic font-semibold" style={{ color: 'var(--ns-primary)' }}>
+              <span className="text-indigo-500 italic">
                 {configUI[mode].acento}
                 {mode === 'login' || mode === 'registro' ? '.' : ''}
-              </em>
+              </span>
             </h2>
-            <p
-              className="mt-4 text-[15px] font-medium leading-relaxed"
-              style={{ color: 'var(--ns-text-secondary)' }}
-              data-testid="login-subtitle"
-            >
+            <p className="text-lg font-bold text-white/30 leading-relaxed">
               {configUI[mode].subtitulo}
             </p>
           </div>
@@ -734,41 +672,18 @@ export default function Login() {
           {/* SOCIAL */}
           {mode !== 'recuperar' && (
             <>
-              <div className="grid grid-cols-2 gap-2.5 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 <button
                   type="button"
                   onClick={() => handleSocialLogin('google')}
                   disabled={loading || cooldown > 0}
-                  data-testid="google-login-btn"
-                  className="group flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: 'var(--ns-surface)',
-                    border: '1.5px solid var(--ns-border)',
-                    color: 'var(--ns-text)',
-                  }}
-                  onMouseEnter={(e) =>
-                    !e.currentTarget.disabled &&
-                    (e.currentTarget.style.borderColor = 'var(--ns-primary)')
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--ns-border)')}
+                  className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-30 active:scale-95"
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
                   <span>Google</span>
                 </button>
@@ -776,37 +691,18 @@ export default function Login() {
                   type="button"
                   onClick={() => handleSocialLogin('github')}
                   disabled={loading || cooldown > 0}
-                  data-testid="github-login-btn"
-                  className="group flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: 'var(--ns-surface)',
-                    border: '1.5px solid var(--ns-border)',
-                    color: 'var(--ns-text)',
-                  }}
-                  onMouseEnter={(e) =>
-                    !e.currentTarget.disabled &&
-                    (e.currentTarget.style.borderColor = 'var(--ns-primary)')
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--ns-border)')}
+                  className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-30 active:scale-95"
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                   </svg>
                   <span>GitHub</span>
                 </button>
               </div>
-              <div className="relative mb-6 flex items-center gap-3">
-                <div className="flex-1 h-px" style={{ background: 'var(--ns-border)' }} />
-                <span
-                  className="text-[10px] font-semibold uppercase tracking-[0.3em]"
-                  style={{
-                    color: 'var(--ns-text-muted)',
-                    fontFamily: '"JetBrains Mono", monospace',
-                  }}
-                >
-                  O con email
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--ns-border)' }} />
+              <div className="relative mb-8 flex items-center gap-4">
+                <div className="flex-1 h-px bg-white/5" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">O con email</span>
+                <div className="flex-1 h-px bg-white/5" />
               </div>
             </>
           )}
@@ -815,16 +711,7 @@ export default function Login() {
           <form onSubmit={handleAuth} className="space-y-5" data-testid="auth-form">
             {/* Email */}
             <div>
-              <label
-                htmlFor="email"
-                className="block text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
-                style={{
-                  fontFamily: '"JetBrains Mono", monospace',
-                  color: 'var(--ns-text-secondary)',
-                }}
-              >
-                Email
-              </label>
+              <label htmlFor="email" className="block text-[11px] font-black uppercase tracking-[0.3em] text-white/30 mb-3">Email</label>
               <input
                 id="email"
                 type="email"
@@ -834,35 +721,17 @@ export default function Login() {
                 placeholder="tu@empresa.com"
                 disabled={loading || cooldown > 0}
                 autoComplete="email"
-                data-testid="email-input"
-                className="ns-input-clean disabled:opacity-50"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-sm outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all disabled:opacity-30"
               />
             </div>
 
             {/* Password */}
             {mode !== 'recuperar' && (
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label
-                    htmlFor="password"
-                    className="block text-[11px] font-bold uppercase tracking-[0.2em]"
-                    style={{
-                      fontFamily: '"JetBrains Mono", monospace',
-                      color: 'var(--ns-text-secondary)',
-                    }}
-                  >
-                    Contraseña
-                  </label>
+                <div className="flex items-center justify-between mb-3">
+                  <label htmlFor="password" className="block text-[11px] font-black uppercase tracking-[0.3em] text-white/30">Contraseña</label>
                   {mode === 'login' && (
-                    <button
-                      type="button"
-                      onClick={() => cambiarModo('recuperar')}
-                      data-testid="forgot-password-link"
-                      className="text-[11px] font-semibold transition-colors underline-offset-4 hover:underline"
-                      style={{ color: 'var(--ns-primary)' }}
-                    >
-                      ¿La olvidaste?
-                    </button>
+                    <button type="button" onClick={() => cambiarModo('recuperar')} className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors">¿La olvidaste?</button>
                   )}
                 </div>
                 <div className="relative">
@@ -875,43 +744,17 @@ export default function Login() {
                     placeholder="••••••••"
                     disabled={loading || cooldown > 0}
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    data-testid="password-input"
-                    className="ns-input-clean pr-11 disabled:opacity-50"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-sm outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all disabled:opacity-30 pr-14"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    data-testid="toggle-password-visibility"
-                    aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors"
-                    style={{ color: 'var(--ns-text-muted)' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ns-primary)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ns-text-muted)')}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
                   >
                     {showPassword ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
-                        />
-                      </svg>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     )}
                   </button>
                 </div>
@@ -989,43 +832,32 @@ export default function Login() {
             <button
               type="submit"
               disabled={botonDeshabilitado}
-              data-testid="submit-btn"
-              className="ns-btn-celeste w-full mt-2"
-              style={{ marginTop: '8px' }}
+              className="w-full mt-4 py-5 rounded-[1.5rem] bg-indigo-600 text-white font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               {renderBotonTexto()}
             </button>
           </form>
 
           {/* SWITCH */}
-          <div
-            className="mt-8 pt-5 border-t"
-            style={{ borderColor: 'var(--ns-border)' }}
-          >
+          <div className="mt-12 pt-8 border-t border-white/5">
             {mode === 'recuperar' ? (
               <button
                 type="button"
                 onClick={() => cambiarModo('login')}
-                data-testid="back-to-login"
-                className="text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5"
-                style={{ color: 'var(--ns-text-secondary)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ns-primary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ns-text-secondary)')}
+                className="text-[11px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-all flex items-center gap-3"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 Volver al inicio de sesión
               </button>
             ) : (
-              <p className="text-[13px]" style={{ color: 'var(--ns-text-secondary)' }}>
+              <p className="text-[11px] font-black uppercase tracking-widest text-white/20">
                 {mode === 'login' ? '¿Primera vez por acá?' : '¿Ya tenés cuenta?'}{' '}
                 <button
                   type="button"
                   onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
-                  data-testid="switch-mode-link"
-                  className="font-bold underline-offset-4 hover:underline transition-colors"
-                  style={{ color: 'var(--ns-primary)' }}
+                  className="text-indigo-400 hover:text-indigo-300 transition-colors ml-2"
                 >
                   {mode === 'login' ? 'Creá una cuenta gratis' : 'Iniciá sesión'}
                 </button>

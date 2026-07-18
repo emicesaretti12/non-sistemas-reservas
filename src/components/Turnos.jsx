@@ -204,16 +204,16 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         <button
           key={dayNum}
           onClick={() => { setFechaActual(d); setModalDiaAbierto(true); }}
-          className={`aspect-square flex flex-col items-center justify-center rounded-[1rem] md:rounded-2xl transition-all relative overflow-hidden ${isSelected ? 'bg-slate-900 text-white shadow-xl scale-110 z-10' : 'bg-slate-50 hover:bg-slate-200'} ${isToday && !isSelected ? 'border-2 border-blue-400' : 'border border-transparent'}`}
+          className={`aspect-square flex flex-col items-center justify-center rounded-2xl md:rounded-3xl transition-all relative overflow-hidden ${isSelected ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 scale-105 z-10' : 'bg-white/5 border border-white/5 hover:bg-white/10'} ${isToday && !isSelected ? 'ring-2 ring-indigo-500/50' : ''}`}
         >
-          <span className={`text-[13px] md:text-base ${isSelected ? 'font-black' : 'font-bold text-slate-700'} mb-2 md:mb-1.5`}>{dayNum}</span>
+          <span className={`text-[14px] md:text-lg ${isSelected ? 'font-black' : 'font-bold text-white/80'} mb-1`}>{dayNum}</span>
 
           {contador > 0 && (
-            <div className="absolute bottom-1 md:bottom-2 left-1/2 -translate-x-1/2 flex gap-0.5 md:gap-1 items-center">
+            <div className="flex gap-0.5 md:gap-1 items-center">
               {contador < 4 ?
-                Array.from({ length: contador }).map((_, idx) => <div key={idx} className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`}></div>)
+                Array.from({ length: contador }).map((_, idx) => <div key={idx} className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-indigo-400'}`}></div>)
                 :
-                <div className={`text-[8px] md:text-[9px] font-black ${isSelected ? 'text-white' : 'text-blue-500'}`}>+{contador}</div>
+                <div className={`text-[8px] md:text-[9px] font-black ${isSelected ? 'text-white' : 'text-indigo-400'}`}>+{contador}</div>
               }
             </div>
           )}
@@ -222,22 +222,22 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     })
 
     return (
-      <div className="bg-white border border-slate-100 rounded-3xl p-4 shadow-sm w-full animate-in fade-in zoom-in-95 duration-500">
-        <div className="flex justify-between items-center mb-4 px-2">
-          <button onClick={() => setFechaActual(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-500 rounded-full hover:bg-slate-900 hover:text-white transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+      <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl w-full animate-in fade-in zoom-in-95 duration-700 backdrop-blur-xl">
+        <div className="flex justify-between items-center mb-6 px-2">
+          <button onClick={() => setFechaActual(new Date(year, month - 1, 1))} className="w-10 h-10 flex items-center justify-center bg-white/5 text-white/60 rounded-xl hover:bg-indigo-600 hover:text-white transition-all active:scale-90">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs md:text-sm">
+          <h3 className="font-black text-white uppercase tracking-[0.2em] text-[11px] md:text-sm">
             {new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
           </h3>
-          <button onClick={() => setFechaActual(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-500 rounded-full hover:bg-slate-900 hover:text-white transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+          <button onClick={() => setFechaActual(new Date(year, month + 1, 1))} className="w-10 h-10 flex items-center justify-center bg-white/5 text-white/60 rounded-xl hover:bg-indigo-600 hover:text-white transition-all active:scale-90">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
-        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2 text-center">
-          {nombresDias.map(n => <div key={n} className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{n}</div>)}
+        <div className="grid grid-cols-7 gap-2 md:gap-4 mb-4 text-center">
+          {nombresDias.map(n => <div key={n} className="text-[10px] font-black text-white/20 uppercase tracking-widest">{n}</div>)}
         </div>
-        <div className="grid grid-cols-7 gap-1 md:gap-2">
+        <div className="grid grid-cols-7 gap-2 md:gap-4">
           {blanks}
           {days}
         </div>
@@ -416,35 +416,38 @@ export default function Turnos({ negocioId, rubro, negocio }) {
   }
 
   return (
-    <div className="flex flex-col max-w-2xl mx-auto bg-[#F8FAFC] rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden relative">
+    <div className="flex flex-col w-full h-full bg-transparent overflow-hidden relative">
 
       {loading && (
         <div className="absolute top-4 right-4 z-50">
-          <div className="w-6 h-6 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+          <div className="w-6 h-6 border-4 border-white/10 border-t-indigo-500 rounded-full animate-spin"></div>
         </div>
       )}
 
       {/* VISTA PRINCIPAL: CALENDARIO PANORÁMICO */}
-      <div className="flex-1 px-3 py-5 md:px-8 md:py-8 bg-[#F8FAFC] overflow-y-auto no-scrollbar w-full">
-        <div className="mb-5 md:mb-8 px-1 md:px-2">
-          <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900 leading-none">
+      <div className="flex-1 px-4 py-6 md:px-10 md:py-10 overflow-y-auto no-scrollbar w-full space-y-8">
+        <div className="px-1 md:px-2">
+          <h1 className="text-3xl md:text-6xl font-black tracking-tighter text-white leading-none mb-2">
             Agenda
           </h1>
-          <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1 md:mt-2">
-            {todosLosTurnos.length} {vocab.citasRegistradas}
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/40">
+              {todosLosTurnos.length} {vocab.citasRegistradas}
+            </p>
+          </div>
         </div>
 
-        <div className="mb-4 md:mb-8 w-full">
+        <div className="w-full">
           {renderCalendarioCompleto()}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 px-2 w-full">
-          <button onClick={() => setFiltroEmpleado('todos')} className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border transition-all shrink-0 ${filtroEmpleado === 'todos' ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>{vocab.filtroTodos}</button>
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-1 w-full">
+          <button onClick={() => setFiltroEmpleado('todos')} className={`px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all shrink-0 ${filtroEmpleado === 'todos' ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}>{vocab.filtroTodos}</button>
           {empleados.map(e => (
-            <button key={e.id} onClick={() => setFiltroEmpleado(e.id)} className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border transition-all flex items-center gap-2 shrink-0 ${filtroEmpleado === e.id ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
-              <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 bg-slate-200">
-                {e.foto_url && <img src={e.foto_url} className="object-cover h-full w-full" />}
+            <button key={e.id} onClick={() => setFiltroEmpleado(e.id)} className={`px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center gap-3 shrink-0 ${filtroEmpleado === e.id ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}>
+              <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 ring-2 ring-white/10">
+                {e.foto_url ? <img src={e.foto_url} className="object-cover h-full w-full" /> : <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center text-[10px]">{e.nombre[0]}</div>}
               </div>
               {e.nombre.split(' ')[0]}
             </button>
@@ -463,37 +466,39 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
           if (proximos.length === 0) return null
           return (
-            <div className="mt-6 md:mt-8 px-1">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Próximos {vocab.turnos}</h3>
+            <div className="mt-10 md:mt-12 px-1 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Próximos {vocab.turnos}</h3>
               </div>
-              <div className="space-y-2">
+              <div className="grid gap-3">
                 {proximos.map(t => {
                   const tDate = safeParseDate(t.fecha_hora)
                   const horaStr = tDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
                   const fechaStr = tDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
                   const esHoy = tDate.toDateString() === new Date().toDateString()
                   return (
-                    <div key={t.id} className="bg-white rounded-xl p-3 border border-slate-100 shadow-sm flex items-center gap-3 hover:shadow-md transition-all">
-                      <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${esHoy ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-600'}`}>
-                        <span className="text-sm font-black leading-none">{horaStr}</span>
-                        <span className="text-[8px] font-bold uppercase tracking-wider mt-0.5 opacity-60">{esHoy ? 'Hoy' : fechaStr}</span>
+                    <div key={t.id} className="bg-white/[0.03] rounded-2xl p-4 border border-white/10 shadow-xl flex items-center gap-4 hover:bg-white/[0.05] transition-all group">
+                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 ${esHoy ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 text-white/60'}`}>
+                        <span className="text-base font-black leading-none tabular-nums">{horaStr}</span>
+                        <span className="text-[9px] font-black uppercase tracking-wider mt-1 opacity-70">{esHoy ? 'Hoy' : fechaStr}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-900 truncate">{t.cliente_nombre}</p>
-                        <p className="text-[10px] text-slate-400 font-medium truncate">
-                          {t.servicios?.nombre} · {t.empleados?.nombre?.split(' ')[0] || vocab.fallbackStaff}
-                        </p>
+                        <p className="text-base font-bold text-white truncate mb-0.5">{t.cliente_nombre}</p>
+                        <div className="flex items-center gap-2 text-[11px] font-medium text-white/40 truncate">
+                          <span>{t.servicios?.nombre}</span>
+                          <span className="w-1 h-1 rounded-full bg-white/10" />
+                          <span>{t.empleados?.nombre?.split(' ')[0] || vocab.fallbackStaff}</span>
+                        </div>
                       </div>
                       <a
                         href={`https://wa.me/${t.cliente_telefono?.replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-100 transition-colors shrink-0"
+                        className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/20 transition-all shrink-0 active:scale-90"
                         title="WhatsApp"
                       >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
                       </a>
                     </div>
                   )
@@ -604,17 +609,17 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           )
 
           return (
-            <div className="mt-6 md:mt-8 px-1">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Lugares libres hoy</h3>
+            <div className="mt-10 md:mt-12 px-1 space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Cupos disponibles</h3>
                 </div>
-                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
+                <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl uppercase tracking-widest border border-emerald-500/20">
                   {timeKeys.length} {timeKeys.length === 1 ? 'horario' : 'horarios'}
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {timeKeys.slice(0, 12).map(time => (
                   <button
                     key={time}
@@ -623,25 +628,30 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                       setNuevoTurno(prev => ({ ...prev, hora: time, empleado_id: byTime[time][0]?.id || '' }))
                       setModalAbierto(true)
                     }}
-                    className="bg-white rounded-xl p-3 border border-emerald-100 hover:border-emerald-300 hover:shadow-md transition-all text-left group"
+                    className="bg-white/[0.03] rounded-2xl p-4 border border-white/10 hover:bg-white/[0.06] hover:border-emerald-500/30 transition-all text-left group relative overflow-hidden shadow-xl"
                   >
-                    <p className="text-lg font-black text-slate-900 tracking-tighter group-hover:text-emerald-600 transition-colors">{time}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      {byTime[time].slice(0, 3).map(emp => (
-                        <div key={emp.id} className="w-5 h-5 rounded-full bg-slate-100 overflow-hidden border border-white shadow-sm" title={emp.nombre}>
-                          {emp.foto_url ? <img src={emp.foto_url} className="w-full h-full object-cover" /> : <span className="text-[8px] font-bold text-slate-400 flex items-center justify-center h-full">{emp.nombre[0]}</span>}
-                        </div>
-                      ))}
-                      {byTime[time].length > 3 && <span className="text-[9px] font-bold text-slate-400">+{byTime[time].length - 3}</span>}
+                    <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                    <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1.5">
-                      {byTime[time].length} {byTime[time].length === 1 ? 'disponible' : 'disponibles'}
+                    <p className="text-2xl font-black text-white tracking-tighter group-hover:text-emerald-400 transition-colors tabular-nums mb-2">{time}</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex -space-x-2">
+                        {byTime[time].slice(0, 3).map(emp => (
+                          <div key={emp.id} className="w-6 h-6 rounded-full bg-white/5 overflow-hidden border-2 border-[#0f1117] shadow-sm" title={emp.nombre}>
+                            {emp.foto_url ? <img src={emp.foto_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[9px] font-black bg-indigo-500/20 text-indigo-400">{emp.nombre[0]}</div>}
+                          </div>
+                        ))}
+                      </div>
+                      {byTime[time].length > 3 && <span className="text-[10px] font-black text-white/30">+{byTime[time].length - 3}</span>}
+                    </div>
+                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-3 opacity-60">
+                      {byTime[time].length} {byTime[time].length === 1 ? 'libre' : 'libres'}
                     </p>
                   </button>
                 ))}
               </div>
               {timeKeys.length > 12 && (
-                <p className="text-[10px] text-slate-400 font-medium text-center mt-3">Y {timeKeys.length - 12} horarios más disponibles</p>
+                <p className="text-[11px] text-white/20 font-black uppercase tracking-widest text-center mt-4">Y {timeKeys.length - 12} horarios más disponibles</p>
               )}
             </div>
           )

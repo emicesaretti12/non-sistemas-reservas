@@ -236,49 +236,83 @@ export default function Inventario({ negocioId, rubro }) {
   )
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700 pb-28 md:pb-4">
+    <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+      <header className="flex flex-col gap-6 mb-8 shrink-0">
+        <div className="flex items-center justify-between bg-white/[0.03] p-8 md:p-10 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+          </div>
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-none">Inventario</h2>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/30">
+                {seccion === 'inventario' ? `${items.length} productos en stock` : `${catItems.length} productos en catálogo`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 relative z-10">
+            <button
+              onClick={() => setSeccion(seccion === 'inventario' ? 'catalogo' : 'inventario')}
+              className="px-6 py-4 rounded-2xl bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:bg-white/10 hover:text-white transition-all border border-white/5 active:scale-95"
+            >
+              {seccion === 'inventario' ? 'Catálogo' : 'Inventario'}
+            </button>
+            <button
+              onClick={seccion === 'inventario' ? () => setModalAbierto(true) : () => setCatModal(true)}
+              className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/40 active:scale-95 transition-all gap-3 hover:bg-indigo-500 border border-white/20"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+              <span className="hidden md:inline text-[11px] font-black uppercase tracking-[0.3em]">Nuevo</span>
+            </button>
+          </div>
+        </div>
 
-      {/* SECTION TABS */}
-      <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
-        <button onClick={() => setSeccion('inventario')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${seccion === 'inventario' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400'}`}>
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          Stock
-        </button>
-        <button onClick={() => setSeccion('catalogo')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${seccion === 'catalogo' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400'}`}>
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          Catálogo
-        </button>
-      </div>
+        {/* BUSQUEDA Y FILTROS */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative group">
+            <input
+              type="text"
+              placeholder="Buscar por nombre..."
+              className="w-full pl-14 pr-6 py-5 bg-white/[0.03] rounded-2xl border border-white/10 text-white font-bold text-sm outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/10"
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+            />
+            <svg className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/10 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </div>
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 sm:pb-0">
+            {['todos', 'stock-bajo', ...categorias].map(c => (
+              <button
+                key={c}
+                onClick={() => setFiltro(c)}
+                className={`whitespace-nowrap px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${filtro === c ? 'bg-white text-[#1a1d24] border-white' : 'bg-white/5 border-white/5 text-white/30 hover:border-white/10 hover:text-white/50 active:scale-95'}`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
 
       {/* ===== SECCIÓN: INVENTARIO (STOCK) ===== */}
       {seccion === 'inventario' && (<>
-        <header className="bg-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl md:text-3xl font-bold tracking-tighter text-slate-900 leading-none">Inventario</h2>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">{items.length} productos registrados</p>
-            </div>
-            <button onClick={() => setModalAbierto(true)} className="px-4 md:px-6 py-3 bg-slate-900 text-white rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-2 shadow-lg">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
-              Agregar
-            </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Valor Total</p>
+            <p className="text-3xl font-black text-white tracking-tighter">${totalValor.toLocaleString()}</p>
+            <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all" />
           </div>
-
-          <div className="grid grid-cols-3 gap-2 md:gap-3">
-            <div className="bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl text-center">
-              <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Valor Total</p>
-              <p className="text-lg md:text-2xl font-black text-slate-900 tracking-tight mt-0.5">${totalValor.toLocaleString()}</p>
-            </div>
-            <div className="bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl text-center">
-              <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Productos</p>
-              <p className="text-lg md:text-2xl font-black text-slate-900 tracking-tight mt-0.5">{items.length}</p>
-            </div>
-            <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl text-center ${stockBajo > 0 ? 'bg-red-50' : 'bg-emerald-50'}`}>
-              <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Stock Bajo</p>
-              <p className={`text-lg md:text-2xl font-black tracking-tight mt-0.5 ${stockBajo > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{stockBajo}</p>
-            </div>
+          <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Productos</p>
+            <p className="text-3xl font-black text-white tracking-tighter">{items.length}</p>
+            <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all" />
           </div>
-        </header>
+          <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden group ${stockBajo > 0 ? 'bg-rose-500/5 border-rose-500/20' : 'bg-white/[0.03] border-white/10'}`}>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Stock Bajo</p>
+            <p className={`text-3xl font-black tracking-tighter ${stockBajo > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>{stockBajo}</p>
+            <div className={`absolute -bottom-4 -right-4 w-20 h-20 rounded-full blur-2xl transition-all ${stockBajo > 0 ? 'bg-rose-500/10 group-hover:bg-rose-500/20' : 'bg-emerald-500/10 group-hover:bg-emerald-500/20'}`} />
+          </div>
+        </div>
 
         {/* FILTROS */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -296,44 +330,44 @@ export default function Inventario({ negocioId, rubro }) {
 
         {/* LISTADO */}
         {itemsFiltrados.length === 0 ? (
-          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-12 text-center">
-            <svg className="w-16 h-16 text-slate-200 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Sin productos</p>
-            <p className="text-xs text-slate-400 mt-1">Agregá tu primer producto al inventario</p>
+          <div className="bg-white/[0.03] rounded-[2.5rem] border border-white/10 p-16 text-center">
+            <svg className="w-20 h-20 text-white/5 mx-auto mb-6" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            <p className="text-sm font-black text-white/20 uppercase tracking-[0.3em]">Sin productos</p>
+            <p className="text-xs text-white/10 mt-2 font-bold">Agregá tu primer producto al inventario</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 gap-4">
             {itemsFiltrados.map(item => {
               const nivel = getNivelStock(item)
               const margen = item.precio_venta > 0 && item.precio_costo > 0
                 ? Math.round(((item.precio_venta - item.precio_costo) / item.precio_venta) * 100) : null
               return (
-                <div key={item.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 hover:border-slate-300 transition-all group">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`w-11 h-11 md:w-12 md:h-12 rounded-xl ${nivel.ring} ring-4 ${nivel.color} flex items-center justify-center text-white font-black text-sm shrink-0`}>
+                <div key={item.id} className="bg-white/[0.03] rounded-[2rem] p-6 border border-white/10 flex flex-col sm:flex-row sm:items-center gap-6 group hover:bg-white/[0.05] transition-all relative overflow-hidden">
+                  <div className="flex items-center gap-6 flex-1 min-w-0 relative z-10">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-xl shrink-0 shadow-2xl ${nivel.color}`}>
                       {item.cantidad}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-slate-900 truncate">{item.nombre}</p>
-                        <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0 ${nivel.color === 'bg-red-500' ? 'bg-red-50 text-red-600' : nivel.color === 'bg-amber-500' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>{nivel.text}</span>
+                      <div className="flex items-center gap-3 mb-2">
+                        <p className="text-lg font-black text-white truncate leading-tight">{item.nombre}</p>
+                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${nivel.color === 'bg-red-500' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : nivel.color === 'bg-amber-500' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>{nivel.text}</span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.categoria}</span>
-                        {item.precio_venta > 0 && <span className="text-[10px] font-bold text-emerald-600">${item.precio_venta}</span>}
-                        {margen !== null && <span className="text-[9px] font-medium text-slate-400">{margen}% margen</span>}
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{item.categoria}</span>
+                        {item.precio_venta > 0 && <span className="text-[11px] font-black text-indigo-400">${item.precio_venta}</span>}
+                        {margen !== null && <span className="text-[10px] font-bold text-white/10">{margen}% margen</span>}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 justify-end border-t sm:border-none border-slate-50 pt-2 sm:pt-0">
-                    <button onClick={() => { setModalMovimiento(item.id); setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' }) }} className="w-10 h-10 md:w-9 md:h-9 rounded-xl md:rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-all active:scale-90" title="Movimiento de stock">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <div className="flex items-center gap-3 shrink-0 justify-end relative z-10">
+                    <button onClick={() => { setModalMovimiento(item.id); setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' }) }} className="w-12 h-12 rounded-2xl bg-white/5 text-white/20 hover:bg-white/10 hover:text-white flex items-center justify-center transition-all active:scale-90 border border-white/5" title="Movimiento">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
-                    <button onClick={() => abrirEdicion(item)} className="w-10 h-10 md:w-9 md:h-9 rounded-xl md:rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center transition-all active:scale-90" title="Editar">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <button onClick={() => abrirEdicion(item)} className="w-12 h-12 rounded-2xl bg-white/5 text-white/20 hover:bg-white/10 hover:text-white flex items-center justify-center transition-all active:scale-90 border border-white/5" title="Editar">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
-                    <button onClick={() => eliminar(item.id)} className="w-10 h-10 md:w-9 md:h-9 rounded-xl md:rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all active:scale-90" title="Eliminar">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <button onClick={() => eliminar(item.id)} className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90 border border-rose-500/20" title="Eliminar">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
                   </div>
                 </div>
@@ -344,66 +378,63 @@ export default function Inventario({ negocioId, rubro }) {
 
         {/* MODAL: AGREGAR / EDITAR PRODUCTO */}
         {modalAbierto && (
-          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3rem] shadow-2xl p-5 md:p-10 animate-in slide-in-from-bottom-[20%] duration-500 border border-slate-100 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
+          <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-[#0f1117]/80 backdrop-blur-2xl animate-in fade-in duration-300">
+            <div className="bg-[#1a1d24] w-full max-w-lg rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-white/10 relative overflow-hidden max-h-[90vh] overflow-y-auto">
+              <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[80px]" />
+              </div>
+
+              <div className="flex justify-between items-center mb-10 relative z-10">
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900">{modoEdicion ? 'Editar Producto' : 'Nuevo Producto'}</h2>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Control de inventario</p>
+                  <h2 className="text-3xl font-black tracking-tighter text-white leading-none">{modoEdicion ? 'Editar Producto' : 'Nuevo Producto'}</h2>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Control de inventario</p>
+                  </div>
                 </div>
-                <button onClick={cerrarModal} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
+                <button onClick={cerrarModal} className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center text-white/20 hover:text-white transition-all active:scale-90 border border-white/5">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
                 </button>
               </div>
 
-              <form onSubmit={guardar} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Nombre del Producto</label>
-                  <input required className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm" placeholder="Ej: Shampoo profesional" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} />
+              <form onSubmit={guardar} className="space-y-6 relative z-10">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 ml-2">Nombre del Producto</label>
+                  <input required className="w-full p-5 bg-white/5 rounded-2xl outline-none font-bold text-white border border-white/10 focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all text-base placeholder:text-white/10" placeholder="Ej: Shampoo profesional" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Categoría</label>
-                    <select className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none text-sm cursor-pointer" value={form.categoria} onChange={e => setForm({ ...form, categoria: e.target.value })}>
-                      {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 ml-2">Categoría</label>
+                    <select className="w-full p-5 bg-white/5 rounded-2xl outline-none font-bold text-white border border-white/10 focus:border-indigo-500/50 focus:bg-white/[0.08] appearance-none text-base cursor-pointer" value={form.categoria} onChange={e => setForm({ ...form, category: e.target.value })}>
+                      {categorias.map(c => <option key={c} value={c} className="bg-[#1a1d24]">{c}</option>)}
                     </select>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Unidad</label>
-                    <select className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none text-sm cursor-pointer" value={form.unidad} onChange={e => setForm({ ...form, unidad: e.target.value })}>
-                      {['unidad', 'ml', 'litro', 'gr', 'kg', 'caja', 'paquete'].map(u => <option key={u} value={u}>{u}</option>)}
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 ml-2">Unidad</label>
+                    <select className="w-full p-5 bg-white/5 rounded-2xl outline-none font-bold text-white border border-white/10 focus:border-indigo-500/50 focus:bg-white/[0.08] appearance-none text-base cursor-pointer" value={form.unidad} onChange={e => setForm({ ...form, unidad: e.target.value })}>
+                      {['unidad', 'ml', 'litro', 'gr', 'kg', 'caja', 'paquete'].map(u => <option key={u} value={u} className="bg-[#1a1d24]">{u}</option>)}
                     </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Cantidad</label>
-                    <input type="number" min="0" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.cantidad} onChange={e => setForm({ ...form, cantidad: parseInt(e.target.value) || 0 })} />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 ml-2">Cantidad</label>
+                    <input type="number" min="0" className="w-full p-5 bg-white/5 rounded-2xl outline-none font-bold text-white border border-white/10 focus:border-indigo-500/50 focus:bg-white/[0.08] text-base" value={form.cantidad} onChange={e => setForm({ ...form, cantidad: parseInt(e.target.value) || 0 })} />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Costo $</label>
-                    <input type="number" min="0" step="0.01" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.precio_costo} onChange={e => setForm({ ...form, precio_costo: parseFloat(e.target.value) || 0 })} />
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 ml-2">Costo $</label>
+                    <input type="number" min="0" step="0.01" className="w-full p-5 bg-white/5 rounded-2xl outline-none font-bold text-white border border-white/10 focus:border-indigo-500/50 focus:bg-white/[0.08] text-base" value={form.precio_costo} onChange={e => setForm({ ...form, precio_costo: parseFloat(e.target.value) || 0 })} />
                   </div>
-                  <div className="space-y-1.5 col-span-2 sm:col-span-1">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Venta $</label>
-                    <input type="number" min="0" step="0.01" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.precio_venta} onChange={e => setForm({ ...form, precio_venta: parseFloat(e.target.value) || 0 })} />
+                  <div className="space-y-2 col-span-2 sm:col-span-1">
+                    <label className="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 ml-2">Venta $</label>
+                    <input type="number" min="0" step="0.01" className="w-full p-5 bg-white/5 rounded-2xl outline-none font-bold text-white border border-white/10 focus:border-indigo-500/50 focus:bg-white/[0.08] text-base" value={form.precio_venta} onChange={e => setForm({ ...form, precio_venta: parseFloat(e.target.value) || 0 })} />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Stock Mínimo (alerta)</label>
-                  <input type="number" min="0" className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm" value={form.stock_minimo} onChange={e => setForm({ ...form, stock_minimo: parseInt(e.target.value) || 0 })} />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 ml-1">Descripción (opcional)</label>
-                  <textarea className="w-full p-4 bg-[#F8FAFC] rounded-[1.2rem] outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 text-sm resize-none h-20" placeholder="Notas adicionales..." value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} />
-                </div>
-
-                <button disabled={guardando} type="submit" className="w-full py-5 rounded-[1.2rem] bg-slate-900 text-white font-bold text-[10px] tracking-widest uppercase shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4">
-                  {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Guardar Cambios' : 'Agregar al Inventario')}
+                <button disabled={guardando} type="submit" className="w-full py-6 rounded-2xl bg-indigo-600 text-white font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-indigo-500/40 active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 hover:bg-indigo-500 border border-white/20 disabled:opacity-30">
+                  {guardando ? <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? 'Guardar Cambios' : 'Agregar al Inventario')}
                 </button>
               </form>
             </div>
