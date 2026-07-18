@@ -1,18 +1,40 @@
 {
-  "name": "Noni Gestión Inteligente",
+  "name": "Noni — Gestión Inteligente",
   "short_name": "Noni",
-  "description": "Hub de operaciones automatizado para tu negocio",
+  "description": "Hub de operaciones y reservas inteligentes para tu negocio.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0f172a",
+  "background_color": "#0a0c12",
+  "theme_color": "#6366f1",
   "orientation": "portrait",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Dashboard Noni"
     }
   ]
 }

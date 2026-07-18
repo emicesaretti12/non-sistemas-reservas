@@ -35,6 +35,29 @@ export default function DashboardHome({
   const [servicios, setServicios] = useState([])
   const [empleados, setEmpleados] = useState([])
   const [tick, setTick] = useState(0)
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [showInstallBtn, setShowInstallBtn] = useState(false)
+
+  // Lógica de instalación PWA
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstallBtn(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   // Re-render cada minuto para countdowns / "ahora"
   useEffect(() => {
@@ -209,6 +232,29 @@ export default function DashboardHome({
             </button>
           </div>
         </div>
+
+        {/* Banner de Instalación PWA */}
+        {showInstallBtn && (
+          <div className="mt-4 animate-in slide-in-from-top-4 duration-500">
+            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-indigo-500/20 flex items-center justify-between gap-4 border border-white/20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-white"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+                <div>
+                  <p className="text-white font-black text-sm md:text-base leading-tight">Instalar App</p>
+                  <p className="text-white/70 text-[10px] md:text-xs font-medium">Agregá Noni a tu pantalla de inicio para acceso rápido.</p>
+                </div>
+              </div>
+              <button
+                onClick={handleInstallClick}
+                className="px-5 py-3 rounded-xl bg-white text-indigo-600 font-black text-[10px] uppercase tracking-widest shadow-lg active:scale-95 transition-all shrink-0"
+              >
+                Instalar
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ═══════════ 3 MÉTRICAS CLAVE DEL DÍA ═══════════ */}
