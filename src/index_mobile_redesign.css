@@ -1,0 +1,360 @@
+/* ============================================================
+   MOBILE NATIVE REDESIGN — BOTTOM SHEETS & PREMIUM UI
+   ============================================================ */
+
+/* ============================================================
+   BOTTOM SHEET MODAL (Mobile Native Style)
+   ============================================================ */
+
+.ns-bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: ns-fade-in 0.3s ease-out;
+}
+
+.ns-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, rgba(24, 26, 32, 0.98) 0%, rgba(15, 17, 23, 0.98) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px 32px 0 0;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: ns-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.ns-bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  margin: -8px auto 16px;
+}
+
+.ns-bottom-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ns-bottom-sheet-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #e8eaed;
+}
+
+.ns-bottom-sheet-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ns-bottom-sheet-close:active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.92);
+}
+
+@keyframes ns-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ns-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   PREMIUM INPUT FIELDS (Mobile-First)
+   ============================================================ */
+
+.ns-input-clean {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  outline: none;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ns-text);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 48px;
+  font-family: inherit;
+}
+
+.ns-input-clean::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+}
+
+.ns-input-clean:focus {
+  border-color: rgba(108, 92, 231, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+.ns-input-clean:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   PREMIUM BUTTON STYLES (Mobile-First)
+   ============================================================ */
+
+.ns-btn-celeste {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  color: white;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.3);
+}
+
+.ns-btn-celeste:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(108, 92, 231, 0.4);
+}
+
+.ns-btn-celeste:active {
+  transform: scale(0.96);
+}
+
+.ns-btn-celeste:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ============================================================
+   EXPORT BUTTONS (Mobile-First)
+   ============================================================ */
+
+.ns-export-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 40px;
+}
+
+.ns-export-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.ns-export-btn:active {
+  transform: scale(0.94);
+}
+
+/* ============================================================
+   FORM GROUP (Mobile-First)
+   ============================================================ */
+
+.ns-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ns-form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ============================================================
+   MODAL FORM (Bottom Sheet Style)
+   ============================================================ */
+
+.ns-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ns-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ns-modal-actions button {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 48px;
+}
+
+.ns-modal-actions button.primary {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+}
+
+.ns-modal-actions button.primary:active {
+  transform: scale(0.96);
+}
+
+.ns-modal-actions button.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.ns-modal-actions button.secondary:active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   MOBILE CALENDAR IMPROVEMENTS
+   ============================================================ */
+
+.ns-calendar-day {
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ns-calendar-day:active {
+  transform: scale(0.92);
+}
+
+.ns-calendar-day.today {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.3) 0%, rgba(162, 155, 254, 0.2) 100%);
+  border-color: rgba(108, 92, 231, 0.5);
+  color: #a29bfe;
+  font-weight: 700;
+}
+
+.ns-calendar-day.selected {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  border-color: #a29bfe;
+  color: white;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+}
+
+/* ============================================================
+   PAGE TRANSITIONS (Mobile-First)
+   ============================================================ */
+
+.ns-page-transition-enter {
+  animation: ns-page-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ns-page-transition-exit {
+  animation: ns-page-out 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .ns-bottom-sheet {
+    padding: 20px 16px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ns-bottom-sheet-title {
+    font-size: 16px;
+  }
+
+  .ns-input-clean,
+  .ns-btn-celeste {
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .ns-modal-actions button {
+    min-height: 44px;
+  }
+}
+
+@media (min-width: 768px) {
+  .ns-bottom-sheet {
+    display: none;
+  }
+}
