@@ -1,13 +1,9 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
-import { useTheme, ThemeToggle } from '../contexts/ThemeContext'
 
 const COOLDOWN_SEGUNDOS = 60
 
 export default function Login() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
-
   const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -274,9 +270,9 @@ export default function Login() {
 
   const configUI = {
     login: {
-      titulo: 'Bienvenido de vuelta a',
+      titulo: 'Bienvenido a',
       acento: 'Noni',
-      subtitulo: 'Gestioná tu agenda, equipo y reservas desde un sólo lugar.',
+      subtitulo: 'Gestioná tu agenda, equipo y reservas desde un solo lugar.',
       btn: 'Iniciar sesión',
     },
     registro: {
@@ -297,13 +293,6 @@ export default function Login() {
     () => now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
     [now]
   )
-  const fechaHoy = useMemo(
-    () =>
-      now
-        .toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' })
-        .replace(/^./, (c) => c.toUpperCase()),
-    [now]
-  )
 
   const renderPasswordMeter = () => {
     if (mode !== 'registro' || !password) return null
@@ -319,11 +308,11 @@ export default function Login() {
           <span
             key={r.id}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold"
-            style={{ color: r.test ? 'var(--ns-success)' : 'var(--ns-text-muted)' }}
+            style={{ color: r.test ? '#10B981' : '#9CA3AF' }}
           >
             <span
               className="w-1.5 h-1.5 rounded-full transition-colors"
-              style={{ background: r.test ? 'var(--ns-success)' : 'var(--ns-border-strong)' }}
+              style={{ background: r.test ? '#10B981' : '#EDE9FE' }}
             />
             {r.text}
           </span>
@@ -357,531 +346,260 @@ export default function Login() {
     )
   }
 
-  // Theme-aware styles
-  const styles = {
-    shell: {
-      background: 'var(--ns-bg)',
-      color: 'var(--ns-text)',
-    },
-    asidePattern: {
-      background:
-        'radial-gradient(at 25% 15%, rgba(56, 189, 248, 0.45) 0%, transparent 55%), radial-gradient(at 80% 80%, rgba(8, 145, 178, 0.55) 0%, transparent 55%), linear-gradient(135deg, #075985 0%, #0C4A6E 50%, #0B1220 100%)',
-    },
-    grain: {
-      backgroundImage:
-        "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-    },
-  }
-
   return (
-    <div
-      className="min-h-dvh w-full flex"
-      style={{ ...styles.shell, fontFamily: '"Inter Tight", "Inter", -apple-system, sans-serif' }}
-      data-testid="login-screen"
-    >
-      {/* ═══════════════════ LEFT — BRAND HERO ═══════════════════ */}
-      <aside
-        className="hidden lg:flex lg:w-[48%] xl:w-[52%] relative overflow-hidden flex-col text-white"
-        style={{ background: '#0f1117' }}
-      >
-        {/* Background Gradients */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/20 blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-violet-600/20 blur-[120px]" />
-        </div>
-        
-        {/* Grain overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
-          style={styles.grain}
-        />
+    <div className="ns-login-shell" data-testid="login-screen">
+      {/* Background */}
+      <div className="ns-login-bg" />
+      <div className="ns-login-orb ns-login-orb-1" />
+      <div className="ns-login-orb ns-login-orb-2" />
+      <div className="ns-login-orb ns-login-orb-3" />
 
-        <div className="relative z-10 flex flex-col justify-between h-full px-16 py-12">
-          {/* TOP STRIP */}
-          <header className="flex items-start justify-between">
-            <a href="/" className="group flex items-center gap-4">
-              <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/40 border border-white/20 transform group-hover:rotate-6 transition-transform">
-                <span className="text-white font-black text-xl italic tracking-tighter">N</span>
-              </div>
-              <div className="leading-none">
-                <p className="font-black text-2xl tracking-tighter text-white">
-                  Noni<span className="text-indigo-500">.</span>
-                </p>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mt-1">
-                  Sistema de reservas
-                </p>
-              </div>
-            </a>
-
-            <div className="text-right text-[10px] font-black uppercase tracking-[0.3em] text-white/20">
-              <p>Est. MMXXIV</p>
-              <p className="mt-1">Salsipuedes · Argentina</p>
-            </div>
-          </header>
-
-          {/* EDITORIAL HEADLINE */}
-          <div className="my-auto max-w-2xl">
-            <div className="flex items-center gap-4 mb-8">
-              <span className="text-[11px] font-black uppercase tracking-[0.4em] text-indigo-500">
-                N°01 · Operaciones
-              </span>
-              <div className="h-px w-20 bg-white/10" />
-            </div>
-
-            <h1 className="text-7xl xl:text-8xl font-black tracking-tighter text-white leading-[0.9] mb-8">
-              Tu agenda,
-              <br />
-              <span className="text-indigo-500 italic">orquestada</span>
-              <br />
-              al detalle.
-            </h1>
-
-            <p className="text-xl leading-relaxed text-white/40 max-w-lg font-bold">
-              Reservas, equipo e inventario. Una plataforma diseñada para el ritmo de tu negocio.
-              <span className="block mt-4 text-white/20">Premium. Simple. Sin fricción.</span>
+      <div className="ns-login-card w-full max-w-md mx-auto z-10 relative">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="ns-login-logo">
+            <span className="text-white font-black text-xl tracking-tighter">N</span>
+          </div>
+          <div className="leading-none">
+            <p className="font-black text-xl tracking-tight text-[#1E1B4B]">
+              Noni<span className="text-[#5B3DF5]">.</span>
+            </p>
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mt-1">
+              Sistema de reservas
             </p>
           </div>
+        </div>
 
-          {/* LIVE OPS MOCK PANEL */}
+        {/* Title */}
+        <div className="mb-8">
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-[#1E1B4B] leading-[1.05] mb-2">
+            {configUI[mode].titulo}{' '}
+            <span className="text-[#5B3DF5]">
+              {configUI[mode].acento}
+              {mode === 'login' || mode === 'registro' ? '.' : ''}
+            </span>
+          </h2>
+          <p className="text-[13px] font-medium text-[#6B7280] leading-relaxed">
+            {configUI[mode].subtitulo}
+          </p>
+        </div>
+
+        {/* Mensaje */}
+        {mensaje && (
           <div
-            className="rounded-2xl overflow-hidden ns-hero-glass"
-            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}
-          >
-            <div
-              className="flex items-center justify-between px-5 py-3 border-b border-white/10"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
-            >
-              <div className="flex items-center gap-2.5">
-                <span
-                  className="w-2 h-2 rounded-full ns-pulse-soft"
-                  style={{ background: '#38BDF8' }}
-                />
-                <p
-                  className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/85"
-                  style={{ fontFamily: '"JetBrains Mono", monospace' }}
-                >
-                  Agenda en vivo
-                </p>
-              </div>
-              <p
-                className="text-[10px] font-semibold text-white/55"
-                style={{ fontFamily: '"JetBrains Mono", monospace' }}
-              >
-                {fechaHoy} · {horaAhora}
-              </p>
-            </div>
-            <ul className="divide-y divide-white/8">
-              {[
-                { h: '09:30', s: 'Corte + Barba', c: 'M. Álvarez', t: 'Confirmado' },
-                { h: '11:00', s: 'Coloración', c: 'L. Pereyra', t: 'En curso' },
-                { h: '14:15', s: 'Manicura', c: 'P. Romero', t: 'Pendiente' },
-              ].map((r, i) => (
-                <li
-                  key={i}
-                  className="grid grid-cols-[60px_1fr_auto] items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors"
-                >
-                  <span
-                    className="text-[12px] font-bold"
-                    style={{ fontFamily: '"JetBrains Mono", monospace', color: '#7DD3FC' }}
-                  >
-                    {r.h}
-                  </span>
-                  <div>
-                    <p className="text-[12px] font-semibold text-white leading-tight">{r.s}</p>
-                    <p className="text-[10px] text-white/55 mt-0.5">{r.c}</p>
-                  </div>
-                  <span
-                    className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded"
-                    style={{
-                      fontFamily: '"JetBrains Mono", monospace',
-                      background:
-                        r.t === 'En curso'
-                          ? 'rgba(52, 211, 153, 0.18)'
-                          : r.t === 'Confirmado'
-                          ? 'rgba(56, 189, 248, 0.18)'
-                          : 'rgba(251, 191, 36, 0.18)',
-                      color:
-                        r.t === 'En curso'
-                          ? '#6EE7B7'
-                          : r.t === 'Confirmado'
-                          ? '#7DD3FC'
-                          : '#FCD34D',
-                    }}
-                  >
-                    {r.t}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* FOOTER STRIP */}
-          <footer
-            className="mt-10 pt-5 border-t border-white/10 flex items-center justify-between text-[10px] text-white/50"
-            style={{ fontFamily: '"JetBrains Mono", monospace' }}
-          >
-            <div className="flex items-center gap-4">
-              <span>v2.5.0</span>
-              <span className="w-1 h-1 rounded-full bg-white/30" />
-              <span className="flex items-center gap-1.5">
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: '#34D399', boxShadow: '0 0 8px #34D399' }}
-                />
-                Servicios operativos
-              </span>
-            </div>
-            <span>© {new Date().getFullYear()} · Hecho con oficio</span>
-          </footer>
-        </div>
-      </aside>
-
-      {/* ═══════════════════ RIGHT — FORM ═══════════════════ */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 sm:px-10 lg:px-14 relative">
-        {/* Top right: theme toggle */}
-        <div className="absolute top-6 right-6 z-10">
-          <ThemeToggle testId="theme-toggle-btn" />
-        </div>
-
-        {/* Mobile brand strip */}
-        <div
-          className="lg:hidden w-full max-w-[420px] flex items-center justify-between mb-10"
-          data-testid="brand-mobile"
-        >
-          <a href="/" className="flex items-center gap-2.5">
-            <div className="relative">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
-                style={{ background: 'var(--ns-gradient-deep)' }}
-              >
-                <span
-                  className="text-white font-black text-[17px] tracking-tighter"
-                  style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
-                >
-                  N
-                </span>
-              </div>
-              <span
-                className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                style={{ background: 'var(--ns-primary-light)' }}
-              />
-            </div>
-            <div className="leading-none">
-              <p
-                className="font-bold text-[16px] tracking-tight"
-                style={{ color: 'var(--ns-text)' }}
-              >
-                Noni<span style={{ color: 'var(--ns-primary)' }}>.</span>
-              </p>
-              <p
-                className="text-[9px] font-semibold uppercase tracking-[0.25em] mt-1"
-                style={{
-                  color: 'var(--ns-text-muted)',
-                  fontFamily: '"JetBrains Mono", monospace',
-                }}
-              >
-                Sistema de reservas
-              </p>
-            </div>
-          </a>
-          <span
-            className="text-[10px] font-semibold uppercase tracking-[0.25em]"
+            role="alert"
+            data-testid={`alert-${mensaje.tipo}`}
+            className="mb-6 p-4 text-[13px] font-medium flex items-start gap-3 rounded-2xl border"
             style={{
-              color: 'var(--ns-text-muted)',
-              fontFamily: '"JetBrains Mono", monospace',
+              background:
+                mensaje.tipo === 'error' ? 'rgba(239, 68, 68, 0.06)' : 'rgba(16, 185, 129, 0.06)',
+              color: mensaje.tipo === 'error' ? '#EF4444' : '#10B981',
+              borderColor:
+                mensaje.tipo === 'error' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
             }}
           >
-            {horaAhora}
-          </span>
-        </div>
-
-        <div className="w-full max-w-[440px]">
-          {/* HEADER */}
-          <div className="mb-10">
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-[11px] font-black uppercase tracking-[0.4em] text-indigo-500">
-                {mode === 'login' ? 'N°02 · Acceso' : mode === 'registro' ? 'N°00 · Registro' : 'N°03 · Recuperar'}
-              </span>
-              <div className="h-px flex-1 bg-white/5" />
+            <div className="shrink-0 mt-0.5">
+              {mensaje.tipo === 'error' ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
             </div>
-
-            <h2 className="text-5xl sm:text-6xl font-black tracking-tighter text-white leading-[0.9] mb-4">
-              {configUI[mode].titulo}{' '}
-              <span className="text-indigo-500 italic">
-                {configUI[mode].acento}
-                {mode === 'login' || mode === 'registro' ? '.' : ''}
-              </span>
-            </h2>
-            <p className="text-lg font-bold text-white/30 leading-relaxed">
-              {configUI[mode].subtitulo}
-            </p>
-          </div>
-
-          {/* MENSAJE */}
-          {mensaje && (
-            <div
-              role="alert"
-              data-testid={`alert-${mensaje.tipo}`}
-              className="mb-6 p-4 text-[13px] font-medium flex items-start gap-3 rounded-xl border"
-              style={{
-                background:
-                  mensaje.tipo === 'error' ? 'var(--ns-danger-bg)' : 'var(--ns-success-bg)',
-                color: mensaje.tipo === 'error' ? 'var(--ns-danger)' : 'var(--ns-success)',
-                borderColor:
-                  mensaje.tipo === 'error'
-                    ? 'color-mix(in srgb, var(--ns-danger) 30%, transparent)'
-                    : 'color-mix(in srgb, var(--ns-success) 30%, transparent)',
-              }}
-            >
-              <div className="shrink-0 mt-0.5">
-                {mensaje.tipo === 'error' ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="leading-snug">{mensaje.texto}</p>
-                {cooldown > 0 && mensaje.tipo === 'error' && (
-                  <div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-white/40">
-                    <div
-                      className="h-full transition-all duration-1000 ease-linear"
-                      style={{
-                        width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%`,
-                        background: 'var(--ns-danger)',
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* SOCIAL */}
-          {mode !== 'recuperar' && (
-            <>
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('google')}
-                  disabled={loading || cooldown > 0}
-                  className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-30 active:scale-95"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                  </svg>
-                  <span>Google</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('github')}
-                  disabled={loading || cooldown > 0}
-                  className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-30 active:scale-95"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                  </svg>
-                  <span>GitHub</span>
-                </button>
-              </div>
-              <div className="relative mb-8 flex items-center gap-4">
-                <div className="flex-1 h-px bg-white/5" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">O con email</span>
-                <div className="flex-1 h-px bg-white/5" />
-              </div>
-            </>
-          )}
-
-          {/* FORM */}
-          <form onSubmit={handleAuth} className="space-y-5" data-testid="auth-form">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-[11px] font-black uppercase tracking-[0.3em] text-white/30 mb-3">Email</label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@empresa.com"
-                disabled={loading || cooldown > 0}
-                autoComplete="email"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-sm outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all disabled:opacity-30"
-              />
-            </div>
-
-            {/* Password */}
-            {mode !== 'recuperar' && (
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label htmlFor="password" className="block text-[11px] font-black uppercase tracking-[0.3em] text-white/30">Contraseña</label>
-                  {mode === 'login' && (
-                    <button type="button" onClick={() => cambiarModo('recuperar')} className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors">¿La olvidaste?</button>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    disabled={loading || cooldown > 0}
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-sm outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all disabled:opacity-30 pr-14"
+            <div className="flex-1">
+              <p className="leading-snug">{mensaje.texto}</p>
+              {cooldown > 0 && mensaje.tipo === 'error' && (
+                <div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-[#EDE9FE]">
+                  <div
+                    className="h-full transition-all duration-1000 ease-linear"
+                    style={{
+                      width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%`,
+                      background: '#EF4444',
+                    }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
-                  >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    )}
-                  </button>
                 </div>
-                {renderPasswordMeter()}
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+        )}
 
-            {/* Confirmar */}
-            {mode === 'registro' && (
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
-                  style={{
-                    fontFamily: '"JetBrains Mono", monospace',
-                    color: 'var(--ns-text-secondary)',
-                  }}
-                >
-                  Confirmar contraseña
-                </label>
-                <input
-                  id="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repetí la contraseña"
-                  disabled={loading || cooldown > 0}
-                  autoComplete="new-password"
-                  data-testid="confirm-password-input"
-                  className="ns-input-clean disabled:opacity-50"
-                  style={
-                    confirmPassword.length > 0 && password !== confirmPassword
-                      ? { borderColor: 'var(--ns-danger)' }
-                      : undefined
-                  }
-                />
-              </div>
-            )}
-
-            {/* Terms */}
-            {mode === 'registro' && (
-              <label className="flex items-start gap-3 cursor-pointer select-none pt-1">
-                <input
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  disabled={cooldown > 0}
-                  data-testid="terms-checkbox"
-                  className="mt-0.5 w-4 h-4 rounded cursor-pointer accent-sky-500"
-                />
-                <span className="text-[12.5px] leading-snug" style={{ color: 'var(--ns-text-secondary)' }}>
-                  Acepto los{' '}
-                  <a
-                    href="#"
-                    className="font-semibold underline-offset-4 hover:underline"
-                    style={{ color: 'var(--ns-primary)' }}
-                  >
-                    Términos
-                  </a>{' '}
-                  y la{' '}
-                  <a
-                    href="#"
-                    className="font-semibold underline-offset-4 hover:underline"
-                    style={{ color: 'var(--ns-primary)' }}
-                  >
-                    Política de Privacidad
-                  </a>
-                  .
-                </span>
-              </label>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={botonDeshabilitado}
-              className="w-full mt-4 py-5 rounded-[1.5rem] bg-indigo-600 text-white font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-indigo-500/40 hover:bg-indigo-500 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-            >
-              {renderBotonTexto()}
-            </button>
-          </form>
-
-          {/* SWITCH */}
-          <div className="mt-12 pt-8 border-t border-white/5">
-            {mode === 'recuperar' ? (
+        {/* Social */}
+        {mode !== 'recuperar' && (
+          <>
+            <div className="grid grid-cols-2 gap-3 mb-6">
               <button
                 type="button"
-                onClick={() => cambiarModo('login')}
-                className="text-[11px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-all flex items-center gap-3"
+                onClick={() => handleSocialLogin('google')}
+                disabled={loading || cooldown > 0}
+                className="ns-login-social-btn"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
-                Volver al inicio de sesión
+                <span>Google</span>
               </button>
-            ) : (
-              <p className="text-[11px] font-black uppercase tracking-widest text-white/20">
-                {mode === 'login' ? '¿Primera vez por acá?' : '¿Ya tenés cuenta?'}{' '}
-                <button
-                  type="button"
-                  onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
-                  className="text-indigo-400 hover:text-indigo-300 transition-colors ml-2"
-                >
-                  {mode === 'login' ? 'Creá una cuenta gratis' : 'Iniciá sesión'}
-                </button>
-              </p>
-            )}
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('github')}
+                disabled={loading || cooldown > 0}
+                className="ns-login-social-btn"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1E1B4B">
+                  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                </svg>
+                <span>GitHub</span>
+              </button>
+            </div>
+            <div className="relative mb-6 flex items-center gap-3">
+              <div className="flex-1 h-px bg-[#EDE9FE]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#9CA3AF]">O con email</span>
+              <div className="flex-1 h-px bg-[#EDE9FE]" />
+            </div>
+          </>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleAuth} className="space-y-4" data-testid="auth-form">
+          <div>
+            <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] mb-2">Email</label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@empresa.com"
+              disabled={loading || cooldown > 0}
+              autoComplete="email"
+              className="ns-login-input"
+            />
           </div>
 
-          {/* Mobile footer */}
-          <div
-            className="lg:hidden mt-10 pt-5 border-t flex items-center justify-between text-[10px] uppercase tracking-[0.25em]"
-            style={{
-              borderColor: 'var(--ns-border)',
-              color: 'var(--ns-text-muted)',
-              fontFamily: '"JetBrains Mono", monospace',
-            }}
+          {mode !== 'recuperar' && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Contraseña</label>
+                {mode === 'login' && (
+                  <button type="button" onClick={() => cambiarModo('recuperar')} className="text-[10px] font-bold uppercase tracking-widest text-[#5B3DF5] hover:text-[#4328D4] transition-colors">¿La olvidaste?</button>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={loading || cooldown > 0}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  className="ns-login-input pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#5B3DF5] transition-colors"
+                >
+                  {showPassword ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                  )}
+                </button>
+              </div>
+              {renderPasswordMeter()}
+            </div>
+          )}
+
+          {mode === 'registro' && (
+            <div>
+              <label htmlFor="confirmPassword" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] mb-2">Confirmar contraseña</label>
+              <input
+                id="confirmPassword"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repetí la contraseña"
+                disabled={loading || cooldown > 0}
+                autoComplete="new-password"
+                data-testid="confirm-password-input"
+                className="ns-login-input"
+                style={confirmPassword.length > 0 && password !== confirmPassword ? { borderColor: '#EF4444' } : undefined}
+              />
+            </div>
+          )}
+
+          {mode === 'registro' && (
+            <label className="flex items-start gap-3 cursor-pointer select-none pt-1">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                disabled={cooldown > 0}
+                data-testid="terms-checkbox"
+                className="mt-0.5 w-4 h-4 rounded cursor-pointer accent-[#5B3DF5]"
+              />
+              <span className="text-[12px] leading-snug text-[#6B7280]">
+                Acepto los{' '}
+                <a href="#" className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Términos</a>
+                {' '}y la{' '}
+                <a href="#" className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Política de Privacidad</a>.
+              </span>
+            </label>
+          )}
+
+          <button
+            type="submit"
+            disabled={botonDeshabilitado}
+            className="ns-login-submit-btn"
           >
-            <span>© {new Date().getFullYear()} Noni</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--ns-success)' }} />
-              Online
-            </span>
-          </div>
+            {renderBotonTexto()}
+          </button>
+        </form>
+
+        {/* Switch */}
+        <div className="mt-8 pt-6 border-t border-[#EDE9FE]">
+          {mode === 'recuperar' ? (
+            <button
+              type="button"
+              onClick={() => cambiarModo('login')}
+              className="text-[11px] font-black uppercase tracking-widest text-[#9CA3AF] hover:text-[#1E1B4B] transition-all flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Volver al inicio de sesión
+            </button>
+          ) : (
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF]">
+              {mode === 'login' ? '¿Primera vez por acá?' : '¿Ya tenés cuenta?'}{' '}
+              <button
+                type="button"
+                onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
+                className="text-[#5B3DF5] hover:text-[#4328D4] transition-colors ml-2 font-bold"
+              >
+                {mode === 'login' ? 'Creá una cuenta gratis' : 'Iniciá sesión'}
+              </button>
+            </p>
+          )}
         </div>
-      </main>
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t border-[#EDE9FE] flex items-center justify-between text-[9px] uppercase tracking-[0.2em] text-[#9CA3AF]">
+          <span>© {new Date().getFullYear()} Noni</span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+            Online
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

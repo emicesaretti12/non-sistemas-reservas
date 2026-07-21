@@ -854,56 +854,52 @@ export default function Dashboard({ session }) {
 
 
   return (
-    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : negocio ? 'ns-owner-dark' : 'bg-[#F8FAFC] text-slate-900'} ns-has-bottom-nav`} style={{ colorScheme: (negocio?.es_admin_plataforma || negocio) ? 'dark' : 'light' }}>
+    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : negocio ? 'ns-owner-dark' : 'bg-[#FAFAFC] text-slate-900'} ns-has-bottom-nav`} style={{ colorScheme: negocio ? 'light' : 'light' }}>
 
       {/* Copy-link toast */}
       {copyToast && (
         <div className="ns-copy-toast">
           <IconCheckCircle size={20} className="text-emerald-500 shrink-0" />
           <div>
-            <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
-            <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+            <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Compartilo por WhatsApp o redes</p>
           </div>
         </div>
       )}
 
-      {/* GLOBAL NAVBAR COMPACTO */}
-      <nav className={`h-16 md:h-24 flex items-center justify-between px-6 md:px-12 sticky top-0 z-[100] ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]/80 backdrop-blur-2xl border-b border-white/5 shadow-2xl' : negocio ? 'bg-[#0f1117]/80 backdrop-blur-2xl border-b border-white/5' : 'bg-white/80 backdrop-blur-2xl border-b border-white/5 shadow-lg'}`}>
-        <div className="flex items-center gap-3 md:gap-5">
-          <div className="w-10 h-10 md:w-14 md:h-14 bg-indigo-600 rounded-2xl md:rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-indigo-500/40 border border-white/20 transform hover:rotate-6 transition-transform">
-            <span className="text-white font-black text-sm md:text-xl italic tracking-tighter">N</span>
+      {/* GLOBAL NAVBAR — Bento Minimal */}
+      <nav className={`h-16 md:h-20 flex items-center justify-between px-4 md:px-10 sticky top-0 z-[100] ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]/80 backdrop-blur-2xl border-b border-white/5 shadow-2xl' : 'ns-nav-dark'}`}>
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-shadow-glow)' }}>
+            <span className="text-white font-black text-sm md:text-lg tracking-tighter">N</span>
           </div>
           <div className="flex flex-col">
-            <p className="text-[11px] md:text-sm font-black tracking-[0.2em] uppercase text-white leading-none mb-1">
+            <p className="text-[11px] md:text-[13px] font-black tracking-[0.1em] leading-none" style={{ color: 'var(--ns-text)' }}>
               {negocio?.es_admin_plataforma ? 'Nucleus Master' : (negocio?.nombre || 'Panel')}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <p className="text-[9px] md:text-[11px] font-black tracking-widest uppercase text-white/30">
+              <p className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase" style={{ color: 'var(--ns-text-muted)' }}>
                 {negocio?.rubro || 'Gestión de Reservas'}
               </p>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 md:gap-8">
+        <div className="flex items-center gap-3 md:gap-6">
           {negocio && !negocio.es_admin_plataforma && (
             <>
-              {/* NOTIFICATION CENTER */}
               <NotificationCenter negocioId={negocio.id} rubro={negocio.rubro} />
-
-              {/* GLOBAL SEARCH TRIGGER */}
-              <button onClick={() => setSearchOpen(true)} className="hidden md:flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 transition-all text-[11px] font-black uppercase tracking-widest text-white/40 border border-white/10 group">
-                <svg className="w-4 h-4 group-hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Buscar...
+              <button onClick={() => setSearchOpen(true)} className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all group" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text-muted)' }}>
+                <svg className="w-3.5 h-3.5 group-hover:opacity-70" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                Buscar
               </button>
-
-              <button onClick={() => window.open(publicLink, '_blank')} className="hidden md:flex text-[10px] font-black uppercase tracking-[0.2em] text-white/30 hover:text-indigo-400 transition-all items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                App Pública
+              <button onClick={() => window.open(publicLink, '_blank')} className="hidden md:flex text-[9px] font-black uppercase tracking-[0.15em] items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                Ver App
               </button>
             </>
           )}
-          <button onClick={() => supabase.auth.signOut()} className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-rose-500/60 hover:text-rose-500 transition-colors">Salir</button>
+          <button onClick={() => supabase.auth.signOut()} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-colors" style={{ color: '#EF444480' }}>Salir</button>
         </div>
       </nav>
 
@@ -1008,22 +1004,22 @@ export default function Dashboard({ session }) {
           /* ==========================================================
              VISTA: DASHBOARD BUSINESS (OWNER) — MOBILE FIRST COMPLETO
              ========================================================== */
-          <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-700">
+          <div className="space-y-4 md:space-y-5 animate-in slide-in-from-bottom-8 duration-700">
 
-            {/* BANNER DE SUSCRIPCIÓN (prueba activa o suscripción por vencer) */}
+            {/* BANNER DE SUSCRIPCIÓN — Bento */}
             {(accesoSub.estado === 'trial' || (accesoSub.estado === 'activo' && accesoSub.diasRestantes != null && accesoSub.diasRestantes <= 5)) && (
-              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-indigo-50 border-indigo-200' : 'bg-amber-50 border-amber-200'}`} data-testid="subscription-banner">
+              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-[#E8DEFF] border-[#C4B5FD]' : 'bg-[#FEF3C7] border-[#FCD34D]'}`} data-testid="subscription-banner">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-indigo-500' : 'bg-amber-500'}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-[#5B3DF5]' : 'bg-[#F59E0B]'}`}>
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-indigo-900' : 'text-amber-900'}`}>
+                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-[#1E1B4B]' : 'text-[#92400E]'}`}>
                       {accesoSub.estado === 'trial'
                         ? `Prueba gratis · te ${accesoSub.diasRestantes === 1 ? 'queda 1 día' : `quedan ${accesoSub.diasRestantes} días`}`
                         : `Tu plan vence en ${accesoSub.diasRestantes === 1 ? '1 día' : `${accesoSub.diasRestantes} días`}`}
                     </p>
-                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-indigo-500' : 'text-amber-600'}`}>
+                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-[#5B3DF5]' : 'text-[#D97706]'}`}>
                       Plan {PLAN.nombre} · ${PLAN.precio.toLocaleString('es-AR')}/mes · activá para no perder el acceso
                     </p>
                   </div>
@@ -1032,43 +1028,43 @@ export default function Dashboard({ session }) {
                   href={whatsappActivacion(negocio, session.user.email)}
                   target="_blank" rel="noopener noreferrer"
                   data-testid="subscription-banner-cta"
-                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-amber-500 hover:bg-amber-600'}`}
+                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-[#5B3DF5]' : 'bg-[#F59E0B]'}`}
                 >
                   {accesoSub.estado === 'trial' ? 'Activar plan' : 'Renovar'}
                 </a>
               </div>
             )}
 
-            {/* BRAND HERO — sólo en pestañas que no son el inicio (el inicio trae su propio hero) */}
+            {/* BRAND HERO — Bento Card Light (sólo en pestañas que no son el inicio) */}
             {tab !== 'inicio' && (
-            <header className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 bg-white/[0.03] border border-white/10 group animate-in fade-in slide-in-from-top-4 duration-700">
+            <header className="relative overflow-hidden rounded-3xl p-6 md:p-10 bg-[#FFFFFF] border group animate-in fade-in slide-in-from-top-4 duration-700" style={{ borderColor: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
               <div className="relative z-10 flex items-center justify-between gap-6">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/40">{tabsConfig.find(t => t.id === tab)?.label || 'Panel'}</span>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--ns-primary)' }} />
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-text-muted)' }}>{tabsConfig.find(t => t.id === tab)?.label || 'Panel'}</span>
                   </div>
-                  <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-white leading-none mb-2 truncate">{negocio.nombre}</h2>
-                  <p className="text-[11px] md:text-sm font-black uppercase tracking-[0.2em] text-indigo-400/60">{negocio.rubro}</p>
+                  <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-none mb-1 truncate" style={{ color: 'var(--ns-text)' }}>{negocio.nombre}</h2>
+                  <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--ns-primary)' }}>{negocio.rubro}</p>
                 </div>
                 {logoUrl && (
-                  <div className="w-20 h-20 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem] bg-white p-1 shadow-2xl shadow-black/50 shrink-0 transform group-hover:scale-110 transition-transform duration-700">
-                    <img src={logoUrl} className="w-full h-full object-cover rounded-[1.8rem] md:rounded-[2.3rem]" alt="Logo" />
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-[#E8DEFF] p-1 shrink-0 transform group-hover:scale-105 transition-transform duration-500">
+                    <img src={logoUrl} className="w-full h-full object-cover rounded-[1rem] md:rounded-[1.5rem]" alt="Logo" />
                   </div>
                 )}
               </div>
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 md:w-96 md:h-96 rounded-full blur-[100px] md:blur-[150px] opacity-20 group-hover:scale-125 transition-transform duration-1000 pointer-events-none" style={{ background: colorPrimario || '#6366f1' }}></div>
+              <div className="absolute -bottom-16 -right-16 w-48 h-48 md:w-64 md:h-64 rounded-full blur-[80px] opacity-10 group-hover:opacity-15 transition-opacity duration-700 pointer-events-none" style={{ background: 'var(--ns-primary)' }}></div>
             </header>
             )}
 
-            {/* TAB SELECTOR — DESKTOP */}
-            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-3 p-2 bg-white/[0.02] border border-white/5 rounded-[2rem] no-scrollbar">
+            {/* TAB SELECTOR — Desktop Bento Pills */}
+            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-2 p-2 rounded-2xl no-scrollbar" style={{ background: 'var(--ns-bg)', border: '1px solid var(--ns-border)' }}>
               {tabsConfig.map(i => (
                 <button 
                   key={i.id} 
                   id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined} 
                   onClick={() => setTab(i.id)} 
-                  className={`px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border ${tab === i.id ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20 scale-105' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
+                  className={`ns-tab ${tab === i.id ? 'active' : ''}`}
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {i.label}
@@ -1082,7 +1078,8 @@ export default function Dashboard({ session }) {
                 <button 
                   key={i.id} 
                   onClick={() => setTab(i.id)} 
-                  className={`px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border ${tab === i.id ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 border-white/5 text-white/30'}`}
+                  className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border ${tab === i.id ? 'text-white shadow-md' : ''}`}
+                  style={tab === i.id ? { background: 'var(--ns-primary)', borderColor: 'var(--ns-primary)', boxShadow: '0 4px 12px rgba(91, 61, 245, 0.2)' } : { background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text-muted)' }}
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {i.label}
@@ -1548,22 +1545,17 @@ export default function Dashboard({ session }) {
         )}
       </main>
 
-      {/* ====== BOTTOM NAVIGATION BAR — MOBILE ONLY ====== */}
+      {/* ====== BOTTOM NAVIGATION BAR — Bento Floating ====== */}
       {negocio && !negocio.es_admin_plataforma && (
-        <nav className="fixed bottom-0 left-0 right-0 h-[85px] bg-[#0f1117]/90 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around px-4 pb-5 z-[100] md:hidden">
+        <nav className="ns-bottom-nav">
           {bottomNavTabs.map(item => (
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
-              className="flex flex-col items-center gap-1.5 relative group"
+              className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
             >
-              {tab === item.id && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-1 bg-indigo-500 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.8)]" />
-              )}
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${tab === item.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 scale-110' : 'text-white/30 hover:text-white/50'}`}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${tab === item.id ? 'text-white' : 'text-white/20'}`}>{item.label}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span>{item.label}</span>
             </button>
           ))}
         </nav>

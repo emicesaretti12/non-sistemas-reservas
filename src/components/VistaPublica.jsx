@@ -393,17 +393,17 @@ export default function VistaPublica() {
   }
 
   return (
-    <div className="min-h-screen text-[#1D1D1F] font-sans antialiased selection:bg-zinc-900 selection:text-white relative overflow-x-hidden bg-[#FDFDFC]" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light' }}>
+    <div className="min-h-screen text-[#1E1B4B] font-sans antialiased relative overflow-x-hidden" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light', background: 'var(--ns-bg)' }}>
       
-      {/* BAÑO DE COLOR (Sutil resplandor de fondo) */}
-      <div className="absolute top-0 inset-x-0 h-[60vh] pointer-events-none z-0" style={{ background: `linear-gradient(to bottom, ${accentUltraSoft}, transparent)` }}></div>
+      {/* BAÑO DE COLOR (Sutil resplandor de fondo — marca lilac) */}
+      <div className="absolute top-0 inset-x-0 h-[60vh] pointer-events-none z-0" style={{ background: 'linear-gradient(to bottom, #E8DEFF, transparent)' }}></div>
 
       {/* 1. HERO & BRANDING SECTION — Más compacto en mobile */}
-      <header className="relative h-[28vh] md:h-[30vh] w-full overflow-hidden bg-zinc-100 z-10">
+      <header className="relative h-[28vh] md:h-[30vh] w-full overflow-hidden z-10" style={{ background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)' }}>
          {negocio.portada_url ? (
            <img src={negocio.portada_url} className="w-full h-full object-cover animate-in fade-in duration-1000" alt="Cover" />
          ) : (
-           <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${hexToRgba(accent, 0.15)} 0%, ${hexToRgba(accent, 0.05)} 100%)` }}></div>
+           <div className="w-full h-full absolute inset-0" style={{ background: 'linear-gradient(135deg, #E8DEFF 0%, #5B3DF5 100%)' }}></div>
          )}
       </header>
 
@@ -411,23 +411,22 @@ export default function VistaPublica() {
          
          {/* TARJETA DE IDENTIDAD — Optimizada para mobile */}
          <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
-            <div className="bg-white rounded-[1.8rem] md:rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-zinc-100 p-4 md:p-5 flex flex-col items-center text-center">
+            <div className="ns-public-identity-card">
                
                <div 
-                 className="w-[4.5rem] h-[4.5rem] md:w-20 md:h-20 rounded-[1rem] md:rounded-[1.2rem] bg-white p-1 -mt-12 md:-mt-14 mb-2 md:mb-3 border border-white/50 relative z-10 transition-transform duration-500 hover:scale-105"
-                 style={{ boxShadow: `0 12px 30px ${accentGlow}` }}
+                 className="ns-public-logo"
                >
                   {negocio.logo_url ? (
-                    <img src={negocio.logo_url} className="w-full h-full object-cover rounded-[0.75rem] md:rounded-[0.9rem]" alt="Logo" />
+                    <img src={negocio.logo_url} className="w-full h-full object-cover" alt="Logo" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl md:text-3xl font-bold rounded-[0.75rem] md:rounded-[0.9rem]" style={{ backgroundColor: accentSoft, color: accent }}>
+                    <div className="w-full h-full flex items-center justify-center text-2xl md:text-3xl font-bold text-white" style={{ background: 'var(--ns-gradient-1)' }}>
                        {negocio.nombre.charAt(0)}
                     </div>
                   )}
                </div>
                
-               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em] mb-0.5 md:mb-1" style={{ color: accent }}>{negocio.rubro}</span>
-               <h1 className="text-xl md:text-2xl font-extrabold tracking-tighter leading-tight text-zinc-900 mb-1">{negocio.nombre}</h1>
+               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em] mb-0.5 md:mb-1" style={{ color: 'var(--ns-primary)' }}>{negocio.rubro}</span>
+               <h1 className="text-xl md:text-2xl font-black tracking-tighter leading-tight mb-1" style={{ color: 'var(--ns-text)' }}>{negocio.nombre}</h1>
                
                {negocio.instagram && (
                  <a 
@@ -445,7 +444,7 @@ export default function VistaPublica() {
                {negocio.descripcion && (
                  <>
                    <div className={`relative overflow-hidden transition-[max-height] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] w-full px-1 md:px-2 ${bioExpandida ? 'max-h-[500px]' : 'max-h-[40px]'}`}>
-                      <p className="text-[12px] md:text-[13px] font-medium text-zinc-500 leading-relaxed text-balance">
+                      <p className="text-[12px] md:text-[13px] font-medium leading-relaxed text-balance" style={{ color: 'var(--ns-text-muted)' }}>
                          {negocio.descripcion}
                       </p>
                       {!bioExpandida && (
@@ -455,7 +454,7 @@ export default function VistaPublica() {
                    <button 
                      onClick={() => setBioExpandida(!bioExpandida)} 
                      className="mt-2 md:mt-3 text-[8px] md:text-[9px] font-black px-3 md:px-4 py-1 md:py-1.5 rounded-full uppercase tracking-widest transition-colors active:scale-95"
-                     style={{ color: accent, backgroundColor: accentUltraSoft }}
+                     style={{ color: 'var(--ns-primary)', backgroundColor: 'var(--ns-primary-bg)' }}
                    >
                       {bioExpandida ? 'Ocultar info' : 'Leer más'}
                    </button>
@@ -465,11 +464,11 @@ export default function VistaPublica() {
 
             {/* TOGGLE RESERVAS / CATÁLOGO */}
             {catalogo.length > 0 && paso < 5 && (
-              <div className="mt-3 flex bg-zinc-100 rounded-xl p-1 gap-0.5">
-                <button onClick={() => setVistaActiva('reservas')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${vistaActiva === 'reservas' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-400'}`}>
+              <div className="mt-3 flex rounded-xl p-1 gap-0.5" style={{ background: 'var(--ns-primary-bg)' }}>
+                <button onClick={() => setVistaActiva('reservas')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${vistaActiva === 'reservas' ? 'text-white shadow-sm' : 'text-zinc-400'}`} style={vistaActiva === 'reservas' ? { background: 'var(--ns-primary)' } : {}}>
                   {vocab.paso1Titulo || 'Reservas'}
                 </button>
-                <button onClick={() => setVistaActiva('catalogo')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${vistaActiva === 'catalogo' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-400'}`}>
+                <button onClick={() => setVistaActiva('catalogo')} className={`flex-1 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${vistaActiva === 'catalogo' ? 'text-white shadow-sm' : 'text-zinc-400'}`} style={vistaActiva === 'catalogo' ? { background: 'var(--ns-primary)' } : {}}>
                   Catálogo
                 </button>
               </div>
@@ -483,25 +482,25 @@ export default function VistaPublica() {
          {paso >= 2 && (
            <div className="mt-3 flex flex-wrap gap-1.5 px-1 animate-in fade-in duration-300">
              {servicioSeleccionado && (
-               <button onClick={() => setPaso(1)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white border border-zinc-100 shadow-sm active:scale-95 transition-all text-zinc-600">
-                 <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: accentSoft }}>
-                   <svg className="w-2.5 h-2.5" style={{ color: accent }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+               <button onClick={() => setPaso(1)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)' }}>
+                 <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
+                   <svg className="w-2.5 h-2.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>
                  {servicioSeleccionado.nombre}
                </button>
              )}
              {empleadoSeleccionado && paso >= 3 && (
-               <button onClick={() => setPaso(2)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white border border-zinc-100 shadow-sm active:scale-95 transition-all text-zinc-600">
-                 <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: accentSoft }}>
-                   <svg className="w-2.5 h-2.5" style={{ color: accent }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+               <button onClick={() => setPaso(2)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)' }}>
+                 <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
+                   <svg className="w-2.5 h-2.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>
                  {empleadoSeleccionado.nombre.split(' ')[0]}
                </button>
              )}
              {reserva.fecha && paso >= 4 && (
-               <button onClick={() => setPaso(3)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white border border-zinc-100 shadow-sm active:scale-95 transition-all text-zinc-600">
-                 <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: accentSoft }}>
-                   <svg className="w-2.5 h-2.5" style={{ color: accent }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+               <button onClick={() => setPaso(3)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)' }}>
+                 <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
+                   <svg className="w-2.5 h-2.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>
                  {reserva.fecha.split('-').reverse().slice(0,2).join('/')} {reserva.hora}
                </button>
@@ -511,17 +510,17 @@ export default function VistaPublica() {
 
          {/* PROGRESS BAR — Más compacto */}
          {paso < 5 && (
-           <nav className="mt-4 mb-3 md:mt-6 md:mb-4 sticky top-2 md:top-4 z-40 bg-white/80 backdrop-blur-2xl py-2 rounded-[1rem] md:rounded-[1.2rem] px-3 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-white">
+           <nav className="ns-progress-nav">
               <div className="flex items-center justify-between mb-1.5 md:mb-2 px-1">
-                 <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: accentGlow }}>Progreso de Reserva</span>
-                 <span className="text-[9px] md:text-[10px] font-bold text-zinc-900">{paso} / 4</span>
+                 <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-primary)' }}>Progreso de Reserva</span>
+                 <span className="text-[9px] md:text-[10px] font-bold" style={{ color: 'var(--ns-text)' }}>{paso} / 4</span>
               </div>
               <div className="flex gap-1 md:gap-1.5">
                  {[1,2,3,4].map(p => (
-                   <div key={p} className="h-1 md:h-1.5 flex-1 rounded-full overflow-hidden bg-zinc-100 relative">
+                   <div key={p} className="h-1 md:h-1.5 flex-1 rounded-full overflow-hidden relative" style={{ background: 'var(--ns-border)' }}>
                       <div className="absolute inset-y-0 left-0 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" style={{ 
                         width: paso >= p ? '100%' : '0%', 
-                        backgroundColor: paso >= p ? accent : 'transparent' 
+                        backgroundColor: 'var(--ns-primary)' 
                       }}></div>
                    </div>
                  ))}
@@ -535,16 +534,16 @@ export default function VistaPublica() {
             {/* --- PASO 1: SERVICIOS --- */}
             {paso === 1 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-2.5 md:space-y-3">
-                <h2 className="text-base md:text-lg font-bold tracking-tight px-1 text-zinc-900">{vocab.paso1Titulo}</h2>
-                <div className="bg-white rounded-[1.3rem] md:rounded-[1.5rem] shadow-sm border border-zinc-100/80 overflow-hidden">
+                <h2 className="text-base md:text-lg font-black tracking-tight px-1" style={{ color: 'var(--ns-text)' }}>{vocab.paso1Titulo}</h2>
+                <div className="nh-card overflow-hidden">
                    {servicios.map((s, idx) => (
                      <button 
                         key={s.id} 
                         onClick={() => { setReserva({...reserva, servicioId: s.id}); setPaso(2) }} 
-                        className={`w-full text-left p-3.5 md:p-4 flex justify-between items-center transition-all active:scale-[0.99] group brand-item-hover ${idx !== servicios.length - 1 ? 'border-b border-zinc-50' : ''}`}
+                        className={`ns-public-service-item ${idx !== servicios.length - 1 ? 'border-b' : ''}`}
                      >
                         <div className="flex items-center gap-3">
-                           <div className="w-9 h-9 md:w-10 md:h-10 rounded-[0.8rem] md:rounded-[0.9rem] flex items-center justify-center transition-all duration-300 group-hover:scale-105 shrink-0" style={{ backgroundColor: accentSoft, color: accent }}>
+                           <div className="ns-public-service-ic">
                                {vocab.usarIconoCustom ? (
                                  <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor"><path d={vocab.iconoServicio}/></svg>
                                ) : (
@@ -552,13 +551,13 @@ export default function VistaPublica() {
                                )}
                            </div>
                            <div className="min-w-0">
-                              <p className="font-bold text-zinc-900 text-[14px] md:text-[15px] tracking-tight leading-none transition-colors truncate">{s.nombre}</p>
-                              <p className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mt-1">{s.duracion_minutos} min</p>
+                              <p className="font-bold text-[14px] md:text-[15px] tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>{s.nombre}</p>
+                              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] mt-1" style={{ color: 'var(--ns-text-muted)' }}>{s.duracion_minutos} min</p>
                            </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                           <span className="font-bold text-base md:text-lg tracking-tighter text-zinc-900">${s.precio}</span>
-                           <svg className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-300 group-hover:translate-x-1 transition-transform" style={{ color: accentGlow }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                           <span className="font-black text-base md:text-lg tracking-tighter" style={{ color: 'var(--ns-text)' }}>${s.precio}</span>
+                           <svg className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover:translate-x-1 transition-transform" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
                         </div>
                      </button>
                    ))}
@@ -570,8 +569,8 @@ export default function VistaPublica() {
             {paso === 2 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
-                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">{vocab.paso2Titulo}</h2>
-                   <button onClick={() => setPaso(1)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white px-3 py-1.5 rounded-full shadow-sm active:scale-90 transition-all flex items-center gap-1" style={{ color: accent }}>
+                   <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.paso2Titulo}</h2>
+                   <button onClick={() => setPaso(1)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso2Volver}
                    </button>
                 </div>
@@ -580,14 +579,14 @@ export default function VistaPublica() {
                      <button 
                         key={e.id} 
                         onClick={() => { setReserva({...reserva, empleadoId: e.id}); setPaso(3) }} 
-                        className="bg-white p-4 md:p-5 rounded-[1.3rem] md:rounded-2xl flex flex-col items-center gap-3 shadow-sm border border-zinc-100/50 active:scale-[0.96] transition-all group brand-border-hover"
+                        className="ns-public-employee-card"
                      >
-                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden shadow-sm border-[3px] border-white group-hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]" style={{ backgroundColor: accentSoft }}>
-                           {e.foto_url ? <img src={e.foto_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl md:text-2xl font-bold" style={{ color: accent }}>{e.nombre.charAt(0)}</div>}
+                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-[3px] border-white group-hover:scale-105 transition-transform duration-500" style={{ background: 'var(--ns-primary-bg)' }}>
+                           {e.foto_url ? <img src={e.foto_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl md:text-2xl font-bold" style={{ color: 'var(--ns-primary)' }}>{e.nombre.charAt(0)}</div>}
                         </div>
                         <div className="text-center w-full">
-                          <span className="font-bold text-xs tracking-tight text-zinc-900 truncate block">{e.nombre}</span>
-                          {e.especialidad && <span className="text-[9px] text-zinc-400 font-medium truncate block mt-0.5">{e.especialidad}</span>}
+                          <span className="font-bold text-xs tracking-tight truncate block" style={{ color: 'var(--ns-text)' }}>{e.nombre}</span>
+                          {e.especialidad && <span className="text-[9px] font-medium truncate block mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>{e.especialidad}</span>}
                         </div>
                      </button>
                    ))}
@@ -599,13 +598,13 @@ export default function VistaPublica() {
             {paso === 3 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
-                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">Fecha y Horario</h2>
-                   <button onClick={() => setPaso(2)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white px-3 py-1.5 rounded-full shadow-sm active:scale-90 transition-all flex items-center gap-1" style={{ color: accent }}>
+                   <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>Fecha y Horario</h2>
+                   <button onClick={() => setPaso(2)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso3Volver}
                    </button>
                 </div>
                 
-                <div className="bg-white rounded-[1.3rem] md:rounded-[1.5rem] shadow-sm border border-zinc-100/80 p-3 md:p-4 overflow-hidden">
+                <div className="nh-card p-3 md:p-4">
                    
                    {/* SCROLL HORIZONTAL DE FECHAS */}
                    <div className="flex overflow-x-auto gap-1.5 md:gap-2 pb-3 md:pb-4 no-scrollbar snap-x relative -mx-1 px-1">
@@ -677,52 +676,52 @@ export default function VistaPublica() {
             {paso === 4 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
-                   <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900">{vocab.paso4Titulo}</h2>
-                   <button onClick={() => setPaso(3)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white px-3 py-1.5 rounded-full shadow-sm active:scale-90 transition-all flex items-center gap-1" style={{ color: accent }}>
+                   <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.paso4Titulo}</h2>
+                   <button onClick={() => setPaso(3)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso4Volver}
                    </button>
                 </div>
                 
                 <form id="reservaForm" onSubmit={submitBooking} className="space-y-3 md:space-y-4">
-                   <div className="bg-white rounded-[1.3rem] md:rounded-[1.5rem] shadow-sm border border-zinc-100/80 p-3.5 md:p-4 space-y-3">
+                   <div className="ns-public-form-card">
                       
                       <div className="space-y-1">
-                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Nombre Completo</label>
-                         <div className="relative flex items-center brand-input-wrapper">
-                            <div className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center brand-input-icon transition-colors" style={{ backgroundColor: accentUltraSoft }}><svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="Ej. Pablo Pérez" value={reserva.clienteNombre} onChange={(e) => setReserva({...reserva, clienteNombre: e.target.value})} />
+                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Nombre Completo</label>
+                         <div className="ns-input-wrapper">
+                            <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                            <input required className="ns-input" placeholder="Ej. Pablo Pérez" value={reserva.clienteNombre} onChange={(e) => setReserva({...reserva, clienteNombre: e.target.value})} />
                          </div>
                       </div>
 
                       <div className="space-y-1">
-                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>WhatsApp</label>
-                         <div className="relative flex items-center brand-input-wrapper">
-                            <div className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center brand-input-icon transition-colors" style={{ backgroundColor: accentUltraSoft }}><svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required type="tel" className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="351 000 0000" value={reserva.clienteTelefono} onChange={(e) => setReserva({...reserva, clienteTelefono: e.target.value})} />
+                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>WhatsApp</label>
+                         <div className="ns-input-wrapper">
+                            <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                            <input required type="tel" className="ns-input" placeholder="351 000 0000" value={reserva.clienteTelefono} onChange={(e) => setReserva({...reserva, clienteTelefono: e.target.value})} />
                          </div>
                       </div>
 
                       <div className="space-y-1">
-                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Correo Electrónico</label>
-                         <div className="relative flex items-center brand-input-wrapper">
-                            <div className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center brand-input-icon transition-colors" style={{ backgroundColor: accentUltraSoft }}><svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required type="email" className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="correo@ejemplo.com" value={reserva.clienteEmail} onChange={(e) => setReserva({...reserva, clienteEmail: e.target.value})} />
+                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Correo Electrónico</label>
+                         <div className="ns-input-wrapper">
+                            <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                            <input required type="email" className="ns-input" placeholder="correo@ejemplo.com" value={reserva.clienteEmail} onChange={(e) => setReserva({...reserva, clienteEmail: e.target.value})} />
                          </div>
                       </div>
                       
                       {isRestaurante && (
                         <div className="space-y-1">
-                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Comensales</label>
-                          <div className="relative flex items-center brand-input-wrapper">
-                             <div className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center brand-input-icon transition-colors" style={{ backgroundColor: accentUltraSoft }}><svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                             <input type="number" min="1" max="20" required className="w-full bg-[#FDFDFC] border border-zinc-100 text-zinc-900 rounded-xl py-3 pl-11 pr-4 font-bold outline-none transition-all text-sm placeholder:text-zinc-300 brand-input" placeholder="Cantidad de personas" value={reserva.campoExtra} onChange={(e) => setReserva({...reserva, campoExtra: e.target.value})} />
+                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Comensales</label>
+                          <div className="ns-input-wrapper">
+                             <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                             <input type="number" min="1" max="20" required className="ns-input" placeholder="Cantidad de personas" value={reserva.campoExtra} onChange={(e) => setReserva({...reserva, campoExtra: e.target.value})} />
                           </div>
                         </div>
                       )}
                    </div>
 
                    {/* TICKET VIP DEGRADADO */}
-                   <div className="rounded-[1.3rem] md:rounded-[1.5rem] p-5 md:p-6 text-white shadow-xl relative overflow-hidden" style={{ background: `linear-gradient(135deg, #18181B 0%, ${accentDark} 150%)` }}>
+                   <div className="ns-public-ticket">
                       <div className="relative z-10 flex justify-between items-center">
                          <div className="space-y-0.5">
                             <p className="text-[8px] md:text-[9px] font-bold opacity-60 uppercase tracking-[0.3em] mb-0.5 md:mb-1 text-white">{vocab.ticketTitulo}</p>
@@ -755,32 +754,32 @@ export default function VistaPublica() {
               <section className="text-center py-12 md:py-16 animate-in zoom-in-95 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-5 md:space-y-6">
                 <div 
                    className="w-20 h-20 md:w-24 md:h-24 text-white rounded-[1.3rem] md:rounded-[1.5rem] flex items-center justify-center mx-auto rotate-3"
-                   style={{ backgroundColor: accent, boxShadow: `0 15px 35px ${accentGlow}` }}
+                   style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 15px 35px rgba(91, 61, 245, 0.3)' }}
                 >
                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
-                <div className="space-y-1.5 px-2">
-                   <h3 className="text-2xl md:text-3xl font-extrabold tracking-tighter text-zinc-900">{vocab.exitoTitulo}</h3>
-                   <p className="text-xs md:text-sm text-zinc-500 font-medium leading-relaxed max-w-[260px] mx-auto text-balance">
-                     {vocab.exitoMensaje} <b className="text-zinc-900">{reserva.fecha.split('-').reverse().join('/')}</b> a las <b className="text-zinc-900">{reserva.hora} hs</b> {vocab.exitoMensaje2}
+                 <div className="space-y-1.5 px-2">
+                   <h3 className="text-2xl md:text-3xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>{vocab.exitoTitulo}</h3>
+                   <p className="text-xs md:text-sm font-medium leading-relaxed max-w-[260px] mx-auto text-balance" style={{ color: 'var(--ns-text-muted)' }}>
+                     {vocab.exitoMensaje} <b style={{ color: 'var(--ns-text)' }}>{reserva.fecha.split('-').reverse().join('/')}</b> a las <b style={{ color: 'var(--ns-text)' }}>{reserva.hora} hs</b> {vocab.exitoMensaje2}
                    </p>
                 </div>
 
                 {/* Resumen final */}
-                <div className="bg-white rounded-[1.3rem] border border-zinc-100 shadow-sm p-4 text-left space-y-2.5 mx-auto max-w-[300px]">
+                <div className="ns-public-summary-card">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{vocab.servicio.charAt(0).toUpperCase() + vocab.servicio.slice(1)}</span>
-                    <span className="text-xs font-bold text-zinc-900">{servicioSeleccionado?.nombre}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>{vocab.servicio.charAt(0).toUpperCase() + vocab.servicio.slice(1)}</span>
+                    <span className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>{servicioSeleccionado?.nombre}</span>
                   </div>
-                  <div className="h-px bg-zinc-50"></div>
+                  <div className="h-px" style={{ background: 'var(--ns-border)' }}></div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{vocab.empleado.charAt(0).toUpperCase() + vocab.empleado.slice(1)}</span>
-                    <span className="text-xs font-bold text-zinc-900">{empleadoSeleccionado?.nombre}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>{vocab.empleado.charAt(0).toUpperCase() + vocab.empleado.slice(1)}</span>
+                    <span className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>{empleadoSeleccionado?.nombre}</span>
                   </div>
-                  <div className="h-px bg-zinc-50"></div>
+                  <div className="h-px" style={{ background: 'var(--ns-border)' }}></div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Precio</span>
-                    <span className="text-xs font-bold text-zinc-900">${servicioSeleccionado?.precio}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Precio</span>
+                    <span className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>${servicioSeleccionado?.precio}</span>
                   </div>
                 </div>
 
@@ -800,8 +799,8 @@ export default function VistaPublica() {
                       const detalles = encodeURIComponent(`Reserva confirmada en ${negocio.nombre}\n${servicioSeleccionado?.nombre}\nCon: ${empleadoSeleccionado?.nombre}\n\nPrecio: $${servicioSeleccionado?.precio}`)
                       window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${fmt(start)}/${fmt(end)}&details=${detalles}&sf=true&output=xml`, '_blank')
                     }}
-                    className="w-full py-3.5 rounded-xl text-white font-bold text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all"
-                    style={{ backgroundColor: accent }}
+                    className="ns-cta-primary"
+                    style={{}}
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
                     Agregar al Calendario
@@ -815,7 +814,7 @@ export default function VistaPublica() {
                         const msg = encodeURIComponent(`Hola ${negocio.nombre}, acabo de reservar:\n\n📋 ${servicioSeleccionado?.nombre}\n📅 ${reserva.fecha.split('-').reverse().join('/')} a las ${reserva.hora} hs\n👤 ${reserva.clienteNombre}\n📞 ${reserva.clienteTelefono}\n\n¡Gracias!`)
                         window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
                       }}
-                      className="w-full py-3.5 rounded-xl bg-[#25D366] text-white font-bold text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all"
+                      className="ns-cta-wa"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                       Confirmar por WhatsApp
@@ -824,7 +823,7 @@ export default function VistaPublica() {
                 </div>
 
                 <div className="pt-2">
-                   <button onClick={() => window.location.reload()} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2.5 rounded-full shadow-sm active:scale-95 transition-all" style={{ backgroundColor: accentUltraSoft, color: accent }}>{vocab.nuevaReservaBtn}</button>
+                   <button onClick={() => window.location.reload()} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2.5 rounded-full active:scale-95 transition-all" style={{ backgroundColor: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}>{vocab.nuevaReservaBtn}</button>
                 </div>
               </section>
             )}
@@ -833,23 +832,23 @@ export default function VistaPublica() {
          )}
 
          {/* ========== VISTA: CATÁLOGO TIENDA ========== */}
-         {vistaActiva === 'catalogo' && (
+           {vistaActiva === 'catalogo' && (
            <section className="mt-4 md:mt-8 space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
              
              {/* HEADER CATÁLOGO: Búsqueda y Filtros */}
-             <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between bg-white p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-zinc-100">
+             <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between nh-card">
                <div className="relative flex-1 md:max-w-xs">
-                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                 <input type="text" placeholder="Buscar producto..." className="w-full bg-zinc-50 border border-transparent rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-zinc-200 focus:bg-white transition-all font-bold text-zinc-900 placeholder:text-zinc-400" value={catBusqueda} onChange={e => setCatBusqueda(e.target.value)} />
+                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                 <input type="text" placeholder="Buscar producto..." className="w-full ns-input" style={{ paddingLeft: '2.5rem' }} value={catBusqueda} onChange={e => setCatBusqueda(e.target.value)} />
                </div>
                
                {(() => {
                  const cats = [...new Set(catalogo.map(p => p.categoria))]
                  return cats.length > 1 ? (
                    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
-                     <button onClick={() => setCatFiltro('todos')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === 'todos' ? { backgroundColor: accent } : {}}>Todos</button>
+                     <button onClick={() => setCatFiltro('todos')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === 'todos' ? { backgroundColor: 'var(--ns-primary)' } : {}}>Todos</button>
                      {cats.map(c => (
-                       <button key={c} onClick={() => setCatFiltro(c)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === c ? { backgroundColor: accent } : {}}>{c}</button>
+                       <button key={c} onClick={() => setCatFiltro(c)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === c ? { backgroundColor: 'var(--ns-primary)' } : {}}>{c}</button>
                      ))}
                    </div>
                  ) : null
@@ -883,40 +882,40 @@ export default function VistaPublica() {
                            {prod.imagen_url ? (
                              <img src={prod.imagen_url} alt={prod.nombre} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                            ) : (
-                             <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft }}>
-                               <svg className="w-10 h-10 md:w-12 md:h-12" style={{ color: accent, opacity: 0.3 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                             <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
+                               <svg className="w-10 h-10 md:w-12 md:h-12" style={{ color: 'var(--ns-primary)', opacity: 0.3 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                              </div>
                            )}
                            {/* Badge Categoría */}
                            <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm border border-white/20">
-                             <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest" style={{ color: accent }}>{prod.categoria}</span>
+                             <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-primary)' }}>{prod.categoria}</span>
                            </div>
                          </div>
                          
                          {/* INFO DEL PRODUCTO */}
                          <div className="p-4 md:p-5 flex flex-col flex-1">
-                           <h4 className="text-[14px] md:text-[16px] font-extrabold text-zinc-900 leading-tight mb-1 line-clamp-2">{prod.nombre}</h4>
-                           {prod.descripcion && <p className="text-[11px] md:text-[12px] text-zinc-500 font-medium line-clamp-2 mb-3">{prod.descripcion}</p>}
+                           <h4 className="text-[14px] md:text-[16px] font-black leading-tight mb-1 line-clamp-2" style={{ color: 'var(--ns-text)' }}>{prod.nombre}</h4>
+                           {prod.descripcion && <p className="text-[11px] md:text-[12px] font-medium line-clamp-2 mb-3" style={{ color: 'var(--ns-text-muted)' }}>{prod.descripcion}</p>}
                            
                            <div className="mt-auto flex items-end justify-between gap-2 pt-2">
                              <div>
                                {prod.precio > 0 ? (
-                                 <p className="text-lg md:text-xl font-black tracking-tighter text-zinc-900">${prod.precio.toLocaleString()}</p>
+                                 <p className="text-lg md:text-xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>${prod.precio.toLocaleString()}</p>
                                ) : (
-                                 <p className="text-sm font-bold text-zinc-400">Consultar</p>
+                                 <p className="text-sm font-bold" style={{ color: 'var(--ns-text-muted)' }}>Consultar</p>
                                )}
                              </div>
                              
                              {/* CONTROLES CLICK PREVENIDO PARA NO ABRIR MODAL */}
                              <div onClick={e => e.stopPropagation()}>
                                {qty > 0 ? (
-                                 <div className="flex items-center gap-0 rounded-xl overflow-hidden shadow-sm h-8 md:h-10" style={{ backgroundColor: accent, color: 'white' }}>
+                                 <div className="flex items-center gap-0 rounded-xl overflow-hidden shadow-sm h-8 md:h-10" style={{ backgroundColor: 'var(--ns-primary)', color: 'white' }}>
                                    <button onClick={() => removeFromCart(prod.id)} className="w-8 md:w-9 h-full flex items-center justify-center hover:bg-black/10 active:bg-black/20 transition-all font-bold text-lg">−</button>
                                    <span className="w-6 md:w-8 text-center text-[12px] md:text-[14px] font-black">{qty}</span>
                                    <button onClick={() => addToCart(prod.id)} className="w-8 md:w-9 h-full flex items-center justify-center hover:bg-black/10 active:bg-black/20 transition-all font-bold text-lg">+</button>
                                  </div>
                                ) : (
-                                 <button onClick={() => addToCart(prod.id)} className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-white active:scale-90 transition-all shadow-md hover:shadow-lg" style={{ backgroundColor: accent, boxShadow: `0 4px 15px ${accentGlow}` }}>
+                                 <button onClick={() => addToCart(prod.id)} className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-white active:scale-90 transition-all shadow-md hover:shadow-lg" style={{ backgroundColor: 'var(--ns-primary)', boxShadow: '0 4px 15px rgba(91,61,245,0.3)' }}>
                                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                  </button>
                                )}
@@ -1108,11 +1107,10 @@ export default function VistaPublica() {
 
       {/* STICKY CTAs — Safe area aware */}
       {vistaActiva === 'reservas' && paso === 3 && reserva.hora && (
-        <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-[#FDFDFC] via-[#FDFDFC]/95 to-transparent z-50 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+        <div className="ns-sticky-cta-wrap">
            <button 
               onClick={() => setPaso(4)} 
-              className="w-full max-w-sm mx-auto block py-4 rounded-xl text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-[0.97] transition-all pointer-events-auto" 
-              style={{ backgroundColor: accent, boxShadow: `0 10px 25px ${accentGlow}` }}
+              className="ns-sticky-cta-btn"
            >
               {vocab.avanzarBtn}
            </button>
@@ -1120,13 +1118,12 @@ export default function VistaPublica() {
       )}
       
       {vistaActiva === 'reservas' && paso === 4 && (
-        <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-[#FDFDFC] via-[#FDFDFC]/95 to-transparent z-50 animate-in slide-in-from-bottom-full duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+        <div className="ns-sticky-cta-wrap">
            <button 
               form="reservaForm" 
               disabled={guardando} 
               type="submit" 
-              className="w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-xl text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-[0.97] transition-all pointer-events-auto" 
-              style={{ backgroundColor: accent, boxShadow: `0 10px 25px ${accentGlow}` }}
+              className="ns-sticky-cta-btn"
            >
               {guardando ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : vocab.confirmarBtn}
            </button>
@@ -1137,16 +1134,16 @@ export default function VistaPublica() {
       {(negocio.mapa_url || negocio.direccion) && paso < 5 && (
         <section className="mt-6 md:mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 px-4">
           <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-zinc-100 overflow-hidden">
+            <div className="nh-card overflow-hidden">
               {/* Map Header */}
               <div className="p-4 md:p-5 flex items-center gap-3">
-                <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: accentSoft }}>
-                  <svg className="w-4 h-4 md:w-5 md:h-5" style={{ color: accent }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round" strokeLinejoin="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round" strokeLinejoin="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em]" style={{ color: accentGlow }}>Ubicación</p>
+                  <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em]" style={{ color: 'var(--ns-primary)' }}>Ubicación</p>
                   {negocio.direccion && (
-                    <p className="text-[12px] md:text-sm font-bold text-zinc-800 truncate">{negocio.direccion}</p>
+                    <p className="text-[12px] md:text-sm font-bold truncate" style={{ color: 'var(--ns-text)' }}>{negocio.direccion}</p>
                   )}
                 </div>
                 {negocio.mapa_url && (
@@ -1155,7 +1152,7 @@ export default function VistaPublica() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3 py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all active:scale-95"
-                    style={{ backgroundColor: accentSoft, color: accent }}
+                    style={{ backgroundColor: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}
                   >
                     Abrir Mapa
                   </a>
@@ -1163,7 +1160,7 @@ export default function VistaPublica() {
               </div>
               {/* Map Embed */}
               {negocio.mapa_url && (
-                <div className="h-[180px] md:h-[220px] w-full border-t border-zinc-100">
+                <div className="h-[180px] md:h-[220px] w-full border-t" style={{ borderColor: 'var(--ns-border)' }}>
                   <iframe
                     src={negocio.mapa_url.includes('<iframe') ? negocio.mapa_url.match(/src="([^"]+)"/)?.[1] || '' : `https://www.google.com/maps?q=${encodeURIComponent(negocio.mapa_url.includes('google.com/maps') ? negocio.mapa_url : negocio.direccion || negocio.mapa_url)}&output=embed`}
                     width="100%" height="100%" style={{border: 0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
@@ -1178,26 +1175,272 @@ export default function VistaPublica() {
 
       {paso < 5 && (
         <footer className="mt-8 py-6 md:py-8 flex flex-col items-center gap-2 opacity-30 relative z-10">
-           <div className="w-6 h-6 bg-zinc-900 rounded-[0.4rem] flex items-center justify-center shadow-lg rotate-3"><span className="text-white font-black text-[7px] italic">NS</span></div>
-           <p className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-900">Engineered by Non Sistemas</p>
+           <div className="w-6 h-6 rounded-[0.4rem] flex items-center justify-center shadow-lg rotate-3" style={{ background: 'var(--ns-gradient-1)' }}><span className="text-white font-black text-[7px] italic">NS</span></div>
+           <p className="text-[8px] font-black uppercase tracking-[0.4em]" style={{ color: 'var(--ns-text)' }}>Engineered by Non Sistemas</p>
         </footer>
       )}
 
-      {/* CLASES DINÁMICAS INYECTADAS */}
+      {/* CLASES DINÁMICAS INYECTADAS — Colores de marca */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Efectos Themed Hover */
-        .brand-item-hover:hover { background-color: ${accentUltraSoft}; }
-        .brand-border-hover:hover { border-color: ${accentSoft}; box-shadow: 0 4px 15px ${accentUltraSoft}; }
-        .brand-date-hover:hover:not(:disabled) { background-color: ${accentUltraSoft}; }
-        .brand-pill-hover:hover { filter: brightness(0.95); }
-
-        /* Efectos Themed Focus para Inputs */
-        .brand-input:focus { border-color: ${accentSoft}; box-shadow: 0 0 0 4px ${accentUltraSoft}; }
-        .brand-input-wrapper:focus-within .brand-input-icon { background-color: ${accent}; color: white !important; }
-        .brand-input-wrapper:focus-within .brand-input-icon svg { color: white !important; }
+        /* --- PUBLIC PAGE SPECIFIC --- */
+        .ns-public-identity-card {
+          background: var(--ns-surface);
+          border: 1px solid var(--ns-border);
+          border-radius: 1.8rem;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          box-shadow: 0 8px 30px rgba(91, 61, 245, 0.06);
+        }
+        .ns-public-logo {
+          width: 4.5rem;
+          height: 4.5rem;
+          border-radius: 1rem;
+          background: white;
+          padding: 4px;
+          margin-top: -3rem;
+          margin-bottom: 0.75rem;
+          border: 1px solid rgba(255,255,255,0.5);
+          position: relative;
+          z-index: 10;
+          transition: transform 0.5s;
+          box-shadow: 0 12px 30px rgba(91, 61, 245, 0.15);
+        }
+        .ns-public-logo:hover { transform: scale(1.05); }
+        .ns-public-logo img, .ns-public-logo div {
+          border-radius: 0.75rem;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .ns-public-service-item {
+          width: 100%;
+          text-align: left;
+          padding: 0.875rem 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.2s;
+          cursor: pointer;
+        }
+        .ns-public-service-item:hover { background: var(--ns-primary-bg); }
+        .ns-public-service-item:active { transform: scale(0.99); }
+        .ns-public-service-ic {
+          width: 2.5rem;
+          height: 2.5rem;
+          border-radius: 0.7rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s;
+          background: var(--ns-primary-bg);
+          color: var(--ns-primary);
+          flex-shrink: 0;
+        }
+        .ns-public-service-ic:hover { transform: scale(1.05); }
+        
+        .ns-public-employee-card {
+          background: var(--ns-surface);
+          padding: 1.25rem;
+          border-radius: 1.2rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+          border: 1px solid var(--ns-border);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .ns-public-employee-card:active { transform: scale(0.96); }
+        .ns-public-employee-card:hover { border-color: var(--ns-primary-bg); box-shadow: 0 4px 15px rgba(91,61,245,0.06); }
+        
+        .ns-public-form-card {
+          background: var(--ns-surface);
+          border: 1px solid var(--ns-border);
+          border-radius: 1.3rem;
+          padding: 1rem;
+        }
+        .ns-input-wrapper {
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .ns-input-icon {
+          position: absolute;
+          left: 0.75rem;
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--ns-primary-bg);
+          color: var(--ns-primary);
+          transition: all 0.2s;
+        }
+        .ns-input-icon svg {
+          width: 0.875rem;
+          height: 0.875rem;
+        }
+        .ns-input {
+          width: 100%;
+          background: var(--ns-bg);
+          border: 1px solid var(--ns-border);
+          color: var(--ns-text);
+          border-radius: 0.75rem;
+          padding: 0.75rem 1rem 0.75rem 2.75rem;
+          font-weight: 700;
+          outline: none;
+          transition: all 0.2s;
+          font-size: 0.875rem;
+        }
+        .ns-input::placeholder {
+          color: var(--ns-text-muted);
+          opacity: 0.5;
+        }
+        .ns-input:focus {
+          border-color: var(--ns-primary);
+          box-shadow: 0 0 0 4px var(--ns-primary-bg);
+        }
+        .ns-input-wrapper:focus-within .ns-input-icon {
+          background: var(--ns-primary);
+          color: white;
+        }
+        .ns-input-wrapper:focus-within .ns-input-icon svg {
+          color: white;
+        }
+        
+        .ns-public-ticket {
+          border-radius: 1.3rem;
+          padding: 1.5rem;
+          color: white;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
+        }
+        
+        .ns-public-summary-card {
+          background: var(--ns-surface);
+          border-radius: 1.2rem;
+          border: 1px solid var(--ns-border);
+          padding: 1rem;
+          max-width: 300px;
+          margin: 0 auto;
+        }
+        
+        .ns-cta-primary {
+          width: 100%;
+          padding: 0.875rem;
+          border-radius: 0.75rem;
+          background: var(--ns-primary);
+          color: white;
+          font-weight: 700;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          box-shadow: 0 10px 25px rgba(91,61,245,0.3);
+          transition: all 0.2s;
+        }
+        .ns-cta-primary:active { transform: scale(0.95); }
+        
+        .ns-cta-wa {
+          width: 100%;
+          padding: 0.875rem;
+          border-radius: 0.75rem;
+          background: #25D366;
+          color: white;
+          font-weight: 700;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+          transition: all 0.2s;
+        }
+        .ns-cta-wa:active { transform: scale(0.95); }
+        
+        .ns-sticky-cta-wrap {
+          position: fixed;
+          bottom: 0;
+          inset-inline: 0;
+          padding: 1rem;
+          background: linear-gradient(to top, var(--ns-bg) 0%, rgba(250,247,255,0.95) 95%, transparent 100%);
+          z-index: 50;
+          pointer-events: none;
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        }
+        .ns-sticky-cta-btn {
+          width: 100%;
+          max-width: 24rem;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 1rem;
+          border-radius: 0.75rem;
+          background: var(--ns-primary);
+          color: white;
+          font-weight: 700;
+          font-size: 11px;
+          letter-spacing: 0.125em;
+          text-transform: uppercase;
+          box-shadow: 0 10px 25px rgba(91,61,245,0.3);
+          transition: all 0.2s;
+          pointer-events: auto;
+        }
+        .ns-sticky-cta-btn:active { transform: scale(0.97); }
+        .ns-sticky-cta-btn:disabled { opacity: 0.7; }
+        
+        .ns-progress-nav {
+          margin-top: 1rem;
+          margin-bottom: 0.75rem;
+          position: sticky;
+          top: 0.5rem;
+          z-index: 40;
+          background: rgba(250, 247, 255, 0.8);
+          backdrop-filter: blur(24px);
+          padding: 0.5rem 0.75rem;
+          border-radius: 1rem;
+          box-shadow: 0 4px 20px rgba(91,61,245,0.04);
+          border: 1px solid var(--ns-border);
+        }
+        
+        .ns-public-product-card {
+          background: var(--ns-surface);
+          border-radius: 1.2rem;
+          border: 1px solid var(--ns-border);
+          box-shadow: 0 4px 20px rgba(91,61,245,0.03);
+          overflow: hidden;
+          transition: all 0.3s;
+          display: flex;
+          flex-direction: column;
+          cursor: pointer;
+        }
+        .ns-public-product-card:hover {
+          box-shadow: 0 8px 30px rgba(91,61,245,0.08);
+          transform: translateY(-2px);
+        }
+        .ns-public-product-card img {
+          transition: transform 0.7s;
+        }
+        .ns-public-product-card:hover img {
+          transform: scale(1.05);
+        }
       `}</style>
     </div>
   )
