@@ -186,9 +186,9 @@ export default function Dashboard({ session }) {
 
       if (error && error.code !== 'PGRST116') throw error
 
-      if (data) {
+      if (data && data.id) {
         setNegocio(data)
-        setColorPrimario(data.color_primario || '#0f172a')
+        setColorPrimario(data?.color_primario || '#0f172a')
         setDescripcion(data.descripcion || '')
         setLogoUrl(data.logo_url || '')
         setPortadaUrl(data.portada_url || '')
