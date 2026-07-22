@@ -854,7 +854,7 @@ export default function Dashboard({ session }) {
 
 
   return (
-    <div className={`min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : negocio ? 'ns-owner-dark' : 'bg-[#FAFAFC] text-slate-900'} ns-has-bottom-nav`} style={{ colorScheme: negocio ? 'light' : 'light' }}>
+    <div className={`noni-shell min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : negocio ? 'ns-owner-dark' : 'bg-[#FAFAFC] text-slate-900'} ns-has-bottom-nav`} style={{ colorScheme: negocio ? 'light' : 'light' }}>
 
       {/* Copy-link toast */}
       {copyToast && (

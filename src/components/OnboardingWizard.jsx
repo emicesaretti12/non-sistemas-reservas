@@ -97,7 +97,7 @@ function LivePreview({ data }) {
               </div>
               <p className="font-black text-lg" style={{ color }}>${data.svcPrecio || 0}</p>
             </div>
-            <button className="w-full mt-3 py-3 rounded-xl text-white text-sm font-bold" style={{ background: color }}>Reservar</button>
+            <div className="w-full mt-3 py-3 rounded-xl text-white text-sm font-bold text-center" style={{ background: color }} aria-label="Vista previa del botón de reserva">Reservar</div>
           </motion.div>
         ) : (
           <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 opacity-40">
@@ -182,7 +182,6 @@ export default function OnboardingWizard({ session, onComplete }) {
   const inputRef = useRef(null)
   const vocab = getVocabulario(data.rubro || RUBROS_DISPONIBLES[0])
   const step = steps[stepIdx]
-  const progress = Math.round(((stepIdx) / steps.length) * 100)
 
   useEffect(() => { inputRef.current?.focus() }, [stepIdx])
 

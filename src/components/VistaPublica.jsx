@@ -18,7 +18,6 @@ export default function VistaPublica() {
   // --- CATÁLOGO PÚBLICO ---
   const [vistaActiva, setVistaActiva] = useState('reservas') // 'reservas' | 'catalogo'
   const [catalogo, setCatalogo] = useState([])
-  const [catalogoLoading, setCatalogoLoading] = useState(false)
   const [catFiltro, setCatFiltro] = useState('todos')
   const [catBusqueda, setCatBusqueda] = useState('')
   const [carrito, setCarrito] = useState({}) // { [prodId]: cantidad }
@@ -47,6 +46,7 @@ export default function VistaPublica() {
   const [buscandoHoras, setBuscandoHoras] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [diasCalendario, setDiasCalendario] = useState([])
+  const [calendarWindowStart, setCalendarWindowStart] = useState(0)
 
   // Scroll lock en pasos de formulario en mobile
   useEffect(() => {
@@ -114,6 +114,7 @@ export default function VistaPublica() {
       })
     }
     setDiasCalendario(calendar)
+    setCalendarWindowStart(0)
   }
 
   const handleDateSelect = async (day) => {
@@ -235,7 +236,7 @@ export default function VistaPublica() {
           madrugada: []
         })
       }
-    } catch (e) {
+    } catch {
       console.error("Error en slots")
     } finally {
       setBuscandoHoras(false)
@@ -292,7 +293,7 @@ export default function VistaPublica() {
       if (error) throw error
       setPaso(5)
 
-    } catch (err) {
+    } catch {
       showToast("Ocurrió un error al procesar la solicitud. Reintente.", "error")
     } finally {
       setGuardando(false)
@@ -341,7 +342,6 @@ export default function VistaPublica() {
   // Variables Dinámicas del Motor de Tematización
   const accent = negocio.color_primario || '#000000'
   const accentUltraSoft = hexToRgba(accent, 0.04) 
-  const accentSoft = hexToRgba(accent, 0.12) 
   const accentGlow = hexToRgba(accent, 0.3)
   const accentDark = hexToRgba(accent, 0.85)
 
@@ -393,7 +393,7 @@ export default function VistaPublica() {
   }
 
   return (
-    <div className="min-h-screen text-[#1E1B4B] font-sans antialiased relative overflow-x-hidden" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light', background: 'var(--ns-bg)' }}>
+    <div className="booking-shell min-h-screen text-[#1E1B4B] font-sans antialiased relative overflow-x-hidden" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light', background: 'var(--ns-bg)' }}>
       
       {/* BAÑO DE COLOR (Sutil resplandor de fondo — marca lilac) */}
       <div className="absolute top-0 inset-x-0 h-[60vh] pointer-events-none z-0" style={{ background: 'linear-gradient(to bottom, #E8DEFF, transparent)' }}></div>
@@ -606,27 +606,53 @@ export default function VistaPublica() {
                 
                 <div className="nh-card p-3 md:p-4">
                    
-                   {/* SCROLL HORIZONTAL DE FECHAS */}
-                   <div className="flex overflow-x-auto gap-1.5 md:gap-2 pb-3 md:pb-4 no-scrollbar snap-x relative -mx-1 px-1">
-                      {diasCalendario.map((d, i) => {
+                   {/* NAVEGACIÓN DE FECHAS: ventana corta, sin ocultar disponibilidad futura */}
+                   <div className="flex items-center justify-between gap-2 mb-3 px-0.5">
+                      <button
+                        type="button"
+                        aria-label="Ver fechas anteriores"
+                        disabled={calendarWindowStart === 0}
+                        onClick={() => setCalendarWindowStart((start) => Math.max(0, start - 7))}
+                        className="w-9 h-9 rounded-xl border flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed"
+                        style={{ color: accent, borderColor: 'var(--ns-border)', background: 'var(--ns-surface)' }}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-center" style={{ color: 'var(--ns-text-muted)' }}>
+                        {diasCalendario[calendarWindowStart]?.month || 'Próximas fechas'}
+                      </p>
+                      <button
+                        type="button"
+                        aria-label="Ver fechas siguientes"
+                        disabled={calendarWindowStart + 7 >= diasCalendario.length}
+                        onClick={() => setCalendarWindowStart((start) => Math.min(Math.max(0, diasCalendario.length - 1), start + 7))}
+                        className="w-9 h-9 rounded-xl border flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed"
+                        style={{ color: accent, borderColor: 'var(--ns-border)', background: 'var(--ns-surface)' }}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                   </div>
+                   <div className="grid grid-cols-4 sm:grid-cols-7 gap-2" role="group" aria-label="Fechas disponibles">
+                      {diasCalendario.slice(calendarWindowStart, calendarWindowStart + 7).map((d) => {
                         const isSelected = reserva.fecha === d.full
                         return (
-                          <div key={i} className="flex flex-col items-center shrink-0">
-                             {d.isNewMonth && <span className="text-[8px] md:text-[9px] font-bold text-zinc-300 uppercase tracking-widest mb-1.5 md:mb-2 self-start pl-0.5">{d.month}</span>}
-                             <button 
-                               disabled={!d.available}
-                               onClick={() => handleDateSelect(d)}
-                               className={`snap-center w-[3.3rem] h-[4.2rem] md:w-[3.8rem] md:h-[4.8rem] rounded-[1rem] md:rounded-[1.2rem] flex flex-col items-center justify-center transition-all duration-300 border active:scale-[0.95] brand-date-hover ${
-                                 !d.available ? 'opacity-20 grayscale border-transparent cursor-not-allowed bg-zinc-50' : 
-                                 isSelected ? 'shadow-md scale-105 border-transparent text-white' : 'bg-[#FDFDFC] border-transparent text-zinc-600'
-                               }`}
-                               style={{ backgroundColor: isSelected ? accent : '' }}
-                             >
-                                <span className={`text-[8px] md:text-[9px] font-bold uppercase mb-0.5 md:mb-1 ${isSelected ? 'text-white/90' : 'text-zinc-400'}`}>{d.weekday}</span>
-                                <span className="text-lg md:text-xl font-bold tracking-tighter">{d.number}</span>
-                                {d.isToday && !isSelected && <div className="w-1 h-1 rounded-full mt-0.5" style={{ backgroundColor: accent }}></div>}
-                             </button>
-                          </div>
+                          <button
+                            key={d.full}
+                            type="button"
+                            disabled={!d.available}
+                            onClick={() => handleDateSelect(d)}
+                            aria-pressed={isSelected}
+                            className={`relative w-full h-[4.35rem] md:h-[4.8rem] rounded-[1rem] md:rounded-[1.2rem] flex flex-col items-center justify-center transition-all duration-300 border active:scale-[0.95] brand-date-hover ${
+                              !d.available ? 'opacity-25 grayscale border-transparent cursor-not-allowed bg-zinc-50' :
+                              isSelected ? 'shadow-md scale-[1.03] border-transparent text-white' : 'bg-[#FDFDFC] border-transparent text-zinc-600'
+                            }`}
+                            style={{ backgroundColor: isSelected ? accent : '' }}
+                          >
+                            {d.isNewMonth && <span className={`absolute top-1.5 right-2 text-[7px] font-black tracking-wider ${isSelected ? 'text-white/70' : 'text-zinc-300'}`}>{d.month.slice(0, 3)}</span>}
+                            <span className={`text-[8px] md:text-[9px] font-bold uppercase mb-0.5 md:mb-1 ${isSelected ? 'text-white/90' : 'text-zinc-400'}`}>{d.weekday}</span>
+                            <span className="text-lg md:text-xl font-bold tracking-tighter">{d.number}</span>
+                            {d.isToday && !isSelected && <div className="w-1 h-1 rounded-full mt-0.5" style={{ backgroundColor: accent }}></div>}
+                          </button>
                         )
                       })}
                    </div>

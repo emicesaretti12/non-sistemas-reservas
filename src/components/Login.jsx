@@ -13,9 +13,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [mensaje, setMensaje] = useState(null)
+  const [legalSheet, setLegalSheet] = useState(null)
 
   const [cooldown, setCooldown] = useState(0)
-  const [now, setNow] = useState(new Date())
   const cooldownRef = useRef(null)
   const initRef = useRef(false)
 
@@ -46,9 +46,7 @@ export default function Login() {
   }, [])
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000 * 30)
     return () => {
-      clearInterval(id)
       if (cooldownRef.current) clearInterval(cooldownRef.current)
     }
   }, [])
@@ -288,11 +286,6 @@ export default function Login() {
       btn: 'Enviar enlace',
     },
   }
-
-  const horaAhora = useMemo(
-    () => now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-    [now]
-  )
 
   const renderPasswordMeter = () => {
     if (mode !== 'registro' || !password) return null
@@ -548,9 +541,9 @@ export default function Login() {
               />
               <span className="text-[12px] leading-snug text-[#6B7280]">
                 Acepto los{' '}
-                <a href="#" className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Términos</a>
+                <button type="button" onClick={() => setLegalSheet('terms')} className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Términos</button>
                 {' '}y la{' '}
-                <a href="#" className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Política de Privacidad</a>.
+                <button type="button" onClick={() => setLegalSheet('privacy')} className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Política de Privacidad</button>.
               </span>
             </label>
           )}
@@ -600,6 +593,39 @@ export default function Login() {
           </span>
         </div>
       </div>
+
+      {legalSheet && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-5" role="presentation">
+          <button type="button" aria-label="Cerrar información legal" className="absolute inset-0 bg-[#18152e]/45 backdrop-blur-sm" onClick={() => setLegalSheet(null)} />
+          <section role="dialog" aria-modal="true" aria-labelledby="legal-sheet-title" className="relative w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] bg-white p-6 sm:p-7 shadow-2xl animate-in slide-in-from-bottom-6 duration-300">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="inline-flex rounded-full bg-[#EEEBFF] px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#5B3DF5]">Noni</span>
+                <h2 id="legal-sheet-title" className="mt-3 text-xl font-black tracking-tight text-[#1E1B4B]">
+                  {legalSheet === 'terms' ? 'Términos de uso' : 'Política de privacidad'}
+                </h2>
+              </div>
+              <button type="button" aria-label="Cerrar" onClick={() => setLegalSheet(null)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F5F3FF] text-[#5B3DF5] transition-colors hover:bg-[#E8DEFF]">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6l12 12" strokeLinecap="round" /></svg>
+              </button>
+            </div>
+            <div className="mt-5 space-y-3 text-sm leading-relaxed text-[#656273]">
+              {legalSheet === 'terms' ? (
+                <>
+                  <p>Al crear una cuenta, usás Noni para administrar reservas y la información operativa de tu negocio. Debés proporcionar datos correctos y mantener el acceso a tu cuenta de forma responsable.</p>
+                  <p>Las reservas, servicios y horarios configurados son responsabilidad del negocio que administra la cuenta. Podés dejar de usar el servicio desde la configuración de tu cuenta.</p>
+                </>
+              ) : (
+                <>
+                  <p>Usamos los datos de registro y la información necesaria para autenticar tu cuenta, mostrar tus reservas y brindar soporte al funcionamiento de la aplicación.</p>
+                  <p>La información se procesa únicamente para operar el servicio y no se comparte para fines ajenos a la gestión de reservas. Podés solicitar ayuda sobre tus datos desde los canales de contacto del servicio.</p>
+                </>
+              )}
+            </div>
+            <button type="button" onClick={() => setLegalSheet(null)} className="mt-6 min-h-11 w-full rounded-2xl bg-[#5B3DF5] px-4 py-3 text-xs font-black uppercase tracking-[0.13em] text-white shadow-[0_10px_22px_rgba(91,61,245,0.25)] transition-transform active:scale-[0.98]">Entendido</button>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

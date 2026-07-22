@@ -2198,3 +2198,337 @@ body {
 .ns-tab-content-enter {
   animation: ns-tab-switch 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+
+/* ============================================================
+   NONI OS — REFINAMIENTO NATIVO / PLASTILINA MINIMALISTA
+   Alcance exclusivo: panel autenticado y experiencia de reserva.
+   No afecta la landing page.
+   ============================================================ */
+.noni-shell,
+.booking-shell {
+  --ns-bg: #f7f7fb;
+  --ns-surface: rgba(255, 255, 255, 0.88);
+  --ns-surface-hover: #ffffff;
+  --ns-text: #20212b;
+  --ns-text-muted: #71727f;
+  --ns-primary: #6958d7;
+  --ns-primary-bg: #eeebff;
+  --ns-border: rgba(52, 48, 91, 0.11);
+  --ns-border-hover: rgba(105, 88, 215, 0.36);
+  --ns-gradient-1: linear-gradient(145deg, #8172f2 0%, #5f4bc4 100%);
+  --ns-shadow-glow: 0 14px 26px rgba(104, 88, 215, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  --ns-plastilina-card: 0 18px 42px rgba(57, 52, 103, 0.10), 0 3px 9px rgba(45, 42, 72, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  --ns-plastilina-active: 0 6px 16px rgba(57, 52, 103, 0.10), inset 0 2px 4px rgba(51, 43, 110, 0.10);
+  background-color: var(--ns-bg);
+  background-image: radial-gradient(circle at 8% -8%, rgba(208, 201, 255, 0.72), transparent 26rem), radial-gradient(circle at 92% 4%, rgba(232, 245, 255, 0.85), transparent 28rem);
+}
+
+.noni-shell {
+  letter-spacing: -0.01em;
+}
+
+.noni-shell .ns-nav-dark {
+  background: rgba(250, 250, 253, 0.78);
+  border-bottom-color: rgba(52, 48, 91, 0.08);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.76) inset, 0 8px 30px rgba(51, 44, 92, 0.04);
+}
+
+.noni-shell main {
+  position: relative;
+}
+
+.noni-shell .nh-card,
+.noni-shell .ns-settings-card,
+.noni-shell .ns-client-card,
+.noni-shell .ns-stat-mini {
+  border-color: var(--ns-border);
+  box-shadow: var(--ns-plastilina-card);
+}
+
+.noni-shell .nh-card,
+.noni-shell .ns-settings-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+}
+
+.noni-shell .ns-client-card,
+.noni-shell .ns-stat-mini {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 253, 0.92));
+}
+
+.noni-shell .ns-bottom-nav {
+  max-width: 34rem;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.84);
+  border-color: rgba(52, 48, 91, 0.10);
+  box-shadow: 0 22px 48px rgba(50, 43, 98, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.noni-shell .ns-bottom-nav-item {
+  min-height: 48px;
+  color: #8a8996;
+}
+
+.noni-shell .ns-bottom-nav-item.active {
+  color: var(--ns-primary);
+  font-weight: 800;
+}
+
+.noni-shell .ns-bottom-nav-item.active::before {
+  width: 42px;
+  height: 40px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f2efff, #e3defe);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), 0 5px 12px rgba(105, 88, 215, 0.12);
+}
+
+.noni-shell button,
+.booking-shell button,
+.noni-shell a,
+.booking-shell a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.noni-shell button:not(:disabled),
+.booking-shell button:not(:disabled) {
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.noni-shell button:not(:disabled):active,
+.booking-shell button:not(:disabled):active {
+  transform: scale(0.975);
+}
+
+.noni-shell button:focus-visible,
+.booking-shell button:focus-visible,
+.noni-shell a:focus-visible,
+.booking-shell a:focus-visible,
+.noni-shell input:focus-visible,
+.booking-shell input:focus-visible,
+.noni-shell textarea:focus-visible,
+.booking-shell textarea:focus-visible,
+.noni-shell select:focus-visible,
+.booking-shell select:focus-visible {
+  outline: 3px solid rgba(105, 88, 215, 0.28);
+  outline-offset: 3px;
+}
+
+.noni-shell input,
+.noni-shell textarea,
+.noni-shell select {
+  border-radius: 16px;
+  border-color: var(--ns-border);
+  box-shadow: inset 0 1px 2px rgba(38, 34, 70, 0.04), 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.booking-shell {
+  min-height: 100dvh;
+  color: var(--ns-text);
+  background-image: radial-gradient(circle at 10% -6%, rgba(216, 210, 255, 0.82), transparent 30rem), radial-gradient(circle at 94% 25%, rgba(225, 245, 255, 0.9), transparent 28rem);
+}
+
+.booking-shell > header {
+  height: clamp(14rem, 30vh, 20rem);
+  isolation: isolate;
+}
+
+.booking-shell > header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(31, 26, 62, 0.05), rgba(31, 26, 62, 0.28));
+}
+
+.booking-shell .ns-public-identity-card {
+  position: relative;
+  overflow: visible;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 30px;
+  box-shadow: 0 24px 48px rgba(54, 46, 104, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(22px) saturate(125%);
+}
+
+.booking-shell .ns-public-logo {
+  box-shadow: 0 12px 24px rgba(50, 42, 99, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.booking-shell .ns-progress-nav {
+  border: 1px solid rgba(52, 48, 91, 0.08);
+  background: rgba(255, 255, 255, 0.74);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: 0 12px 25px rgba(57, 52, 103, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.booking-shell .nh-card,
+.booking-shell .ns-public-form-card,
+.booking-shell .ns-public-summary-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--ns-border);
+  box-shadow: var(--ns-plastilina-card);
+}
+
+.booking-shell .nh-card {
+  border-radius: 26px;
+}
+
+.booking-shell .ns-public-service-item {
+  min-height: 76px;
+  padding: 15px 16px;
+  background: transparent;
+}
+
+.booking-shell .ns-public-service-item:hover {
+  background: linear-gradient(90deg, rgba(105, 88, 215, 0.075), transparent);
+}
+
+.booking-shell .ns-public-service-ic {
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 12px rgba(105, 88, 215, 0.10);
+}
+
+.booking-shell .ns-public-employee-card {
+  min-height: 150px;
+  padding: 18px 14px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--ns-border);
+  box-shadow: 0 10px 20px rgba(57, 52, 103, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.booking-shell .ns-public-employee-card:hover {
+  border-color: var(--ns-border-hover);
+  box-shadow: 0 16px 28px rgba(57, 52, 103, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  transform: translateY(-2px);
+}
+
+.booking-shell .ns-public-form-card {
+  border-radius: 26px;
+}
+
+.booking-shell .ns-input-wrapper {
+  border-radius: 17px;
+  background: #fbfbfe;
+  border-color: rgba(52, 48, 91, 0.10);
+  box-shadow: inset 0 1px 2px rgba(53, 48, 87, 0.04), 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.booking-shell .ns-input-wrapper:focus-within {
+  border-color: rgba(105, 88, 215, 0.48);
+  box-shadow: 0 0 0 4px rgba(105, 88, 215, 0.12), inset 0 1px 2px rgba(53, 48, 87, 0.04);
+}
+
+.booking-shell .ns-public-ticket {
+  border-radius: 26px;
+  box-shadow: 0 20px 34px rgba(80, 61, 188, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
+.booking-shell .brand-date-hover:hover {
+  border-color: rgba(105, 88, 215, 0.32) !important;
+  box-shadow: 0 10px 18px rgba(64, 52, 139, 0.10);
+}
+
+.booking-shell [disabled] {
+  cursor: not-allowed;
+}
+
+@media (min-width: 768px) {
+  .booking-shell main.max-w-md {
+    max-width: 42rem;
+  }
+
+  .booking-shell .ns-public-identity-card {
+    border-radius: 34px;
+  }
+
+  .booking-shell .ns-public-service-item {
+    min-height: 84px;
+    padding: 18px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noni-shell *,
+  .booking-shell * {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Centro de mando: bento suave y controles de alta legibilidad */
+.noni-shell [data-testid="home-hero"] {
+  border-color: rgba(68, 59, 130, 0.10) !important;
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.97), rgba(247,246,255,0.88)) !important;
+  box-shadow: var(--ns-plastilina-card) !important;
+}
+
+.noni-shell [data-testid="home-hero"] > div:first-child {
+  opacity: 0.14 !important;
+}
+
+.noni-shell .nh-metric {
+  min-height: 118px;
+  border: 1px solid rgba(68, 59, 130, 0.09);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(248,248,253,0.90));
+  box-shadow: 0 12px 26px rgba(57, 52, 103, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.noni-shell button.nh-metric:hover {
+  border-color: var(--ns-border-hover);
+  box-shadow: 0 18px 32px rgba(57, 52, 103, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  transform: translateY(-2px);
+}
+
+.noni-shell .nh-metric::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.36), transparent 42%);
+}
+
+.noni-shell .nh-next {
+  border-radius: 28px;
+}
+
+.noni-shell [data-testid="home-loading"] {
+  min-height: 320px;
+}
+
+.noni-shell [data-testid="home-view-app"],
+.noni-shell [title="Ajustes"] {
+  box-shadow: 0 6px 12px rgba(57, 52, 103, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+.noni-shell [data-testid="home-view-app"]:hover,
+.noni-shell [title="Ajustes"]:hover {
+  border-color: rgba(105, 88, 215, 0.25) !important;
+  box-shadow: 0 10px 18px rgba(57, 52, 103, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+}
+
+.noni-shell .ns-spinner {
+  width: 34px;
+  height: 34px;
+  border-width: 3px;
+  box-shadow: 0 8px 18px rgba(57, 52, 103, 0.10);
+}
+
+@media (max-width: 639px) {
+  .noni-shell [data-testid="home-hero"] {
+    border-radius: 24px;
+  }
+
+  .noni-shell .nh-metric {
+    min-height: 104px;
+    border-radius: 18px;
+  }
+}
