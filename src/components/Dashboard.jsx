@@ -1590,7 +1590,7 @@ export default function Dashboard({ session }) {
           publicLink={publicLink}
           onNavigate={(t) => setTab(t)}
           onStartTour={() => tour.start()}
-          negocioNombre={negocio?.nombre}
+          negocio={negocio}
           smartAlerts={{
             turnosHoy: stats.hoy || 0,
             ingresosHoy: stats.ingresos || 0,
