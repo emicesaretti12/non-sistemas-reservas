@@ -1,37 +1,37 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useToast } from './Toast'
 
 const TEMPLATES = [
   {
-    id: 'modern-dark',
-    name: 'Elegante Oscuro',
-    bg: 'linear-gradient(145deg, #0c1929 0%, #1a2942 50%, #0e1f35 100%)',
+    id: 'brand-dark',
+    name: 'Marca Oscura',
+    bg: 'linear-gradient(145deg, #1A1630 0%, #2D1F6E 50%, #1A1630 100%)',
     textColor: '#ffffff',
-    accentColor: '#38bdf8',
+    accentColor: '#A78BFA',
     style: 'dark',
   },
   {
-    id: 'sky-gradient',
-    name: 'Celeste Cielo',
-    bg: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #7dd3fc 100%)',
+    id: 'brand-violet',
+    name: 'Violeta Marca',
+    bg: 'linear-gradient(135deg, #5B3DF5 0%, #7C5CF8 50%, #9B7EFF 100%)',
     textColor: '#ffffff',
-    accentColor: '#ffffff',
-    style: 'light',
+    accentColor: '#E8DEFF',
+    style: 'dark',
   },
   {
-    id: 'minimal-white',
-    name: 'Minimalista',
-    bg: 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)',
-    textColor: '#0f172a',
-    accentColor: '#0ea5e9',
+    id: 'brand-soft',
+    name: 'Suave Marca',
+    bg: 'linear-gradient(180deg, #F0EBFF 0%, #E8DEFF 100%)',
+    textColor: '#1A1630',
+    accentColor: '#5B3DF5',
     style: 'white',
   },
   {
-    id: 'sunset',
-    name: 'Atardecer',
-    bg: 'linear-gradient(135deg, #1e1b4b 0%, #4c1d95 40%, #7c3aed 100%)',
+    id: 'brand-gradient',
+    name: 'Gradiente',
+    bg: 'linear-gradient(135deg, #1A1630 0%, #5B3DF5 60%, #8B7CF6 100%)',
     textColor: '#ffffff',
-    accentColor: '#c4b5fd',
+    accentColor: '#E8DEFF',
     style: 'dark',
   },
   {
@@ -53,27 +53,25 @@ const TEMPLATES = [
 ]
 
 const SIZES = [
-  { id: 'story', label: 'Story', w: 1080, h: 1920, aspect: '9/16', previewH: 520, previewW: 292 },
-  { id: 'post', label: 'Post', w: 1080, h: 1080, aspect: '1/1', previewH: 380, previewW: 380 },
-  { id: 'landscape', label: 'Portada', w: 1200, h: 628, aspect: '1200/628', previewH: 280, previewW: 534 },
+  { id: 'story', label: 'Story', w: 1080, h: 1920, aspect: '9/16', previewH: 480, previewW: 270 },
+  { id: 'post', label: 'Post', w: 1080, h: 1080, aspect: '1/1', previewH: 340, previewW: 340 },
+  { id: 'landscape', label: 'Portada', w: 1200, h: 628, aspect: '1200/628', previewH: 240, previewW: 460 },
 ]
 
 export default function FlyerCreator({ negocio, publicLink }) {
   const toast = useToast()
-  const canvasRef = useRef(null)
 
   const [selectedTemplate, setSelectedTemplate] = useState(TEMPLATES[0])
   const [selectedSize, setSelectedSize] = useState(SIZES[0])
   const [titulo, setTitulo] = useState(negocio?.nombre || 'Mi Negocio')
   const [subtitulo, setSubtitulo] = useState('Reservá tu turno online')
   const [promo, setPromo] = useState('')
-  const [showQR, setShowQR] = useState(true)
   const [showLink, setShowLink] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  const shortLink = publicLink?.replace(window.location.origin, '') || '/app/mi-negocio'
+  const shortLink = publicLink?.replace(window.location.origin, '') || '/reservas/mi-negocio'
 
-  // ─── Generate the flyer as a canvas and download ───
   const generateFlyer = useCallback(async () => {
     setGenerating(true)
     try {
@@ -82,15 +80,13 @@ export default function FlyerCreator({ negocio, publicLink }) {
       canvas.height = selectedSize.h
       const ctx = canvas.getContext('2d')
 
-      // Background gradient
-      const colors = selectedTemplate.bg.match(/#[0-9a-fA-F]{6}/g) || ['#0c1929', '#1a2942']
+      const colors = selectedTemplate.bg.match(/#[0-9a-fA-F]{6}/g) || ['#1A1630', '#5B3DF5']
       const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
       colors.forEach((c, i) => grad.addColorStop(i / (colors.length - 1), c))
       ctx.fillStyle = grad
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Decorative circles
-      ctx.globalAlpha = 0.06
+      ctx.globalAlpha = 0.08
       ctx.fillStyle = selectedTemplate.accentColor
       ctx.beginPath()
       ctx.arc(canvas.width * 0.85, canvas.height * 0.15, canvas.width * 0.35, 0, Math.PI * 2)
@@ -103,15 +99,12 @@ export default function FlyerCreator({ negocio, publicLink }) {
       const textColor = selectedTemplate.textColor
       const accentColor = selectedTemplate.accentColor
       const isStory = selectedSize.id === 'story'
-      const isPost = selectedSize.id === 'post'
       const scale = canvas.width / 1080
 
-      // ─── Logo badge ───
       const badgeSize = isStory ? 90 * scale : 70 * scale
       const badgeX = canvas.width / 2 - badgeSize / 2
       const badgeY = isStory ? 200 * scale : 100 * scale
 
-      // Badge background
       ctx.fillStyle = accentColor
       ctx.globalAlpha = 0.15
       roundRect(ctx, badgeX - 10, badgeY - 10, badgeSize + 20, badgeSize + 20, 24 * scale)
@@ -133,21 +126,18 @@ export default function FlyerCreator({ negocio, publicLink }) {
         drawTextBadge(ctx, badgeX, badgeY, badgeSize, scale, accentColor, textColor, titulo)
       }
 
-      // ─── Title ───
       const titleY = badgeY + badgeSize + (isStory ? 80 : 60) * scale
       ctx.fillStyle = textColor
       ctx.textAlign = 'center'
       ctx.font = `900 ${(isStory ? 72 : 58) * scale}px Inter, system-ui, sans-serif`
       wrapText(ctx, titulo.toUpperCase(), canvas.width / 2, titleY, canvas.width * 0.8, (isStory ? 80 : 68) * scale)
 
-      // ─── Subtitle ───
       const lines = getWrappedLines(ctx, titulo.toUpperCase(), canvas.width * 0.8, `900 ${(isStory ? 72 : 58) * scale}px Inter`)
       const subY = titleY + lines.length * (isStory ? 80 : 68) * scale + 20 * scale
       ctx.fillStyle = accentColor
       ctx.font = `600 ${(isStory ? 36 : 30) * scale}px Inter, system-ui, sans-serif`
       ctx.fillText(subtitulo, canvas.width / 2, subY)
 
-      // ─── Promo badge ───
       if (promo) {
         const promoY = subY + (isStory ? 80 : 60) * scale
         const promoW = ctx.measureText(promo).width + 60 * scale
@@ -161,10 +151,8 @@ export default function FlyerCreator({ negocio, publicLink }) {
         ctx.fillText(promo, canvas.width / 2, promoY + 8 * scale)
       }
 
-      // ─── Bottom section: Link ───
       if (showLink) {
-        const linkY = canvas.height - (isStory ? 260 : isPost ? 200 : 140) * scale
-        // Link pill
+        const linkY = canvas.height - (isStory ? 260 : 200) * scale
         const linkText = publicLink || 'tu-link-de-reservas.com'
         const shortDisplay = linkText.replace('https://', '').replace('http://', '')
         ctx.font = `700 ${(isStory ? 26 : 22) * scale}px Inter, system-ui, sans-serif`
@@ -180,7 +168,6 @@ export default function FlyerCreator({ negocio, publicLink }) {
         ctx.font = `700 ${(isStory ? 24 : 20) * scale}px Inter, system-ui, sans-serif`
         ctx.fillText(shortDisplay, canvas.width / 2, linkY + 4 * scale)
 
-        // CTA label
         const ctaY = linkY - 40 * scale
         ctx.fillStyle = textColor
         ctx.globalAlpha = 0.5
@@ -189,7 +176,6 @@ export default function FlyerCreator({ negocio, publicLink }) {
         ctx.globalAlpha = 1
       }
 
-      // ─── Footer branding ───
       const footY = canvas.height - 50 * scale
       ctx.fillStyle = textColor
       ctx.globalAlpha = 0.3
@@ -197,7 +183,6 @@ export default function FlyerCreator({ negocio, publicLink }) {
       ctx.fillText('Powered by Non Sistemas', canvas.width / 2, footY)
       ctx.globalAlpha = 1
 
-      // ─── Download ───
       const dataUrl = canvas.toDataURL('image/png', 1.0)
       const a = document.createElement('a')
       a.href = dataUrl
@@ -211,166 +196,193 @@ export default function FlyerCreator({ negocio, publicLink }) {
     } finally {
       setGenerating(false)
     }
-  }, [selectedTemplate, selectedSize, titulo, subtitulo, promo, showQR, showLink, negocio, publicLink])
+  }, [selectedTemplate, selectedSize, titulo, subtitulo, promo, showLink, negocio, publicLink])
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(publicLink || '').catch(() => {})
+    setCopied(true)
+    toast.success('¡Link copiado al portapapeles!')
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h3 className="text-lg sm:text-xl font-black tracking-tight text-slate-900">Crear Flyer</h3>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Diseñá un flyer para tus redes con tu link de reservas</p>
-        </div>
-        <button
-          onClick={generateFlyer}
-          disabled={generating}
-          className="px-5 py-3 bg-sky-500 hover:bg-sky-400 text-white font-black text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-sky-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {generating ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Generando...
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Descargar Flyer
-            </>
-          )}
-        </button>
-      </div>
+    <div className="flex flex-col gap-4 ns-tab-content-enter pb-6">
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* ─── Left: Controls ─── */}
-        <div className="space-y-4">
-          {/* Size selector */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Formato</p>
+      {/* ── HEADER BENTO PLASTILINA ── */}
+      <header className="ns-section-header">
+        <div className="flex items-center justify-between relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-plastilina-btn)' }}>
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-primary)' }}>Marketing</span>
+            </div>
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-none" style={{ color: 'var(--ns-text)' }}>Crear Flyer</h2>
+            <p className="text-[10px] font-medium mt-1" style={{ color: 'var(--ns-text-muted)' }}>Diseñá un flyer para tus redes con tu link de reservas</p>
+          </div>
+
+          {/* Botón Descargar */}
+          <button
+            onClick={generateFlyer}
+            disabled={generating}
+            className="flex items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40 relative overflow-hidden"
+            style={{ background: 'var(--ns-primary)', boxShadow: 'var(--ns-plastilina-btn)' }}
+          >
+            <span className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 100%)' }} />
+            {generating ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span className="hidden sm:inline">Descargar</span>
+              </>
+            )}
+          </button>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* ── PANEL IZQUIERDO: Controles ── */}
+        <div className="space-y-3">
+
+          {/* Formato */}
+          <div className="rounded-2xl p-4 ns-stagger-in ns-delay-1" style={{ background: 'white', border: '1px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--ns-text-muted)' }}>Formato</p>
             <div className="grid grid-cols-3 gap-2">
               {SIZES.map(s => (
                 <button
                   key={s.id}
                   onClick={() => setSelectedSize(s)}
-                  className={`py-2.5 px-3 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${
-                    selectedSize.id === s.id
-                      ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
-                  }`}
+                  className="py-3 px-2 rounded-xl text-[10px] font-black transition-all active:scale-95 relative overflow-hidden"
+                  style={{
+                    background: selectedSize.id === s.id ? 'var(--ns-primary)' : 'var(--ns-accent-bg)',
+                    color: selectedSize.id === s.id ? 'white' : 'var(--ns-text-secondary)',
+                    border: selectedSize.id === s.id ? 'none' : '1px solid var(--ns-border)',
+                    boxShadow: selectedSize.id === s.id ? 'var(--ns-plastilina-btn)' : 'var(--ns-shadow-sm)',
+                  }}
                 >
+                  {selectedSize.id === s.id && (
+                    <span className="absolute top-0 left-0 right-0 h-1/2 rounded-t-xl pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 100%)' }} />
+                  )}
                   {s.label}
-                  <span className="block text-[9px] opacity-60 mt-0.5">{s.w}×{s.h}</span>
+                  <span className="block text-[8px] opacity-60 mt-0.5">{s.w}×{s.h}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Template selector */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Estilo</p>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          {/* Estilo / Template */}
+          <div className="rounded-2xl p-4 ns-stagger-in ns-delay-2" style={{ background: 'white', border: '1px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--ns-text-muted)' }}>Estilo</p>
+            <div className="grid grid-cols-6 gap-2">
               {TEMPLATES.map(t => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedTemplate(t)}
-                  className={`group relative aspect-square rounded-xl overflow-hidden transition-all active:scale-90 ${
-                    selectedTemplate.id === t.id ? 'ring-2 ring-sky-500 ring-offset-2' : 'hover:scale-105'
-                  }`}
-                  style={{ background: t.bg }}
+                  className="relative aspect-square rounded-xl overflow-hidden transition-all active:scale-90"
+                  style={{
+                    background: t.bg,
+                    boxShadow: selectedTemplate.id === t.id
+                      ? '0 0 0 3px var(--ns-primary), 0 4px 12px rgba(91,61,245,0.3)'
+                      : 'var(--ns-shadow-sm)',
+                    transform: selectedTemplate.id === t.id ? 'scale(1.05)' : 'scale(1)',
+                  }}
                   title={t.name}
                 >
                   {selectedTemplate.id === t.id && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white drop-shadow-lg" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <svg className="w-3.5 h-3.5 text-white drop-shadow" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                     </div>
                   )}
                 </button>
               ))}
             </div>
+            <p className="text-[9px] font-semibold mt-2" style={{ color: 'var(--ns-primary)' }}>{selectedTemplate.name}</p>
           </div>
 
-          {/* Text inputs */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 space-y-3">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Contenido</p>
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Título</label>
-              <input
-                type="text"
-                value={titulo}
-                onChange={e => setTitulo(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-sky-400 focus:bg-white outline-none transition-all"
-                placeholder="Nombre del negocio"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Subtítulo</label>
-              <input
-                type="text"
-                value={subtitulo}
-                onChange={e => setSubtitulo(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:border-sky-400 focus:bg-white outline-none transition-all"
-                placeholder="Reservá tu turno online"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Promoción <span className="text-slate-300">(opcional)</span></label>
-              <input
-                type="text"
-                value={promo}
-                onChange={e => setPromo(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:border-sky-400 focus:bg-white outline-none transition-all"
-                placeholder="Ej: 20% OFF primera visita"
-              />
-            </div>
-          </div>
+          {/* Contenido */}
+          <div className="rounded-2xl p-4 space-y-3 ns-stagger-in ns-delay-3" style={{ background: 'white', border: '1px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-text-muted)' }}>Contenido</p>
 
-          {/* Options */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Opciones</p>
-            <label className="flex items-center justify-between cursor-pointer group">
-              <span className="text-xs font-semibold text-slate-700">Mostrar link de reservas</span>
-              <div
-                onClick={() => setShowLink(!showLink)}
-                className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${showLink ? 'bg-sky-500' : 'bg-slate-200'}`}
-              >
-                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${showLink ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+            {[
+              { label: 'Título', value: titulo, setter: setTitulo, placeholder: 'Nombre del negocio' },
+              { label: 'Subtítulo', value: subtitulo, setter: setSubtitulo, placeholder: 'Reservá tu turno online' },
+              { label: 'Promoción', value: promo, setter: setPromo, placeholder: 'Ej: 20% OFF primera visita', optional: true },
+            ].map(field => (
+              <div key={field.label}>
+                <label className="text-[9px] font-black uppercase tracking-widest block mb-1.5" style={{ color: 'var(--ns-text-muted)' }}>
+                  {field.label} {field.optional && <span style={{ color: 'var(--ns-border)' }}>(opcional)</span>}
+                </label>
+                <input
+                  type="text"
+                  value={field.value}
+                  onChange={e => field.setter(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl text-sm font-semibold outline-none transition-all"
+                  style={{ background: 'var(--ns-accent-bg)', border: '1.5px solid var(--ns-border)', color: 'var(--ns-text)', boxShadow: 'var(--ns-shadow-inner)' }}
+                  placeholder={field.placeholder}
+                  onFocus={e => { e.target.style.borderColor = 'var(--ns-primary)'; e.target.style.boxShadow = '0 0 0 4px rgba(91,61,245,0.1)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'var(--ns-border)'; e.target.style.boxShadow = 'var(--ns-shadow-inner)'; }}
+                />
               </div>
+            ))}
+          </div>
+
+          {/* Opciones */}
+          <div className="rounded-2xl p-4 ns-stagger-in ns-delay-4" style={{ background: 'white', border: '1px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--ns-text-muted)' }}>Opciones</p>
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="text-[12px] font-semibold" style={{ color: 'var(--ns-text)' }}>Mostrar link de reservas</span>
+              <button
+                onClick={() => setShowLink(!showLink)}
+                className="relative transition-all duration-300 active:scale-90"
+                style={{
+                  width: '48px', height: '26px', borderRadius: '999px',
+                  background: showLink ? 'var(--ns-primary)' : 'var(--ns-border)',
+                  boxShadow: showLink ? 'var(--ns-plastilina-btn)' : 'var(--ns-shadow-inner)',
+                  border: 'none', cursor: 'pointer',
+                }}
+              >
+                <div className="absolute top-[3px] bg-white rounded-full transition-all duration-300"
+                  style={{ width: '20px', height: '20px', left: showLink ? '25px' : '3px', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
+              </button>
             </label>
           </div>
         </div>
 
-        {/* ─── Right: Preview ─── */}
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest self-start">Vista previa</p>
+        {/* ── PANEL DERECHO: Preview ── */}
+        <div className="flex flex-col items-center gap-4 ns-stagger-in ns-delay-2">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] self-start" style={{ color: 'var(--ns-text-muted)' }}>Vista previa</p>
+
+          {/* Preview Card — Plastilina */}
           <div
-            className="rounded-2xl overflow-hidden shadow-2xl border border-slate-200 relative transition-all duration-500"
+            className="rounded-3xl overflow-hidden relative transition-all duration-500 w-full max-w-[340px]"
             style={{
-              width: Math.min(selectedSize.previewW, 360),
-              height: Math.min(selectedSize.previewH, 560),
               background: selectedTemplate.bg,
+              boxShadow: '0 20px 60px rgba(91,61,245,0.2), 0 8px 24px rgba(0,0,0,0.12)',
+              aspectRatio: selectedSize.id === 'story' ? '9/16' : selectedSize.id === 'post' ? '1/1' : '1200/628',
+              maxHeight: selectedSize.id === 'story' ? '500px' : selectedSize.id === 'post' ? '340px' : '240px',
             }}
           >
             {/* Decorative orbs */}
-            <div className="absolute top-0 right-0 w-1/2 h-1/2 rounded-full opacity-[0.06]"
-              style={{ background: selectedTemplate.accentColor, filter: 'blur(40px)', transform: 'translate(30%, -30%)' }}
-            />
-            <div className="absolute bottom-0 left-0 w-1/3 h-1/3 rounded-full opacity-[0.06]"
-              style={{ background: selectedTemplate.accentColor, filter: 'blur(30px)', transform: 'translate(-20%, 20%)' }}
-            />
+            <div className="absolute top-0 right-0 w-1/2 h-1/2 rounded-full pointer-events-none"
+              style={{ background: selectedTemplate.accentColor, opacity: 0.06, filter: 'blur(40px)', transform: 'translate(30%, -30%)' }} />
+            <div className="absolute bottom-0 left-0 w-1/3 h-1/3 rounded-full pointer-events-none"
+              style={{ background: selectedTemplate.accentColor, opacity: 0.06, filter: 'blur(30px)', transform: 'translate(-20%, 20%)' }} />
 
-            {/* Preview content */}
-            <div className="relative h-full flex flex-col items-center justify-center px-5 text-center">
-              {/* Logo */}
+            {/* Shine overlay */}
+            <div className="absolute top-0 left-0 right-0 h-1/3 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%)' }} />
+
+            {/* Content */}
+            <div className="relative h-full flex flex-col items-center justify-center px-6 text-center gap-3">
+              {/* Logo / Avatar */}
               {negocio?.logo_url ? (
-                <img src={negocio.logo_url} className="w-12 h-12 rounded-xl object-cover mb-4 shadow-lg" alt="" />
+                <img src={negocio.logo_url} className="w-12 h-12 rounded-2xl object-cover shadow-lg" alt="" />
               ) : (
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg"
-                  style={{ background: selectedTemplate.accentColor + '25' }}
-                >
-                  <span className="font-black text-base" style={{ color: selectedTemplate.accentColor }}>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"
+                  style={{ background: selectedTemplate.accentColor + '25', border: `1px solid ${selectedTemplate.accentColor}30` }}>
+                  <span className="font-black text-lg" style={{ color: selectedTemplate.accentColor }}>
                     {titulo?.[0] || 'N'}
                   </span>
                 </div>
@@ -378,38 +390,33 @@ export default function FlyerCreator({ negocio, publicLink }) {
 
               {/* Title */}
               <h2 className="font-black text-base sm:text-lg leading-tight tracking-tight"
-                style={{ color: selectedTemplate.textColor }}
-              >
+                style={{ color: selectedTemplate.textColor }}>
                 {titulo || 'Tu Negocio'}
               </h2>
 
               {/* Subtitle */}
-              <p className="text-[11px] font-semibold mt-1.5 opacity-80"
-                style={{ color: selectedTemplate.accentColor }}
-              >
+              <p className="text-[11px] font-semibold opacity-80"
+                style={{ color: selectedTemplate.accentColor }}>
                 {subtitulo}
               </p>
 
               {/* Promo */}
               {promo && (
-                <div className="mt-3 px-3 py-1.5 rounded-full text-[10px] font-bold"
-                  style={{ background: selectedTemplate.accentColor + '20', color: selectedTemplate.accentColor }}
-                >
+                <div className="px-3 py-1.5 rounded-full text-[10px] font-bold"
+                  style={{ background: selectedTemplate.accentColor + '20', color: selectedTemplate.accentColor }}>
                   {promo}
                 </div>
               )}
 
               {/* Link */}
               {showLink && (
-                <div className="mt-auto mb-6 space-y-1.5">
+                <div className="mt-auto mb-4 space-y-1.5">
                   <p className="text-[8px] font-bold uppercase tracking-widest opacity-40"
-                    style={{ color: selectedTemplate.textColor }}
-                  >
+                    style={{ color: selectedTemplate.textColor }}>
                     Reservá online ↓
                   </p>
-                  <div className="px-3 py-1.5 rounded-lg text-[9px] font-bold"
-                    style={{ background: selectedTemplate.textColor + '10', color: selectedTemplate.accentColor }}
-                  >
+                  <div className="px-3 py-1.5 rounded-xl text-[9px] font-bold"
+                    style={{ background: selectedTemplate.textColor + '10', color: selectedTemplate.accentColor }}>
                     {shortLink}
                   </div>
                 </div>
@@ -419,26 +426,54 @@ export default function FlyerCreator({ negocio, publicLink }) {
             {/* Footer */}
             <div className="absolute bottom-2 left-0 right-0 text-center">
               <span className="text-[7px] font-bold uppercase tracking-widest opacity-20"
-                style={{ color: selectedTemplate.textColor }}
-              >
+                style={{ color: selectedTemplate.textColor }}>
                 Non Sistemas
               </span>
             </div>
           </div>
 
-          {/* Copy link button */}
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(publicLink || '').catch(() => {})
-              toast.success('¡Link copiado al portapapeles!')
-            }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-[11px] font-bold text-slate-600 transition-all active:scale-95"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            Copiar link de reservas
-          </button>
+          {/* Acciones */}
+          <div className="flex flex-col gap-2 w-full max-w-[340px]">
+            <button
+              onClick={generateFlyer}
+              disabled={generating}
+              className="w-full py-3.5 rounded-2xl text-white font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 relative overflow-hidden"
+              style={{ background: 'var(--ns-primary)', boxShadow: 'var(--ns-plastilina-btn)' }}
+            >
+              <span className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.15) 0%,transparent 100%)' }} />
+              {generating ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  Descargar Flyer
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={copyLink}
+              className="w-full py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2"
+              style={{
+                background: copied ? 'rgba(16,185,129,0.1)' : 'var(--ns-accent-bg)',
+                color: copied ? '#059669' : 'var(--ns-text-secondary)',
+                border: '1px solid var(--ns-border)',
+                boxShadow: 'var(--ns-shadow-sm)',
+              }}
+            >
+              {copied ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  ¡Copiado!
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  Copiar link de reservas
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

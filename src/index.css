@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 /* ============================================================
-   NON SISTEMAS — DESIGN SYSTEM v3
-   Minimalist · Bento Grid · Mobile-First
+   NON SISTEMAS — DESIGN SYSTEM v4 "Plastilina 3D"
+   Minimalist · Bento Grid · Mobile-First · Ultra Premium
    Brand: Electric Indigo #5B3DF5 · Soft Lilac #E8DEFF
    ============================================================ */
 
 /* ---------- Design Tokens ---------- */
 :root {
-  --ns-bg: #FAFAFC;
+  --ns-bg: #F5F3FF;
   --ns-surface: #FFFFFF;
-  --ns-surface-hover: #F5F3FF;
+  --ns-surface-hover: #F0EBFF;
   --ns-surface-elevated: #FFFFFF;
-  --ns-border: #EDE9FE;
-  --ns-border-hover: #C4B5FD;
+  --ns-border: #E4DAFF;
+  --ns-border-hover: #B8A0FF;
   --ns-text: #1E1B4B;
-  --ns-text-secondary: #6B7280;
-  --ns-text-muted: #9CA3AF;
+  --ns-text-secondary: #5B5580;
+  --ns-text-muted: #9B91C0;
   --ns-primary: #5B3DF5;
   --ns-primary-light: #8B7CF6;
   --ns-primary-dark: #4328D4;
   --ns-primary-bg: #E8DEFF;
-  --ns-primary-bg-hover: #DDD0FF;
+  --ns-primary-bg-hover: #D4C5FF;
   --ns-accent: #E8DEFF;
   --ns-accent-bg: #F3EEFF;
   --ns-success: #10B981;
@@ -29,17 +29,44 @@
   --ns-danger: #EF4444;
   --ns-danger-bg: rgba(239, 68, 68, 0.08);
   --ns-warning: #F59E0B;
+  --ns-warning-bg: rgba(245, 158, 11, 0.1);
   --ns-gradient-1: linear-gradient(135deg, #5B3DF5 0%, #8B7CF6 50%, #A78BFA 100%);
+  --ns-gradient-deep: linear-gradient(135deg, #3D1FD9 0%, #5B3DF5 50%, #7B5CF8 100%);
   --ns-gradient-hero: linear-gradient(135deg, #1E1B4B 0%, #312E81 40%, #4338CA 100%);
   --ns-gradient-card: linear-gradient(180deg, #FFFFFF 0%, #FAFAFC 100%);
-  --ns-shadow-sm: 0 1px 3px rgba(30, 27, 75, 0.04);
-  --ns-shadow-md: 0 4px 12px rgba(30, 27, 75, 0.06);
-  --ns-shadow-lg: 0 8px 30px rgba(30, 27, 75, 0.08);
-  --ns-shadow-glow: 0 0 30px rgba(91, 61, 245, 0.15);
+  --ns-gradient-soft: linear-gradient(135deg, #F3EEFF 0%, #E8DEFF 100%);
+
+  /* 3D Plastilina Shadows */
+  --ns-shadow-sm: 0 2px 8px rgba(91, 61, 245, 0.06), 0 1px 3px rgba(30, 27, 75, 0.04);
+  --ns-shadow-md: 0 6px 20px rgba(91, 61, 245, 0.10), 0 2px 8px rgba(30, 27, 75, 0.06);
+  --ns-shadow-lg: 0 12px 40px rgba(91, 61, 245, 0.14), 0 4px 16px rgba(30, 27, 75, 0.08);
+  --ns-shadow-xl: 0 20px 60px rgba(91, 61, 245, 0.18), 0 8px 24px rgba(30, 27, 75, 0.10);
+  --ns-shadow-glow: 0 0 40px rgba(91, 61, 245, 0.25);
+  --ns-shadow-inner: inset 0 2px 8px rgba(91, 61, 245, 0.08);
+
+  /* 3D Plastilina Effect */
+  --ns-plastilina-card: 
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 -1px 0 rgba(91, 61, 245, 0.08) inset,
+    0 8px 24px rgba(91, 61, 245, 0.10),
+    0 2px 8px rgba(30, 27, 75, 0.06);
+  --ns-plastilina-btn:
+    0 1px 0 rgba(255,255,255,0.35) inset,
+    0 -2px 0 rgba(0,0,0,0.15) inset,
+    0 6px 20px rgba(91, 61, 245, 0.35),
+    0 2px 8px rgba(91, 61, 245, 0.20);
+  --ns-plastilina-active:
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 -1px 0 rgba(0,0,0,0.2) inset,
+    0 2px 8px rgba(91, 61, 245, 0.15);
+
+  --ns-radius-xs: 12px;
   --ns-radius-sm: 16px;
   --ns-radius-md: 20px;
   --ns-radius-lg: 24px;
-  --ns-radius-xl: 32px;
+  --ns-radius-xl: 28px;
+  --ns-radius-2xl: 32px;
+  --ns-radius-3xl: 40px;
 
   /* Safe Area for Mobile */
   --sab: env(safe-area-inset-bottom, 0px);
@@ -85,8 +112,8 @@ body {
 
 /* ---------- Scrollbar ---------- */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -94,12 +121,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(91, 61, 245, 0.15);
+  background: rgba(91, 61, 245, 0.2);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(91, 61, 245, 0.3);
+  background: rgba(91, 61, 245, 0.35);
 }
 
 /* ---------- No Scrollbar Utility ---------- */
@@ -113,31 +140,31 @@ body {
 }
 
 /* ============================================================
-   KEYFRAME ANIMATIONS
+   KEYFRAME ANIMATIONS — PREMIUM SET
    ============================================================ */
 
 @keyframes ns-fade-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes ns-fade-down {
-  from { opacity: 0; transform: translateY(-12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes ns-scale-in {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.88); }
   to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes ns-slide-right {
-  from { opacity: 0; transform: translateX(20px); }
+  from { opacity: 0; transform: translateX(24px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes ns-slide-left {
-  from { opacity: 0; transform: translateX(-20px); }
+  from { opacity: 0; transform: translateX(-24px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
@@ -147,8 +174,8 @@ body {
 }
 
 @keyframes ns-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(91, 61, 245, 0.08); }
-  50% { box-shadow: 0 0 35px rgba(91, 61, 245, 0.18); }
+  0%, 100% { box-shadow: 0 0 20px rgba(91, 61, 245, 0.10); }
+  50% { box-shadow: 0 0 40px rgba(91, 61, 245, 0.25); }
 }
 
 @keyframes ns-shimmer {
@@ -173,28 +200,28 @@ body {
 }
 
 @keyframes ns-stagger-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes ns-page-in {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes ns-tab-switch {
-  from { opacity: 0; transform: translateX(12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(16px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 @keyframes ns-counter {
-  from { opacity: 0; transform: translateY(12px); filter: blur(3px); }
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
 @keyframes ns-bounce-subtle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-5px); }
 }
 
 @keyframes ns-wave {
@@ -203,13 +230,49 @@ body {
 }
 
 @keyframes ns-pulse-ring {
-  0%, 100% { opacity: 0; transform: scale(0.95); }
-  50% { opacity: 1; transform: scale(1.08); }
+  0%, 100% { opacity: 0; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.10); }
 }
 
 @keyframes ns-marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+
+@keyframes ns-spring-in {
+  0% { opacity: 0; transform: scale(0.7) translateY(20px); }
+  60% { transform: scale(1.05) translateY(-4px); }
+  80% { transform: scale(0.97) translateY(2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes ns-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92); }
+  70% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ns-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-4deg); }
+  75% { transform: rotate(4deg); }
+}
+
+@keyframes ns-pulse-soft {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes ns-typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }
 
 /* ============================================================
@@ -218,7 +281,7 @@ body {
 
 .ns-fade-up { animation: ns-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ns-fade-down { animation: ns-fade-down 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.ns-scale-in { animation: ns-scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ns-scale-in { animation: ns-scale-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ns-slide-right { animation: ns-slide-right 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ns-slide-left { animation: ns-slide-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ns-float { animation: ns-float 4s ease-in-out infinite; }
@@ -226,31 +289,33 @@ body {
 .ns-blob { animation: ns-blob 12s ease-in-out infinite; }
 .ns-stagger-in { animation: ns-stagger-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ns-page-in { animation: ns-page-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.ns-tab-switch { animation: ns-tab-switch 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ns-tab-switch { animation: ns-tab-switch 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ns-counter { animation: ns-counter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ns-spring-in { animation: ns-spring-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ns-pulse-soft { animation: ns-pulse-soft 2s ease-in-out infinite; }
 
 .ns-delay-1 { animation-delay: 0.05s; }
-.ns-delay-2 { animation-delay: 0.1s; }
+.ns-delay-2 { animation-delay: 0.10s; }
 .ns-delay-3 { animation-delay: 0.15s; }
-.ns-delay-4 { animation-delay: 0.2s; }
+.ns-delay-4 { animation-delay: 0.20s; }
 .ns-delay-5 { animation-delay: 0.25s; }
-.ns-delay-6 { animation-delay: 0.3s; }
+.ns-delay-6 { animation-delay: 0.30s; }
 .ns-delay-7 { animation-delay: 0.35s; }
-.ns-delay-8 { animation-delay: 0.4s; }
+.ns-delay-8 { animation-delay: 0.40s; }
 .ns-delay-9 { animation-delay: 0.45s; }
-.ns-delay-10 { animation-delay: 0.5s; }
+.ns-delay-10 { animation-delay: 0.50s; }
 
 /* ============================================================
-   COMPONENT CLASSES — MINIMALIST BENTO
+   COMPONENT CLASSES — PLASTILINA 3D BENTO
    ============================================================ */
 
-/* Bento Card — Light Surface */
+/* Bento Card — Plastilina 3D Light Surface */
 .ns-glass {
   background: #FFFFFF;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--ns-border);
-  box-shadow: var(--ns-shadow-sm);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(232, 222, 255, 0.8);
+  box-shadow: var(--ns-plastilina-card);
 }
 
 .ns-glass-dark {
@@ -258,17 +323,22 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Card Hover Lift */
+/* Card Hover Lift — Plastilina */
 .ns-card-lift {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ns-card-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--ns-shadow-lg);
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: var(--ns-shadow-xl);
 }
 
-/* Premium Input — Light */
+.ns-card-lift:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--ns-plastilina-active);
+}
+
+/* Premium Input — Plastilina */
 .ns-input {
   width: 100%;
   padding: 14px 18px;
@@ -280,7 +350,8 @@ body {
   font-size: 14px;
   color: var(--ns-text);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 48px;
+  min-height: 50px;
+  box-shadow: var(--ns-shadow-inner);
 }
 
 .ns-input::placeholder {
@@ -291,10 +362,10 @@ body {
 .ns-input:focus {
   border-color: var(--ns-primary);
   background: var(--ns-surface);
-  box-shadow: 0 0 0 4px var(--ns-primary-bg);
+  box-shadow: 0 0 0 4px rgba(91, 61, 245, 0.12), var(--ns-shadow-inner);
 }
 
-/* Premium Button — Primary */
+/* Premium Button — Plastilina Primary */
 .ns-btn-primary {
   width: 100%;
   padding: 16px 24px;
@@ -314,17 +385,30 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(91, 61, 245, 0.25);
+  box-shadow: var(--ns-plastilina-btn);
+}
+
+.ns-btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .ns-btn-primary:hover {
   background: var(--ns-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(91, 61, 245, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 -2px 0 rgba(0,0,0,0.2) inset, 0 10px 30px rgba(91, 61, 245, 0.45);
 }
 
 .ns-btn-primary:active {
-  transform: scale(0.97);
+  transform: scale(0.97) translateY(1px);
+  box-shadow: var(--ns-plastilina-active);
 }
 
 .ns-btn-primary:disabled {
@@ -391,7 +475,7 @@ body {
   animation: ns-check-draw 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
 }
 
-/* Tag / Badge */
+/* Tag / Badge — Plastilina */
 .ns-badge {
   display: inline-flex;
   align-items: center;
@@ -404,23 +488,23 @@ body {
   text-transform: uppercase;
 }
 
-/* Stat Card — Bento */
+/* Stat Card — Bento Plastilina */
 .ns-stat-card {
   background: var(--ns-surface);
   border-radius: var(--ns-radius-lg);
   border: 1px solid var(--ns-border);
   padding: 24px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--ns-shadow-sm);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-plastilina-card);
 }
 
 .ns-stat-card:hover {
   border-color: var(--ns-border-hover);
-  box-shadow: var(--ns-shadow-md);
-  transform: translateY(-2px);
+  box-shadow: var(--ns-shadow-xl);
+  transform: translateY(-3px) scale(1.005);
 }
 
-/* Tab Active Indicator — Bento Pill */
+/* Tab Active Indicator — Bento Pill Plastilina */
 .ns-tab {
   position: relative;
   padding: 10px 18px;
@@ -438,6 +522,7 @@ body {
   gap: 8px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ns-tab:hover {
@@ -448,47 +533,62 @@ body {
 .ns-tab.active {
   background: var(--ns-primary);
   color: white;
-  box-shadow: 0 4px 12px rgba(91, 61, 245, 0.2);
+  box-shadow: var(--ns-plastilina-btn);
 }
 
-/* Toggle Switch */
+.ns-tab.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Toggle Switch — Plastilina */
 .ns-toggle {
   position: relative;
-  width: 48px;
-  height: 26px;
+  width: 52px;
+  height: 28px;
   background: var(--ns-border);
   border-radius: 999px;
   cursor: pointer;
   transition: background 0.3s;
+  box-shadow: var(--ns-shadow-inner);
 }
 
 .ns-toggle::after {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 3px;
+  top: 4px;
+  left: 4px;
   width: 20px;
   height: 20px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ns-toggle.active {
   background: var(--ns-primary);
+  box-shadow: 0 0 0 3px rgba(91, 61, 245, 0.15);
 }
 
 .ns-toggle.active::after {
-  transform: translateX(22px);
+  transform: translateX(24px);
 }
 
 /* Progress Bar */
 .ns-progress-bar {
-  height: 5px;
+  height: 6px;
   border-radius: 999px;
   background: var(--ns-border);
   overflow: hidden;
+  box-shadow: var(--ns-shadow-inner);
 }
 
 .ns-progress-fill {
@@ -500,17 +600,8 @@ body {
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Empty State */
-.ns-empty-state {
-  text-align: center;
-  padding: 40px 24px;
-  background: var(--ns-accent-bg);
-  border: 2px dashed var(--ns-border);
-  border-radius: var(--ns-radius-lg);
-}
-
 /* ============================================================
-   MOBILE BOTTOM NAVIGATION BAR — BENTO FLOATING
+   MOBILE BOTTOM NAVIGATION BAR — BENTO PLASTILINA FLOATING
    ============================================================ */
 
 .ns-bottom-nav {
@@ -519,16 +610,16 @@ body {
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
   border-top: 1px solid var(--ns-border);
-  padding: 8px 10px;
+  padding: 8px 12px;
   padding-bottom: calc(8px + var(--sab));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 -4px 20px rgba(30, 27, 75, 0.06);
+  box-shadow: 0 -8px 32px rgba(91, 61, 245, 0.08), 0 -1px 0 rgba(91, 61, 245, 0.06);
 }
 
 @media (max-width: 767px) {
@@ -536,10 +627,14 @@ body {
     bottom: 12px;
     left: 12px;
     right: 12px;
-    border-radius: 20px;
+    border-radius: 24px;
     border: 1px solid var(--ns-border);
     padding-bottom: 8px;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 
+      0 8px 32px rgba(91, 61, 245, 0.12),
+      0 2px 8px rgba(30, 27, 75, 0.06),
+      0 1px 0 rgba(255,255,255,0.9) inset;
   }
 }
 
@@ -549,8 +644,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding: 8px 4px 4px;
-  border-radius: 12px;
+  padding: 8px 6px 6px;
+  border-radius: 14px;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -563,47 +658,65 @@ body {
   flex: 1;
   min-width: 0;
   -webkit-tap-highlight-color: transparent;
+  position: relative;
 }
 
 .ns-bottom-nav-item svg {
   width: 22px;
   height: 22px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ns-bottom-nav-item.active {
   color: var(--ns-primary);
+}
+
+.ns-bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
   background: var(--ns-primary-bg);
+  border-radius: 12px;
+  z-index: -1;
+  animation: ns-scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .ns-bottom-nav-item.active svg {
-  transform: scale(1.1);
+  transform: scale(1.15) translateY(-1px);
+  color: var(--ns-primary);
 }
 
 .ns-bottom-nav-item:active {
-  transform: scale(0.88);
+  transform: scale(0.86);
 }
 
 @media (max-width: 767px) {
   .ns-has-bottom-nav {
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (min-width: 768px) {
+  .ns-bottom-nav {
+    display: none;
+  }
   .ns-has-bottom-nav {
     padding-bottom: 0;
   }
 }
 
 /* ============================================================
-   DASHBOARD MOBILE-FIRST REFINEMENTS — BENTO
+   DASHBOARD MOBILE-FIRST REFINEMENTS — BENTO PLASTILINA
    ============================================================ */
 
 /* Compact hero for mobile */
 .ns-hero-compact {
-  padding: 16px 18px;
-  border-radius: 20px;
+  padding: 18px 20px;
+  border-radius: 22px;
 }
 
 @media (min-width: 768px) {
@@ -613,13 +726,13 @@ body {
   }
 }
 
-/* Settings section card */
+/* Settings section card — Plastilina */
 .ns-settings-card {
   background: #ffffff;
   border: 1px solid var(--ns-border);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: var(--ns-shadow-sm);
+  box-shadow: var(--ns-plastilina-card);
 }
 
 .ns-settings-card-header {
@@ -656,7 +769,7 @@ body {
   background: var(--ns-surface-hover);
 }
 
-/* Client list card */
+/* Client list card — Plastilina */
 .ns-client-card {
   background: #ffffff;
   border: 1px solid var(--ns-border);
@@ -665,35 +778,38 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--ns-shadow-sm);
-  min-height: 56px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-plastilina-card);
+  min-height: 60px;
 }
 
 .ns-client-card:active {
   transform: scale(0.97);
+  box-shadow: var(--ns-plastilina-active);
 }
 
 .ns-client-card:hover {
-  box-shadow: var(--ns-shadow-md);
+  box-shadow: var(--ns-shadow-xl);
   border-color: var(--ns-border-hover);
+  transform: translateY(-2px);
 }
 
 .ns-client-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   background: var(--ns-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ns-primary);
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(91, 61, 245, 0.15);
 }
 
-/* Stat mini card for mobile */
+/* Stat mini card for mobile — Plastilina */
 .ns-stat-mini {
   background: #ffffff;
   border: 1px solid var(--ns-border);
@@ -702,25 +818,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--ns-shadow-sm);
-  min-height: 90px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-plastilina-card);
+  min-height: 96px;
 }
 
 .ns-stat-mini:hover {
   border-color: var(--ns-border-hover);
-  box-shadow: var(--ns-shadow-md);
-  transform: translateY(-2px);
-}
-
-/* Hide bottom nav on desktop */
-@media (min-width: 768px) {
-  .ns-bottom-nav {
-    display: none;
-  }
-  .ns-has-bottom-nav {
-    padding-bottom: 0;
-  }
+  box-shadow: var(--ns-shadow-xl);
+  transform: translateY(-3px);
 }
 
 /* Mobile-specific enhancements */
@@ -730,10 +836,10 @@ body {
 
 @media (max-width: 767px) {
   .ns-mobile-content-area {
-    min-height: calc(100vh - 56px - 76px);
+    min-height: calc(100vh - 56px - 80px);
   }
   .ns-fab-mobile {
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 12px) !important;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 12px) !important;
   }
 }
 
@@ -756,18 +862,18 @@ body {
 
 /* Glassy navbar */
 .ns-nav-dark {
-  background: rgba(250, 250, 252, 0.85);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  background: rgba(245, 243, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--ns-border);
 }
 
-/* Bento Cards */
+/* Bento Cards — Plastilina */
 .nh-card {
   background: #FFFFFF;
   border: 1px solid var(--ns-border);
   border-radius: 24px;
-  box-shadow: var(--ns-shadow-sm);
+  box-shadow: var(--ns-plastilina-card);
 }
 
 /* Hero */
@@ -784,8 +890,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .nh-logo-letter {
@@ -848,33 +955,53 @@ body {
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .nh-icon-btn svg { width: 18px; height: 18px; }
 .nh-icon-btn:active { transform: scale(0.9); }
-.nh-icon-btn:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.nh-icon-btn:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
-/* Metric tiles — Bento */
+/* Metric tiles — Bento Plastilina */
 .nh-metric {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  padding: 16px 14px;
-  border-radius: 20px;
+  padding: 18px 16px;
+  border-radius: 22px;
   background: #FFFFFF;
   border: 1px solid var(--ns-border);
   text-align: left;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 96px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 100px;
   justify-content: space-between;
-  box-shadow: var(--ns-shadow-sm);
+  box-shadow: var(--ns-plastilina-card);
+  position: relative;
+  overflow: hidden;
 }
+
+.nh-metric::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ns-gradient-1);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
 .nh-metric:active { transform: scale(0.96); }
-.nh-metric:hover { border-color: var(--ns-border-hover); box-shadow: var(--ns-shadow-md); }
+.nh-metric:hover { 
+  border-color: var(--ns-border-hover); 
+  box-shadow: var(--ns-shadow-xl); 
+  transform: translateY(-3px);
+}
+.nh-metric:hover::before { opacity: 1; }
 
 .nh-metric-label {
   font-size: 9px;
@@ -970,10 +1097,11 @@ body {
   background: rgba(52, 211, 153, 0.1);
   border: 1px solid rgba(52, 211, 153, 0.2);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.1);
 }
 .nh-wa-btn--sm { width: 36px; height: 36px; border-radius: 10px; }
 .nh-wa-btn:active { transform: scale(0.9); }
-.nh-wa-btn:hover { background: #25d366; color: #fff; }
+.nh-wa-btn:hover { background: #25d366; color: #fff; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
 .nh-wa-btn.is-sent { background: #059669; color: #fff; border-color: transparent; }
 
 /* Rows */
@@ -993,14 +1121,15 @@ body {
 
 /* Empty state icon */
 .nh-empty-ic {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--ns-text-muted);
   background: var(--ns-accent-bg);
+  box-shadow: var(--ns-shadow-inner);
 }
 
 .nh-mini-cta {
@@ -1013,6 +1142,7 @@ body {
   text-transform: uppercase;
   color: #fff;
   background: var(--ns-primary);
+  box-shadow: var(--ns-plastilina-btn);
 }
 
 /* Available slots */
@@ -1031,15 +1161,15 @@ body {
   align-items: flex-start;
   gap: 3px;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--ns-accent-bg);
   border: 1.5px solid var(--ns-border);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 52px;
-  box-shadow: none;
+  min-height: 54px;
+  box-shadow: var(--ns-shadow-sm);
 }
 .nh-slot:active { transform: scale(0.94); }
-.nh-slot:hover { background: var(--ns-primary-bg); border-color: var(--ns-border-hover); }
+.nh-slot:hover { background: var(--ns-primary-bg); border-color: var(--ns-border-hover); box-shadow: var(--ns-shadow-md); }
 .nh-slot-time {
   font-size: 15px;
   font-weight: 800;
@@ -1058,7 +1188,7 @@ body {
   width: 100%;
   text-align: center;
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 11px;
   font-weight: 600;
   color: var(--ns-text-muted);
@@ -1068,31 +1198,52 @@ body {
 }
 .nh-notice:hover:not(.nh-notice--static) { color: var(--ns-text); border-color: var(--ns-border-hover); }
 
-/* Quick actions — Bento */
+/* Quick actions — Bento Plastilina */
 .nh-action {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 14px 8px;
-  border-radius: 16px;
+  padding: 16px 8px;
+  border-radius: 18px;
   background: #FFFFFF;
   border: 1px solid var(--ns-border);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--ns-shadow-sm);
-  min-height: 76px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-plastilina-card);
+  min-height: 80px;
+  position: relative;
+  overflow: hidden;
 }
-.nh-action:active { transform: scale(0.93); }
-.nh-action:hover { border-color: var(--ns-border-hover); box-shadow: var(--ns-shadow-md); }
+.nh-action::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  pointer-events: none;
+}
+.nh-action:active { transform: scale(0.93); box-shadow: var(--ns-plastilina-active); }
+.nh-action:hover { border-color: var(--ns-border-hover); box-shadow: var(--ns-shadow-xl); transform: translateY(-3px); }
 .nh-action-ic {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   background: var(--ns-primary);
+  box-shadow: var(--ns-plastilina-btn);
+  position: relative;
+}
+.nh-action-ic::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
 }
 .nh-action-label {
   font-size: 9px;
@@ -1135,7 +1286,7 @@ body {
 
 
 /* ============================================================
-   LANDING PAGE — PRO SaaS STYLES
+   LANDING PAGE — PRO SaaS STYLES (no tocar)
    ============================================================ */
 
 .ns-hero-gradient {
@@ -1230,7 +1381,7 @@ body {
 .ns-login-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(145deg, #FAFAFC 0%, #F3EEFF 30%, #EDE9FE 60%, #FAFAFC 100%);
+  background: linear-gradient(145deg, #F5F3FF 0%, #EDE9FE 30%, #E4DAFF 60%, #F5F3FF 100%);
   background-size: 300% 300%;
   animation: ns-gradient-shift 12s ease infinite;
 }
@@ -1261,23 +1412,24 @@ body {
   animation-delay: 6s;
 }
 
-/* Glass card — Light */
+/* Glass card — Light Plastilina */
 .ns-login-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(32px) saturate(160%);
-  -webkit-backdrop-filter: blur(32px) saturate(160%);
-  border: 1px solid rgba(232, 222, 255, 0.6);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(232, 222, 255, 0.7);
   border-radius: 2rem;
   padding: 2rem 1.75rem;
   box-shadow:
-    0 24px 80px rgba(91, 61, 245, 0.08),
-    0 4px 20px rgba(30, 27, 75, 0.04);
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 24px 80px rgba(91, 61, 245, 0.10),
+    0 4px 20px rgba(30, 27, 75, 0.06);
   position: relative;
   overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
 }
 .ns-login-card:hover {
-  box-shadow: 0 32px 100px rgba(91, 61, 245, 0.1), 0 4px 24px rgba(30, 27, 75, 0.06);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 32px 100px rgba(91, 61, 245, 0.12), 0 4px 24px rgba(30, 27, 75, 0.08);
 }
 @media (min-width: 768px) {
   .ns-login-card {
@@ -1297,12 +1449,8 @@ body {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #5B3DF5, #8B7CF6);
-  box-shadow: 0 8px 24px rgba(91, 61, 245, 0.25);
+  box-shadow: var(--ns-plastilina-btn);
   animation: ns-float 5s ease-in-out infinite;
-}
-@keyframes ns-login-logo-glow {
-  0%, 100% { box-shadow: 0 8px 24px rgba(91, 61, 245, 0.2); }
-  50% { box-shadow: 0 8px 40px rgba(91, 61, 245, 0.35); }
 }
 @media (min-width: 768px) {
   .ns-login-logo {
@@ -1329,10 +1477,11 @@ body {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   backdrop-filter: blur(8px);
   -webkit-tap-highlight-color: transparent;
-  min-height: 44px;
+  min-height: 46px;
+  box-shadow: var(--ns-shadow-sm);
 }
 .ns-login-social-btn:hover {
-  background: rgba(232, 222, 255, 0.6);
+  background: rgba(232, 222, 255, 0.7);
   border-color: var(--ns-border-hover);
   transform: translateY(-1px);
   box-shadow: var(--ns-shadow-md);
@@ -1366,6 +1515,7 @@ body {
   color: var(--ns-text);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 46px;
+  box-shadow: var(--ns-shadow-inner);
 }
 .ns-login-input::placeholder {
   color: var(--ns-text-muted);
@@ -1373,7 +1523,7 @@ body {
 .ns-login-input:focus {
   border-color: var(--ns-primary);
   background: #FFFFFF;
-  box-shadow: 0 0 0 4px var(--ns-primary-bg);
+  box-shadow: 0 0 0 4px rgba(91, 61, 245, 0.12), var(--ns-shadow-inner);
 }
 @media (min-width: 768px) {
   .ns-login-input {
@@ -1401,12 +1551,20 @@ body {
   overflow: hidden;
   margin-top: 1.25rem;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 8px 24px rgba(91, 61, 245, 0.25);
+  box-shadow: var(--ns-plastilina-btn);
   animation: ns-gradient-shift 4s ease infinite;
   min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.ns-login-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  pointer-events: none;
 }
 .ns-login-submit-btn::after {
   content: '';
@@ -1418,7 +1576,7 @@ body {
 }
 .ns-login-submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(91, 61, 245, 0.3);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 -2px 0 rgba(0,0,0,0.2) inset, 0 16px 40px rgba(91, 61, 245, 0.4);
 }
 .ns-login-submit-btn:active { transform: scale(0.97); }
 .ns-login-submit-btn:disabled {
@@ -1436,55 +1594,74 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FLOATING ASSISTANT — Bento Design
+   FLOATING ASSISTANT NONI — Plastilina 3D Design
    ═══════════════════════════════════════════════════════════════ */
 
 .ns-assistant-fab {
   position: fixed;
-  bottom: 88px;
+  bottom: 92px;
   right: 16px;
   z-index: 90;
-  width: 56px;
-  height: 56px;
-  border-radius: 1.25rem;
-  background: white;
-  border: 1.5px solid var(--ns-border);
-  box-shadow: var(--ns-shadow-md), 0 0 0 1px rgba(255,255,255,0.8) inset;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #5B3DF5 0%, #7B5CF8 100%);
+  border: none;
+  box-shadow: var(--ns-plastilina-btn);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
-.ns-assistant-fab:active { transform: scale(0.9); }
-.ns-assistant-fab:hover { box-shadow: var(--ns-shadow-lg); }
+
+.ns-assistant-fab::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.ns-assistant-fab:active { 
+  transform: scale(0.88); 
+  box-shadow: var(--ns-plastilina-active);
+}
+.ns-assistant-fab:hover { 
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 -2px 0 rgba(0,0,0,0.2) inset, 0 16px 40px rgba(91, 61, 245, 0.5);
+}
+
 @media (min-width: 768px) {
   .ns-assistant-fab {
-    bottom: 24px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    border-radius: 1.25rem;
+    bottom: 28px;
+    right: 28px;
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
   }
 }
 
 .ns-assistant-pulse {
   position: absolute;
-  inset: -4px;
-  border-radius: 1.4rem;
-  border: 2px solid var(--ns-primary-bg-hover);
+  inset: -5px;
+  border-radius: 24px;
+  border: 2px solid rgba(91, 61, 245, 0.4);
   animation: ns-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .ns-assistant-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  background: var(--ns-primary);
+  top: -5px;
+  right: -5px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #EF4444;
   color: white;
   font-size: 9px;
   font-weight: 900;
@@ -1492,25 +1669,26 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  box-shadow: 0 2px 8px rgba(91, 61, 245, 0.3);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
   border: 2px solid white;
+  animation: ns-spring-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .ns-assistant-badge--done {
   background: var(--ns-success);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
 .ns-assistant-reshow {
   position: fixed;
-  bottom: 88px;
+  bottom: 92px;
   right: 16px;
   z-index: 90;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   background: white;
   border: 1px solid var(--ns-border);
-  box-shadow: var(--ns-shadow-sm);
+  box-shadow: var(--ns-plastilina-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1521,14 +1699,17 @@ body {
 .ns-assistant-reshow:hover {
   color: var(--ns-primary);
   border-color: var(--ns-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--ns-shadow-md);
 }
 @media (min-width: 768px) {
   .ns-assistant-reshow {
-    bottom: 24px;
-    right: 24px;
+    bottom: 28px;
+    right: 28px;
   }
 }
 
+/* Panel — Plastilina Bottom Sheet */
 .ns-assistant-panel {
   position: fixed;
   z-index: 91;
@@ -1537,29 +1718,53 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  border-radius: 1.5rem 1.5rem 0 0;
-  max-height: 85vh;
-  box-shadow: 0 -4px 30px rgba(30, 27, 75, 0.08);
+  border-radius: 28px 28px 0 0;
+  max-height: 82vh;
+  box-shadow: 
+    0 -8px 40px rgba(91, 61, 245, 0.12),
+    0 -2px 0 rgba(91, 61, 245, 0.06);
   border: 1px solid var(--ns-border);
   border-bottom: none;
+  display: flex;
+  flex-direction: column;
 }
+
 @media (min-width: 768px) {
   .ns-assistant-panel {
-    bottom: 24px;
-    right: 24px;
+    bottom: 28px;
+    right: 28px;
     left: auto;
-    width: 360px;
-    max-height: 480px;
-    border-radius: 1.5rem;
+    width: 380px;
+    max-height: 520px;
+    border-radius: 28px;
     border-bottom: 1px solid var(--ns-border);
-    box-shadow: var(--ns-shadow-lg);
+    box-shadow: var(--ns-shadow-xl);
+  }
+}
+
+/* Drag handle for mobile */
+.ns-assistant-panel::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: var(--ns-border);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .ns-assistant-panel::before {
+    display: none;
   }
 }
 
 .ns-assistant-body {
   padding: 14px 18px;
   overflow-y: auto;
-  max-height: 40vh;
+  max-height: 38vh;
+  flex: 1;
 }
 @media (min-width: 768px) {
   .ns-assistant-body { max-height: 220px; }
@@ -1583,26 +1788,38 @@ body {
 
 .ns-assistant-cta {
   width: 100%;
-  padding: 11px 14px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
   background: var(--ns-primary);
   color: white;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 4px 12px rgba(91, 61, 245, 0.2);
+  box-shadow: var(--ns-plastilina-btn);
+  position: relative;
+  overflow: hidden;
+}
+.ns-assistant-cta::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  pointer-events: none;
 }
 .ns-assistant-cta:active { transform: scale(0.96); }
+.ns-assistant-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(91, 61, 245, 0.4); }
 
 .ns-assistant-tip {
   padding: 10px 18px;
   border-top: 1px solid var(--ns-border);
   background: var(--ns-accent-bg);
+  flex-shrink: 0;
 }
 
 .ns-assistant-footer {
@@ -1611,6 +1828,7 @@ body {
   padding: 12px 18px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--ns-border);
+  flex-shrink: 0;
 }
 .ns-assistant-footer-btn {
   flex: 1;
@@ -1618,8 +1836,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 9px 12px;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
   font-size: 10px;
   font-weight: 700;
   background: var(--ns-accent);
@@ -1628,14 +1846,21 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--ns-shadow-sm);
 }
 .ns-assistant-footer-btn:active { transform: scale(0.96); }
-.ns-assistant-footer-btn:hover { background: var(--ns-primary-bg-hover); }
+.ns-assistant-footer-btn:hover { background: var(--ns-primary-bg-hover); color: var(--ns-primary); }
 .ns-assistant-footer-btn--muted {
   background: transparent;
   color: var(--ns-text-muted);
+  box-shadow: none;
 }
 .ns-assistant-footer-btn--muted:hover { background: var(--ns-accent-bg); }
+
+/* Typing dots animation */
+.ns-typing-dot {
+  animation: ns-typing-dot 1.4s ease-in-out infinite;
+}
 
 /* Copy toast */
 .ns-copy-toast {
@@ -1646,38 +1871,330 @@ body {
   z-index: 200;
   background: white;
   border-radius: 1rem;
-  box-shadow: var(--ns-shadow-lg);
+  box-shadow: var(--ns-shadow-xl);
   border: 1px solid var(--ns-border);
   padding: 12px 20px;
   display: flex;
   align-items: center;
   gap: 10px;
-  animation: ns-slide-in-top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes ns-slide-in-top {
-  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  animation: ns-fade-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Export buttons */
+/* Export buttons — Plastilina */
 .ns-export-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: 10px;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 12px;
   background: var(--ns-accent-bg);
   border: 1px solid var(--ns-border);
   font-size: 10px;
   font-weight: 700;
   color: var(--ns-text-secondary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-shadow-sm);
 }
-.ns-export-btn:hover { background: var(--ns-primary-bg); color: var(--ns-primary); }
+.ns-export-btn:hover { 
+  background: var(--ns-primary-bg); 
+  color: var(--ns-primary); 
+  border-color: var(--ns-border-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ns-shadow-md);
+}
 .ns-export-btn:active { transform: scale(0.96); }
 
 /* Mobile content area */
 .ns-mobile-content-area {
   min-height: 50vh;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ROBOT ANIMATIONS — Noni Avatar
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-robot-glow {
+  animation: ns-pulse-soft 2s ease-in-out infinite;
+}
+
+.ns-robot-antenna {
+  animation: ns-pulse-soft 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BENTO SECTION HEADERS — Plastilina 3D Style
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-section-header {
+  background: linear-gradient(135deg, var(--ns-primary-bg) 0%, #F0EBFF 100%);
+  border: 1px solid var(--ns-border);
+  border-radius: var(--ns-radius-2xl);
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--ns-plastilina-card);
+}
+
+@media (max-width: 767px) {
+  .ns-section-header {
+    padding: 20px 22px;
+    border-radius: var(--ns-radius-xl);
+  }
+}
+
+.ns-section-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BENTO PERIOD SELECTOR — Plastilina Pill
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-period-selector {
+  display: flex;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid var(--ns-border);
+  border-radius: 16px;
+  padding: 4px;
+  gap: 2px;
+  box-shadow: var(--ns-shadow-inner);
+}
+
+.ns-period-btn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--ns-text-muted);
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ns-period-btn.active {
+  background: white;
+  color: var(--ns-text);
+  box-shadow: var(--ns-plastilina-card);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BENTO CHART BARS — Plastilina 3D
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-bar-chart-bar {
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, #8B7CF6 0%, #5B3DF5 100%);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 -2px 8px rgba(91, 61, 245, 0.2);
+  min-height: 4px;
+}
+
+.ns-bar-chart-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+}
+
+.ns-bar-chart-bar:hover {
+  filter: brightness(1.1);
+  transform: scaleY(1.02);
+  transform-origin: bottom;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HORARIOS — Plastilina Toggle Style
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-day-toggle {
+  position: relative;
+  width: 56px;
+  height: 30px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  flex-shrink: 0;
+}
+
+.ns-day-toggle.off {
+  background: var(--ns-border);
+  box-shadow: var(--ns-shadow-inner);
+}
+
+.ns-day-toggle.on {
+  background: var(--ns-primary);
+  box-shadow: 0 0 0 3px rgba(91, 61, 245, 0.2), 0 4px 12px rgba(91, 61, 245, 0.3);
+}
+
+.ns-day-toggle-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ns-day-toggle.on .ns-day-toggle-thumb {
+  transform: translateX(26px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FLYER CREATOR — Plastilina Style
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-template-card {
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 2px solid transparent;
+  box-shadow: var(--ns-shadow-sm);
+}
+
+.ns-template-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--ns-shadow-lg);
+}
+
+.ns-template-card.selected {
+  border-color: var(--ns-primary);
+  box-shadow: 0 0 0 3px rgba(91, 61, 245, 0.15), var(--ns-shadow-md);
+}
+
+.ns-template-card:active {
+  transform: scale(0.96);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CLIENTES — Plastilina Card
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-cliente-card {
+  background: white;
+  border: 1px solid var(--ns-border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-plastilina-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.ns-cliente-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+}
+
+.ns-cliente-card:hover {
+  border-color: var(--ns-border-hover);
+  box-shadow: var(--ns-shadow-xl);
+  transform: translateY(-2px);
+}
+
+.ns-cliente-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--ns-plastilina-active);
+}
+
+.ns-cliente-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.ns-cliente-avatar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REPORTES — Plastilina KPI Cards
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-kpi-card {
+  background: white;
+  border: 1px solid var(--ns-border);
+  border-radius: 24px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--ns-plastilina-card);
+}
+
+.ns-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.ns-kpi-card:hover {
+  border-color: var(--ns-border-hover);
+  box-shadow: var(--ns-shadow-xl);
+  transform: translateY(-3px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING BAR ANIMATION
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MISC UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+.ns-gradient-deep {
+  background: var(--ns-gradient-deep);
+}
+
+.ns-pulse-soft {
+  animation: ns-pulse-soft 2s ease-in-out infinite;
+}
+
+/* Smooth tab content transitions */
+.ns-tab-content-enter {
+  animation: ns-tab-switch 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

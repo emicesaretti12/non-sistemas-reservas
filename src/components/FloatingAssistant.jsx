@@ -4,133 +4,112 @@ import { IconRobot, IconCheckCircle, IconBolt, IconChart, IconCalendar, IconPale
 const ASSISTANT_KEY = 'ns_assistant_state_v2'
 const ROBOT_NAME = 'Noni'
 
-// ── Time-of-day greeting ────────────────────────────────────────────────────
 function getGreeting(nombre) {
   const h = new Date().getHours()
   const saludo = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
-  return nombre ? `${saludo}, ${nombre}` : saludo
+  return nombre ? `${saludo}, ${nombre} 👋` : `${saludo} 👋`
 }
 
 // ── Typing Indicator ────────────────────────────────────────────────────────
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-1 px-3 py-2">
+    <div className="flex items-center gap-1.5 px-4 py-3">
       {[0, 1, 2].map(i => (
         <div
           key={i}
-          className="w-1.5 h-1.5 bg-sky-400 rounded-full ns-typing-dot"
-          style={{ animationDelay: `${i * 0.15}s` }}
+          className="w-2 h-2 rounded-full ns-typing-dot"
+          style={{ background: 'var(--ns-primary)', animationDelay: `${i * 0.15}s` }}
         />
       ))}
     </div>
   )
 }
 
-// ── Robot SVG Avatar ────────────────────────────────────────────────────────
+// ── Robot Avatar — Plastilina 3D ────────────────────────────────────────────
 function RobotAvatar({ size = 40, speaking = false, mood = 'happy', blinking = false }) {
-  const getEyeRy = () => {
-    if (blinking) return 0.3
-    if (mood === 'wink') return 0.5
-    return 2.5
-  }
+  const eyeRy = blinking ? 0.3 : mood === 'wink' ? 0.5 : 2.5
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Glow behind head */}
-      <circle cx="24" cy="25" r="18" fill="#0ea5e9" opacity="0.08" className={speaking ? 'ns-robot-glow' : ''} />
+      {/* Glow */}
+      <circle cx="24" cy="25" r="18" fill="#5B3DF5" opacity={speaking ? 0.15 : 0.06} className={speaking ? 'ns-robot-glow' : ''} />
       {/* Antenna */}
-      <line x1="24" y1="4" x2="24" y2="12" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="24" cy="3" r="2.5" fill="#38bdf8" className="ns-robot-antenna" />
+      <line x1="24" y1="4" x2="24" y2="12" stroke="#8B7CF6" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="24" cy="3" r="2.5" fill="#5B3DF5" className="ns-robot-antenna" />
       {/* Head */}
-      <rect x="8" y="12" width="32" height="26" rx="8" fill="url(#robotGrad)" />
-      <rect x="8" y="12" width="32" height="26" rx="8" stroke="#0ea5e9" strokeWidth="1.5" fill="none" />
-      {/* Visor / Face plate */}
-      <rect x="12" y="17" width="24" height="14" rx="5" fill="#1e1e2e" opacity="0.9" />
+      <rect x="8" y="12" width="32" height="26" rx="8" fill="url(#robotGradBrand)" />
+      <rect x="8" y="12" width="32" height="26" rx="8" stroke="#8B7CF6" strokeWidth="1.5" fill="none" />
+      {/* Visor */}
+      <rect x="12" y="17" width="24" height="14" rx="5" fill="#1A1630" opacity="0.9" />
       {/* Eye glow */}
-      <circle cx="19" cy="24" r="4" fill="#00cec9" opacity="0.15" />
-      <circle cx="29" cy="24" r="4" fill="#00cec9" opacity="0.15" />
+      <circle cx="19" cy="24" r="4" fill="#A78BFA" opacity="0.2" />
+      <circle cx="29" cy="24" r="4" fill="#A78BFA" opacity="0.2" />
       {/* Eyes */}
-      <ellipse cx="19" cy="24" rx="2.5" ry={getEyeRy()} fill="#00cec9" style={{ transition: 'ry 0.1s' }} />
-      <ellipse cx="29" cy="24" rx="2.5" ry={getEyeRy()} fill="#00cec9" style={{ transition: 'ry 0.1s' }} />
+      <ellipse cx="19" cy="24" rx="2.5" ry={eyeRy} fill="#A78BFA" style={{ transition: 'ry 0.1s' }} />
+      <ellipse cx="29" cy="24" rx="2.5" ry={eyeRy} fill="#A78BFA" style={{ transition: 'ry 0.1s' }} />
       {/* Mouth */}
       <path
-        d={speaking ? "M20 28 Q24 31 28 28" : mood === 'happy' ? "M20 28 Q24 30.5 28 28" : "M20 28 Q24 29 28 28"}
-        stroke="#00cec9" strokeWidth="1.5" strokeLinecap="round" fill="none"
+        d={speaking ? 'M20 28 Q24 31 28 28' : mood === 'happy' ? 'M20 28 Q24 30.5 28 28' : 'M20 28 Q24 29 28 28'}
+        stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round" fill="none"
       />
       {/* Ears */}
-      <rect x="4" y="20" width="5" height="8" rx="2" fill="#0ea5e9" />
-      <rect x="39" y="20" width="5" height="8" rx="2" fill="#0ea5e9" />
+      <rect x="4" y="20" width="5" height="8" rx="2" fill="#7C5CF8" />
+      <rect x="39" y="20" width="5" height="8" rx="2" fill="#7C5CF8" />
       {/* Body hint */}
-      <rect x="16" y="38" width="16" height="6" rx="3" fill="#0ea5e9" opacity="0.5" />
+      <rect x="16" y="38" width="16" height="6" rx="3" fill="#5B3DF5" opacity="0.5" />
       <defs>
-        <linearGradient id="robotGrad" x1="8" y1="12" x2="40" y2="38">
-          <stop offset="0%" stopColor="#e0f2fe" />
-          <stop offset="100%" stopColor="#7dd3fc" />
+        <linearGradient id="robotGradBrand" x1="8" y1="12" x2="40" y2="38">
+          <stop offset="0%" stopColor="#E8DEFF" />
+          <stop offset="100%" stopColor="#C4B5FD" />
         </linearGradient>
       </defs>
     </svg>
   )
 }
 
-// ── Contextual Messages Config ──────────────────────────────────────────────
+// ── Contextual Messages ─────────────────────────────────────────────────────
 const getContextualMessages = (tab, setupData, vocab, smartAlerts = {}) => {
   const messages = []
 
-  // Global urgent messages based on setup state
   if (!setupData.hasServicios && !setupData.hasEmpleados && !setupData.hasHorarios) {
     messages.push({
-      id: 'welcome',
-      priority: 1,
-      emoji: 'bolt',
+      id: 'welcome', priority: 1, emoji: 'bolt', badge: 'Empezar',
       title: '¡Hola! Soy Noni, tu asistente',
-      text: 'Te voy a guiar paso a paso para configurar tu sistema de reservas. Hay 3 cosas esenciales que necesitás configurar: servicios, equipo y horarios. ¡Arranquemos!',
+      text: 'Te guío paso a paso para configurar tu sistema de reservas. Hay 3 cosas esenciales: servicios, equipo y horarios.',
       cta: { label: 'Empezar →', tab: 'servicios' },
-      badge: 'Empezar',
     })
   }
 
   if (setupData.hasServicios && !setupData.hasEmpleados) {
     messages.push({
-      id: 'need-staff',
-      priority: 2,
-      emoji: 'bolt',
+      id: 'need-staff', priority: 2, emoji: 'bolt', badge: 'Siguiente paso',
       title: 'Bien, ya tenés servicios',
-      text: 'Ahora necesitás agregar al menos un profesional. Los clientes van a poder elegir con quién reservar.',
+      text: 'Ahora agregá al menos un profesional. Los clientes podrán elegir con quién reservar.',
       cta: { label: 'Agregar equipo →', tab: 'equipo' },
-      badge: 'Siguiente paso',
     })
   }
 
   if (setupData.hasServicios && setupData.hasEmpleados && !setupData.hasHorarios) {
     messages.push({
-      id: 'need-hours',
-      priority: 2,
-      emoji: 'calendar',
+      id: 'need-hours', priority: 2, emoji: 'calendar', badge: 'Último paso esencial',
       title: 'Casi listo, faltan tus horarios',
-      text: 'Definí qué días y en qué horarios atendés. Sin horarios configurados, los clientes no pueden ver turnos disponibles.',
+      text: 'Definí qué días y en qué horarios atendés. Sin horarios, los clientes no pueden ver turnos disponibles.',
       cta: { label: 'Configurar horarios →', tab: 'horarios' },
-      badge: 'Último paso esencial',
     })
   }
 
   if (setupData.hasServicios && setupData.hasEmpleados && setupData.hasHorarios && !setupData.hasShared) {
     messages.push({
-      id: 'share-link',
-      priority: 2,
-      emoji: 'rocket',
+      id: 'share-link', priority: 2, emoji: 'rocket', badge: '¡Listo!',
       title: '¡Tu sistema está listo!',
-      text: 'Ya podés compartir tu link de reservas. Envialo por WhatsApp a tus clientes para que empiecen a reservar solos, 24/7.',
+      text: 'Ya podés compartir tu link de reservas. Envialo por WhatsApp a tus clientes para que reserven solos, 24/7.',
       cta: { label: 'Copiar mi link', action: 'copy-link' },
-      badge: '¡Listo!',
     })
   }
 
-  // ═══ SMART ALERTS — real-time contextual intelligence ═══
   if (smartAlerts.turnosHoy > 0 && tab === 'inicio') {
     const ingFmt = smartAlerts.ingresosHoy?.toLocaleString() || '0'
     messages.push({
-      id: 'smart-today',
-      priority: 3,
-      emoji: 'chart',
+      id: 'smart-today', priority: 3, emoji: 'chart',
       title: `Hoy tenés ${smartAlerts.turnosHoy} ${smartAlerts.turnosHoy === 1 ? vocab?.turno || 'turno' : vocab?.turnos || 'turnos'}`,
       text: `Ingresos esperados: $${ingFmt}. ${smartAlerts.ocupacion > 70 ? '¡Gran ocupación!' : smartAlerts.ocupacion > 40 ? 'Buena actividad.' : 'Hay margen para más reservas.'}`,
     })
@@ -141,11 +120,9 @@ const getContextualMessages = (tab, setupData, vocab, smartAlerts = {}) => {
     const diffMin = Math.round((proximo - new Date()) / 60000)
     if (diffMin > 0 && diffMin < 120) {
       messages.push({
-        id: 'smart-proxima',
-        priority: 2,
-        emoji: 'calendar',
-        title: `${smartAlerts.proximaCita.cliente_nombre} llega ${diffMin < 60 ? `en ${diffMin} min` : `en ${Math.floor(diffMin/60)}h`}`,
-        text: `${smartAlerts.proximaCita.servicios?.nombre || vocab?.servicio || 'Turno'}. ¿Querés enviarle un recordatorio por WhatsApp?`,
+        id: 'smart-proxima', priority: 2, emoji: 'calendar',
+        title: `${smartAlerts.proximaCita.cliente_nombre} llega ${diffMin < 60 ? `en ${diffMin} min` : `en ${Math.floor(diffMin / 60)}h`}`,
+        text: `${smartAlerts.proximaCita.servicios?.nombre || vocab?.servicio || 'Turno'}. ¿Querés enviarle un recordatorio?`,
         cta: { label: 'Ver agenda →', tab: 'agenda' },
       })
     }
@@ -153,146 +130,56 @@ const getContextualMessages = (tab, setupData, vocab, smartAlerts = {}) => {
 
   if (smartAlerts.clientesVIP > 0 && tab === 'clientes') {
     messages.push({
-      id: 'smart-vip',
-      priority: 4,
-      emoji: 'rocket',
+      id: 'smart-vip', priority: 4, emoji: 'rocket',
       title: `Tenés ${smartAlerts.clientesVIP} ${smartAlerts.clientesVIP === 1 ? 'cliente VIP' : 'clientes VIP'}`,
-      text: 'Son los que más vuelven. Considerá ofrecerles descuentos o beneficios exclusivos para fidelizarlos aún más.',
-    })
-  }
-
-  if (smartAlerts.stockBajo > 0) {
-    messages.push({
-      id: 'smart-stock',
-      priority: 2,
-      emoji: 'bolt',
-      title: `Alerta: ${smartAlerts.stockBajo} producto${smartAlerts.stockBajo > 1 ? 's' : ''} con stock bajo`,
-      text: 'Revisá tu inventario para reponer antes de que se agote. Los productos con stock bajo pueden afectar la atención.',
-      cta: { label: 'Ver inventario →', tab: 'inventario' },
+      text: 'Son los que más vuelven. Considerá ofrecerles descuentos o beneficios exclusivos.',
     })
   }
 
   if (smartAlerts.ingresosMes > 0 && tab === 'reportes') {
     messages.push({
-      id: 'smart-ingresos',
-      priority: 4,
-      emoji: 'chart',
+      id: 'smart-ingresos', priority: 4, emoji: 'chart',
       title: `Este mes: $${smartAlerts.ingresosMes?.toLocaleString()}`,
-      text: `Con ${smartAlerts.turnosSemana} ${vocab?.turnos || 'turnos'} esta semana y ${smartAlerts.totalClientes} clientes registrados. ¡Seguí así!`,
+      text: `Con ${smartAlerts.turnosSemana} ${vocab?.turnos || 'turnos'} esta semana y ${smartAlerts.totalClientes} clientes registrados.`,
     })
   }
 
-  // Tab-specific educational messages
   switch (tab) {
     case 'inicio':
       if (setupData.hasServicios && setupData.hasEmpleados && setupData.hasHorarios && !smartAlerts.turnosHoy) {
-        messages.push({
-          id: 'monitor-intro',
-          priority: 5,
-          emoji: 'chart',
-          title: 'Tu panel de control',
-          text: 'Acá ves el resumen de tu negocio en tiempo real. Se actualiza con cada reserva nueva.',
-        })
+        messages.push({ id: 'monitor-intro', priority: 5, emoji: 'chart', title: 'Tu panel de control', text: 'Acá ves el resumen de tu negocio en tiempo real. Se actualiza con cada reserva nueva.' })
       }
       break
-
     case 'agenda':
-      messages.push({
-        id: 'agenda-help',
-        priority: 4,
-        emoji: 'calendar',
-        title: 'Gestión de turnos',
-        text: setupData.hasTurnos
-          ? 'Desde acá podés ver, confirmar o cancelar turnos. También podés crear turnos manualmente si un cliente te llama por teléfono.'
-          : 'Cuando tus clientes reserven desde tu link, los turnos aparecen acá automáticamente. También podés crear turnos a mano con el botón "+".',
-        cta: setupData.hasTurnos ? undefined : { label: 'Crear turno manual', action: 'none' },
-      })
+      messages.push({ id: 'agenda-help', priority: 4, emoji: 'calendar', title: 'Gestión de turnos', text: setupData.hasTurnos ? 'Desde acá podés ver, confirmar o cancelar turnos. También podés crear turnos manualmente.' : 'Cuando tus clientes reserven desde tu link, los turnos aparecen acá automáticamente.' })
       break
-
     case 'servicios':
-      messages.push({
-        id: 'services-help',
-        priority: 3,
-        emoji: 'bolt',
-        title: setupData.hasServicios ? 'Tus servicios' : '¿Qué es un servicio?',
-        text: setupData.hasServicios
-          ? 'Podés editar precios, duración y nombre en cualquier momento. Los cambios se reflejan al instante en tu app pública.'
-          : 'Un servicio es lo que ofrecés: un corte, una consulta, una clase, un turno... Cada servicio tiene nombre, precio y cuánto dura. Tus clientes lo ven al reservar.',
-      })
+      messages.push({ id: 'services-help', priority: 3, emoji: 'bolt', title: setupData.hasServicios ? 'Tus servicios' : '¿Qué es un servicio?', text: setupData.hasServicios ? 'Podés editar precios, duración y nombre en cualquier momento.' : 'Un servicio es lo que ofrecés: corte, consulta, clase... Cada uno tiene nombre, precio y duración.' })
       break
-
     case 'equipo':
-      messages.push({
-        id: 'staff-help',
-        priority: 3,
-        emoji: 'robot',
-        title: setupData.hasEmpleados ? 'Tu equipo' : '¿Para qué es el equipo?',
-        text: setupData.hasEmpleados
-          ? 'Podés agregar, editar o desactivar profesionales. Si trabajás solo, con un solo perfil alcanza.'
-          : 'Acá cargás a las personas que atienden. Si sos vos solo, ponete a vos mismo. Los clientes van a elegir con quién quieren reservar.',
-      })
+      messages.push({ id: 'staff-help', priority: 3, emoji: 'robot', title: setupData.hasEmpleados ? 'Tu equipo' : '¿Para qué es el equipo?', text: setupData.hasEmpleados ? 'Podés agregar, editar o desactivar profesionales.' : 'Acá cargás a las personas que atienden. Si sos vos solo, ponete a vos mismo.' })
       break
-
     case 'horarios':
-      messages.push({
-        id: 'hours-help',
-        priority: 3,
-        emoji: 'calendar',
-        title: setupData.hasHorarios ? 'Horarios configurados' : '¿Cómo funcionan los horarios?',
-        text: setupData.hasHorarios
-          ? 'Podés modificar días y horarios cuando quieras. Si tenés que cerrar un día especial, simplemente desactivá ese día.'
-          : 'Elegí qué días de la semana abrís y en qué rango horario (ej: Lunes a Viernes de 9:00 a 18:00). El sistema calcula automáticamente los turnos disponibles.',
-      })
+      messages.push({ id: 'hours-help', priority: 3, emoji: 'calendar', title: setupData.hasHorarios ? 'Horarios configurados' : '¿Cómo funcionan los horarios?', text: setupData.hasHorarios ? 'Podés modificar días y horarios cuando quieras.' : 'Elegí qué días abrís y en qué rango horario. El sistema calcula los turnos disponibles automáticamente.' })
       break
-
-    case 'inventario':
-      messages.push({
-        id: 'inventory-help',
-        priority: 5,
-        emoji: 'clipboard',
-        title: 'Control de stock',
-        text: 'Acá controlás tus productos e insumos. Definí un stock mínimo y el sistema te avisa cuando se está acabando. Útil para barberías, estéticas, veterinarias, etc.',
-      })
-      break
-
     case 'clientes':
-      messages.push({
-        id: 'clients-help',
-        priority: 5,
-        emoji: 'robot',
-        title: 'Base de clientes',
-        text: 'Los clientes se agregan automáticamente cuando reservan. Acá ves su historial, frecuencia de visitas e ingresos totales. ¡Los VIP son los que más vuelven!',
-      })
+      messages.push({ id: 'clients-help', priority: 5, emoji: 'robot', title: 'Base de clientes', text: 'Los clientes se agregan automáticamente cuando reservan. Ves su historial, frecuencia e ingresos. ¡Los VIP son los que más vuelven!' })
       break
-
     case 'reportes':
-      messages.push({
-        id: 'reports-help',
-        priority: 5,
-        emoji: 'chart',
-        title: 'Reportes y estadísticas',
-        text: 'Visualizá ingresos, servicios más pedidos y rendimiento de tu equipo. Los datos se calculan a partir de tus turnos confirmados.',
-      })
+      messages.push({ id: 'reports-help', priority: 5, emoji: 'chart', title: 'Reportes y estadísticas', text: 'Visualizá ingresos, servicios más pedidos y rendimiento de tu equipo. Los datos vienen de tus turnos confirmados.' })
       break
-
     case 'ajustes':
-      messages.push({
-        id: 'settings-help',
-        priority: 4,
-        emoji: 'palette',
-        title: 'Personalizá tu marca',
-        text: 'Subí tu logo, elegí tu color, escribí tu bio y agregá tu Instagram. Todo esto lo ven tus clientes cuando abren tu link de reservas.',
-      })
+      messages.push({ id: 'settings-help', priority: 4, emoji: 'palette', title: 'Personalizá tu marca', text: 'Subí tu logo, elegí tu color y escribí tu bio. Todo esto lo ven tus clientes al abrir tu link de reservas.' })
+      break
+    case 'flyer':
+      messages.push({ id: 'flyer-help', priority: 5, emoji: 'palette', title: 'Creador de flyers', text: 'Diseñá un flyer con tu link de reservas y compartilo en redes. Elegí el formato y estilo que más te guste.' })
       break
   }
 
-  // Sort by priority (lower = more important)
   messages.sort((a, b) => a.priority - b.priority)
-
   return messages
 }
 
-// ── Quick Tips ──────────────────────────────────────────────────────────────
 const QUICK_TIPS = [
   'Tip: Compartí tu link de reservas en tu bio de Instagram para recibir reservas automáticas.',
   'Tip: Si un cliente te llama, podés crear el turno manualmente desde la Agenda.',
@@ -300,23 +187,14 @@ const QUICK_TIPS = [
   'Tip: Podés cambiar precios y duración de servicios en cualquier momento.',
   'Tip: El color que elegís en Ajustes se refleja en la app que ven tus clientes.',
   'Tip: Los clientes VIP son los que visitaron 10 o más veces. ¡Cuidalos!',
-  'Tip: Usá el inventario para trackear productos y recibir alertas de stock bajo.',
   'Tip: Podés desactivar un profesional temporalmente sin eliminarlo.',
 ]
 
 // ── Main Component ──────────────────────────────────────────────────────────
 export default function FloatingAssistant({
-  tab,
-  setupData,
-  vocab,
-  publicLink,
-  onNavigate,
-  onStartTour,
-  negocioNombre,
-  smartAlerts = {},
+  tab, setupData, vocab, publicLink, onNavigate, onStartTour, negocioNombre, smartAlerts = {},
 }) {
   const [open, setOpen] = useState(false)
-  const [minimized, setMinimized] = useState(false)
   const [messageIdx, setMessageIdx] = useState(0)
   const [speaking, setSpeaking] = useState(false)
   const [quickTip, setQuickTip] = useState('')
@@ -336,78 +214,54 @@ export default function FloatingAssistant({
       if (saved) {
         const parsed = JSON.parse(saved)
         if (parsed.dismissed) setDismissed(true)
-        if (parsed.minimized) setMinimized(true)
       }
     } catch {}
   }, [])
 
-  // Save state
   useEffect(() => {
-    localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed, minimized }))
-  }, [dismissed, minimized])
+    localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed }))
+  }, [dismissed])
 
-  // Speaking animation + typing indicator when panel opens or message changes
+  // Speaking animation when panel opens or message changes
   useEffect(() => {
     if (open) {
       setIsTyping(true)
-      const typingTimer = setTimeout(() => {
-        setIsTyping(false)
-        setSpeaking(true)
-      }, 600)
-      const speakTimer = setTimeout(() => setSpeaking(false), 2600)
-      return () => { clearTimeout(typingTimer); clearTimeout(speakTimer) }
+      const t1 = setTimeout(() => { setIsTyping(false); setSpeaking(true) }, 600)
+      const t2 = setTimeout(() => setSpeaking(false), 2600)
+      return () => { clearTimeout(t1); clearTimeout(t2) }
     }
   }, [open, messageIdx, tab])
 
-  // Auto-show pulse for new users
   useEffect(() => {
-    if (!setupData.hasServicios || !setupData.hasEmpleados || !setupData.hasHorarios) {
-      setShowPulse(true)
-    }
+    if (!setupData.hasServicios || !setupData.hasEmpleados || !setupData.hasHorarios) setShowPulse(true)
   }, [setupData])
 
-  // Rotate quick tips
   useEffect(() => {
     setQuickTip(QUICK_TIPS[Math.floor(Math.random() * QUICK_TIPS.length)])
-    const interval = setInterval(() => {
-      setQuickTip(QUICK_TIPS[Math.floor(Math.random() * QUICK_TIPS.length)])
-    }, 15000)
+    const interval = setInterval(() => setQuickTip(QUICK_TIPS[Math.floor(Math.random() * QUICK_TIPS.length)]), 15000)
     return () => clearInterval(interval)
   }, [])
 
-  // Reset message index when tab changes
-  useEffect(() => {
-    setMessageIdx(0)
-  }, [tab])
+  useEffect(() => { setMessageIdx(0) }, [tab])
 
   // Auto-show speech bubble for first time users
   useEffect(() => {
     const bubbleSeen = localStorage.getItem('ns_bubble_shown')
     if (!bubbleSeen && !open) {
-      const showTimer = setTimeout(() => {
-        setShowBubble(true)
-        localStorage.setItem('ns_bubble_shown', '1')
-      }, 3000)
-      const hideTimer = setTimeout(() => {
-        setShowBubble(false)
-      }, 11000) // 3s delay + 8s visible
-      return () => { clearTimeout(showTimer); clearTimeout(hideTimer) }
+      const t1 = setTimeout(() => { setShowBubble(true); localStorage.setItem('ns_bubble_shown', '1') }, 3000)
+      const t2 = setTimeout(() => setShowBubble(false), 11000)
+      return () => { clearTimeout(t1); clearTimeout(t2) }
     }
   }, [])
 
   // Blink + wink randomly
   useEffect(() => {
-    // Natural blinking every 3-5 seconds
     const blinkInterval = setInterval(() => {
       setBlinking(true)
       setTimeout(() => setBlinking(false), 150)
     }, 3000 + Math.random() * 2000)
-    // Wink occasionally
     const winkInterval = setInterval(() => {
-      if (!open) {
-        setMood('wink')
-        setTimeout(() => setMood('happy'), 400)
-      }
+      if (!open) { setMood('wink'); setTimeout(() => setMood('happy'), 400) }
     }, 12000)
     return () => { clearInterval(blinkInterval); clearInterval(winkInterval) }
   }, [open])
@@ -416,9 +270,7 @@ export default function FloatingAssistant({
   useEffect(() => {
     if (!open) return
     const handler = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
-        setOpen(false)
-      }
+      if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -427,8 +279,8 @@ export default function FloatingAssistant({
   if (dismissed) {
     return (
       <button
-        className="ns-assistant-reshow ns-fade-up"
-        onClick={() => { setDismissed(false); setOpen(true); localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed: false, minimized: false })) }}
+        className="ns-assistant-reshow"
+        onClick={() => { setDismissed(false); setOpen(true); localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed: false })) }}
         title="Mostrar a Noni"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -441,24 +293,14 @@ export default function FloatingAssistant({
   const messages = getContextualMessages(tab, setupData, vocab, smartAlerts)
   const currentMessage = messages[messageIdx] || messages[0]
 
-  // Calculate setup progress
-  const setupSteps = [
-    setupData.hasServicios,
-    setupData.hasEmpleados,
-    setupData.hasHorarios,
-    setupData.hasBranding,
-    setupData.hasShared,
-  ]
+  const setupSteps = [setupData.hasServicios, setupData.hasEmpleados, setupData.hasHorarios, setupData.hasBranding, setupData.hasShared]
   const completedCount = setupSteps.filter(Boolean).length
   const totalSteps = setupSteps.length
   const progress = Math.round((completedCount / totalSteps) * 100)
   const allDone = completedCount === totalSteps
 
   const handleCta = (cta) => {
-    if (cta.tab) {
-      onNavigate?.(cta.tab)
-      setOpen(false)
-    }
+    if (cta.tab) { onNavigate?.(cta.tab); setOpen(false) }
     if (cta.action === 'copy-link') {
       navigator.clipboard.writeText(publicLink || '').catch(() => {})
       setCopyToast(true)
@@ -468,108 +310,119 @@ export default function FloatingAssistant({
 
   return (
     <>
-      {/* Copy toast */}
+      {/* Copy toast — Plastilina */}
       {copyToast && (
         <div className="ns-copy-toast">
-          <IconCheckCircle size={20} className="text-emerald-500 shrink-0" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,0.1)' }}>
+            <IconCheckCircle size={18} className="text-emerald-500" />
+          </div>
           <div>
-            <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
-            <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+            <p className="text-xs font-black" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Compartilo por WhatsApp o redes</p>
           </div>
         </div>
       )}
 
-      {/* ── Floating Button ───────────────────────────────────────── */}
+      {/* ── FAB Button — Plastilina 3D ── */}
       {!open && (
         <button
           onClick={() => { setOpen(true); setShowPulse(false); setShowBubble(false) }}
-          className="ns-assistant-fab ns-scale-in"
+          className="ns-assistant-fab"
           title={`${ROBOT_NAME} — Tu asistente`}
         >
           {/* Pulse ring */}
-          {showPulse && !allDone && (
-            <span className="ns-assistant-pulse" />
-          )}
-          <RobotAvatar size={36} speaking={false} mood={mood} blinking={blinking} />
-          {/* Speech bubble tooltip */}
+          {showPulse && !allDone && <span className="ns-assistant-pulse" />}
+
+          {/* Avatar container — Plastilina */}
+          <div className="relative z-10">
+            <RobotAvatar size={34} speaking={false} mood={mood} blinking={blinking} />
+          </div>
+
+          {/* Speech bubble */}
           {showBubble && (
-            <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-sky-100 px-4 py-3 whitespace-nowrap pointer-events-none ns-fade-up">
-              <p className="text-xs font-bold text-slate-900">¡Hola! Soy <span className="text-sky-600">Noni</span></p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tocame para empezar a configurar</p>
-              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-b border-sky-100 rotate-[-45deg]"></div>
+            <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 rounded-2xl px-4 py-3 whitespace-nowrap pointer-events-none ns-fade-up"
+              style={{ background: 'white', boxShadow: 'var(--ns-shadow-lg)', border: '1px solid var(--ns-border)' }}>
+              <p className="text-xs font-black" style={{ color: 'var(--ns-text)' }}>¡Hola! Soy <span style={{ color: 'var(--ns-primary)' }}>Noni</span></p>
+              <p className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>Tocame para empezar</p>
+              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-[-45deg]"
+                style={{ border: '1px solid var(--ns-border)', borderLeft: 'none', borderTop: 'none' }} />
             </div>
           )}
+
           {/* Progress badge */}
-          {!allDone && (
-            <span className="ns-assistant-badge">
-              {completedCount}/{totalSteps}
-            </span>
-          )}
-          {allDone && (
+          {!allDone ? (
+            <span className="ns-assistant-badge">{completedCount}/{totalSteps}</span>
+          ) : (
             <span className="ns-assistant-badge ns-assistant-badge--done">✓</span>
           )}
         </button>
       )}
 
-      {/* ── Panel ─────────────────────────────────────────────────── */}
+      {/* ── Panel — Plastilina 3D ── */}
       {open && (
-        <div
-          ref={panelRef}
-          className="ns-assistant-panel ns-scale-in"
-        >
-          {/* Header — Gradient with greeting */}
-          <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #0ea5e9 100%)' }}>
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-2 right-4 w-24 h-24 border border-white/30 rounded-full" />
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 border border-white/20 rounded-full" />
-            </div>
-            <div className="relative px-5 py-4 flex items-center justify-between">
+        <div ref={panelRef} className="ns-assistant-panel">
+
+          {/* Header — Plastilina gradient */}
+          <div className="relative overflow-hidden rounded-t-[1.75rem]" style={{ background: 'var(--ns-gradient-1)' }}>
+            {/* Decorative orbs */}
+            <div className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none" style={{ background: 'rgba(255,255,255,0.08)', filter: 'blur(20px)', transform: 'translate(30%, -30%)' }} />
+            <div className="absolute bottom-0 left-0 w-16 h-16 rounded-full pointer-events-none" style={{ background: 'rgba(255,255,255,0.06)', filter: 'blur(15px)', transform: 'translate(-20%, 20%)' }} />
+            {/* Shine */}
+            <div className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.12) 0%,transparent 100%)' }} />
+
+            <div className="relative px-5 pt-4 pb-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                  <RobotAvatar size={28} speaking={speaking} mood="happy" blinking={blinking} />
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }}>
+                  <RobotAvatar size={26} speaking={speaking} mood="happy" blinking={blinking} />
                 </div>
                 <div>
                   <h4 className="text-sm font-black text-white tracking-tight">{ROBOT_NAME}</h4>
                   <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">
-                    {speaking ? 'Escribiendo...' : 'Tu asistente'}
+                    {speaking ? 'Escribiendo...' : 'Tu asistente IA'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setOpen(false)}
-                  className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
-                  title="Minimizar"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-colors"
+                style={{ background: 'rgba(255,255,255,0.1)' }}
+                title="Cerrar"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
-            {/* Greeting bar */}
-            <div className="px-5 pb-3">
+
+            {/* Greeting */}
+            <div className="px-5 pb-4">
               <p className="text-[11px] text-white/80 font-medium">{getGreeting(negocioNombre)}</p>
             </div>
           </div>
 
-          {/* Progress Bar (only show if not all done) */}
+          {/* Progress Bar */}
           {!allDone && (
-            <div className="px-5 pt-1 pb-2">
+            <div className="px-5 pt-3 pb-2" style={{ background: 'var(--ns-accent-bg)' }}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Progreso de configuración</span>
-                <span className="text-[9px] font-black text-sky-600">{progress}%</span>
+                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Configuración</span>
+                <span className="text-[9px] font-black" style={{ color: 'var(--ns-primary)' }}>{progress}%</span>
               </div>
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-1000 ease-out"
-                  style={{ background: 'linear-gradient(90deg, #0284c7, #38bdf8, #0ea5e9)', width: `${progress}%` }}
+                  style={{ background: 'var(--ns-gradient-1)', width: `${progress}%`, boxShadow: '0 0 8px rgba(91,61,245,0.4)' }}
                 />
+              </div>
+              <div className="flex gap-1.5 mt-2">
+                {setupSteps.map((done, i) => (
+                  <div key={i} className="flex-1 h-1 rounded-full transition-all duration-500"
+                    style={{ background: done ? 'var(--ns-primary)' : 'var(--ns-border)' }} />
+                ))}
               </div>
             </div>
           )}
 
-          {/* Message — Chat bubble style */}
+          {/* Message Body */}
           <div className="ns-assistant-body">
             {isTyping && <TypingIndicator />}
             {!isTyping && currentMessage && (
@@ -577,25 +430,25 @@ export default function FloatingAssistant({
                 {currentMessage.badge && (
                   <span className="ns-assistant-msg-badge">{currentMessage.badge}</span>
                 )}
-                <div className="flex items-start gap-2.5">
-                  <div className="w-7 h-7 shrink-0 rounded-lg bg-sky-50 flex items-center justify-center text-sky-500">
-                    {currentMessage.emoji === 'bolt' && <IconBolt size={16} />}
-                    {currentMessage.emoji === 'rocket' && <IconRocket size={16} />}
-                    {currentMessage.emoji === 'chart' && <IconChart size={16} />}
-                    {currentMessage.emoji === 'calendar' && <IconCalendar size={16} />}
-                    {currentMessage.emoji === 'palette' && <IconPalette size={16} />}
-                    {currentMessage.emoji === 'robot' && <IconRobot size={16} />}
-                    {currentMessage.emoji === 'clipboard' && <IconClipboard size={16} />}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 shrink-0 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-primary-bg)' }}>
+                    {currentMessage.emoji === 'bolt' && <IconBolt size={16} className="text-[#5B3DF5]" />}
+                    {currentMessage.emoji === 'rocket' && <IconRocket size={16} className="text-[#5B3DF5]" />}
+                    {currentMessage.emoji === 'chart' && <IconChart size={16} className="text-[#5B3DF5]" />}
+                    {currentMessage.emoji === 'calendar' && <IconCalendar size={16} className="text-[#5B3DF5]" />}
+                    {currentMessage.emoji === 'palette' && <IconPalette size={16} className="text-[#5B3DF5]" />}
+                    {currentMessage.emoji === 'robot' && <IconRobot size={16} className="text-[#5B3DF5]" />}
+                    {currentMessage.emoji === 'clipboard' && <IconClipboard size={16} className="text-[#5B3DF5]" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900 leading-tight">{currentMessage.title}</p>
-                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1">{currentMessage.text}</p>
+                    <p className="text-xs font-black leading-tight" style={{ color: 'var(--ns-text)' }}>{currentMessage.title}</p>
+                    <p className="text-[11px] font-medium leading-relaxed mt-1" style={{ color: 'var(--ns-text-secondary)' }}>{currentMessage.text}</p>
                   </div>
                 </div>
                 {currentMessage.cta && (
                   <button
                     onClick={() => handleCta(currentMessage.cta)}
-                    className="ns-assistant-cta mt-3"
+                    className="ns-assistant-cta mt-3 w-full"
                   >
                     {currentMessage.cta.label}
                   </button>
@@ -603,15 +456,19 @@ export default function FloatingAssistant({
               </div>
             )}
 
-            {/* Message navigation */}
+            {/* Message navigation dots */}
             {messages.length > 1 && (
               <div className="flex items-center justify-between mt-3">
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   {messages.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setMessageIdx(i)}
-                      className={`h-1.5 rounded-full transition-all ${i === messageIdx ? 'w-4 bg-sky-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'}`}
+                      className="h-1.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: i === messageIdx ? '16px' : '6px',
+                        background: i === messageIdx ? 'var(--ns-primary)' : 'var(--ns-border)',
+                      }}
                     />
                   ))}
                 </div>
@@ -619,14 +476,16 @@ export default function FloatingAssistant({
                   <button
                     onClick={() => setMessageIdx(i => Math.max(0, i - 1))}
                     disabled={messageIdx === 0}
-                    className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-all"
+                    className="w-7 h-7 rounded-xl flex items-center justify-center transition-all disabled:opacity-30"
+                    style={{ background: 'var(--ns-accent-bg)', color: 'var(--ns-text-muted)' }}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
                   <button
                     onClick={() => setMessageIdx(i => Math.min(messages.length - 1, i + 1))}
                     disabled={messageIdx === messages.length - 1}
-                    className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-all"
+                    className="w-7 h-7 rounded-xl flex items-center justify-center transition-all disabled:opacity-30"
+                    style={{ background: 'var(--ns-accent-bg)', color: 'var(--ns-text-muted)' }}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
@@ -637,7 +496,10 @@ export default function FloatingAssistant({
 
           {/* Quick Tip */}
           <div className="ns-assistant-tip">
-            <p className="text-[10px] text-slate-400 font-medium leading-relaxed">{quickTip}</p>
+            <div className="flex items-start gap-2">
+              <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <p className="text-[10px] font-medium leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>{quickTip}</p>
+            </div>
           </div>
 
           {/* Footer Actions */}
