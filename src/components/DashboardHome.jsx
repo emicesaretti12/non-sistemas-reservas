@@ -22,7 +22,7 @@ const fmtHora = (d) => new Date(d).toLocaleTimeString('es-AR', { hour: '2-digit'
 export default function DashboardHome({
   negocio,
   vocab,
-  colorPrimario = '#6c5ce7',
+  colorPrimario = '#5B3DF5',
   onNavigate,
   publicLink,
   showToast,
@@ -167,7 +167,7 @@ export default function DashboardHome({
     setTurnosHoy((prev) => prev.map((x) => (x.id === t.id ? { ...x, recordatorio_enviado: true } : x)))
   }
 
-  const accent = colorPrimario || '#6c5ce7'
+  const accent = colorPrimario || '#5B3DF5'
   const maxSem = Math.max(...distribucionSemanal, 1)
   const hoyIdx = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1
   const fechaLarga = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })

@@ -121,9 +121,9 @@
 }
 
 .ns-input-clean:focus {
-  border-color: rgba(108, 92, 231, 0.6);
+  border-color: rgba(91, 61, 245, 0.6);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+  box-shadow: 0 0 0 4px rgba(91, 61, 245, 0.15);
 }
 
 .ns-input-clean:disabled {
@@ -138,7 +138,7 @@
 .ns-btn-celeste {
   width: 100%;
   padding: 16px 24px;
-  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  background: linear-gradient(135deg, #5B3DF5 0%, #8B75FF 100%);
   color: white;
   font-weight: 800;
   font-size: 13px;
@@ -154,12 +154,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.3);
+  box-shadow: 0 8px 24px rgba(91, 61, 245, 0.3);
 }
 
 .ns-btn-celeste:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 12px 32px rgba(91, 61, 245, 0.4);
 }
 
 .ns-btn-celeste:active {
@@ -257,9 +257,9 @@
 }
 
 .ns-modal-actions button.primary {
-  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  background: linear-gradient(135deg, #5B3DF5 0%, #8B75FF 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+  box-shadow: 0 4px 12px rgba(91, 61, 245, 0.3);
 }
 
 .ns-modal-actions button.primary:active {
@@ -303,17 +303,17 @@
 }
 
 .ns-calendar-day.today {
-  background: linear-gradient(135deg, rgba(108, 92, 231, 0.3) 0%, rgba(162, 155, 254, 0.2) 100%);
-  border-color: rgba(108, 92, 231, 0.5);
-  color: #a29bfe;
+  background: linear-gradient(135deg, rgba(91, 61, 245, 0.3) 0%, rgba(162, 155, 254, 0.2) 100%);
+  border-color: rgba(91, 61, 245, 0.5);
+  color: #8B75FF;
   font-weight: 700;
 }
 
 .ns-calendar-day.selected {
-  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
-  border-color: #a29bfe;
+  background: linear-gradient(135deg, #5B3DF5 0%, #8B75FF 100%);
+  border-color: #8B75FF;
   color: white;
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 4px 12px rgba(91, 61, 245, 0.4);
 }
 
 /* ============================================================
