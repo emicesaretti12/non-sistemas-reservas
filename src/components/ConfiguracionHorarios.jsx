@@ -77,21 +77,21 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
       <header className="flex flex-col gap-6 mb-8 shrink-0">
-        <div className="flex items-center justify-between bg-white/[0.03] p-8 md:p-10 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+        <div className="flex items-center justify-between bg-[#F7F5FF] p-8 md:p-10 rounded-[2.5rem] border border-[#EDE8F7] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-none">Horarios</h2>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#1A1630] leading-none">Horarios</h2>
             <div className="flex items-center gap-2 mt-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/30">Matriz de disponibilidad</p>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5B3DF5] animate-pulse" />
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#A09CB5]">Matriz de disponibilidad</p>
             </div>
           </div>
           <button
             onClick={guardarConfiguracion}
             disabled={guardando}
-            className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/40 active:scale-95 transition-all gap-3 hover:bg-indigo-500 border border-white/20 relative z-10 disabled:opacity-30"
+            className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-[#5B3DF5] text-white flex items-center justify-center shadow-2xl shadow-[#5B3DF5]/40 active:scale-95 transition-all gap-3 hover:bg-[#5B3DF5] border border-white/20 relative z-10 disabled:opacity-30"
           >
             {guardando ? <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : (
               <>
@@ -118,7 +118,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
 
       {/* --- LISTA DE DÍAS (APPLE SETTINGS STYLE) --- */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-        <div className="bg-white/[0.03] rounded-[2.5rem] border border-white/10 overflow-hidden max-w-3xl">
+        <div className="bg-[#F7F5FF] rounded-[2.5rem] border border-[#EDE8F7] overflow-hidden max-w-3xl">
           {diasSemana.map((dia, index) => {
             const dataDia = horarios[dia.id]
             const isLast = index === diasSemana.length - 1
@@ -126,17 +126,17 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
             return (
               <div
                 key={dia.id}
-                className={`p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all hover:bg-white/[0.02] ${!isLast ? 'border-b border-white/5' : ''}`}
+                className={`p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all hover:bg-[#F7F5FF] ${!isLast ? 'border-b border-[#EDE8F7]' : ''}`}
               >
                 {/* Toggle y Nombre del Día */}
                 <div className="flex items-center gap-6 min-w-[180px]">
                   <button
                     onClick={() => toggleDia(dia.id)}
-                    className={`relative w-14 h-8 rounded-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] shrink-0 focus:outline-none border-2 ${dataDia.abierto ? 'bg-indigo-600 border-indigo-400 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-white/5 border-white/10'}`}
+                    className={`relative w-14 h-8 rounded-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] shrink-0 focus:outline-none border-2 ${dataDia.abierto ? 'bg-[#5B3DF5] border-[#5B3DF5] shadow-[0_0_20px_rgba(91,61,245,0.4)]' : 'bg-white border-[#EDE8F7]'}`}
                   >
                     <div className={`absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${dataDia.abierto ? 'transform translate-x-6 scale-110' : ''}`}></div>
                   </button>
-                  <span className={`font-black text-xl md:text-2xl tracking-tighter transition-all ${dataDia.abierto ? 'text-white' : 'text-white/10'}`}>
+                  <span className={`font-black text-xl md:text-2xl tracking-tighter transition-all ${dataDia.abierto ? 'text-[#1A1630]' : 'text-[#A09CB5]'}`}>
                     {dia.label}
                   </span>
                 </div>
@@ -145,25 +145,25 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                 <div className={`flex flex-col gap-4 transition-all duration-500 ${dataDia.abierto ? 'opacity-100' : 'opacity-10 pointer-events-none'}`}>
 
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 bg-white/5 px-5 py-4 rounded-2xl border border-white/10 focus-within:border-indigo-500/50 transition-all">
+                    <div className="flex items-center gap-3 bg-white px-5 py-4 rounded-2xl border border-[#EDE8F7] focus-within:border-[#5B3DF5] transition-all">
                       <input
                         type="time"
                         disabled={!dataDia.abierto}
                         value={dataDia.inicio}
                         onChange={(e) => cambiarHora(dia.id, 'inicio', e.target.value)}
-                        className="bg-transparent font-black text-white outline-none text-base w-full md:w-auto"
+                        className="bg-transparent font-black text-[#1A1630] outline-none text-base w-full md:w-auto"
                       />
                     </div>
 
-                    <span className="text-white/10 font-black">-</span>
+                    <span className="text-[#A09CB5] font-black">-</span>
 
-                    <div className="flex items-center gap-3 bg-white/5 px-5 py-4 rounded-2xl border border-white/10 focus-within:border-indigo-500/50 transition-all">
+                    <div className="flex items-center gap-3 bg-white px-5 py-4 rounded-2xl border border-[#EDE8F7] focus-within:border-[#5B3DF5] transition-all">
                       <input
                         type="time"
                         disabled={!dataDia.abierto}
                         value={dataDia.fin}
                         onChange={(e) => cambiarHora(dia.id, 'fin', e.target.value)}
-                        className="bg-transparent font-black text-white outline-none text-base w-full md:w-auto"
+                        className="bg-transparent font-black text-[#1A1630] outline-none text-base w-full md:w-auto"
                       />
                     </div>
                   </div>

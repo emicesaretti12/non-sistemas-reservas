@@ -204,22 +204,22 @@ export default function Empleados({ negocioId, rubro }) {
         </div>
       )}
 
-      <header className="flex items-center justify-between bg-white/[0.03] p-8 md:p-10 rounded-[2.5rem] border border-white/10 mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
+      <header className="flex items-center justify-between bg-[#F7F5FF] p-8 md:p-10 rounded-[2.5rem] border border-[#EDE8F7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
         </div>
         <div className="relative z-10">
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-none">{vocab.empleadoPlural}</h2>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#1A1630] leading-none">{vocab.empleadoPlural}</h2>
           <div className="flex items-center gap-2 mt-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#5B3DF5] animate-pulse" />
+            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#A09CB5]">
               {especialistas.length} {vocab.empleados} en línea
             </p>
           </div>
         </div>
         <button
           onClick={abrirModalCrear}
-          className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/40 active:scale-95 transition-all gap-3 hover:bg-indigo-500 border border-white/20 relative z-10"
+          className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-[#5B3DF5] text-white flex items-center justify-center shadow-2xl shadow-[#5B3DF5]/40 active:scale-95 transition-all gap-3 hover:bg-[#5B3DF5] border border-white/20 relative z-10"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
           <span className="hidden md:inline text-[11px] font-black uppercase tracking-[0.3em]">{vocab.nuevoEmpleado}</span>
@@ -274,39 +274,39 @@ export default function Empleados({ negocioId, rubro }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {especialistas.map((esp) => (
-              <div key={esp.id} className="bg-white/[0.03] rounded-[2.5rem] p-6 border border-white/10 flex items-center gap-5 group hover:bg-white/[0.05] transition-all relative overflow-hidden shadow-2xl">
+              <div key={esp.id} className="bg-[#F7F5FF] rounded-[2.5rem] p-6 border border-[#EDE8F7] flex items-center gap-5 group hover:bg-white transition-all relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </div>
                 
-                <div className="relative w-20 h-20 rounded-[2rem] overflow-hidden shadow-2xl border-2 border-white/10 bg-white/5 shrink-0 z-10">
+                <div className="relative w-20 h-20 rounded-[2rem] overflow-hidden shadow-2xl border-2 border-[#EDE8F7] bg-white shrink-0 z-10">
                   {esp.foto_url ? (
                     <img src={esp.foto_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={esp.nombre} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/10 text-3xl font-black">{esp.nombre.charAt(0)}</div>
+                    <div className="w-full h-full flex items-center justify-center text-[#A09CB5] text-3xl font-black">{esp.nombre.charAt(0)}</div>
                   )}
                   {/* Estado badge */}
-                  <div className={`absolute bottom-2 right-2 w-4 h-4 rounded-full border-4 border-[#1a1d24] ${esp.estado === 'vacaciones' ? 'bg-amber-400' : esp.estado === 'inactivo' ? 'bg-rose-500' : 'bg-emerald-400'
+                  <div className={`absolute bottom-2 right-2 w-4 h-4 rounded-full border-4 border-white ${esp.estado === 'vacaciones' ? 'bg-amber-400' : esp.estado === 'inactivo' ? 'bg-rose-500' : 'bg-emerald-400'
                     }`}></div>
                 </div>
 
                 <div className="flex-1 overflow-hidden relative z-10">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-black text-lg text-white truncate leading-tight">{esp.nombre}</h4>
-                    {esp.comision_porcentaje > 0 && <span className="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest border border-indigo-500/20">{esp.comision_porcentaje}%</span>}
+                    <h4 className="font-black text-lg text-[#1A1630] truncate leading-tight">{esp.nombre}</h4>
+                    {esp.comision_porcentaje > 0 && <span className="text-[8px] font-black text-[#5B3DF5] bg-[#5B3DF5]/10 px-2 py-0.5 rounded-full uppercase tracking-widest border border-[#5B3DF5]/20">{esp.comision_porcentaje}%</span>}
                   </div>
-                  <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-1 truncate">
+                  <p className="text-[10px] font-black text-[#A09CB5] uppercase tracking-[0.2em] mt-1 truncate">
                     {esp.especialidad || 'General'}
                   </p>
                   {(esp.email || esp.telefono) && (
                     <div className="flex items-center gap-3 mt-2">
-                      {esp.telefono && <span className="text-[9px] text-white/20 font-bold truncate">{esp.telefono}</span>}
+                      {esp.telefono && <span className="text-[9px] text-[#A09CB5] font-bold truncate">{esp.telefono}</span>}
                     </div>
                   )}
                 </div>
 
                 <div className="flex flex-col gap-2 relative z-10">
-                  <button onClick={() => abrirModalEditar(esp)} className="w-10 h-10 rounded-xl bg-white/5 text-white/20 flex items-center justify-center hover:bg-white/10 hover:text-white transition-all active:scale-90 border border-white/5">
+                  <button onClick={() => abrirModalEditar(esp)} className="w-10 h-10 rounded-xl bg-white text-[#A09CB5] flex items-center justify-center hover:bg-[#E8DEFF]/40 hover:text-[#5B3DF5] transition-all active:scale-90 border border-[#EDE8F7]">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
                   <button onClick={() => eliminarEspecialista(esp.id)} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90 border border-rose-500/20">
@@ -322,20 +322,20 @@ export default function Empleados({ negocioId, rubro }) {
       {/* --- MODAL: CREAR / EDITAR --- */}
       {modalAbierto && (
         <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-[#0f1117]/80 backdrop-blur-2xl animate-in fade-in duration-300">
-          <div className="bg-[#1a1d24] w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-white/10 relative overflow-hidden">
+          <div className="bg-white w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-[#EDE8F7] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[80px]" />
+              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#5B3DF5]/10 blur-[80px]" />
             </div>
 
             <div className="flex justify-between items-center mb-10 relative z-10">
               <div>
-                <h2 className="text-3xl font-black tracking-tighter text-white leading-none">{modoEdicion ? vocab.editarEmpleado : vocab.nuevoEmpleado}</h2>
+                <h2 className="text-3xl font-black tracking-tighter text-[#1A1630] leading-none">{modoEdicion ? vocab.editarEmpleado : vocab.nuevoEmpleado}</h2>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Gestión de {vocab.empleados}</p>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5B3DF5] animate-pulse" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5]">Gestión de {vocab.empleados}</p>
                 </div>
               </div>
-              <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center text-white/20 hover:text-white transition-all active:scale-90 border border-white/5">
+              <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-white hover:bg-[#E8DEFF]/40 rounded-2xl flex items-center justify-center text-[#A09CB5] hover:text-[#5B3DF5] transition-all active:scale-90 border border-[#EDE8F7]">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
               </button>
             </div>

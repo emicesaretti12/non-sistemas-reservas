@@ -193,24 +193,24 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
       <header className="flex flex-col gap-6 mb-8 shrink-0">
-        <div className="flex items-center justify-between bg-white/[0.03] p-8 md:p-10 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+        <div className="flex items-center justify-between bg-[#F7F5FF] p-8 md:p-10 rounded-[2.5rem] border border-[#EDE8F7] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
           </div>
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-none">Reportes</h2>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#1A1630] leading-none">Reportes</h2>
             <div className="flex items-center gap-2 mt-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/30">Análisis de rendimiento</p>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5B3DF5] animate-pulse" />
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#A09CB5]">Análisis de rendimiento</p>
             </div>
           </div>
-          <div className="flex bg-white/5 p-1.5 rounded-2xl relative z-10 border border-white/5">
+          <div className="flex bg-[#F7F5FF] p-1.5 rounded-2xl relative z-10 border border-[#EDE8F7]">
             {[
               { id: 'semana', label: 'Semana' },
               { id: 'mes', label: 'Mes' },
               { id: 'todo', label: 'Anual' }
             ].map(p => (
-              <button key={p.id} onClick={() => setPeriodo(p.id)} className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all ${periodo === p.id ? 'bg-white text-[#1a1d24] shadow-2xl' : 'text-white/30 hover:text-white/50'}`}>
+              <button key={p.id} onClick={() => setPeriodo(p.id)} className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all ${periodo === p.id ? 'bg-white text-[#1A1630] shadow-2xl' : 'text-[#A09CB5] hover:text-[#6B6489]'}`}>
                 {p.label}
               </button>
             ))}
@@ -220,26 +220,26 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
 
       {/* KPIs PRINCIPALES CON COMPARACIÓN */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Ingresos</p>
-          <h3 className="text-3xl font-black text-white tracking-tighter">${datos.ingresosPeriodo.toLocaleString()}</h3>
+        <div className="bg-[#F7F5FF] p-8 rounded-[2.5rem] border border-[#EDE8F7] relative overflow-hidden group">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mb-2">Ingresos</p>
+          <h3 className="text-3xl font-black text-[#1A1630] tracking-tighter">${datos.ingresosPeriodo.toLocaleString()}</h3>
           <div className={`inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full text-[10px] font-black ${variacionIngresos >= 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}`}>
             <span>{variacionIngresos >= 0 ? '↑' : '↓'} {Math.abs(variacionIngresos)}%</span>
           </div>
-          <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all" />
+          <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-[#5B3DF5]/10 rounded-full blur-2xl group-hover:bg-[#5B3DF5]/20 transition-all" />
         </div>
-        <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Turnos</p>
-          <h3 className="text-3xl font-black text-white tracking-tighter">{datos.turnosPeriodo}</h3>
+        <div className="bg-[#F7F5FF] p-8 rounded-[2.5rem] border border-[#EDE8F7] relative overflow-hidden group">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mb-2">Turnos</p>
+          <h3 className="text-3xl font-black text-[#1A1630] tracking-tighter">{datos.turnosPeriodo}</h3>
           <div className={`inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full text-[10px] font-black ${variacionTurnos >= 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}`}>
             <span>{variacionTurnos >= 0 ? '↑' : '↓'} {Math.abs(variacionTurnos)}%</span>
           </div>
           <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all" />
         </div>
-        <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Ticket Prom.</p>
-          <h3 className="text-3xl font-black text-white tracking-tighter">${datos.ticketPromedio.toLocaleString()}</h3>
-          <div className="inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full text-[10px] font-black bg-white/5 text-white/30 border border-white/10">
+        <div className="bg-[#F7F5FF] p-8 rounded-[2.5rem] border border-[#EDE8F7] relative overflow-hidden group">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mb-2">Ticket Prom.</p>
+          <h3 className="text-3xl font-black text-[#1A1630] tracking-tighter">${datos.ticketPromedio.toLocaleString()}</h3>
+          <div className="inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full text-[10px] font-black bg-[#F7F5FF] text-[#A09CB5] border border-[#EDE8F7]">
             <span>valor promedio</span>
           </div>
           <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-fuchsia-500/10 rounded-full blur-2xl group-hover:bg-fuchsia-500/20 transition-all" />
@@ -247,34 +247,34 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
       </div>
 
       {/* GRÁFICO DE INGRESOS POR DÍA */}
-      <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 mb-8 relative overflow-hidden group">
+      <div className="bg-[#F7F5FF] p-8 rounded-[2.5rem] border border-[#EDE8F7] mb-8 relative overflow-hidden group">
         <div className="flex items-center justify-between mb-8 relative z-10">
           <div>
-            <h4 className="text-xl font-black text-white tracking-tighter">Ingresos por {periodo === 'todo' ? 'Mes' : 'Día'}</h4>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mt-1">Tendencia de facturación</p>
+            <h4 className="text-xl font-black text-[#1A1630] tracking-tighter">Ingresos por {periodo === 'todo' ? 'Mes' : 'Día'}</h4>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mt-1">Tendencia de facturación</p>
           </div>
-          <span className="text-3xl font-black text-indigo-400 tracking-tighter">${datos.ingresosPeriodo.toLocaleString()}</span>
+          <span className="text-3xl font-black text-[#5B3DF5] tracking-tighter">${datos.ingresosPeriodo.toLocaleString()}</span>
         </div>
         <div className="flex items-end gap-2 h-48 relative z-10">
           {datos.ingresosPorDia.map((d, idx) => (
             <div key={idx} className="flex-1 flex flex-col items-center gap-4 group min-w-0 h-full justify-end">
               <div className="w-full relative h-full flex items-end">
                 <div 
-                  className="w-full rounded-t-2xl transition-all duration-700 group-hover:opacity-100 opacity-40 bg-gradient-to-t from-indigo-600 to-violet-500 shadow-[0_0_20px_rgba(79,70,229,0.2)]"
+                  className="w-full rounded-t-2xl transition-all duration-700 group-hover:opacity-100 opacity-40 bg-gradient-to-t from-[#5B3DF5] to-violet-500 shadow-[#5B3DF5]/20"
                   style={{ 
                     height: `${Math.max(3, (d.valor / maxIngresoDia) * 100)}%`,
                   }}
                 />
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-[#1a1d24] text-[10px] font-black px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap z-20 shadow-2xl scale-75 group-hover:scale-100">
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-[#1A1630] text-[10px] font-black px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap z-20 shadow-2xl scale-75 group-hover:scale-100">
                   ${d.valor.toLocaleString()}
                 </div>
               </div>
-              <span className="text-[8px] font-black text-white/10 uppercase tracking-tighter group-hover:text-white/30 transition-colors">{d.label}</span>
+              <span className="text-[8px] font-black text-[#A09CB5] uppercase tracking-tighter group-hover:text-[#A09CB5] transition-colors">{d.label}</span>
             </div>
           ))}
         </div>
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="absolute bottom-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-600/5 blur-[80px]" />
+          <div className="absolute bottom-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-[#5B3DF5]/5 blur-[80px]" />
         </div>
       </div>
 
@@ -282,31 +282,31 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         
         {/* TOP SERVICIOS */}
-        <div className="bg-white/[0.03] rounded-[2.5rem] border border-white/10 overflow-hidden relative group">
-          <div className="p-8 border-b border-white/5">
-            <h4 className="text-xl font-black text-white tracking-tighter">{vocab.servicioPlural} más rentables</h4>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mt-1">Por facturación</p>
+        <div className="bg-[#F7F5FF] rounded-[2.5rem] border border-[#EDE8F7] overflow-hidden relative group">
+          <div className="p-8 border-b border-[#EDE8F7]">
+            <h4 className="text-xl font-black text-[#1A1630] tracking-tighter">{vocab.servicioPlural} más rentables</h4>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mt-1">Por facturación</p>
           </div>
           {datos.topServicios.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/10">Sin datos disponibles</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5]">Sin datos disponibles</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-[#EDE8F7]">
               {datos.topServicios.map((s, idx) => {
                 const maxRev = datos.topServicios[0]?.revenue || 1
                 return (
-                  <div key={idx} className="px-8 py-5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors group/item">
-                    <span className="text-xs font-black text-white/10 w-6 group-hover/item:text-indigo-500 transition-colors">{idx + 1}</span>
+                  <div key={idx} className="px-8 py-5 flex items-center gap-4 hover:bg-[#E8DEFF]/40 transition-colors group/item">
+                    <span className="text-xs font-black text-[#A09CB5] w-6 group-hover/item:text-[#5B3DF5] transition-colors">{idx + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-white truncate leading-tight">{s.nombre}</p>
-                      <div className="mt-2.5 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-indigo-600 to-violet-500 shadow-[0_0_10px_rgba(79,70,229,0.3)]" style={{ width: `${(s.revenue / maxRev) * 100}%` }}></div>
+                      <p className="text-sm font-black text-[#1A1630] truncate leading-tight">{s.nombre}</p>
+                      <div className="mt-2.5 h-1.5 bg-[#EDE8F7] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#5B3DF5] to-violet-500 shadow-[#5B3DF5]/20" style={{ width: `${(s.revenue / maxRev) * 100}%` }}></div>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-black text-white">${s.revenue.toLocaleString()}</p>
-                      <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-1">{s.count} {vocab.turnos}</p>
+                      <p className="text-sm font-black text-[#1A1630]">${s.revenue.toLocaleString()}</p>
+                      <p className="text-[10px] font-black text-[#A09CB5] uppercase tracking-widest mt-1">{s.count} {vocab.turnos}</p>
                     </div>
                   </div>
                 )
@@ -316,33 +316,33 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         </div>
 
         {/* TOP EMPLEADOS */}
-        <div className="bg-white/[0.03] rounded-[2.5rem] border border-white/10 overflow-hidden relative group">
-          <div className="p-8 border-b border-white/5">
-            <h4 className="text-xl font-black text-white tracking-tighter">{vocab.empleadoPlural} por rendimiento</h4>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mt-1">Por facturación generada</p>
+        <div className="bg-[#F7F5FF] rounded-[2.5rem] border border-[#EDE8F7] overflow-hidden relative group">
+          <div className="p-8 border-b border-[#EDE8F7]">
+            <h4 className="text-xl font-black text-[#1A1630] tracking-tighter">{vocab.empleadoPlural} por rendimiento</h4>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mt-1">Por facturación generada</p>
           </div>
           {datos.topEmpleados.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/10">Sin datos disponibles</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5]">Sin datos disponibles</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-[#EDE8F7]">
               {datos.topEmpleados.map((e, idx) => {
                 const maxRev = datos.topEmpleados[0]?.revenue || 1
                 return (
-                  <div key={idx} className="px-8 py-5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors group/item">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-black text-sm shrink-0 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all">
+                  <div key={idx} className="px-8 py-5 flex items-center gap-4 hover:bg-[#E8DEFF]/40 transition-colors group/item">
+                    <div className="w-10 h-10 rounded-xl bg-[#5B3DF5]/20 text-[#5B3DF5] border border-[#5B3DF5]/20 flex items-center justify-center font-black text-sm shrink-0 group-hover/item:bg-[#5B3DF5] group-hover/item:text-white transition-all">
                       {e.nombre.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-white truncate leading-tight">{e.nombre}</p>
-                      <div className="mt-2.5 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-indigo-600 to-violet-500 shadow-[0_0_10px_rgba(79,70,229,0.3)]" style={{ width: `${(e.revenue / maxRev) * 100}%` }}></div>
+                      <p className="text-sm font-black text-[#1A1630] truncate leading-tight">{e.nombre}</p>
+                      <div className="mt-2.5 h-1.5 bg-[#EDE8F7] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#5B3DF5] to-violet-500 shadow-[#5B3DF5]/20" style={{ width: `${(e.revenue / maxRev) * 100}%` }}></div>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-black text-white">${e.revenue.toLocaleString()}</p>
-                      <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-1">{e.count} {vocab.turnos}</p>
+                      <p className="text-sm font-black text-[#1A1630]">${e.revenue.toLocaleString()}</p>
+                      <p className="text-[10px] font-black text-[#A09CB5] uppercase tracking-widest mt-1">{e.count} {vocab.turnos}</p>
                     </div>
                   </div>
                 )
@@ -356,13 +356,13 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-24">
         
         {/* HORAS PICO */}
-        <div className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/10 relative group">
-          <h4 className="text-xl font-black text-white tracking-tighter mb-1">Horas con más demanda</h4>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-8">Distribución horaria</p>
+        <div className="bg-[#F7F5FF] p-8 rounded-[2.5rem] border border-[#EDE8F7] relative group">
+          <h4 className="text-xl font-black text-[#1A1630] tracking-tighter mb-1">Horas con más demanda</h4>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mb-8">Distribución horaria</p>
           
           {Object.keys(datos.horasPico).length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/10">Sin datos disponibles</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5]">Sin datos disponibles</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -371,11 +371,11 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
                 .slice(0, 6)
                 .map(([hora, count]) => (
                   <div key={hora} className="flex items-center gap-4 group/item">
-                    <span className="text-[10px] font-black text-white/30 w-12 shrink-0 group-hover/item:text-white transition-colors">{hora}:00</span>
-                    <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-indigo-600 to-violet-500 shadow-[0_0_10px_rgba(79,70,229,0.3)]" style={{ width: `${(count / maxHoraPico) * 100}%` }}></div>
+                    <span className="text-[10px] font-black text-[#A09CB5] w-12 shrink-0 group-hover/item:text-[#5B3DF5] transition-colors">{hora}:00</span>
+                    <div className="flex-1 h-2 bg-[#EDE8F7] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#5B3DF5] to-violet-500 shadow-[#5B3DF5]/20" style={{ width: `${(count / maxHoraPico) * 100}%` }}></div>
                     </div>
-                    <span className="text-xs font-black text-white w-6 text-right">{count}</span>
+                    <span className="text-xs font-black text-[#1A1630] w-6 text-right">{count}</span>
                   </div>
                 ))}
             </div>
@@ -383,28 +383,28 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         </div>
 
         {/* TOP CLIENTES */}
-        <div className="bg-white/[0.03] rounded-[2.5rem] border border-white/10 overflow-hidden relative group">
-          <div className="p-8 border-b border-white/5">
-            <h4 className="text-xl font-black text-white tracking-tighter">{vocab.clientePlural.replace('Base de ', '')} destacados</h4>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mt-1">Mayor facturación</p>
+        <div className="bg-[#F7F5FF] rounded-[2.5rem] border border-[#EDE8F7] overflow-hidden relative group">
+          <div className="p-8 border-b border-[#EDE8F7]">
+            <h4 className="text-xl font-black text-[#1A1630] tracking-tighter">{vocab.clientePlural.replace('Base de ', '')} destacados</h4>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] mt-1">Mayor facturación</p>
           </div>
           {datos.topClientes.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/10">Sin datos disponibles</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5]">Sin datos disponibles</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-[#EDE8F7]">
               {datos.topClientes.map((c, idx) => (
-                <div key={idx} className="px-8 py-5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors group/item">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-black text-sm text-white/20 group-hover/item:bg-white group-hover/item:text-[#1a1d24] transition-all">
+                <div key={idx} className="px-8 py-5 flex items-center gap-4 hover:bg-[#E8DEFF]/40 transition-colors group/item">
+                  <div className="w-10 h-10 rounded-xl bg-[#F7F5FF] border border-[#EDE8F7] flex items-center justify-center font-black text-sm text-[#A09CB5] group-hover/item:bg-white group-hover/item:text-[#1A1630] transition-all">
                     {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-white truncate leading-tight">{c.nombre}</p>
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-1">{c.count} {vocab.turnos}</p>
+                    <p className="text-sm font-black text-[#1A1630] truncate leading-tight">{c.nombre}</p>
+                    <p className="text-[10px] font-black text-[#A09CB5] uppercase tracking-widest mt-1">{c.count} {vocab.turnos}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-black text-white">${c.revenue.toLocaleString()}</p>
+                    <p className="text-sm font-black text-[#1A1630]">${c.revenue.toLocaleString()}</p>
                   </div>
                 </div>
               ))}

@@ -185,40 +185,40 @@ export default function DashboardHome({
 
       {/* ═══════════ HERO / SALUDO — Bento Dark Card ═══════════ */}
       <header
-        className="relative overflow-hidden rounded-3xl p-6 md:p-10 border-0"
-        style={{ background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)', boxShadow: '0 20px 60px rgba(30, 27, 75, 0.15)' }}
+        className="relative overflow-hidden rounded-3xl p-6 md:p-10 border border-[#EDE8F7] bg-white"
+        style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
         data-testid="home-hero"
       >
         <div
-          className="absolute -top-24 -right-20 w-96 h-96 rounded-full blur-[100px] opacity-40 pointer-events-none"
+          className="absolute -top-24 -right-20 w-96 h-96 rounded-full blur-[100px] opacity-20 pointer-events-none"
           style={{ background: 'radial-gradient(circle, #5B3DF5 0%, transparent 70%)' }}
         />
         <div
-          className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full blur-[80px] opacity-15 pointer-events-none"
+          className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full blur-[80px] opacity-10 pointer-events-none"
           style={{ background: '#8B7CF6' }}
         />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex items-center justify-center shrink-0" style={{ background: 'rgba(232, 222, 255, 0.15)', border: '1px solid rgba(255,255,255,0.15)' }}>
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex items-center justify-center shrink-0" style={{ background: '#F7F5FF', border: '1px solid #EDE8F7' }}>
               {negocio?.logo_url
                 ? <img src={negocio.logo_url} alt="logo" className="w-full h-full object-cover" />
-                : <span className="text-[#E8DEFF] font-black text-xl">{negocio?.nombre?.charAt(0) || 'N'}</span>}
+                : <span className="text-[#5B3DF5] font-black text-xl">{negocio?.nombre?.charAt(0) || 'N'}</span>}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50">{saludo()}</span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#6B6489]">{saludo()}</span>
               </div>
-              <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white mb-1">{negocio?.nombre || 'Tu negocio'}</h1>
-              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/40">{fechaLarga}</p>
+              <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[#1A1630] mb-1">{negocio?.nombre || 'Tu negocio'}</h1>
+              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#A09CB5]">{fechaLarga}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3 md:ml-auto">
             <button
               onClick={() => window.open(publicLink, '_blank')}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white/70 transition-all active:scale-90" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-[#1A1630] transition-all active:scale-90 hover:text-[#5B3DF5] hover:bg-[#E8DEFF]/40" style={{ background: '#F7F5FF', border: '1px solid #EDE8F7' }}
               title="Ver app pública"
               data-testid="home-view-app"
             >
@@ -226,7 +226,7 @@ export default function DashboardHome({
             </button>
             <button
               onClick={() => onNavigate?.('ajustes')}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white/70 transition-all active:scale-90" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-[#1A1630] transition-all active:scale-90 hover:text-[#5B3DF5] hover:bg-[#E8DEFF]/40" style={{ background: '#F7F5FF', border: '1px solid #EDE8F7' }}
               title="Ajustes"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 md:w-5 md:h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -237,19 +237,19 @@ export default function DashboardHome({
         {/* Banner de Instalación PWA */}
         {showInstallBtn && (
           <div className="mt-4">
-            <div className="p-4 md:p-5 rounded-2xl flex items-center justify-between gap-4 border" style={{ background: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.15)' }}>
+            <div className="p-4 md:p-5 rounded-2xl flex items-center justify-between gap-4 border" style={{ background: '#F7F5FF', borderColor: '#EDE8F7' }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-white"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'white', border: '1px solid #EDE8F7' }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-[#1A1630]"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
                 <div>
-                  <p className="text-white font-black text-sm leading-tight">Instalar App</p>
-                  <p className="text-white/50 text-[9px] md:text-[10px] font-medium">Agregá Noni a tu pantalla de inicio.</p>
+                  <p className="text-[#1A1630] font-black text-sm leading-tight">Instalar App</p>
+                  <p className="text-[#6B6489] text-[9px] md:text-[10px] font-medium">Agregá Noni a tu pantalla de inicio.</p>
                 </div>
               </div>
               <button
                 onClick={handleInstallClick}
-                className="px-4 py-2.5 rounded-xl bg-white text-[#5B3DF5] font-black text-[9px] uppercase tracking-widest shadow-lg active:scale-95 transition-all shrink-0"
+                className="px-4 py-2.5 rounded-xl bg-[#5B3DF5] text-white font-black text-[9px] uppercase tracking-widest shadow-lg active:scale-95 transition-all shrink-0"
               >
                 Instalar
               </button>
