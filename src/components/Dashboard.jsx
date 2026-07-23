@@ -32,9 +32,9 @@ import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevo
 
 // Componentes del Dashboard
 import DashboardTour, { useTour } from './DashboardTourV2'
-import FloatingAssistant from './NoniAssistantV2'
+import FloatingAssistant from './NoniAssistantV3'
 import DashboardHome from './DashboardHome'
-import NotificationCenter from './NotificationCenter'
+import NotificationCenter from './NotificationCenterV2'
 import GlobalSearch from './GlobalSearch'
 import '../components/PlastilinaStyles.css'
 
