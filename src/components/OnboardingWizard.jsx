@@ -4,6 +4,7 @@ import { RUBROS_DISPONIBLES, getVocabulario } from '../utils/vocabulario'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IconCelebrate, IconCheckCircle } from './NoniIcons'
 import { useToast } from './Toast'
+import OnboardingComplete from './OnboardingComplete'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
@@ -282,34 +283,13 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Done screen ──────────────────────────────────────────────────────────
   if (done) {
-    const slug = data.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-    const link = `${window.location.origin}/app/${slug}/${negocioId}`
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
-        <motion.div initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} className="max-w-md w-full text-center space-y-6">
-          <motion.div initial={{scale:0}} animate={{scale:1}} transition={{type:'spring',delay:.2}} className="w-24 h-24 mx-auto rounded-[2rem] flex items-center justify-center shadow-2xl overflow-hidden" style={{background:data.color}}>
-            {data.logo_url ? <img src={data.logo_url} className="w-full h-full object-cover" /> : <span className="text-white text-4xl font-black">{data.nombre[0]?.toUpperCase()}</span>}
-          </motion.div>
-          <div>
-            <h1 className="text-4xl font-black text-white tracking-tight flex items-center justify-center gap-3">¡Listo! <IconCelebrate size={32} className="text-amber-400" /></h1>
-            <p className="text-slate-400 mt-2">Tu plataforma está activa en producción.</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:border-white/30 transition-all"
-            onClick={() => { navigator.clipboard.writeText(link); showToast('Enlace copiado al portapapeles'); }}>
-            <code className="text-sm text-sky-400 block truncate">{link}</code>
-            <p className="text-[10px] text-white/30 mt-2 uppercase tracking-widest">Tocar para copiar</p>
-          </div>
-          <button onClick={() => {
-            // Ensure tour, assistant & guided setup show for new accounts
-            localStorage.removeItem('ns_tour_completed_v2')
-            localStorage.removeItem('ns_assistant_v2')
-            localStorage.removeItem('ns_bubble_shown')
-            onComplete()
-          }} className="w-full py-4 rounded-2xl text-white font-black text-sm uppercase tracking-widest" style={{background:data.color}}>
-            Ir al Dashboard →
-          </button>
-        </motion.div>
-      </div>
+      <OnboardingComplete
+        data={data}
+        negocioId={negocioId}
+        onComplete={onComplete}
+        showToast={showToast}
+      />
     )
   }
 

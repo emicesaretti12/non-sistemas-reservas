@@ -347,6 +347,7 @@ export default function FloatingAssistant({
     if (cta.tab) { onNavigate?.(cta.tab); setOpen(false) }
     if (cta.action === 'copy-link') {
       navigator.clipboard.writeText(publicLink || '').catch(() => {})
+      localStorage.setItem('ns_link_shared', '1')
       setCopyToast(true)
       setTimeout(() => setCopyToast(false), 3000)
     }

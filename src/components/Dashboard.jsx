@@ -31,11 +31,12 @@ import { IconCheckCircle } from './NoniIcons'
 import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN } from '../utils/suscripcion'
 
 // Componentes del Dashboard
-import DashboardTour, { useTour } from './DashboardTour'
-import FloatingAssistant from './FloatingAssistant'
+import DashboardTour, { useTour } from './DashboardTourV2'
+import FloatingAssistant from './NoniAssistantV2'
 import DashboardHome from './DashboardHome'
 import NotificationCenter from './NotificationCenter'
 import GlobalSearch from './GlobalSearch'
+import '../components/PlastilinaStyles.css'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
@@ -1583,7 +1584,7 @@ export default function Dashboard({ session }) {
             hasEmpleados: crmStats.totalEmpleados > 0,
             hasHorarios: negocio?.horarios && Object.values(negocio.horarios).some(d => d.abierto),
             hasBranding: !!(logoUrl || descripcion),
-            hasShared: false,
+            hasShared: !!localStorage.getItem('ns_link_shared'),
             hasTurnos: stats.hoy > 0 || actividadReciente.length > 0,
           }}
           vocab={vocab}
