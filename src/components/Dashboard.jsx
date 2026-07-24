@@ -38,6 +38,7 @@ import NotificationCenter from './NotificationCenterV2'
 import GlobalSearch from './GlobalSearch'
 import '../components/PlastilinaStyles.css'
 import '../components/MobileOptimized.css'
+import '../components/NavbarPremium.css'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
