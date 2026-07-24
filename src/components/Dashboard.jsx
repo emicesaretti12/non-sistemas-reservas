@@ -8,8 +8,8 @@ import Servicios from './Servicios'
 import Empleados from './Empleados'
 import ConfiguracionHorarios from './ConfiguracionHorarios'
 import Reportes from './Reportes'
-import Inventario from './Inventario'
-import FlyerCreator from './FlyerCreator'
+import InventarioPro from './InventarioPro'
+import FlyerCreatorPro from './FlyerCreatorPro'
 
 // Sistema de Vocabulario Multi-Negocio
 import { getVocabulario, RUBROS_DISPONIBLES } from '../utils/vocabulario'
@@ -1115,8 +1115,8 @@ export default function Dashboard({ session }) {
                 {tab === 'servicios' && <div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div>}
                 {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
-                {tab === 'inventario' && <Inventario negocioId={negocio.id} rubro={negocio.rubro} />}
-                {tab === 'flyer' && <FlyerCreator negocio={negocio} publicLink={publicLink} />}
+                {tab === 'inventario' && <InventarioPro negocioId={negocio.id} rubro={negocio.rubro} />}
+                {tab === 'flyer' && <FlyerCreatorPro negocio={negocio} publicLink={publicLink} />}
               </div>
 
               {/* ====== TAB: CLIENTES — COMPLETO ====== */}
