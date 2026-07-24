@@ -32,11 +32,12 @@ import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevo
 
 // Componentes del Dashboard
 import DashboardTour, { useTour } from './DashboardTourV2'
-import FloatingAssistant from './NoniAssistantV3'
+import FloatingAssistant from './NoniAssistantV4'
 import DashboardHome from './DashboardHome'
 import NotificationCenter from './NotificationCenterV2'
 import GlobalSearch from './GlobalSearch'
 import '../components/PlastilinaStyles.css'
+import '../components/MobileOptimized.css'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
@@ -1092,24 +1093,26 @@ export default function Dashboard({ session }) {
             <div className="ns-mobile-content-area">
 
               {tab === 'inicio' && (
-                <DashboardHome
-                  negocio={negocio}
-                  vocab={vocab}
-                  colorPrimario={colorPrimario}
-                  onNavigate={(t) => setTab(t)}
-                  publicLink={publicLink}
-                  showToast={showToast}
-                  clientesCount={clientes.length}
-                  stats={stats}
-                  distribucionSemanal={distribucionSemanal}
-                />
+                <div id="tour-monitor">
+                  <DashboardHome
+                    negocio={negocio}
+                    vocab={vocab}
+                    colorPrimario={colorPrimario}
+                    onNavigate={(t) => setTab(t)}
+                    publicLink={publicLink}
+                    showToast={showToast}
+                    clientesCount={clientes.length}
+                    stats={stats}
+                    distribucionSemanal={distribucionSemanal}
+                  />
+                </div>
               )}
 
               {/* GESTIÓN DINÁMICA DE TABS */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                {tab === 'agenda' && <Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} />}
+                {tab === 'agenda' && <div id="tour-agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div>}
                 {tab === 'reportes' && <Reportes negocioId={negocio.id} colorPrimario={colorPrimario} rubro={negocio.rubro} />}
-                {tab === 'servicios' && <Servicios negocioId={negocio.id} rubro={negocio.rubro} />}
+                {tab === 'servicios' && <div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div>
                 {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
                 {tab === 'inventario' && <Inventario negocioId={negocio.id} rubro={negocio.rubro} />}
@@ -1281,7 +1284,7 @@ export default function Dashboard({ session }) {
 
               {/* ====== TAB: AJUSTES — COMPLETO ====== */}
               {tab === 'ajustes' && (
-                <div className="space-y-4 md:space-y-5 animate-in fade-in duration-700 max-w-2xl">
+                <div id="tour-ajustes" className="space-y-4 md:space-y-5 animate-in fade-in duration-700 max-w-2xl">
 
                   {/* SECCIÓN: PERFIL DEL NEGOCIO */}
                   <div className="ns-settings-card">
