@@ -1112,7 +1112,7 @@ export default function Dashboard({ session }) {
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                 {tab === 'agenda' && <div id="tour-agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div>}
                 {tab === 'reportes' && <Reportes negocioId={negocio.id} colorPrimario={colorPrimario} rubro={negocio.rubro} />}
-                {tab === 'servicios' && <div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div>
+                {tab === 'servicios' && <div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div>}
                 {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
                 {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
                 {tab === 'inventario' && <Inventario negocioId={negocio.id} rubro={negocio.rubro} />}
