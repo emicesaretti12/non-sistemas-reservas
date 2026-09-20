@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { RUBROS_DISPONIBLES, getVocabulario } from '../utils/vocabulario'
+import { horariosPorDefecto } from '../utils/reservas'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IconCelebrate, IconCheckCircle } from './NoniIcons'
 import { useToast } from './Toast'
@@ -223,22 +224,30 @@ export default function OnboardingWizard({ session, onComplete }) {
     createdRef.current = true
     setSaving(true)
     try {
-      const { data: existing } = await supabase.from('negocios').select('id').eq('owner_id', session.user.id).maybeSingle()
+      const { data: existing } = await supabase
+        .from('negocios').select('id').eq('owner_id', session.user.id)
+        .order('creado_en', { ascending: false }).limit(1).maybeSingle()
+
       let id = existing?.id
       if (!id) {
+        // `es_admin_plataforma` NO se manda desde el cliente: era una vía de
+        // escalada de privilegios (ver sql/2026-09-20_seguridad_y_reservas.sql,
+        // que además lo bloquea a nivel base).
         const { data: neg, error } = await supabase.from('negocios').insert([{
           owner_id: session.user.id, nombre: finalData.nombre, rubro: finalData.rubro,
           color_primario: finalData.color, estado_suscripcion: 'trial',
-          es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL
-            ? session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL : false
         }]).select().single()
         if (error) throw error
         id = neg.id
       }
       setNegocioId(id)
+
+      // Horarios por defecto (Lun a Vie de 9 a 18). Antes se guardaba `null` y
+      // el link público del negocio nuevo mostraba TODOS los días cerrados:
+      // no podía recibir una sola reserva hasta configurarlos a mano.
       await supabase.from('negocios').update({
         descripcion: finalData.descripcion, instagram: finalData.instagram,
-        logo_url: finalData.logo_url, horarios: null
+        logo_url: finalData.logo_url, horarios: horariosPorDefecto()
       }).eq('id', id)
       
       if (finalData.svcNombre) {

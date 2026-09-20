@@ -1,7 +1,7 @@
 /**
  * suscripcion.js — Lógica central de planes, prueba gratis y bloqueo de acceso.
  *
- * Modelo de datos (tabla `negocios`, ver sql_suscripciones.sql):
+ * Modelo de datos (tabla `negocios`, ver sql/2026-09-20_seguridad_y_reservas.sql):
  *   - estado_suscripcion: 'trial' | 'activo' | 'suspendido'
  *   - trial_inicio       TIMESTAMPTZ
  *   - trial_fin          TIMESTAMPTZ  (inicio + 7 días)
@@ -9,29 +9,51 @@
  *   - plan               TEXT (default 'profesional')
  *
  * Compatibilidad: si faltan las columnas nuevas (datos viejos), NO se bloquea el acceso.
+ *
+ * ── CONFIGURACIÓN ───────────────────────────────────────────────────────────
+ * Los datos de cobro se leen de variables de entorno para no tener que tocar
+ * código al cambiarlos. Definilas en `.env` (local) y en Vercel (producción):
+ *
+ *   VITE_CONTACTO_WHATSAPP=5493511234567   ← tu número, internacional, sin "+"
+ *   VITE_CONTACTO_EMAIL=soporte@nonsistemas.com
+ *   VITE_PLAN_PRECIO=9990
+ *   VITE_PLAN_NOMBRE=Profesional
+ *
+ * Si VITE_CONTACTO_WHATSAPP no está seteada, los botones de activación caen al
+ * email y la app muestra un aviso en Ajustes para que lo completes.
  */
+
+const env = import.meta.env
+
+const precioEnv = Number(env.VITE_PLAN_PRECIO)
 
 export const PLAN = {
   id: 'profesional',
-  nombre: 'Profesional',
-  precio: 9990,
+  nombre: env.VITE_PLAN_NOMBRE || 'Profesional',
+  precio: Number.isFinite(precioEnv) && precioEnv > 0 ? precioEnv : 9990,
   moneda: 'ARS',
   trialDias: 7,
   cicloDias: 30,
 }
 
-// ⚠️ EDITAR: tu WhatsApp para recibir pedidos de activación (formato internacional, sin "+").
-// Ej Argentina: 549 + característica sin 0 + número sin 15. p.ej: 5493511234567
 export const CONTACTO_PAGO = {
-  whatsapp: '5493510000000',
-  email: 'soporte@nonsistemas.com',
+  whatsapp: (env.VITE_CONTACTO_WHATSAPP || '').replace(/[^0-9]/g, ''),
+  email: env.VITE_CONTACTO_EMAIL || 'soporte@nonsistemas.com',
 }
+
+/** true si todavía no se configuró un canal de cobro real. */
+export const cobroSinConfigurar = !CONTACTO_PAGO.whatsapp
 
 const DIA_MS = 86400000
 
 /** Días (redondeo hacia arriba) entre dos fechas. */
 export function diasEntre(desde, hasta) {
   return Math.ceil((hasta.getTime() - desde.getTime()) / DIA_MS)
+}
+
+/** Formatea un precio en pesos sin decimales. */
+export function formatearPrecio(valor = PLAN.precio) {
+  return `$${Number(valor || 0).toLocaleString('es-AR')}`
 }
 
 /**
@@ -85,12 +107,13 @@ export function etiquetaEstado(estado) {
   }
 }
 
-/** Link de WhatsApp para solicitar la activación manual del plan. */
+/** Link de WhatsApp (o mailto como fallback) para solicitar la activación del plan. */
 export function whatsappActivacion(negocio, email) {
   const msg = `Hola! Quiero activar mi suscripción de Noni para "${negocio?.nombre || ''}" (ID: ${negocio?.id || ''}). Mi email: ${email || ''}.`
-  const num = (CONTACTO_PAGO.whatsapp || '').replace(/[^0-9]/g, '')
-  if (!num) return `mailto:${CONTACTO_PAGO.email}?subject=${encodeURIComponent('Activar suscripción')}&body=${encodeURIComponent(msg)}`
-  return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`
+  if (!CONTACTO_PAGO.whatsapp) {
+    return `mailto:${CONTACTO_PAGO.email}?subject=${encodeURIComponent('Activar suscripción')}&body=${encodeURIComponent(msg)}`
+  }
+  return `https://wa.me/${CONTACTO_PAGO.whatsapp}?text=${encodeURIComponent(msg)}`
 }
 
 /** Próxima fecha de vencimiento al registrar un pago (extiende si todavía está vigente). */

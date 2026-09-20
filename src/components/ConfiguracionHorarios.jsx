@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { normalizarHorarios, horariosPorDefecto } from '../utils/reservas'
 import { useToast } from './Toast'
 import { IconRobot } from './NoniIcons'
 
@@ -8,17 +9,9 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   const [guardando, setGuardando] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const defaultHorarios = {
-    lunes:     { abierto: true,  inicio: '08:00', fin: '21:00', pausa: true,  inicioPausa: '13:00', finPausa: '17:00' },
-    martes:    { abierto: true,  inicio: '08:00', fin: '21:00', pausa: true,  inicioPausa: '13:00', finPausa: '17:00' },
-    miercoles: { abierto: true,  inicio: '08:00', fin: '21:00', pausa: true,  inicioPausa: '13:00', finPausa: '17:00' },
-    jueves:    { abierto: true,  inicio: '08:00', fin: '21:00', pausa: true,  inicioPausa: '13:00', finPausa: '17:00' },
-    viernes:   { abierto: true,  inicio: '08:00', fin: '21:00', pausa: true,  inicioPausa: '13:00', finPausa: '17:00' },
-    sabado:    { abierto: false, inicio: '10:00', fin: '14:00', pausa: false, inicioPausa: '13:00', finPausa: '17:00' },
-    domingo:   { abierto: false, inicio: '00:00', fin: '00:00', pausa: false, inicioPausa: '13:00', finPausa: '17:00' }
-  }
-
-  const [horarios, setHorarios] = useState(negocio?.horarios || defaultHorarios)
+  // Normalizamos: varios negocios tienen el JSON incompleto o en null y al
+  // leer `horarios[dia].abierto` la pantalla explotaba.
+  const [horarios, setHorarios] = useState(() => normalizarHorarios(negocio?.horarios))
 
   const diasSemana = [
     { id: 'lunes',     label: 'Lun', full: 'Lunes' },
@@ -44,7 +37,36 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
     }))
   }
 
+  const aMinutos = (hhmm) => {
+    const [h, m] = String(hhmm || '').split(':').map(Number)
+    return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0)
+  }
+
   async function guardarConfiguracion() {
+    // Validación: una pausa fuera del horario dejaba la agenda sin turnos y
+    // no había ninguna señal de por qué.
+    for (const dia of diasSemana) {
+      const d = horarios[dia.id]
+      if (!d?.abierto) continue
+      if (aMinutos(d.inicio) === aMinutos(d.fin)) {
+        toast.error(`${dia.full}: la hora de apertura y cierre no pueden ser iguales.`)
+        return
+      }
+      if (d.pausa) {
+        const ini = aMinutos(d.inicio), fin = aMinutos(d.fin)
+        const pIni = aMinutos(d.inicioPausa), pFin = aMinutos(d.finPausa)
+        const nocturno = fin <= ini
+        if (pFin <= pIni) {
+          toast.error(`${dia.full}: el fin de la pausa tiene que ser posterior al inicio.`)
+          return
+        }
+        if (!nocturno && (pIni < ini || pFin > fin)) {
+          toast.error(`${dia.full}: la pausa tiene que estar dentro del horario de atención.`)
+          return
+        }
+      }
+    }
+
     setGuardando(true)
     try {
       const { error } = await supabase
@@ -153,7 +175,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       {/* ── LISTA DE DÍAS — Plastilina 3D Cards ── */}
       <div className="space-y-3">
         {diasSemana.map((dia, index) => {
-          const dataDia = horarios[dia.id]
+          const dataDia = horarios[dia.id] || horariosPorDefecto()[dia.id]
           const isOpen = dataDia.abierto
 
           return (

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, esGastronomia } from '../utils/vocabulario'
 import { getEstadoSuscripcion } from '../utils/suscripcion'
+import { ocupaHorario, duracionTurno, parseFecha, seSolapan, verificarDisponibilidad, mapaEmbedUrl } from '../utils/reservas'
 import { useToast } from './Toast'
 
 export default function VistaPublica() {
@@ -11,6 +12,7 @@ export default function VistaPublica() {
   
   // --- CORE DATA STATE ---
   const [loading, setLoading] = useState(true)
+  const [errorCarga, setErrorCarga] = useState(null)
   const [negocio, setNegocio] = useState(null)
   const [servicios, setServicios] = useState([])
   const [empleados, setEmpleados] = useState([])
@@ -61,13 +63,21 @@ export default function VistaPublica() {
   async function bootBrandedApp() {
     try {
       setLoading(true)
+      setErrorCarga(null)
+
+      // `maybeSingle` en vez de `single`: un ID inexistente ya no tira error,
+      // devuelve null y podemos mostrar una pantalla decente.
       const { data: biz, error } = await supabase
         .from('negocios')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
+      if (!biz) {
+        setErrorCarga('no-encontrado')
+        return
+      }
       setNegocio(biz)
 
       const [resSrvs, resEmps, resCat] = await Promise.all([
@@ -81,7 +91,8 @@ export default function VistaPublica() {
       setCatalogo(resCat.data || [])
       generarCalendarioPro(biz.horarios)
     } catch (e) {
-      console.error("Nucleus Error:", e.message)
+      console.error('Error cargando la app de reservas:', e.message)
+      setErrorCarga('conexion')
     } finally {
       setLoading(false)
     }
@@ -156,34 +167,48 @@ export default function VistaPublica() {
     try {
       // Para horarios nocturnos, consultar reservas del día actual Y el siguiente
       const selectedDayStart = new Date(year, month - 1, d, 0, 0, 0)
-      const inicioDiaISO = selectedDayStart.toISOString()
+      // Miramos desde 8h antes del inicio del día: un turno largo de la noche
+      // anterior también ocupa franjas de este día.
+      const inicioDiaISO = new Date(selectedDayStart.getTime() - 8 * 3600000).toISOString()
       const finBusquedaISO = isOvernight
         ? new Date(year, month - 1, d + 1, 23, 59, 59, 999).toISOString()
         : new Date(year, month - 1, d, 23, 59, 59, 999).toISOString()
 
-      const { data: taken } = await supabase
+      let queryTurnos = supabase
         .from('turnos')
-        .select('fecha_hora, servicios(duracion_minutos)')
-        .eq('empleado_id', reserva.empleadoId)
-        .eq('estado', 'confirmado')
+        .select('fecha_hora, estado, servicios(duracion_minutos)')
+        .eq('negocio_id', negocio.id)
         .gte('fecha_hora', inicioDiaISO)
         .lte('fecha_hora', finBusquedaISO)
 
+      // `.eq(col, null)` no filtra NULL en PostgREST. Sin este `.is`, un negocio
+      // sin staff cargado nunca detectaba turnos ocupados y sobrevendía horarios.
+      queryTurnos = reserva.empleadoId
+        ? queryTurnos.eq('empleado_id', reserva.empleadoId)
+        : queryTurnos.is('empleado_id', null)
+
+      const { data: taken } = await queryTurnos
+
       // Convertir reservas existentes a "minutos desde medianoche del día seleccionado"
-      const bookedIntervals = taken?.map(t => {
-        let rawDate = t.fecha_hora ? t.fecha_hora.replace(' ', 'T') : ''
-        if (!rawDate.endsWith('Z') && !rawDate.includes('+') && rawDate.split('-').length <= 3) {
-           rawDate += 'Z'
-        }
-        const bdDate = new Date(rawDate)
-        if (isNaN(bdDate.getTime())) return null
+      const bookedIntervals = (taken || []).map(t => {
+        // Los turnos cancelados o marcados como ausencia liberan el horario;
+        // los atendidos ('completado') lo siguen ocupando.
+        if (!ocupaHorario(t)) return null
+        const bdDate = parseFecha(t.fecha_hora)
+        if (!bdDate) return null
 
         // Minutos absolutos desde medianoche del día seleccionado (soporta día siguiente)
         const diffMs = bdDate.getTime() - selectedDayStart.getTime()
         const startMins = Math.round(diffMs / 60000)
-        const duration = t.servicios?.duracion_minutos || 30
-        return { startMins, endMins: startMins + duration }
-      }).filter(Boolean) || []
+        return { startMins, endMins: startMins + duracionTurno(t) }
+      }).filter(Boolean)
+
+      // No ofrecer horarios que ya pasaron (o que arrancan en menos de 15').
+      const ahora = new Date()
+      const esHoy = ahora.toDateString() === new Date(year, month - 1, d).toDateString()
+      const minutosMinimos = esHoy
+        ? Math.round((ahora.getTime() - selectedDayStart.getTime()) / 60000) + 15
+        : -Infinity
 
       const selectedService = servicios.find(s => s.id === reserva.servicioId)
       const selectedDuration = selectedService?.duracion_minutos || 30
@@ -201,21 +226,18 @@ export default function VistaPublica() {
       const avail = slots.filter(s => {
         const slotStart = s.totalMins
         const slotEnd = slotStart + selectedDuration
-        
+
+        // Horario que ya pasó (o demasiado sobre la hora) en el día de hoy
+        if (slotStart < minutosMinimos) return false
+
         // No puede exceder el horario de cierre (en minutos extendidos)
         if (slotEnd > closeMins) return false
-        
+
         // No puede chocar con la pausa (corte) del día
-        if (tienePausa) {
-            if (Math.max(slotStart, inicioPausaMins) < Math.min(slotEnd, finPausaMins)) {
-                return false
-            }
-        }
-        
+        if (tienePausa && seSolapan(slotStart, slotEnd, inicioPausaMins, finPausaMins)) return false
+
         // Comprobar solapamiento con reservas existentes
-        const hasOverlap = bookedIntervals.some(b => {
-           return Math.max(slotStart, b.startMins) < Math.min(slotEnd, b.endMins)
-        })
+        const hasOverlap = bookedIntervals.some(b => seSolapan(slotStart, slotEnd, b.startMins, b.endMins))
 
         return !hasOverlap
       })
@@ -236,8 +258,10 @@ export default function VistaPublica() {
           madrugada: []
         })
       }
-    } catch {
-      console.error("Error en slots")
+    } catch (e) {
+      console.error('Error calculando horarios disponibles:', e?.message || e)
+      setHorasDisponibles({ mañana: [], tarde: [], noche: [], madrugada: [] })
+      showToast('No pudimos cargar los horarios. Revisá tu conexión.', 'error')
     } finally {
       setBuscandoHoras(false)
     }
@@ -245,6 +269,23 @@ export default function VistaPublica() {
 
   async function submitBooking(e) {
     e.preventDefault()
+
+    // ── Validación previa (antes se confiaba sólo en el `required` del HTML) ──
+    const nombre = reserva.clienteNombre.trim()
+    const telefono = reserva.clienteTelefono.trim()
+    const email = reserva.clienteEmail.trim()
+    const soloDigitos = telefono.replace(/[^0-9]/g, '')
+
+    if (nombre.length < 2) return showToast('Escribí tu nombre completo.', 'error')
+    if (soloDigitos.length < 6) return showToast('Revisá el número de WhatsApp: parece incompleto.', 'error')
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return showToast('El correo no tiene un formato válido.', 'error')
+    }
+    if (!reserva.servicioId || !reserva.fecha || !reserva.hora) {
+      setPaso(1)
+      return showToast('Volvé a elegir servicio, fecha y horario.', 'error')
+    }
+
     setGuardando(true)
     try {
       // Empaquetado de hora local a UTC exacto (soporta horario nocturno cross-midnight)
@@ -252,18 +293,28 @@ export default function VistaPublica() {
       const [hour, minute] = reserva.hora.split(':').map(Number)
       const bookingDay = reserva.horaNextDay ? day + 1 : day
       const dateExacta = new Date(year, month - 1, bookingDay, hour, minute, 0)
+
+      if (dateExacta.getTime() < Date.now() - 60000) {
+        setPaso(3)
+        showToast('Ese horario ya pasó. Elegí otro, por favor.', 'error')
+        setGuardando(false)
+        return
+      }
+
       const fechaHoraISO = dateExacta.toISOString()
 
-      // Prevención de Double-Booking
-      const { data: colision } = await supabase
-        .from('turnos')
-        .select('id')
-        .eq('empleado_id', reserva.empleadoId)
-        .eq('fecha_hora', fechaHoraISO)
-        .eq('estado', 'confirmado')
+      // Prevención de double-booking considerando la DURACIÓN del servicio.
+      // (El chequeo anterior comparaba sólo la hora exacta, así que un turno de
+      // 60' a las 10:00 no impedía reservar otro a las 10:30.)
+      const { ok, motivo } = await verificarDisponibilidad(supabase, {
+        negocioId: negocio.id,
+        empleadoId: reserva.empleadoId,
+        inicio: dateExacta,
+        duracionMin: servicios.find(x => x.id === reserva.servicioId)?.duracion_minutos || 30,
+      })
 
-      if (colision && colision.length > 0) {
-        showToast("Este horario acaba de ser reservado. Por favor, selecciona otro.", "error")
+      if (!ok) {
+        showToast(motivo, 'error')
         setPaso(3)
         const diaActual = diasCalendario.find(d => d.full === reserva.fecha)
         if (diaActual) handleDateSelect(diaActual)
@@ -276,9 +327,9 @@ export default function VistaPublica() {
         negocio_id: negocio.id,
         servicio_id: reserva.servicioId,
         empleado_id: reserva.empleadoId,
-        cliente_nombre: reserva.clienteNombre,
-        cliente_telefono: reserva.clienteTelefono,
-        cliente_email: reserva.clienteEmail,
+        cliente_nombre: nombre,
+        cliente_telefono: telefono,
+        cliente_email: email,
         fecha_hora: fechaHoraISO,
         estado: 'confirmado'
       }
@@ -289,12 +340,24 @@ export default function VistaPublica() {
       }
 
       const { error } = await supabase.from('turnos').insert([payload])
-      
-      if (error) throw error
+
+      if (error) {
+        // 23505 = choque con el índice único que impide dos turnos en la misma
+        // franja (ver sql/2026-09-20_seguridad_y_reservas.sql).
+        if (error.code === '23505') {
+          showToast('Ese horario acaba de ocuparse. Elegí otro, por favor.', 'error')
+          setPaso(3)
+          const diaActual = diasCalendario.find(d => d.full === reserva.fecha)
+          if (diaActual) handleDateSelect(diaActual)
+          return
+        }
+        throw error
+      }
       setPaso(5)
 
-    } catch {
-      showToast("Ocurrió un error al procesar la solicitud. Reintente.", "error")
+    } catch (err) {
+      console.error('Error al reservar:', err?.message || err)
+      showToast('No pudimos confirmar la reserva. Revisá tu conexión y reintentá.', 'error')
     } finally {
       setGuardando(false)
     }
@@ -314,6 +377,11 @@ export default function VistaPublica() {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
 
+  // Si el negocio no cargó staff, el paso 2 no tiene nada que mostrar: antes
+  // el cliente quedaba en una pantalla vacía sin poder avanzar.
+  const requiereStaff = empleados.length > 0
+  const pasoTrasServicio = requiereStaff ? 2 : 3
+
   // Helper: nombre del servicio seleccionado
   const servicioSeleccionado = servicios.find(s => s.id === reserva.servicioId)
   const empleadoSeleccionado = empleados.find(e => e.id === reserva.empleadoId)
@@ -332,6 +400,40 @@ export default function VistaPublica() {
       </div>
     </div>
   )
+
+  // Link inválido o error de red: antes esto dejaba la pantalla en blanco
+  // porque más abajo se leía `negocio.color_primario` sobre un null.
+  if (!negocio) {
+    const esNoEncontrado = errorCarga === 'no-encontrado'
+    return (
+      <div className="min-h-dvh flex items-center justify-center p-6 font-sans" style={{ background: 'linear-gradient(135deg, #F8F7FF 0%, #EEEBFF 50%, #FDFCFE 100%)' }} data-testid="public-error">
+        <div className="text-center max-w-sm">
+          <div className="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center shadow-xl" style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)' }}>
+            <svg className="w-9 h-9" style={{ color: '#5B3DF5', opacity: 0.55 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-black tracking-tighter mb-2" style={{ color: '#1E1B4B' }}>
+            {esNoEncontrado ? 'No encontramos este negocio' : 'No pudimos cargar la página'}
+          </h2>
+          <p className="text-sm font-medium mb-6" style={{ color: '#6B6489' }}>
+            {esNoEncontrado
+              ? 'El link puede estar mal escrito o el negocio ya no está disponible. Pedile el link actualizado al negocio.'
+              : 'Parece un problema de conexión. Probá de nuevo en unos segundos.'}
+          </p>
+          {!esNoEncontrado && (
+            <button
+              onClick={() => bootBrandedApp()}
+              className="px-6 py-3.5 rounded-xl text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95"
+              style={{ background: '#5B3DF5', boxShadow: '0 8px 24px rgba(91,61,245,0.35)' }}
+            >
+              Reintentar
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   // Negocio sin acceso (prueba vencida o suspendido) — vista pública bloqueada
   if (negocio && !getEstadoSuscripcion(negocio).acceso) {
@@ -353,6 +455,9 @@ export default function VistaPublica() {
   const accentUltraSoft = hexToRgba(accent, 0.04) 
   const accentGlow = hexToRgba(accent, 0.3)
   const accentDark = hexToRgba(accent, 0.85)
+
+  // Sólo embebemos mapas de Google (el campo lo escribe el dueño del negocio).
+  const mapaUrlSegura = mapaEmbedUrl(negocio.mapa_url, negocio.direccion)
 
   // Vocabulario dinámico según rubro
   const vocab = getVocabulario(negocio.rubro)
@@ -528,10 +633,10 @@ export default function VistaPublica() {
            <nav className="ns-progress-nav">
               <div className="flex items-center justify-between mb-1.5 md:mb-2 px-1">
                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-primary)' }}>Progreso de Reserva</span>
-                 <span className="text-[9px] md:text-[10px] font-bold" style={{ color: 'var(--ns-text)' }}>{paso} / 4</span>
+                 <span className="text-[9px] md:text-[10px] font-bold" style={{ color: 'var(--ns-text)' }}>{requiereStaff ? paso : paso - 1} / {requiereStaff ? 4 : 3}</span>
               </div>
               <div className="flex gap-1 md:gap-1.5">
-                 {[1,2,3,4].map(p => (
+                 {(requiereStaff ? [1,2,3,4] : [1,3,4]).map(p => (
                    <div key={p} className="h-1 md:h-1.5 flex-1 rounded-full overflow-hidden relative" style={{ background: 'var(--ns-border)' }}>
                       <div className="absolute inset-y-0 left-0 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" style={{ 
                         width: paso >= p ? '100%' : '0%', 
@@ -550,11 +655,33 @@ export default function VistaPublica() {
             {paso === 1 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-2.5 md:space-y-3">
                 <h2 className="text-base md:text-lg font-black tracking-tight px-1" style={{ color: 'var(--ns-text)' }}>{vocab.paso1Titulo}</h2>
+                {servicios.length === 0 ? (
+                  <div className="nh-card p-8 text-center" data-testid="public-sin-servicios">
+                     <div className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--ns-primary-bg)' }}>
+                        <svg className="w-7 h-7" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                     </div>
+                     <p className="text-sm font-black" style={{ color: 'var(--ns-text)' }}>Todavía no hay {vocab.servicios} para reservar</p>
+                     <p className="text-[12px] font-medium mt-1.5 leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
+                        {negocio.nombre} está terminando de configurar su agenda online.
+                        {negocio.telefono ? ' Mientras tanto podés escribirles directo.' : ' Probá de nuevo más tarde.'}
+                     </p>
+                     {negocio.telefono && (
+                       <a
+                         href={`https://wa.me/${negocio.telefono.replace(/[^0-9]/g, '')}`}
+                         target="_blank" rel="noopener noreferrer"
+                         className="inline-flex items-center gap-2 mt-5 px-5 py-3 rounded-xl text-white font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all"
+                         style={{ background: '#25D366' }}
+                       >
+                         Escribir por WhatsApp
+                       </a>
+                     )}
+                  </div>
+                ) : (
                 <div className="nh-card overflow-hidden">
                    {servicios.map((s, idx) => (
                      <button 
                         key={s.id} 
-                        onClick={() => { setReserva({...reserva, servicioId: s.id}); setPaso(2) }} 
+                        onClick={() => { setReserva(prev => ({ ...prev, servicioId: s.id, hora: '', horaNextDay: false })); setPaso(pasoTrasServicio) }} 
                         className={`ns-public-service-item ${idx !== servicios.length - 1 ? 'border-b' : ''}`}
                      >
                         <div className="flex items-center gap-3">
@@ -577,6 +704,7 @@ export default function VistaPublica() {
                      </button>
                    ))}
                 </div>
+                )}
               </section>
             )}
 
@@ -593,7 +721,7 @@ export default function VistaPublica() {
                    {empleados.map(e => (
                      <button 
                         key={e.id} 
-                        onClick={() => { setReserva({...reserva, empleadoId: e.id}); setPaso(3) }} 
+                        onClick={() => { setReserva(prev => ({ ...prev, empleadoId: e.id, hora: '', horaNextDay: false })); setPaso(3) }} 
                         className="ns-public-employee-card"
                      >
                         <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-[3px] border-white group-hover:scale-105 transition-transform duration-500" style={{ background: 'var(--ns-primary-bg)' }}>
@@ -614,8 +742,8 @@ export default function VistaPublica() {
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
                    <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>Fecha y Horario</h2>
-                   <button onClick={() => setPaso(2)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso3Volver}
+                   <button onClick={() => setPaso(requiereStaff ? 2 : 1)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {requiereStaff ? vocab.paso3Volver : vocab.paso2Volver}
                    </button>
                 </div>
                 
@@ -690,7 +818,7 @@ export default function VistaPublica() {
                                          return (
                                          <button 
                                             key={slotTime + (slotNextDay ? '-nd' : '')} 
-                                            onClick={() => setReserva({...reserva, hora: slotTime, horaNextDay: slotNextDay})} 
+                                            onClick={() => setReserva(prev => ({ ...prev, hora: slotTime, horaNextDay: slotNextDay }))} 
                                             className={`py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-[0.95] shadow-sm brand-date-hover ${isSelected ? 'text-white border-transparent shadow-md' : 'bg-[#FDFDFC] text-zinc-800 border border-transparent hover:shadow-md'}`} 
                                             style={{ backgroundColor: isSelected ? accent : '', boxShadow: isSelected ? `0 4px 0 rgba(0,0,0,0.1), 0 8px 16px ${accentGlow}, inset 0 2px 0 rgba(255,255,255,0.25)` : undefined }}
                                          >
@@ -702,8 +830,11 @@ export default function VistaPublica() {
                                  </div>
                                )
                              ))}
-                             {horasDisponibles.mañana.length === 0 && horasDisponibles.tarde.length === 0 && horasDisponibles.noche.length === 0 && (
-                               <div className="py-8 text-center bg-zinc-50 rounded-xl border border-dashed border-zinc-200"><p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sin disponibilidad</p></div>
+                             {horasDisponibles.mañana.length === 0 && horasDisponibles.tarde.length === 0 && horasDisponibles.noche.length === 0 && horasDisponibles.madrugada.length === 0 && (
+                               <div className="py-8 text-center bg-zinc-50 rounded-xl border border-dashed border-zinc-200">
+                                 <p className="text-[11px] font-bold text-zinc-500">No quedan horarios libres este día</p>
+                                 <p className="text-[10px] font-medium text-zinc-400 mt-1">Probá con otra fecha del calendario.</p>
+                               </div>
                              )}
                           </div>
                         )}
@@ -730,7 +861,7 @@ export default function VistaPublica() {
                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Nombre Completo</label>
                          <div className="ns-input-wrapper">
                             <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required className="ns-input" placeholder="Ej. Pablo Pérez" value={reserva.clienteNombre} onChange={(e) => setReserva({...reserva, clienteNombre: e.target.value})} />
+                            <input required autoComplete="name" className="ns-input" placeholder="Ej. Pablo Pérez" value={reserva.clienteNombre} onChange={(e) => setReserva(prev => ({ ...prev, clienteNombre: e.target.value }))} />
                          </div>
                       </div>
 
@@ -738,15 +869,15 @@ export default function VistaPublica() {
                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>WhatsApp</label>
                          <div className="ns-input-wrapper">
                             <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required type="tel" className="ns-input" placeholder="351 000 0000" value={reserva.clienteTelefono} onChange={(e) => setReserva({...reserva, clienteTelefono: e.target.value})} />
+                            <input required type="tel" inputMode="tel" autoComplete="tel" className="ns-input" placeholder="351 000 0000" value={reserva.clienteTelefono} onChange={(e) => setReserva(prev => ({ ...prev, clienteTelefono: e.target.value }))} />
                          </div>
                       </div>
 
                       <div className="space-y-1">
-                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Correo Electrónico</label>
+                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Correo Electrónico <span style={{ color: 'var(--ns-text-muted)' }}>· opcional</span></label>
                          <div className="ns-input-wrapper">
                             <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                            <input required type="email" className="ns-input" placeholder="correo@ejemplo.com" value={reserva.clienteEmail} onChange={(e) => setReserva({...reserva, clienteEmail: e.target.value})} />
+                            <input type="email" autoComplete="email" className="ns-input" placeholder="correo@ejemplo.com" value={reserva.clienteEmail} onChange={(e) => setReserva(prev => ({ ...prev, clienteEmail: e.target.value }))} />
                          </div>
                       </div>
                       
@@ -755,7 +886,7 @@ export default function VistaPublica() {
                           <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Comensales</label>
                           <div className="ns-input-wrapper">
                              <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                             <input type="number" min="1" max="20" required className="ns-input" placeholder="Cantidad de personas" value={reserva.campoExtra} onChange={(e) => setReserva({...reserva, campoExtra: e.target.value})} />
+                             <input type="number" min="1" max="20" inputMode="numeric" required className="ns-input" placeholder="Cantidad de personas" value={reserva.campoExtra} onChange={(e) => setReserva(prev => ({ ...prev, campoExtra: e.target.value }))} />
                           </div>
                         </div>
                       )}
@@ -1187,9 +1318,9 @@ export default function VistaPublica() {
                     <p className="text-[12px] md:text-sm font-bold truncate" style={{ color: 'var(--ns-text)' }}>{negocio.direccion}</p>
                   )}
                 </div>
-                {negocio.mapa_url && (
+                {mapaUrlSegura && (
                   <a
-                    href={negocio.mapa_url.includes('google.com/maps') ? negocio.mapa_url : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(negocio.direccion || negocio.mapa_url)}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(negocio.direccion || negocio.nombre)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3 py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all active:scale-95"
@@ -1200,10 +1331,10 @@ export default function VistaPublica() {
                 )}
               </div>
               {/* Map Embed */}
-              {negocio.mapa_url && (
+              {mapaUrlSegura && (
                 <div className="h-[180px] md:h-[220px] w-full border-t" style={{ borderColor: 'var(--ns-border)' }}>
                   <iframe
-                    src={negocio.mapa_url.includes('<iframe') ? negocio.mapa_url.match(/src="([^"]+)"/)?.[1] || '' : `https://www.google.com/maps?q=${encodeURIComponent(negocio.mapa_url.includes('google.com/maps') ? negocio.mapa_url : negocio.direccion || negocio.mapa_url)}&output=embed`}
+                    src={mapaUrlSegura}
                     width="100%" height="100%" style={{border: 0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                     title="Ubicación del negocio"
                   ></iframe>

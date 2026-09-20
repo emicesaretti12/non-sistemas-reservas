@@ -79,16 +79,22 @@ export default function GuidedSetup({
   onNavigate,
   onDismiss,
 }) {
-  const [dismissed, setDismissed] = useState(false)
+  const claveDismiss = `ns_setup_dismissed_${negocio?.id || 'x'}`
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem(claveDismiss) === '1' } catch { return false }
+  })
   const [expanded, setExpanded] = useState(true)
-  const [shared, setShared] = useState(false)
+  // El "ya compartí el link" persiste entre recargas.
+  const [shared, setShared] = useState(() => {
+    try { return localStorage.getItem('ns_link_shared') === '1' } catch { return false }
+  })
   const [expandedStep, setExpandedStep] = useState(null)
   const [copyToast, setCopyToast] = useState(false)
 
   const data = {
     servicios: serviciosCount || 0,
     empleados: empleadosCount || 0,
-    horarios: negocio?.horarios && Object.values(negocio.horarios).some((d) => d.abierto),
+    horarios: Boolean(negocio?.horarios && Object.values(negocio.horarios).some((d) => d?.abierto)),
     logo: negocio?.logo_url,
     descripcion: negocio?.descripcion,
     compartido: shared,
@@ -100,12 +106,26 @@ export default function GuidedSetup({
   const allDone = completedSteps.length === totalSteps
   const nextStep = SETUP_STEPS.find((s) => !s.check(data))
 
+  const marcarCompartido = () => {
+    setShared(true)
+    try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
+  }
+
+  const cerrarPanel = () => {
+    setDismissed(true)
+    try { localStorage.setItem(claveDismiss, '1') } catch { /* modo privado */ }
+    if (onDismiss) onDismiss()
+  }
+
   useEffect(() => {
     if (allDone) {
-      const t = setTimeout(() => setDismissed(true), 8000)
+      const t = setTimeout(() => {
+        setDismissed(true)
+        try { localStorage.setItem(claveDismiss, '1') } catch { /* modo privado */ }
+      }, 8000)
       return () => clearTimeout(t)
     }
-  }, [allDone])
+  }, [allDone, claveDismiss])
 
   if (dismissed) return null
 
@@ -115,13 +135,13 @@ export default function GuidedSetup({
 
   const handleShare = () => {
     const msg = encodeURIComponent(`Reservá en ${negocio?.nombre}: ${publicLink}`)
-    window.open(`https://wa.me/?text=${msg}`, '_blank')
-    setShared(true)
+    window.open(`https://wa.me/?text=${msg}`, '_blank', 'noopener')
+    marcarCompartido()
   }
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(publicLink).catch(() => {})
-    setShared(true)
+    marcarCompartido()
     setCopyToast(true)
     setTimeout(() => setCopyToast(false), 3000)
   }
@@ -507,10 +527,7 @@ export default function GuidedSetup({
               💡 Configuralo ahora — toma menos de 5 minutos
             </span>
             <button
-              onClick={() => {
-                setDismissed(true)
-                onDismiss?.()
-              }}
+              onClick={cerrarPanel}
               className="text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-slate-900"
               style={{ color: '#94a3b8' }}
               data-testid="guided-setup-dismiss"

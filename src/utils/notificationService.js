@@ -16,6 +16,7 @@ class NotificationService {
     this.subscription = null
     this.listeners = []
     this.notifications = []
+    this.negocioId = null
     this.soundEnabled = true
     this.browserNotificationsEnabled = false
     this.loadState()
@@ -27,16 +28,39 @@ class NotificationService {
   async init(negocioId) {
     if (!negocioId) return
 
-    // Request browser notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-      const permission = await Notification.requestPermission()
-      this.browserNotificationsEnabled = permission === 'granted'
-    } else if ('Notification' in window) {
+    // Las notificaciones se guardan por negocio: si alguien inicia sesión con
+    // otra cuenta en el mismo navegador no debe ver las del negocio anterior.
+    if (this.negocioId !== negocioId) {
+      this.negocioId = negocioId
+      this.loadState()
+      this.notifyListeners()
+    }
+
+    // No pedimos permiso al entrar: Chrome descarta (y penaliza) los pedidos
+    // que no nacen de un gesto del usuario. Se solicita desde el centro de
+    // notificaciones con `pedirPermiso()`.
+    if ('Notification' in window) {
       this.browserNotificationsEnabled = Notification.permission === 'granted'
     }
 
     // Subscribe to new turnos (reservations)
     this.subscribeToReservations(negocioId)
+  }
+
+  /**
+   * Pide permiso de notificaciones del navegador. Llamar SIEMPRE desde un
+   * click del usuario.
+   */
+  async pedirPermiso() {
+    if (!('Notification' in window)) return false
+    if (Notification.permission === 'granted') {
+      this.browserNotificationsEnabled = true
+      return true
+    }
+    if (Notification.permission === 'denied') return false
+    const permiso = await Notification.requestPermission()
+    this.browserNotificationsEnabled = permiso === 'granted'
+    return this.browserNotificationsEnabled
   }
 
   /**
@@ -83,20 +107,23 @@ class NotificationService {
    */
   async handleNewReservation(turno) {
     try {
-      // Fetch client and service details
-      const [clientRes, serviceRes] = await Promise.all([
-        supabase.from('clientes').select('*').eq('id', turno.cliente_id).single(),
-        supabase.from('servicios').select('*').eq('id', turno.servicio_id).single(),
-      ])
-
-      const cliente = clientRes.data
-      const servicio = serviceRes.data
+      // Los datos del cliente viven en el propio turno: no existe tabla
+      // `clientes`. La consulta anterior siempre fallaba y toda notificación
+      // decía genéricamente "Cliente reservó un servicio".
+      const cliente = {
+        nombre: turno.cliente_nombre || 'Cliente',
+        telefono: turno.cliente_telefono || '',
+        email: turno.cliente_email || '',
+      }
+      const servicio = turno.servicio_id
+        ? (await supabase.from('servicios').select('nombre, precio').eq('id', turno.servicio_id).maybeSingle()).data
+        : null
 
       const notification = {
         id: turno.id,
         type: 'new_reservation',
         title: '¡Nueva reserva!',
-        message: `${cliente?.nombre || 'Cliente'} reservó ${servicio?.nombre || 'un servicio'}`,
+        message: `${cliente.nombre} reservó ${servicio?.nombre || 'un turno'}${turno.fecha_hora ? ` · ${new Date(turno.fecha_hora).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : ''}`,
         timestamp: new Date().toISOString(),
         turno: turno,
         cliente: cliente,
@@ -118,13 +145,13 @@ class NotificationService {
    */
   async handleReservationUpdate(turno) {
     try {
-      const [clientRes, serviceRes] = await Promise.all([
-        supabase.from('clientes').select('*').eq('id', turno.cliente_id).single(),
-        supabase.from('servicios').select('*').eq('id', turno.servicio_id).single(),
-      ])
-
-      const cliente = clientRes.data
-      const servicio = serviceRes.data
+      const cliente = {
+        nombre: turno.cliente_nombre || 'Cliente',
+        telefono: turno.cliente_telefono || '',
+      }
+      const servicio = turno.servicio_id
+        ? (await supabase.from('servicios').select('nombre, precio').eq('id', turno.servicio_id).maybeSingle()).data
+        : null
 
       let title = 'Actualización de reserva'
       let message = `Cambio en reserva de ${cliente?.nombre || 'Cliente'}`
@@ -195,7 +222,7 @@ class NotificationService {
     try {
       new Notification(notification.title, {
         body: notification.message,
-        icon: '/icon-192x192.png',
+        icon: '/icon-192.png',
         tag: notification.id,
         requireInteraction: false,
       })
@@ -275,13 +302,17 @@ class NotificationService {
     })
   }
 
+  storageKey() {
+    return this.negocioId ? `${NOTIFICATION_KEY}_${this.negocioId}` : NOTIFICATION_KEY
+  }
+
   /**
    * Save state to localStorage
    */
   saveState() {
     try {
       localStorage.setItem(
-        NOTIFICATION_KEY,
+        this.storageKey(),
         JSON.stringify({
           notifications: this.notifications,
           soundEnabled: this.soundEnabled,
@@ -297,7 +328,8 @@ class NotificationService {
    */
   loadState() {
     try {
-      const saved = localStorage.getItem(NOTIFICATION_KEY)
+      const saved = localStorage.getItem(this.storageKey())
+      if (!saved) { this.notifications = [] }
       if (saved) {
         const parsed = JSON.parse(saved)
         this.notifications = parsed.notifications || []
@@ -326,6 +358,7 @@ class NotificationService {
       this.subscription = null
     }
     this.listeners = []
+    this.negocioId = null
   }
 }
 

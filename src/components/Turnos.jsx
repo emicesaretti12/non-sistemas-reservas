@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { verificarDisponibilidad, parseFecha, ocupaHorario } from '../utils/reservas'
 import { useToast } from './Toast'
 import { IconRobot } from './NoniIcons'
 
@@ -23,15 +24,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00'
   })
 
-  // Unificamos el parseo ultra robusto de los strings de Supabase para toda la vista
-  const safeParseDate = (dbString) => {
-    let rawDate = dbString ? dbString.replace(' ', 'T') : ''
-    if (!rawDate.endsWith('Z') && !rawDate.includes('+') && rawDate.split('-').length <= 3) {
-      rawDate += 'Z'
-    }
-    const d = new Date(rawDate)
-    return isNaN(d.getTime()) ? null : d
-  }
+  // Parseo unificado de los timestamps de Supabase (ver utils/reservas.js)
+  const safeParseDate = parseFecha
 
   useEffect(() => {
     if (negocioId) bootSmartAgenda()
@@ -135,10 +129,25 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       .then(() => bootSmartAgenda())
   }
 
-  async function confirmarYCancelarTurno() {
-    const id = confirmDialog.id
+  /**
+   * Cancelar un turno.
+   *
+   * Antes esto borraba la fila: se perdía el historial del cliente y la
+   * facturación del período. Ahora lo marcamos como 'cancelado' (el horario
+   * queda libre igual) y sólo borramos como último recurso, si la base rechaza
+   * el estado por un CHECK viejo.
+   */
+  async function confirmarYCancelarTurno(idForzado = null) {
+    const id = idForzado || confirmDialog.id
+    if (!id) return
     setConfirmDialog({ show: false, id: null })
-    const { error } = await supabase.from('turnos').delete().eq('id', id)
+
+    const { error } = await supabase
+      .from('turnos')
+      .update({ estado: 'cancelado' })
+      .eq('id', id)
+      .eq('negocio_id', negocioId)
+
     if (error) {
       if (error.message?.includes('JWT') || error.code === '401' || error.message?.includes('expired')) {
         const { error: refreshErr } = await supabase.auth.refreshSession()
@@ -148,14 +157,23 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           window.location.href = '/login'
           return
         }
-        const { error: retryErr } = await supabase.from('turnos').delete().eq('id', id)
-        if (retryErr) { toast.error('Error al eliminar el turno: ' + retryErr.message); return }
-      } else {
-        toast.error('Error al eliminar el turno: ' + error.message)
+        return confirmarYCancelarTurno(id)
+      }
+
+      // 23514 = violación de CHECK: la base no acepta el estado 'cancelado'.
+      if (error.code === '23514' || /check constraint/i.test(error.message || '')) {
+        const { error: delErr } = await supabase.from('turnos').delete().eq('id', id).eq('negocio_id', negocioId)
+        if (delErr) { toast.error('No se pudo cancelar el turno: ' + delErr.message); return }
+        toast.success('Turno cancelado')
+        bootSmartAgenda()
         return
       }
+
+      toast.error('No se pudo cancelar el turno: ' + error.message)
+      return
     }
-    toast.success('Turno cancelado correctamente')
+
+    toast.success('Turno cancelado · el horario volvió a quedar libre')
     bootSmartAgenda()
   }
 
@@ -172,7 +190,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const detalles = encodeURIComponent(`Cliente: ${turnoRaw.cliente_nombre}\nWhatsApp: ${turnoRaw.cliente_telefono}\n${vocab.empleado.charAt(0).toUpperCase() + vocab.empleado.slice(1)}: ${empleadoData?.nombre}\n\nGestión: Non Sistemas`)
     const intervalo = `${fmt(inicio)}/${fmt(fin)}`
 
-    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${intervalo}&details=${detalles}&sf=true&output=xml`, '_blank')
+    const win = window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${intervalo}&details=${detalles}&sf=true&output=xml`, '_blank', 'noopener')
+    if (!win) toast.info('Permití las ventanas emergentes si querés agendarlo en Google Calendar.')
   }
 
   /* ═══════════════════════════════════════════
@@ -195,6 +214,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
       // Contar turnos interactivos sincronizados con Parseo Exacto Multi-Navegador
       const turnosEseDia = todosLosTurnos.filter(t => {
+        if (t.estado === 'cancelado') return false
         const tDate = safeParseDate(t.fecha_hora)
         if (!tDate) return false
         return tDate.getFullYear() === year &&
@@ -256,6 +276,13 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
   async function handleGuardarTurno(e) {
     e.preventDefault()
+
+    const nombre = nuevoTurno.cliente_nombre.trim()
+    const telefono = nuevoTurno.cliente_telefono.trim()
+    if (nombre.length < 2) return toast.error('Poné el nombre del cliente.')
+    if (!nuevoTurno.servicio_id) return toast.error(`Elegí un ${vocab.servicio}.`)
+    if (!/^\d{2}:\d{2}$/.test(nuevoTurno.hora)) return toast.error('La hora no es válida.')
+
     setGuardando(true)
     try {
       // FORMATEO LOCAL ESTRICTO
@@ -265,38 +292,50 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       const dateObj = new Date(`${yyyy}-${mm}-${dd}T${nuevoTurno.hora}:00`)
       const fechaHoraExacta = dateObj.toISOString()
 
-      // Verificación de colisión Timezone Safe
-      const { data: colision } = await supabase
-        .from('turnos')
-        .select('id')
-        .eq('empleado_id', nuevoTurno.empleado_id)
-        .eq('fecha_hora', fechaHoraExacta)
-        .eq('estado', 'confirmado')
+      const serv = servicios.find(s => s.id === nuevoTurno.servicio_id)
+      const emp = empleados.find(e => e.id === nuevoTurno.empleado_id)
 
-      if (colision && colision.length > 0) {
-        toast.warning("Ese horario ya fue reservado para este empleado. Elija otro.")
+      // Colisión considerando la duración real del servicio (antes sólo se
+      // comparaba la hora exacta y se podían superponer turnos largos).
+      const { ok, motivo } = await verificarDisponibilidad(supabase, {
+        negocioId,
+        empleadoId: nuevoTurno.empleado_id || null,
+        inicio: dateObj,
+        duracionMin: serv?.duracion_minutos || 30,
+      })
+
+      if (!ok) {
+        toast.warning(motivo)
         setGuardando(false)
         return
       }
 
-      const serv = servicios.find(s => s.id === nuevoTurno.servicio_id)
-      const emp = empleados.find(e => e.id === nuevoTurno.empleado_id)
-
-      const { hora, ...turnoData } = nuevoTurno
+      const { hora, empleado_id, ...turnoData } = nuevoTurno
       const { error } = await supabase.from('turnos').insert([{
         ...turnoData,
+        cliente_nombre: nombre,
+        cliente_telefono: telefono,
+        empleado_id: empleado_id || null,
         negocio_id: negocioId,
         fecha_hora: fechaHoraExacta,
         estado: 'confirmado'
       }])
 
-      if (error) throw error
+      if (error) {
+        if (error.code === '23505') {
+          toast.warning('Ese horario acaba de ocuparse. Elegí otro.')
+          setGuardando(false)
+          bootSmartAgenda()
+          return
+        }
+        throw error
+      }
 
-      dispararGoogleCalendar(nuevoTurno, serv, emp)
       toast.success("Turno agendado con éxito")
       setModalAbierto(false)
       setNuevoTurno({ cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00' })
       bootSmartAgenda()
+      dispararGoogleCalendar({ ...nuevoTurno, cliente_nombre: nombre, cliente_telefono: telefono }, serv, emp)
     } catch (err) {
       toast.error("Error al agendar: " + err.message)
     } finally {
@@ -313,23 +352,28 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     return tDate ? tDate.getHours() : 0
   }
 
-  const turnosMañana = turnos.filter(t => extraeHoraSegura(t.fecha_hora) < 12)
-  const turnosTarde = turnos.filter(t => {
+  // Un turno cancelado ya no cuenta en la agenda del día.
+  const turnosVigentes = turnos.filter(t => t.estado !== 'cancelado')
+
+  const turnosMañana = turnosVigentes.filter(t => extraeHoraSegura(t.fecha_hora) < 12)
+  const turnosTarde = turnosVigentes.filter(t => {
     const h = extraeHoraSegura(t.fecha_hora)
     return h >= 12 && h < 18
   })
-  const turnosNoche = turnos.filter(t => extraeHoraSegura(t.fecha_hora) >= 18)
+  const turnosNoche = turnosVigentes.filter(t => extraeHoraSegura(t.fecha_hora) >= 18)
 
   const renderTurnoCard = (t) => {
     // Convierte el UTC de la DB a la hora local para mostrarlo bien
-    const horaLocal = new Date(t.fecha_hora).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    const fechaAmigable = new Date(t.fecha_hora).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
-    const esResuelto = t.estado === 'completado' || t.estado === 'no_show'
-    const esFuturo = new Date(t.fecha_hora) > new Date()
+    const fechaTurno = safeParseDate(t.fecha_hora) || new Date(t.fecha_hora)
+    const horaLocal = fechaTurno.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+    const fechaAmigable = fechaTurno.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+    const esResuelto = t.estado === 'completado' || t.estado === 'no_show' || t.estado === 'cancelado'
+    const esFuturo = fechaTurno > new Date()
 
     return (
       <div key={t.id} className={`rounded-2xl p-4 md:p-5 border flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-5 group transition-all ${t.estado === 'completado' ? 'bg-emerald-50/60 border-emerald-200/60 opacity-80' :
           t.estado === 'no_show' ? 'bg-red-50/40 border-red-200/50 opacity-65' :
+          t.estado === 'cancelado' ? 'bg-slate-50 border-slate-200 opacity-60' :
             'bg-white border-[#EDE8F7] hover:border-[#5B3DF5]/30 hover:shadow-md'
         }`}>
         <div className="flex md:flex-col items-center gap-2.5 md:gap-0 justify-between md:justify-center shrink-0 w-full md:w-20">
@@ -342,6 +386,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             )}
             {t.estado === 'no_show' && (
               <span className="text-[8px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-md uppercase tracking-wider md:mt-1">No vino</span>
+            )}
+            {t.estado === 'cancelado' && (
+              <span className="text-[8px] font-bold text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-md uppercase tracking-wider md:mt-1">Cancelado</span>
             )}
           </div>
         </div>
@@ -699,22 +746,22 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 <h2 className="text-3xl font-black tracking-tighter text-[#1A1630] leading-none">
                   {fechaActual.getDate()} {fechaActual.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
                 </h2>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A09CB5] mt-1.5">{turnos.length} {vocab.citasAsignadas}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A09CB5] mt-1.5">{turnosVigentes.length} {vocab.citasAsignadas}</p>
               </div>
               <button onClick={() => setModalDiaAbierto(false)} className="w-11 h-11 bg-[#F7F5FF] rounded-full flex items-center justify-center text-[#A09CB5] hover:text-[#5B3DF5] hover:bg-[#E8DEFF] transition-all active:scale-90"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg></button>
             </div>
 
             <div className="flex-1 overflow-y-auto bg-[#F7F5FF] p-4 md:p-6 no-scrollbar relative">
-              {turnos.length === 0 ? (
+              {turnosVigentes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-20 pb-40">
-                  {servicios.length === 0 || empleados.length === 0 ? (
+                  {servicios.length === 0 ? (
                     <>
                       <div className="w-14 h-14 bg-[#E8DEFF] rounded-2xl flex items-center justify-center mb-4">
                         <IconRobot size={28} className="text-[#5B3DF5]" />
                       </div>
                       <p className="text-sm font-bold text-[#1A1630]">Todavía no podés recibir turnos</p>
                       <p className="text-[11px] text-[#A09CB5] font-medium mt-2 max-w-[260px] leading-relaxed">
-                        {servicios.length === 0 ? 'Primero creá al menos un servicio' : 'Agregá al menos un profesional a tu equipo'} para que los clientes puedan reservar.
+                        Creá al menos un {vocab.servicio} para que tus clientes puedan reservar desde tu link.
                       </p>
                     </>
                   ) : (
@@ -829,7 +876,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             <p className="text-sm font-medium text-[#6B6489] mb-6 leading-relaxed">Esta acción eliminará el turno de la agenda y no se puede deshacer.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmDialog({ show: false, id: null })} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest text-[#6B6489] bg-[#F7F5FF] hover:bg-[#E8DEFF] transition-colors">Volver</button>
-              <button onClick={confirmarYCancelarTurno} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest text-white bg-red-500 hover:bg-red-600 transition-colors shadow-md shadow-red-500/20">Sí, Cancelar</button>
+              <button onClick={() => confirmarYCancelarTurno()} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest text-white bg-red-500 hover:bg-red-600 transition-colors shadow-md shadow-red-500/20">Sí, Cancelar</button>
             </div>
           </div>
         </div>

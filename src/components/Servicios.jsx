@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 import { useToast } from './Toast'
-import { IconRobot, IconCelebrate, IconErrorCircle } from './NoniIcons'
+import { useConfirm } from '../contexts/ConfirmContext'
+import { IconRobot, IconCelebrate } from './NoniIcons'
 
 export default function Servicios({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
   const toast = useToast()
+  const { showConfirm } = useConfirm()
   const [loading, setLoading] = useState(true)
   const [servicios, setServicios] = useState([])
 
@@ -15,7 +17,6 @@ export default function Servicios({ negocioId, rubro }) {
   const [guardando, setGuardando] = useState(false)
   const [modoEdicion, setModoEdicion] = useState(null)
   const [showCelebration, setShowCelebration] = useState(false)
-  const [showError, setShowError] = useState('')
 
   const [form, setForm] = useState({
     nombre: '',
@@ -73,12 +74,21 @@ export default function Servicios({ negocioId, rubro }) {
     setGuardando(true)
 
     try {
+      const nombre = form.nombre.trim()
+      const duracion = Number(form.duracion)
+      const precio = Number(form.precio)
+
+      if (!nombre) throw new Error('Poné un nombre para el ' + vocab.servicio + '.')
+      if (!Number.isFinite(duracion) || duracion < 5) throw new Error('La duración tiene que ser de al menos 5 minutos.')
+      if (duracion > 720) throw new Error('La duración no puede superar las 12 horas.')
+      if (!Number.isFinite(precio) || precio < 0) throw new Error('El precio no puede ser negativo.')
+
       // PAYLOAD EXACTO: duracion_minutos coincide con tu SQL
       const payload = {
         negocio_id: negocioId,
-        nombre: form.nombre.trim(),
-        duracion_minutos: Number(form.duracion),
-        precio: Number(form.precio)
+        nombre,
+        duracion_minutos: Math.round(duracion),
+        precio
       }
 
       if (modoEdicion) {
@@ -109,25 +119,34 @@ export default function Servicios({ negocioId, rubro }) {
 
     } catch (error) {
       console.error("Supabase Error:", error)
-      toast.showToast(`Error del servidor: ${error.message}`, 'error')
+      toast.error(error.message || 'No pudimos guardar el servicio. Reintentá.')
     } finally {
       setGuardando(false)
     }
   }
 
-  async function eliminarServicio(id) {
-    if (!window.confirm('¿Desea eliminar este servicio?')) return
-    const { error } = await supabase
-      .from('servicios')
-      .delete()
-      .eq('id', id)
-      .eq('negocio_id', negocioId)
+  function eliminarServicio(srv) {
+    showConfirm({
+      title: `¿Eliminar "${srv.nombre}"?`,
+      message: `Se va a quitar de tu app de reservas. Los turnos ya agendados con este ${vocab.servicio} se mantienen, pero pierden el precio y la duración asociados.`,
+      confirmText: 'Eliminar',
+      isDestructive: true,
+      onConfirm: async () => {
+        const { error } = await supabase
+          .from('servicios')
+          .delete()
+          .eq('id', srv.id)
+          .eq('negocio_id', negocioId)
 
-    if (error) {
-      toast.showToast(`Error al eliminar: ${error.message}`, 'error')
-    } else {
-      setServicios(servicios.filter(s => s.id !== id))
-    }
+        if (error) {
+          // Si hay turnos que lo referencian, Postgres bloquea el borrado.
+          toast.error('No se pudo eliminar: puede tener turnos asociados.')
+        } else {
+          setServicios(prev => prev.filter(s => s.id !== srv.id))
+          toast.success('Servicio eliminado')
+        }
+      }
+    })
   }
 
   return (
@@ -144,16 +163,6 @@ export default function Servicios({ negocioId, rubro }) {
         </div>
       )}
 
-      {/* Error toast */}
-      {showError && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-red-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <IconErrorCircle size={24} className="text-red-500" />
-          <div>
-            <p className="text-sm font-bold text-slate-900">Error</p>
-            <p className="text-[10px] text-slate-500 font-medium">{showError}</p>
-          </div>
-        </div>
-      )}
 
       <header className="flex items-center justify-between bg-white p-8 md:p-10 rounded-[2.5rem] border border-[#EDE8F7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
@@ -248,7 +257,8 @@ export default function Servicios({ negocioId, rubro }) {
                   <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-3.5 rounded-2xl bg-[#F7F5FF] text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] hover:bg-[#E8DEFF]/40 hover:text-[#5B3DF5] transition-all active:scale-95 border border-[#EDE8F7]">
                     Editar
                   </button>
-                  <button onClick={() => eliminarServicio(srv.id)} className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/20 shrink-0">
+                  <button onClick={() => eliminarServicio(srv)} aria-label={`Eliminar ${srv.nombre}`}
+                    className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/20 shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
                   </button>
                 </div>

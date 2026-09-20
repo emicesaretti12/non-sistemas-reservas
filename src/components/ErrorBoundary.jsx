@@ -19,12 +19,17 @@ class ErrorBoundary extends React.Component {
     this.setState({ hasError: false, error: null });
   };
 
+  handleReload = () => {
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
       const message = this.props.fallbackMessage || 'Algo salió mal en esta sección';
+      const detalle = this.state.error?.message;
 
       return (
-        <div className="animate-in fade-in bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-8 flex flex-col items-center justify-center text-center gap-4">
+        <div className="animate-in fade-in bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-8 m-4 flex flex-col items-center justify-center text-center gap-4">
           {/* Icono de advertencia */}
           <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
             <svg
@@ -51,13 +56,27 @@ class ErrorBoundary extends React.Component {
             </p>
           </div>
 
-          {/* Botón reintentar */}
-          <button
-            onClick={this.handleReset}
-            className="mt-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-xl shadow-sm hover:bg-slate-800 active:scale-[0.97] transition-all cursor-pointer"
-          >
-            Reintentar
-          </button>
+          {/* Detalle técnico: ayuda muchísimo cuando el usuario reporta el error */}
+          {detalle && (
+            <p className="text-[11px] font-mono text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 max-w-sm break-words">
+              {detalle}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-2 justify-center mt-2">
+            <button
+              onClick={this.handleReset}
+              className="px-5 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-xl shadow-sm hover:bg-slate-800 active:scale-[0.97] transition-all cursor-pointer"
+            >
+              Reintentar
+            </button>
+            <button
+              onClick={this.handleReload}
+              className="px-5 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-200 active:scale-[0.97] transition-all cursor-pointer"
+            >
+              Recargar la página
+            </button>
+          </div>
         </div>
       );
     }

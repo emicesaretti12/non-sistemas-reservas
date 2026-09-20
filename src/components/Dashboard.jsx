@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { useNavigate } from 'react-router-dom'
 
 // Inyección de componentes modulares
 import Turnos from './Turnos'
@@ -12,7 +11,7 @@ import InventarioPro from './InventarioPro'
 import FlyerCreatorPro from './FlyerCreatorPro'
 
 // Sistema de Vocabulario Multi-Negocio
-import { getVocabulario, RUBROS_DISPONIBLES } from '../utils/vocabulario'
+import { getVocabulario } from '../utils/vocabulario'
 
 // Wizard de Onboarding Guiado
 import OnboardingWizard from './OnboardingWizard'
@@ -27,8 +26,12 @@ import { useConfirm } from '../contexts/ConfirmContext'
 // Iconos
 import { IconCheckCircle } from './NoniIcons'
 
+// Aislamiento de fallos por sección
+import { ErrorGuard } from './ErrorBoundary'
+
 // Suscripción / planes
-import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN } from '../utils/suscripcion'
+import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN, cobroSinConfigurar, formatearPrecio } from '../utils/suscripcion'
+import { ocupaHorario, factura, precioTurno, parseFecha, tieneHorariosConfigurados, mapaEmbedUrl } from '../utils/reservas'
 
 // Componentes del Dashboard
 import DashboardTour, { useTour } from './DashboardTourV2'
@@ -54,17 +57,12 @@ export default function Dashboard({ session }) {
 
   // --- ESTADOS: GESTIÓN DE NEGOCIO (OWNER) ---
   const [tab, setTab] = useState('inicio')
-  const [stats, setStats] = useState({ hoy: 0, ingresos: 0, popular: '-', semana: 0, mesIngresos: 0, tasaOcupacion: 0 })
+  const [stats, setStats] = useState({ hoy: 0, ingresos: 0, proximos: 0, popular: '-', semana: 0, mesIngresos: 0, tasaOcupacion: 0 })
 
   // Lógica Granular de Carga
   const [guardandoPerfil, setGuardandoPerfil] = useState(false)
   const [subiendoLogo, setSubiendoLogo] = useState(false)
   const [subiendoPortada, setSubiendoPortada] = useState(false)
-
-  // --- ESTADOS: ONBOARDING ---
-  const [nombreNegocio, setNombreNegocio] = useState('')
-  const [rubroSeleccionado, setRubroSeleccionado] = useState(RUBROS_DISPONIBLES[0])
-  const [creando, setCreando] = useState(false)
 
   // --- ESTADOS: BRANDING & UI ---
   const [colorPrimario, setColorPrimario] = useState('#0f172a')
@@ -104,8 +102,6 @@ export default function Dashboard({ session }) {
   // --- TOUR GUIADO ---
   const tour = useTour()
 
-  const navigate = useNavigate()
-
   // --- UTILIDADES DE EXPORTACIÓN ---
   function exportToCSV(data, filename, columns) {
     const header = columns.map(c => c.label).join(',')
@@ -126,33 +122,44 @@ export default function Dashboard({ session }) {
   }
 
   function exportReportPDF({ title, negocioNombre, sections }) {
+    // Escapamos todo lo que venga de la base: un nombre con "<" rompía el HTML.
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ))
     // Generate a printable HTML report and trigger print dialog
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title} - ${negocioNombre}</title>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)} - ${esc(negocioNombre)}</title>
     <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#0f172a}
     h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#64748b;border-bottom:1px solid #e2e8f0;padding-bottom:8px}
     .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;flex:1;text-align:center}
     .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
     table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#f1f5f9;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b}
     td{padding:8px 12px;border-bottom:1px solid #f1f5f9}.meta{font-size:11px;color:#94a3b8;margin-top:4px}</style></head><body>
-    <h1>${title}</h1><p class="meta">${negocioNombre} — ${new Date().toLocaleDateString('es-ES', { day:'numeric',month:'long',year:'numeric' })}</p>`
+    <h1>${esc(title)}</h1><p class="meta">${esc(negocioNombre)} — ${new Date().toLocaleDateString('es-ES', { day:'numeric',month:'long',year:'numeric' })}</p>`
     + sections.map(s => {
-      let content = `<h2>${s.title}</h2>`
+      let content = `<h2>${esc(s.title)}</h2>`
       if (s.type === 'kpi') {
-        content += '<div class="kpi-grid">' + s.data.map(k => `<div class="kpi"><div class="val">${k.value}</div><div class="lbl">${k.label}</div></div>`).join('') + '</div>'
+        content += '<div class="kpi-grid">' + s.data.map(k => `<div class="kpi"><div class="val">${esc(k.value)}</div><div class="lbl">${esc(k.label)}</div></div>`).join('') + '</div>'
       } else if (s.type === 'table' && s.data) {
-        content += '<table><thead><tr>' + s.columns.map(c => `<th>${c.label}</th>`).join('') + '</tr></thead><tbody>'
+        content += '<table><thead><tr>' + s.columns.map(c => `<th>${esc(c.label)}</th>`).join('') + '</tr></thead><tbody>'
         + s.data.map(row => '<tr>' + s.columns.map(c => {
           const val = typeof c.key === 'function' ? c.key(row) : row[c.key]
-          return `<td>${val ?? ''}</td>`
+          return `<td>${esc(val)}</td>`
         }).join('') + '</tr>').join('') + '</tbody></table>'
       }
       return content
     }).join('')
     + '</body></html>'
     const w = window.open('', '_blank')
+    if (!w) {
+      showToast('Tu navegador bloqueó la ventana del reporte. Permití las ventanas emergentes e intentá de nuevo.', 'error')
+      return
+    }
     w.document.write(html)
     w.document.close()
-    w.print()
+    // Esperamos al render antes de imprimir: en Safari/Firefox `print()`
+    // inmediato salía en blanco.
+    w.onload = () => w.print()
+    setTimeout(() => { try { w.print() } catch { /* ya impreso */ } }, 400)
   }
 
   useEffect(() => {
@@ -201,30 +208,23 @@ export default function Dashboard({ session }) {
         setMapaUrl(data.mapa_url || '')
         setMensajeBienvenida(data.mensaje_bienvenida || '')
 
-        // --- SISTEMA DE AUTO-APROVISIONAMIENTO DE SUPER ADMIN ---
-        let isAdmin = data.es_admin_plataforma
-        const superAdminEmail = import.meta.env.VITE_SUPERADMIN_EMAIL
-
-        if (superAdminEmail && session.user.email === superAdminEmail && !isAdmin) {
-          const { error: adminErr } = await supabase
-            .from('negocios')
-            .update({ es_admin_plataforma: true })
-            .eq('id', data.id)
-
-          if (!adminErr) {
-            isAdmin = true
-            console.log("Nucleus Security: Permisos de Super Admin concedidos dinámicamente al Owner Master.")
-          }
-        }
+        // El rol de super admin viene SÓLO de la base. Antes la app se lo
+        // auto-asignaba comparando el email contra una variable pública del
+        // bundle; como las policies permitían al dueño actualizar su propia
+        // fila, cualquiera podía escribirse es_admin_plataforma = true y ver
+        // todos los negocios de la plataforma. Para designar un admin ahora se
+        // corre el UPDATE desde el SQL Editor de Supabase (ver el archivo de
+        // migración en /sql).
+        const isAdmin = data.es_admin_plataforma === true
 
         if (isAdmin) {
           await cargarConsolaMaestra()
         } else {
+          const crm = await cargarCrmStats(data.id)
           await Promise.all([
-            cargarMetricasNegocio(data.id),
+            cargarMetricasNegocio(data.id, data, crm.empleadosActivos),
             cargarActividadReciente(data.id),
             cargarClientes(data.id),
-            cargarCrmStats(data.id)
           ])
         }
       }
@@ -259,7 +259,9 @@ export default function Dashboard({ session }) {
 
     const { count: svcCount } = await supabase.from('servicios').select('*', { count: 'exact', head: true }).eq('negocio_id', negocioId)
 
-    setCrmStats({ stockBajo, empleadosActivos: empActivos, totalEmpleados: empTotal, totalServicios: svcCount || 0 })
+    const resumen = { stockBajo, empleadosActivos: empActivos, totalEmpleados: empTotal, totalServicios: svcCount || 0 }
+    setCrmStats(resumen)
+    return resumen
   }
 
   /**
@@ -350,10 +352,12 @@ export default function Dashboard({ session }) {
   /**
    * LÓGICA NEGOCIO: BUSINESS INTELLIGENCE COMPLETA (Timezone Safe)
    */
-  async function cargarMetricasNegocio(negocioId) {
+  async function cargarMetricasNegocio(negocioId, negocioData = null, empleadosActivos = 1) {
     const ahora = new Date()
     const hoyInicio = new Date(ahora)
     hoyInicio.setHours(0, 0, 0, 0)
+    const hoyFin = new Date(ahora)
+    hoyFin.setHours(23, 59, 59, 999)
 
     // Inicio de la semana (lunes)
     const inicioSemana = new Date(ahora)
@@ -365,12 +369,14 @@ export default function Dashboard({ session }) {
     // Inicio del mes
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1)
 
-    // Traemos todos los turnos desde inicio de mes para calcular todo
+    // Traemos todos los turnos desde inicio de mes para calcular todo.
+    // OJO: no filtramos por estado en la query. Antes se pedía sólo
+    // estado='confirmado' y, en cuanto el dueño marcaba un turno como atendido
+    // ('completado'), ese turno y su facturación desaparecían del panel.
     const { data: turnos, error } = await supabase
       .from('turnos')
       .select('*, servicios(nombre, precio, duracion_minutos), empleados(nombre)')
       .eq('negocio_id', negocioId)
-      .eq('estado', 'confirmado')
       .gte('fecha_hora', inicioMes.toISOString())
       .order('fecha_hora', { ascending: true })
 
@@ -380,22 +386,31 @@ export default function Dashboard({ session }) {
     }
 
     if (turnos) {
-      // Turnos futuros desde hoy
-      const turnosFuturos = turnos.filter(t => new Date(t.fecha_hora) >= hoyInicio)
-      const ingresosFuturos = turnosFuturos.reduce((acc, t) => acc + (t.servicios?.precio || 0), 0)
+      // Cancelados y ausencias no cuentan para nada.
+      const activos = turnos.filter(ocupaHorario)
+
+      const fechaDe = (t) => parseFecha(t.fecha_hora) || new Date(t.fecha_hora)
+
+      // Turnos de HOY (antes esta métrica decía "hoy" pero contaba todo el mes
+      // que venía por delante).
+      const turnosHoy = activos.filter(t => {
+        const f = fechaDe(t)
+        return f >= hoyInicio && f <= hoyFin
+      })
+      const ingresosHoy = turnosHoy.filter(factura).reduce((acc, t) => acc + precioTurno(t), 0)
+
+      // Turnos futuros (desde ahora en adelante)
+      const turnosFuturos = activos.filter(t => fechaDe(t) >= ahora)
 
       // Turnos esta semana
-      const turnosSemana = turnos.filter(t => {
-        const f = new Date(t.fecha_hora)
-        return f >= inicioSemana
-      })
+      const turnosSemana = activos.filter(t => fechaDe(t) >= inicioSemana)
 
       // Ingresos del mes completo
-      const ingresosMes = turnos.reduce((acc, t) => acc + (t.servicios?.precio || 0), 0)
+      const ingresosMes = activos.filter(factura).reduce((acc, t) => acc + precioTurno(t), 0)
 
       // Servicio más popular
       const servicioCount = {}
-      turnos.forEach(t => {
+      activos.forEach(t => {
         const nombre = t.servicios?.nombre || 'Otro'
         servicioCount[nombre] = (servicioCount[nombre] || 0) + 1
       })
@@ -406,28 +421,57 @@ export default function Dashboard({ session }) {
       // Distribución semanal (Lun-Dom)
       const distSemanal = [0, 0, 0, 0, 0, 0, 0]
       turnosSemana.forEach(t => {
-        const d = new Date(t.fecha_hora).getDay()
+        const d = fechaDe(t).getDay()
         const idx = d === 0 ? 6 : d - 1 // Lunes=0, Domingo=6
         distSemanal[idx]++
       })
       setDistribucionSemanal(distSemanal)
 
-      // Próxima cita
-      const ahora2 = new Date()
-      const proxima = turnosFuturos.find(t => new Date(t.fecha_hora) > ahora2)
-      if (proxima) {
-        setProximaCita(proxima)
-      }
+      // Próxima cita (la primera que todavía no empezó)
+      setProximaCita(turnosFuturos.find(t => fechaDe(t) > ahora) || null)
+
+      // Ocupación real: turnos de la semana sobre la capacidad configurada.
+      const capacidadSemanal = calcularCapacidadSemanal(negocioData || negocio, empleadosActivos)
+      const tasaOcupacion = capacidadSemanal > 0
+        ? Math.min(100, Math.round((turnosSemana.length / capacidadSemanal) * 100))
+        : 0
 
       setStats({
-        hoy: turnosFuturos.length,
-        ingresos: ingresosFuturos,
+        hoy: turnosHoy.length,
+        ingresos: ingresosHoy,
+        proximos: turnosFuturos.length,
         popular,
         semana: turnosSemana.length,
         mesIngresos: ingresosMes,
-        tasaOcupacion: turnosSemana.length > 0 ? Math.min(100, Math.round((turnosSemana.length / 35) * 100)) : 0
+        tasaOcupacion
       })
     }
+  }
+
+  /**
+   * Capacidad semanal aproximada: slots que entran en los horarios abiertos,
+   * usando la duración del servicio más corto. Reemplaza el "/35" fijo que
+   * daba porcentajes inventados.
+   */
+  function calcularCapacidadSemanal(neg, empleadosActivos = 1) {
+    const horarios = neg?.horarios
+    if (!horarios || typeof horarios !== 'object') return 0
+    const duracionBase = 30
+    let slots = 0
+    for (const dia of Object.values(horarios)) {
+      if (!dia?.abierto || !dia.inicio || !dia.fin) continue
+      const [hi, mi] = String(dia.inicio).split(':').map(Number)
+      const [hf, mf] = String(dia.fin).split(':').map(Number)
+      let minutos = (hf * 60 + mf) - (hi * 60 + mi)
+      if (minutos <= 0) minutos += 1440 // horario nocturno
+      if (dia.pausa && dia.inicioPausa && dia.finPausa) {
+        const [hpi, mpi] = String(dia.inicioPausa).split(':').map(Number)
+        const [hpf, mpf] = String(dia.finPausa).split(':').map(Number)
+        minutos -= Math.max(0, (hpf * 60 + mpf) - (hpi * 60 + mpi))
+      }
+      slots += Math.max(0, Math.floor(minutos / duracionBase))
+    }
+    return slots * Math.max(1, empleadosActivos || 1)
   }
 
   /**
@@ -454,16 +498,20 @@ export default function Dashboard({ session }) {
     try {
       const { data: turnos, error } = await supabase
         .from('turnos')
-        .select('cliente_nombre, cliente_telefono, cliente_email, fecha_hora, servicios(nombre, precio)')
+        .select('cliente_nombre, cliente_telefono, cliente_email, fecha_hora, estado, servicios(nombre, precio)')
         .eq('negocio_id', negocioId)
         .order('fecha_hora', { ascending: false })
+        .limit(5000)
 
       if (error) throw error
 
       // Agrupar por teléfono como identificador único del cliente
       const clientesMap = {}
         ; (turnos || []).forEach(t => {
-          const key = t.cliente_telefono || t.cliente_nombre
+          // Un turno cancelado no convierte a alguien en cliente ni suma plata.
+          if (!ocupaHorario(t)) return
+          const key = (t.cliente_telefono || t.cliente_nombre || '').trim()
+          if (!key) return
           if (!clientesMap[key]) {
             clientesMap[key] = {
               nombre: t.cliente_nombre,
@@ -477,7 +525,7 @@ export default function Dashboard({ session }) {
             }
           }
           clientesMap[key].visitas++
-          clientesMap[key].ingresoTotal += (t.servicios?.precio || 0)
+          clientesMap[key].ingresoTotal += precioTurno(t)
           clientesMap[key].primeraVisita = t.fecha_hora // como viene desc, la última iteración es la primera visita
           if (t.servicios?.nombre) clientesMap[key].servicios.add(t.servicios.nombre)
         })
@@ -528,8 +576,8 @@ export default function Dashboard({ session }) {
         if (tipo === 'logo') setLogoUrl(urlOptimizada)
         if (tipo === 'portada') setPortadaUrl(urlOptimizada)
       }
-    } catch (error) {
-      showToast("Error en el servidor de imágenes. Intente nuevamente.", "error")
+    } catch {
+      showToast('No pudimos subir la imagen. Revisá tu conexión y reintentá.', 'error')
     } finally {
       if (tipo === 'logo') setSubiendoLogo(false)
       if (tipo === 'portada') setSubiendoPortada(false)
@@ -609,6 +657,12 @@ export default function Dashboard({ session }) {
   }
 
   // ===== HELPERS =====
+  /**
+   * El campo "mapa_url" se inyectaba directo en un <iframe src>. Cualquier URL
+   * (incluido javascript: o un sitio de terceros) terminaba embebida en el
+   * panel y en la app pública. Sólo permitimos Google Maps.
+   */
+
   const formatearFechaRelativa = (fechaStr) => {
     if (!fechaStr) return ''
     const fecha = new Date(fechaStr)
@@ -626,63 +680,8 @@ export default function Dashboard({ session }) {
     return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
   }
 
-  const formatearHora = (fechaStr) => {
-    if (!fechaStr) return ''
-    return new Date(fechaStr).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-  }
-
-  const formatearFecha = (fechaStr) => {
-    if (!fechaStr) return ''
-    return new Date(fechaStr).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
-  }
-
   // Vocabulario dinámico según rubro del negocio (debe estar antes de tabsConfig)
   const vocab = getVocabulario(negocio?.rubro)
-
-  // ── Marcar recordatorio enviado proactivamente ──
-  async function marcarRecordatorioEnviado(t) {
-    const num = t.cliente_telefono?.replace(/[^0-9]/g, '') || ''
-    const nombreCorto = t.cliente_nombre?.split(' ')[0] || ''
-    const servNombre = t.servicios?.nombre?.toLowerCase() || vocab?.servicio || 'servicio'
-    const horaStr = formatearHora(t.fecha_hora)
-    const mje = `Hola ${nombreCorto}, te recuerdo tu ${servNombre} hoy a las ${horaStr} hs. ¡Te esperamos!`
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(mje)}`, '_blank')
-
-    const { error } = await supabase.from('turnos').update({ recordatorio_enviado: true }).eq('id', t.id)
-    if (!error) {
-      const actualizados = actividadReciente.map(turno => turno.id === t.id ? { ...turno, recordatorio_enviado: true } : turno)
-      setActividadReciente(actualizados)
-      if (proximaCita?.id === t.id) {
-        setProximaCita({ ...proximaCita, recordatorio_enviado: true })
-      }
-    }
-  }
-
-  /**
-   * ONBOARDING: CREACIÓN TÉCNICA
-   */
-  async function handleOnboarding(e) {
-    e.preventDefault()
-    setCreando(true)
-    const { data, error } = await supabase
-      .from('negocios')
-      .insert([{
-        owner_id: session.user.id,
-        nombre: nombreNegocio,
-        rubro: rubroSeleccionado,
-        color_primario: '#0f172a',
-        estado_suscripcion: 'trial',
-        es_admin_plataforma: import.meta.env.VITE_SUPERADMIN_EMAIL ? (session.user.email === import.meta.env.VITE_SUPERADMIN_EMAIL) : false
-      }])
-      .select().single()
-
-    if (!error) {
-      setNegocio(data)
-    } else {
-      console.error("Onboarding Error:", error.message)
-    }
-    setCreando(false)
-  }
 
   // ===== DEFINICIÓN DE TABS (se usa vocab si está disponible, sino fallback genérico) =====
   const _tabServicios = vocab?.tabServicios || 'Servicios'
@@ -767,7 +766,7 @@ export default function Dashboard({ session }) {
                   <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-widest">{accesoSub.enTrial ? 'Prueba finalizada' : 'Vencido'}</span>
                 </div>
                 <div className="flex items-end gap-1">
-                  <span className="text-3xl font-black tracking-tighter text-slate-900">${PLAN.precio.toLocaleString('es-AR')}</span>
+                  <span className="text-3xl font-black tracking-tighter text-slate-900">{formatearPrecio()}</span>
                   <span className="text-xs text-slate-400 font-bold mb-1">/mes</span>
                 </div>
                 <ul className="mt-3 space-y-1.5">
@@ -824,31 +823,36 @@ export default function Dashboard({ session }) {
     )
   }
 
+  const filtroNormalizado = filtroBusqueda.trim().toLowerCase()
   const negociosFiltrados = todosLosNegocios.filter(n =>
-    n.nombre.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-    n.rubro.toLowerCase().includes(filtroBusqueda.toLowerCase())
+    (n.nombre || '').toLowerCase().includes(filtroNormalizado) ||
+    (n.rubro || '').toLowerCase().includes(filtroNormalizado) ||
+    (n.id || '').toLowerCase().includes(filtroNormalizado)
   )
 
   // Ordenar clientes según criterio
   const clientesOrdenados = [...clientes].sort((a, b) => {
-    if (ordenClientes === 'nombre') return a.nombre.localeCompare(b.nombre)
+    if (ordenClientes === 'nombre') return (a.nombre || '').localeCompare(b.nombre || '')
     if (ordenClientes === 'reciente') return new Date(b.ultimaVisita) - new Date(a.ultimaVisita)
     if (ordenClientes === 'ingresos') return b.ingresoTotal - a.ingresoTotal
     return b.visitas - a.visitas
   })
 
+  const busquedaNormalizada = busquedaCliente.trim().toLowerCase()
   const clientesFiltrados = clientesOrdenados.filter(c =>
-    c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-    c.telefono?.toLowerCase().includes(busquedaCliente.toLowerCase())
+    (c.nombre || '').toLowerCase().includes(busquedaNormalizada) ||
+    (c.telefono || '').toLowerCase().includes(busquedaNormalizada) ||
+    (c.email || '').toLowerCase().includes(busquedaNormalizada)
   )
 
   const publicSlug = negocio?.nombre?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ''
   const publicLink = `${window.location.origin}/app/${publicSlug}/${negocio?.id || ''}`
-  const showCopyToast = () => { navigator.clipboard.writeText(publicLink).catch(() => { }); setCopyToast(true); setTimeout(() => setCopyToast(false), 3000) }
-
-  // Distribución semanal max para normalizar barras
-  const maxSemanal = Math.max(...distribucionSemanal, 1)
-  const diasSemanaLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+  const showCopyToast = () => {
+    navigator.clipboard.writeText(publicLink).catch(() => { })
+    try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
+    setCopyToast(true)
+    setTimeout(() => setCopyToast(false), 3000)
+  }
 
   // Stats resumen del top de clientes
   const totalIngresosClientes = clientes.reduce((acc, c) => acc + c.ingresoTotal, 0)
@@ -936,6 +940,18 @@ export default function Dashboard({ session }) {
                 <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60">Sistema Estable</span>
               </div>
             </header>
+            {cobroSinConfigurar && (
+              <div className="rounded-2xl border p-4 md:p-5 flex items-start gap-3" style={{ background: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.35)' }} data-testid="aviso-cobro">
+                <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-sm font-bold text-amber-300">Falta configurar el canal de cobro</p>
+                  <p className="text-[12px] text-amber-200/70 font-medium mt-1 leading-relaxed">
+                    Los botones "Activar plan" están cayendo al email de soporte. Definí <code className="font-mono">VITE_CONTACTO_WHATSAPP</code> (tu número internacional sin "+") en las variables de entorno de Vercel y volvé a desplegar.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {[
                 { label: 'Totales', val: statsGlobales.total, trend: 'Nodos' },
@@ -972,10 +988,10 @@ export default function Dashboard({ session }) {
                   return (
                   <div key={n.id} className="bg-white/5 border border-white/5 hover:border-white/15 transition-all p-4 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 group">
                     <div className="flex items-center gap-4 md:gap-6 w-full">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white text-black flex items-center justify-center font-black text-lg md:text-xl shadow-xl transition-transform group-hover:rotate-6 shrink-0">{n.nombre.charAt(0)}</div>
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white text-black flex items-center justify-center font-black text-lg md:text-xl shadow-xl transition-transform group-hover:rotate-6 shrink-0">{(n.nombre || '?').charAt(0)}</div>
                       <div className="overflow-hidden flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-white text-base md:text-lg tracking-tight leading-none truncate">{n.nombre}</p>
+                          <p className="font-bold text-white text-base md:text-lg tracking-tight leading-none truncate">{n.nombre || 'Sin nombre'}</p>
                           <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${badge.c}`}>{badge.t}</span>
                         </div>
                         <div className="flex items-center gap-2 md:gap-3 mt-2">
@@ -985,7 +1001,7 @@ export default function Dashboard({ session }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                      <button onClick={() => { const slug = n.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
+                      <button onClick={() => { const slug = (n.nombre || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública">
                         <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </button>
                       {sn.estado !== 'admin' && (
@@ -1023,7 +1039,7 @@ export default function Dashboard({ session }) {
                         : `Tu plan vence en ${accesoSub.diasRestantes === 1 ? '1 día' : `${accesoSub.diasRestantes} días`}`}
                     </p>
                     <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-[#5B3DF5]' : 'text-[#D97706]'}`}>
-                      Plan {PLAN.nombre} · ${PLAN.precio.toLocaleString('es-AR')}/mes · activá para no perder el acceso
+                      Plan {PLAN.nombre} · {formatearPrecio()}/mes · activá para no perder el acceso
                     </p>
                   </div>
                 </div>
@@ -1036,6 +1052,25 @@ export default function Dashboard({ session }) {
                   {accesoSub.estado === 'trial' ? 'Activar plan' : 'Renovar'}
                 </a>
               </div>
+            )}
+
+            {/* AVISO CRÍTICO: sin horarios no hay disponibilidad en el link público */}
+            {!tieneHorariosConfigurados(negocio) && (
+              <button
+                onClick={() => setTab('horarios')}
+                data-testid="aviso-sin-horarios"
+                className="w-full text-left flex items-center gap-3 px-4 md:px-5 py-3.5 rounded-2xl border transition-all active:scale-[0.99]"
+                style={{ background: '#FEF3C7', borderColor: '#FCD34D' }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#F59E0B' }}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-bold text-[#92400E]">Todavía no configuraste tus horarios</p>
+                  <p className="text-[11px] font-medium text-[#D97706]">Sin horarios, tu link de reservas muestra todos los días cerrados. Tocá acá para configurarlos.</p>
+                </div>
+                <svg className="w-4 h-4 text-[#D97706] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
             )}
 
             {/* BRAND HERO — Bento Card Light (sólo en pestañas que no son el inicio) */}
@@ -1094,7 +1129,17 @@ export default function Dashboard({ session }) {
             <div className="ns-mobile-content-area">
 
               {tab === 'inicio' && (
+                <ErrorGuard fallbackMessage="No pudimos mostrar el resumen">
                 <div id="tour-monitor">
+                  {/* Panel de configuración guiada: estaba importado pero nunca
+                      se renderizaba, así que el usuario nuevo caía en un panel
+                      vacío sin saber qué hacer. */}
+                  <GuidedSetup
+                    negocio={negocio}
+                    serviciosCount={crmStats.totalServicios}
+                    empleadosCount={crmStats.totalEmpleados}
+                    onNavigate={(t) => setTab(t)}
+                  />
                   <DashboardHome
                     negocio={negocio}
                     vocab={vocab}
@@ -1107,17 +1152,20 @@ export default function Dashboard({ session }) {
                     distribucionSemanal={distribucionSemanal}
                   />
                 </div>
+                </ErrorGuard>
               )}
 
-              {/* GESTIÓN DINÁMICA DE TABS */}
+              {/* GESTIÓN DINÁMICA DE TABS
+                  Cada sección va dentro de su propio ErrorGuard: si una falla,
+                  el resto del panel sigue funcionando. */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                {tab === 'agenda' && <div id="tour-agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div>}
-                {tab === 'reportes' && <Reportes negocioId={negocio.id} colorPrimario={colorPrimario} rubro={negocio.rubro} />}
-                {tab === 'servicios' && <div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div>}
-                {tab === 'equipo' && <Empleados negocioId={negocio.id} rubro={negocio.rubro} />}
-                {tab === 'horarios' && <ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} />}
-                {tab === 'inventario' && <InventarioPro negocioId={negocio.id} rubro={negocio.rubro} />}
-                {tab === 'flyer' && <FlyerCreatorPro negocio={negocio} publicLink={publicLink} />}
+                {tab === 'agenda' && <ErrorGuard fallbackMessage="No pudimos mostrar la agenda"><div id="tour-agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div></ErrorGuard>}
+                {tab === 'reportes' && <ErrorGuard fallbackMessage="No pudimos generar los reportes"><Reportes negocioId={negocio.id} colorPrimario={colorPrimario} rubro={negocio.rubro} /></ErrorGuard>}
+                {tab === 'servicios' && <ErrorGuard fallbackMessage="No pudimos mostrar tus servicios"><div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div></ErrorGuard>}
+                {tab === 'equipo' && <ErrorGuard fallbackMessage="No pudimos mostrar tu equipo"><Empleados negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
+                {tab === 'horarios' && <ErrorGuard fallbackMessage="No pudimos mostrar los horarios"><ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} /></ErrorGuard>}
+                {tab === 'inventario' && <ErrorGuard fallbackMessage="No pudimos mostrar el inventario"><InventarioPro negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
+                {tab === 'flyer' && <ErrorGuard fallbackMessage="No pudimos abrir el creador de flyers"><FlyerCreatorPro negocio={negocio} publicLink={publicLink} /></ErrorGuard>}
               </div>
 
               {/* ====== TAB: CLIENTES — COMPLETO ====== */}
@@ -1372,10 +1420,14 @@ export default function Dashboard({ session }) {
                         <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ubicación — Google Maps</label>
                         <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
                         <p className="text-[9px] text-slate-400 mt-1.5 ml-1 font-medium">Abrí Google Maps, buscá tu negocio, tocá "Compartir" y pegá el link acá.</p>
-                        {mapaUrl && (
+                        {mapaUrl && !mapaEmbedUrl(mapaUrl, direccionNegocio) && (
+                          <p className="text-[10px] font-bold text-amber-600 mt-2 ml-1">Ese link no parece de Google Maps. Pegá el link que te da el botón "Compartir" de Google Maps.</p>
+                        )}
+                        {mapaUrl && mapaEmbedUrl(mapaUrl, direccionNegocio) && (
                           <div className="mt-3 rounded-xl overflow-hidden border border-slate-200 h-40">
                             <iframe
-                              src={mapaUrl.includes('<iframe') ? mapaUrl.match(/src="([^"]+)"/)?.[1] || '' : `https://www.google.com/maps?q=${encodeURIComponent(mapaUrl.includes('google.com/maps') ? mapaUrl : direccionNegocio || mapaUrl)}&output=embed`}
+                              title="Ubicación del negocio"
+                              src={mapaEmbedUrl(mapaUrl, direccionNegocio)}
                               width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                             ></iframe>
                           </div>
@@ -1403,13 +1455,10 @@ export default function Dashboard({ session }) {
                     </div>
                     <div className="p-5 md:p-6">
                       <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
-                      <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={() => {
-                        navigator.clipboard.writeText(publicLink)
-                        showToast("¡Link copiado!")
-                      }}>
+                      <button type="button" className="w-full text-left flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={showCopyToast}>
                         <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
                         <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                      </div>
+                      </button>
 
                       {/* QR Code */}
                       <div className="mt-4 p-4 bg-white border border-slate-200 rounded-xl text-center">
@@ -1493,7 +1542,7 @@ export default function Dashboard({ session }) {
                             <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${accesoSub.estado === 'trial' ? 'text-indigo-600 bg-indigo-50' : accesoSub.acceso ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'}`}>{etiquetaEstado(accesoSub.estado)}</span>
                           </div>
                           <div className="flex items-end gap-1 mb-1">
-                            <span className="text-3xl font-black tracking-tighter text-slate-900">${PLAN.precio.toLocaleString('es-AR')}</span>
+                            <span className="text-3xl font-black tracking-tighter text-slate-900">{formatearPrecio()}</span>
                             <span className="text-xs text-slate-400 font-bold mb-1">/mes</span>
                           </div>
                           {accesoSub.diasRestantes != null ? (

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 import { useToast } from './Toast'
-import { IconRobot, IconCelebrate, IconErrorCircle } from './NoniIcons'
+import { useConfirm } from '../contexts/ConfirmContext'
+import { IconRobot, IconCelebrate } from './NoniIcons'
 
 export default function Empleados({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
   const toast = useToast()
+  const { showConfirm } = useConfirm()
   const [loading, setLoading] = useState(true)
   const [especialistas, setEspecialistas] = useState([])
 
@@ -16,7 +18,6 @@ export default function Empleados({ negocioId, rubro }) {
   const [subiendoFoto, setSubiendoFoto] = useState(false)
   const [modoEdicion, setModoEdicion] = useState(null)
   const [showCelebration, setShowCelebration] = useState(false)
-  const [showError, setShowError] = useState('')
 
   const [form, setForm] = useState({
     nombre: '',
@@ -108,15 +109,24 @@ export default function Empleados({ negocioId, rubro }) {
     e.preventDefault()
     setGuardando(true)
     try {
-      // Remove user ID fetch since we use the exact UUID of the business
+      const nombreLimpio = form.nombre.trim()
+      if (!nombreLimpio) throw new Error('El nombre no puede quedar vacío.')
+      if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+        throw new Error('El email no tiene un formato válido.')
+      }
+      const comision = parseFloat(form.comision_porcentaje)
+      if (form.comision_porcentaje !== '' && (!Number.isFinite(comision) || comision < 0 || comision > 100)) {
+        throw new Error('La comisión tiene que estar entre 0 y 100.')
+      }
+
       const payload = {
         negocio_id: negocioId,
-        nombre: form.nombre.trim(),
+        nombre: nombreLimpio,
         especialidad: form.especialidad.trim(),
         foto_url: form.foto_url,
         email: form.email.trim() || null,
         telefono: form.telefono.trim() || null,
-        comision_porcentaje: parseFloat(form.comision_porcentaje) || 0,
+        comision_porcentaje: Number.isFinite(comision) ? comision : 0,
         estado: form.estado,
         notas: form.notas.trim() || null
       }
@@ -161,20 +171,40 @@ export default function Empleados({ negocioId, rubro }) {
     }
   }
 
-  async function eliminarEspecialista(id) {
-    if (!window.confirm('¿Desea dar de baja a este especialista/recurso?')) return
-    const { error } = await supabase
-      .from('empleados')
-      .delete()
-      .eq('id', id)
-      .eq('negocio_id', negocioId)
+  function eliminarEspecialista(esp) {
+    showConfirm({
+      title: `¿Dar de baja a ${esp.nombre}?`,
+      message: `Va a dejar de aparecer en tu app de reservas. Si tiene turnos agendados no se puede borrar: en ese caso marcalo como "inactivo" desde Editar.`,
+      confirmText: 'Dar de baja',
+      isDestructive: true,
+      onConfirm: async () => {
+        const { error } = await supabase
+          .from('empleados')
+          .delete()
+          .eq('id', esp.id)
+          .eq('negocio_id', negocioId)
 
-    if (!error) {
-      toast.success('Especialista eliminado correctamente')
-      setEspecialistas(especialistas.filter(e => e.id !== id))
-    } else {
-      toast.error("No se puede eliminar un recurso con agendas activas.")
-    }
+        if (!error) {
+          toast.success(`${esp.nombre} fue dado de baja`)
+          setEspecialistas(prev => prev.filter(e => e.id !== esp.id))
+          return
+        }
+
+        // Tiene turnos asociados: lo pasamos a inactivo para no perder historial.
+        const { error: errInactivo } = await supabase
+          .from('empleados')
+          .update({ estado: 'inactivo' })
+          .eq('id', esp.id)
+          .eq('negocio_id', negocioId)
+
+        if (errInactivo) {
+          toast.error('No se pudo dar de baja. Reintentá en unos segundos.')
+        } else {
+          toast.warning(`${esp.nombre} tiene turnos agendados: quedó como inactivo y ya no recibe reservas nuevas.`)
+          setEspecialistas(prev => prev.map(e => e.id === esp.id ? { ...e, estado: 'inactivo' } : e))
+        }
+      }
+    })
   }
 
   return (
@@ -193,16 +223,6 @@ export default function Empleados({ negocioId, rubro }) {
         </div>
       )}
 
-      {/* Error toast */}
-      {showError && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-red-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <IconErrorCircle size={24} className="text-red-500" />
-          <div>
-            <p className="text-sm font-bold text-slate-900">Error</p>
-            <p className="text-[10px] text-slate-500 font-medium">{showError}</p>
-          </div>
-        </div>
-      )}
 
       <header className="flex items-center justify-between bg-[#F7F5FF] p-8 md:p-10 rounded-[2.5rem] border border-[#EDE8F7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
@@ -309,7 +329,7 @@ export default function Empleados({ negocioId, rubro }) {
                   <button onClick={() => abrirModalEditar(esp)} className="w-10 h-10 rounded-xl bg-white text-[#A09CB5] flex items-center justify-center hover:bg-[#E8DEFF]/40 hover:text-[#5B3DF5] transition-all active:scale-90 border border-[#EDE8F7]">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
-                  <button onClick={() => eliminarEspecialista(esp.id)} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90 border border-rose-500/20">
+                  <button onClick={() => eliminarEspecialista(esp)} aria-label={`Dar de baja a ${esp.nombre}`} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90 border border-rose-500/20">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
                 </div>

@@ -45,13 +45,45 @@ export default function GlobalSearch({
     let cancelled = false
     ;(async () => {
       try {
-        const [cRes, sRes, eRes] = await Promise.all([
-          supabase.from('clientes').select('id, nombre, telefono, email, visitas, frecuencia, ultima_visita').eq('negocio_id', negocio.id).order('visitas', { ascending: false }).limit(100),
-          supabase.from('servicios').select('id, nombre, precio, duracion_minutos, descripcion').eq('negocio_id', negocio.id),
+        // No existe una tabla `clientes`: la base de clientes se deriva del
+        // historial de turnos (igual que en el panel). La consulta anterior
+        // fallaba en silencio y el buscador nunca encontraba a nadie.
+        const [tRes, sRes, eRes] = await Promise.all([
+          supabase
+            .from('turnos')
+            .select('cliente_nombre, cliente_telefono, cliente_email, fecha_hora, estado')
+            .eq('negocio_id', negocio.id)
+            .order('fecha_hora', { ascending: false })
+            .limit(2000),
+          supabase.from('servicios').select('id, nombre, precio, duracion_minutos').eq('negocio_id', negocio.id),
           supabase.from('empleados').select('id, nombre, especialidad, estado, foto_url').eq('negocio_id', negocio.id),
         ])
+
+        const mapa = new Map()
+        for (const t of tRes.data || []) {
+          if (t.estado === 'cancelado' || t.estado === 'no_show') continue
+          const clave = (t.cliente_telefono || t.cliente_nombre || '').trim()
+          if (!clave) continue
+          const previo = mapa.get(clave)
+          if (previo) {
+            previo.visitas += 1
+          } else {
+            mapa.set(clave, {
+              id: clave,
+              nombre: t.cliente_nombre,
+              telefono: t.cliente_telefono,
+              email: t.cliente_email || '',
+              visitas: 1,
+              ultima_visita: t.fecha_hora,
+            })
+          }
+        }
+        const derivados = Array.from(mapa.values())
+          .sort((a, b) => b.visitas - a.visitas)
+          .map(c => ({ ...c, frecuencia: c.visitas >= 10 ? 'VIP' : c.visitas >= 5 ? 'Frecuente' : c.visitas >= 2 ? 'Regular' : 'Nuevo' }))
+
         if (!cancelled) {
-          setLocalClientes(cRes.data || [])
+          setLocalClientes(derivados)
           setLocalServicios(sRes.data || [])
           setLocalEmpleados(eRes.data || [])
           setDataLoaded(true)
