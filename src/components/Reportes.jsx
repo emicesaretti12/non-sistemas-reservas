@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
+import { factura, precioTurno } from '../utils/reservas'
 
-export default function Reportes({ negocioId, colorPrimario, rubro }) {
+export default function Reportes({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
   const [periodo, setPeriodo] = useState('semana') // semana | mes | todo
@@ -44,29 +45,31 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         fechaInicioAnterior = new Date(ahora.getFullYear() - 1, 0, 1)
       }
 
+      // Sin filtro de estado en la query: antes se pedía sólo 'confirmado' y,
+      // en cuanto el dueño marcaba un turno como atendido ('completado'), ese
+      // turno y su facturación desaparecían del reporte. Filtramos en memoria
+      // descartando únicamente cancelados y ausencias.
       const { data: turnos } = await supabase
         .from('turnos')
         .select('*, servicios(nombre, precio, duracion_minutos), empleados(nombre)')
         .eq('negocio_id', negocioId)
-        .eq('estado', 'confirmado')
         .gte('fecha_hora', fechaInicio.toISOString())
         .order('fecha_hora', { ascending: true })
 
       const { data: turnosAnteriores } = await supabase
         .from('turnos')
-        .select('*, servicios(precio)')
+        .select('estado, fecha_hora, servicios(precio)')
         .eq('negocio_id', negocioId)
-        .eq('estado', 'confirmado')
         .gte('fecha_hora', fechaInicioAnterior.toISOString())
         .lt('fecha_hora', fechaInicio.toISOString())
 
-      const listaTurnos = turnos || []
-      const listaAnteriores = turnosAnteriores || []
+      const listaTurnos = (turnos || []).filter(factura)
+      const listaAnteriores = (turnosAnteriores || []).filter(factura)
 
-      const ingresosPeriodo = listaTurnos.reduce((a, t) => a + (t.servicios?.precio || 0), 0)
+      const ingresosPeriodo = listaTurnos.reduce((a, t) => a + precioTurno(t), 0)
       const turnosPeriodo = listaTurnos.length
       const ticketPromedio = turnosPeriodo > 0 ? Math.round(ingresosPeriodo / turnosPeriodo) : 0
-      const ingresosAnterior = listaAnteriores.reduce((a, t) => a + (t.servicios?.precio || 0), 0)
+      const ingresosAnterior = listaAnteriores.reduce((a, t) => a + precioTurno(t), 0)
       const turnosAnterior = listaAnteriores.length
 
       const servicioMap = {}
@@ -74,7 +77,7 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         const nombre = t.servicios?.nombre || 'Sin servicio'
         if (!servicioMap[nombre]) servicioMap[nombre] = { nombre, count: 0, revenue: 0 }
         servicioMap[nombre].count++
-        servicioMap[nombre].revenue += (t.servicios?.precio || 0)
+        servicioMap[nombre].revenue += precioTurno(t)
       })
       const topServicios = Object.values(servicioMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
@@ -83,7 +86,7 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         const nombre = t.empleados?.nombre || vocab.fallbackStaff
         if (!empleadoMap[nombre]) empleadoMap[nombre] = { nombre, count: 0, revenue: 0 }
         empleadoMap[nombre].count++
-        empleadoMap[nombre].revenue += (t.servicios?.precio || 0)
+        empleadoMap[nombre].revenue += precioTurno(t)
       })
       const topEmpleados = Object.values(empleadoMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
@@ -92,7 +95,7 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         const key = t.cliente_telefono || t.cliente_nombre
         if (!clienteMap[key]) clienteMap[key] = { nombre: t.cliente_nombre, count: 0, revenue: 0 }
         clienteMap[key].count++
-        clienteMap[key].revenue += (t.servicios?.precio || 0)
+        clienteMap[key].revenue += precioTurno(t)
       })
       const topClientes = Object.values(clienteMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
@@ -115,7 +118,7 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         listaTurnos.forEach(t => {
           const d = new Date(t.fecha_hora)
           const key = `${d.getMonth() + 1}/${d.getDate()}`
-          if (diasData[key]) { diasData[key].valor += (t.servicios?.precio || 0); diasData[key].turnos++ }
+          if (diasData[key]) { diasData[key].valor += precioTurno(t); diasData[key].turnos++ }
         })
       } else {
         const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
@@ -123,7 +126,7 @@ export default function Reportes({ negocioId, colorPrimario, rubro }) {
         listaTurnos.forEach(t => {
           const d = new Date(t.fecha_hora)
           const key = meses[d.getMonth()]
-          if (diasData[key]) { diasData[key].valor += (t.servicios?.precio || 0); diasData[key].turnos++ }
+          if (diasData[key]) { diasData[key].valor += precioTurno(t); diasData[key].turnos++ }
         })
       }
 

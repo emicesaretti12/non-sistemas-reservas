@@ -11,8 +11,8 @@ const STEPS = [
     message: 'Te voy a guiar paso a paso por tu panel de control. En menos de 1 minuto vas a saber cómo funciona todo.',
     position: 'center',
     Icon: IconRobot,
-    iconBg: 'bg-sky-100',
-    iconColor: 'text-sky-600',
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
   },
   {
     target: 'tour-monitor',
@@ -60,8 +60,8 @@ const STEPS = [
     message: 'Acá aparecen todos los turnos: los de tus clientes y los que vos creés. Podés confirmar, cancelar o contactar por WhatsApp.',
     position: 'bottom',
     Icon: IconCalendar,
-    iconBg: 'bg-sky-100',
-    iconColor: 'text-sky-600',
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
     actionLabel: 'Ver Agenda',
     actionTab: 'agenda',
   },
@@ -93,8 +93,8 @@ const STEPS = [
     message: 'Ahora solo tenés que:\n\n1. Crear tus servicios\n2. Agregar tu equipo\n3. Configurar tus horarios\n4. Compartir tu link\n\nSi necesitás ayuda, tocá el ícono de Noni.',
     position: 'center',
     Icon: IconRocket,
-    iconBg: 'bg-sky-100',
-    iconColor: 'text-sky-600',
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
   },
 ]
 
@@ -102,15 +102,17 @@ export function useTour() {
   const [active, setActive] = useState(false)
 
   useEffect(() => {
-    const completed = localStorage.getItem(TOUR_KEY)
-    if (!completed) {
-      setTimeout(() => setActive(true), 1500)
-    }
+    let completado = false
+    try { completado = localStorage.getItem(TOUR_KEY) === '1' } catch { /* modo privado */ }
+    if (completado) return
+
+    const t = setTimeout(() => setActive(true), 1500)
+    return () => clearTimeout(t)
   }, [])
 
   const start = () => setActive(true)
   const dismiss = () => {
-    localStorage.setItem(TOUR_KEY, '1')
+    try { localStorage.setItem(TOUR_KEY, '1') } catch { /* modo privado */ }
     setActive(false)
   }
 
@@ -126,7 +128,8 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
 
   const recalcTarget = useCallback(() => {
     if (!active || !current.target) {
-      setTargetRect(null)
+      // Diferido: medir y pintar en el mismo tick encadena renders.
+      requestAnimationFrame(() => setTargetRect(null))
       return
     }
     const el = document.getElementById(current.target)
@@ -136,29 +139,32 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
         const rect = el.getBoundingClientRect()
         setTargetRect(rect)
 
-        // Scroll suave pero no agresivo
+        // Centramos el elemento sin pasarnos del final del documento.
         const elementTop = el.offsetTop
         const elementHeight = el.offsetHeight
         const viewportHeight = window.innerHeight
-        const scrollTop = window.scrollY
-
-        const targetScroll = elementTop - viewportHeight / 2 + elementHeight / 2
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - viewportHeight)
+        const targetScroll = Math.min(
+          maxScroll,
+          Math.max(0, elementTop - viewportHeight / 2 + elementHeight / 2)
+        )
 
         window.scrollTo({
           top: targetScroll,
-          behavior: 'smooth',
+          // En móvil el scroll suave se pelea con el reposicionamiento del
+          // tooltip y el resaltado queda desalineado.
+          behavior: window.innerWidth < 768 ? 'auto' : 'smooth',
         })
       })
     } else {
-      setTargetRect(null)
+      requestAnimationFrame(() => setTargetRect(null))
     }
-  }, [step, active, current.target])
+  }, [active, current.target])
 
   useEffect(() => {
-    if (!active) {
-      setStep(0)
-      return
-    }
+    // El paso se resetea al cerrar el tour (`cerrarTour`), no acá, para no
+    // encadenar renders. `recalcTarget` ya difiere su setState a un rAF.
+    if (!active) return
     recalcTarget()
   }, [step, active, recalcTarget])
 
@@ -178,9 +184,14 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
     }
   }, [active, current.target])
 
+  const cerrarTour = () => {
+    setStep(0)
+    onDismiss?.()
+  }
+
   const next = () => {
     if (step < total - 1) setStep((s) => s + 1)
-    else onDismiss()
+    else cerrarTour()
   }
   const prev = () => {
     if (step > 0) setStep((s) => s - 1)
@@ -223,6 +234,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
   const handleAction = () => {
     if (current.actionCopyLink && publicLink) {
       navigator.clipboard.writeText(publicLink).catch(() => {})
+      try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
       setCopyToast(true)
       setTimeout(() => setCopyToast(false), 3000)
     } else if (current.actionTab) {
@@ -259,7 +271,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
       <div className="bg-white rounded-[1.75rem] sm:rounded-[2.5rem] shadow-[0_32px_80px_rgba(0,0,0,0.25)] max-w-[360px] w-full overflow-hidden">
         <div className="h-1 bg-slate-100">
           <motion.div
-            className="h-full bg-gradient-to-r from-sky-400 to-sky-500"
+            className="h-full bg-gradient-to-r from-[#8B7CF6] to-[#5B3DF5]"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.5 }}
@@ -278,7 +290,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
 
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">{current.title}</h2>
 
-          {negocio && step === 0 && <p className="text-sky-600 font-bold mt-1.5 text-sm">{negocio.nombre}</p>}
+          {negocio && step === 0 && <p className="text-violet-600 font-bold mt-1.5 text-sm">{negocio.nombre}</p>}
 
           <p className="text-slate-500 text-[13px] sm:text-sm mt-3 leading-relaxed whitespace-pre-line">{current.message}</p>
 
@@ -291,14 +303,14 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
             {step === 0 ? (
               <>
                 <button
-                  onClick={onDismiss}
+                  onClick={cerrarTour}
                   className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-all active:scale-95"
                 >
                   Saltar
                 </button>
                 <button
                   onClick={next}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 text-white font-black text-xs sm:text-sm hover:from-sky-400 hover:to-sky-300 transition-all shadow-lg shadow-sky-500/25 active:scale-95"
+                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#5B3DF5] to-[#8B7CF6] text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-[#5B3DF5]/25 active:scale-95"
                 >
                   ¡Empecemos! →
                 </button>
@@ -313,7 +325,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
                 </button>
                 <button
                   onClick={next}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 text-white font-black text-xs sm:text-sm hover:from-sky-400 hover:to-sky-300 transition-all shadow-lg shadow-sky-500/25 active:scale-95 flex items-center justify-center gap-2"
+                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#5B3DF5] to-[#8B7CF6] text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-[#5B3DF5]/25 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <IconRocket size={15} /> Siguiente →
                 </button>
@@ -338,7 +350,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
       <div className="bg-white rounded-2xl sm:rounded-[1.4rem] shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-slate-200/60 overflow-hidden">
         <div className="h-1 bg-slate-100">
           <motion.div
-            className="h-full bg-gradient-to-r from-sky-400 to-sky-500"
+            className="h-full bg-gradient-to-r from-[#8B7CF6] to-[#5B3DF5]"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.4 }}
@@ -356,7 +368,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
             </p>
           </div>
           <button
-            onClick={onDismiss}
+            onClick={cerrarTour}
             className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all shrink-0 text-base leading-none active:scale-90"
           >
             ×
@@ -369,7 +381,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
           {current.actionLabel && (
             <button
               onClick={handleAction}
-              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-50 text-sky-600 text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-sky-500 hover:text-white transition-all active:scale-95"
+              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-2 bg-violet-50 text-violet-600 text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-violet-500 hover:text-white transition-all active:scale-95"
             >
               {current.actionCopyLink && (
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -410,6 +422,16 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
 
   return (
     <>
+      {copyToast && (
+        <div className="ns-copy-toast" style={{ zIndex: 10001 }}>
+          <span className="text-lg">🔗</span>
+          <div>
+            <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Pegalo en WhatsApp o Instagram</p>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {current.position === 'center' ? renderCenterModal() : renderTooltip()}
       </AnimatePresence>
@@ -420,7 +442,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onDismiss}
+          onClick={cerrarTour}
           className="fixed inset-0 z-[9998] bg-black/40 pointer-events-auto"
         />
       )}

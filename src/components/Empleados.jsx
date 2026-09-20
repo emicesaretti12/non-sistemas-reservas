@@ -76,8 +76,8 @@ export default function Empleados({ negocioId, rubro }) {
         const urlOptimizada = data.secure_url.replace('/upload/', '/upload/w_400,h_400,c_fill,g_face,q_auto,f_auto/')
         setForm({ ...form, foto_url: urlOptimizada })
       }
-    } catch (error) {
-      toast.error("Error al subir la imagen. Intente nuevamente.")
+    } catch {
+      toast.error('No pudimos subir la imagen. Revisá tu conexión y reintentá.')
     } finally {
       setSubiendoFoto(false)
     }

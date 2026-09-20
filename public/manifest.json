@@ -1,40 +1,49 @@
 {
-  "name": "Noni — Gestión Inteligente",
+  "name": "Noni — Reservas y Gestión",
   "short_name": "Noni",
-  "description": "Hub de operaciones y reservas inteligentes para tu negocio.",
-  "start_url": "/",
+  "description": "Recibí reservas online y gestioná tu agenda, equipo y clientes desde el celular.",
+  "id": "/",
+  "start_url": "/admin",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0c12",
-  "theme_color": "#6366f1",
+  "background_color": "#F5F3FF",
+  "theme_color": "#5B3DF5",
   "orientation": "portrait",
+  "lang": "es-AR",
+  "dir": "ltr",
   "categories": ["business", "productivity"],
   "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
-    },
-    {
-      "src": "/favicon.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/favicon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
     }
   ],
-  "screenshots": [
+  "shortcuts": [
     {
-      "src": "/favicon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "form_factor": "narrow",
-      "label": "Dashboard Noni"
+      "name": "Agenda de hoy",
+      "short_name": "Agenda",
+      "url": "/admin",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

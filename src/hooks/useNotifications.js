@@ -5,36 +5,31 @@ import { notificationService } from '../utils/notificationService'
  * Hook para usar notificaciones en tiempo real
  */
 export function useNotifications(negocioId) {
-  const [notifications, setNotifications] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
+  // El estado arranca leyendo el servicio: así no hace falta un setState
+  // sincrónico dentro del efecto (que provoca un render en cascada).
+  const [notifications, setNotifications] = useState(() => notificationService.getNotifications())
+  const [unreadCount, setUnreadCount] = useState(() => notificationService.getUnreadCount())
 
   useEffect(() => {
-    // Initialize service
-    if (negocioId) {
-      notificationService.init(negocioId)
-    }
-
-    // Subscribe to changes
-    const unsubscribe = notificationService.subscribe(({ notifications, unreadCount }) => {
-      setNotifications(notifications)
-      setUnreadCount(unreadCount)
-    })
-
-    // Load initial state
-    setNotifications(notificationService.getNotifications())
-    setUnreadCount(notificationService.getUnreadCount())
-
-    // Listen for custom events from other tabs
-    const handleNotification = (event) => {
-      setNotifications(notificationService.getNotifications())
+    const sincronizar = () => {
+      setNotifications([...notificationService.getNotifications()])
       setUnreadCount(notificationService.getUnreadCount())
     }
 
-    window.addEventListener('noni:notification', handleNotification)
+    // Suscripción a cambios del servicio
+    const unsubscribe = notificationService.subscribe(({ notifications, unreadCount }) => {
+      setNotifications([...notifications])
+      setUnreadCount(unreadCount)
+    })
+
+    // Inicialización (dispara la sincronización por el propio subscribe)
+    if (negocioId) notificationService.init(negocioId)
+
+    window.addEventListener('noni:notification', sincronizar)
 
     return () => {
       unsubscribe()
-      window.removeEventListener('noni:notification', handleNotification)
+      window.removeEventListener('noni:notification', sincronizar)
     }
   }, [negocioId])
 
@@ -50,11 +45,15 @@ export function useNotifications(negocioId) {
     notificationService.clear()
   }, [])
 
+  /** Pide permiso de notificaciones del navegador (llamar desde un click). */
+  const pedirPermiso = useCallback(() => notificationService.pedirPermiso(), [])
+
   return {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
     clear,
+    pedirPermiso,
   }
 }

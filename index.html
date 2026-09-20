@@ -4,16 +4,28 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="description" content="Noni — Hub de Operaciones y Reservas Inteligentes." />
-    <meta name="theme-color" content="#0f172a" />
-    
-    <!-- iOS / PWA Support -->
+
+    <!-- Sin `maximum-scale`/`user-scalable=no`: bloquear el zoom deja fuera a
+         quien necesita agrandar el texto (y iOS lo ignora igual desde iOS 10). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Noni — Reservas online y gestión de agenda para barberías, bares, estética, veterinarias y más." />
+    <meta name="theme-color" content="#5B3DF5" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- iOS / PWA Support (iOS no soporta SVG como apple-touch-icon) -->
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Noni" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph: así se ve el link al compartirlo por WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Noni" />
+    <meta property="og:title" content="Noni — Reservá online" />
+    <meta property="og:description" content="Elegí servicio, día y horario en menos de un minuto." />
+    <meta property="og:image" content="/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
 
     <!-- Google Fonts: Inter Tight (body) + Fraunces (editorial serif) + JetBrains Mono (mono) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,6 +36,12 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="font-family: system-ui, sans-serif; padding: 40px; text-align: center; color: #1E1B4B">
+        <h1 style="font-size: 20px">Necesitás activar JavaScript</h1>
+        <p style="color: #5B5580">Noni no puede funcionar con JavaScript deshabilitado en tu navegador.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

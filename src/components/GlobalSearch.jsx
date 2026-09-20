@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
 
 /**
@@ -7,16 +7,17 @@ import { supabase } from '../supabaseClient'
  * Arreglado: ahora carga sus propios datos si no se pasan como props.
  */
 export default function GlobalSearch({
-  negocio, session, onNavigate, onClose,
+  negocio, onNavigate, onClose,
   clientes = [], servicios = [], empleados = [],
 }) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
   const [selectedIdx, setSelectedIdx] = useState(0)
+  // Si el padre ya nos pasa los datos, arrancamos con ellos (sin efecto).
+  const tieneDatosDelPadre = clientes.length > 0 || servicios.length > 0 || empleados.length > 0
   const [localClientes, setLocalClientes] = useState(clientes)
   const [localServicios, setLocalServicios] = useState(servicios)
   const [localEmpleados, setLocalEmpleados] = useState(empleados)
-  const [dataLoaded, setDataLoaded] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(tieneDatosDelPadre)
   const inputRef = useRef(null)
 
   // Auto-focus
@@ -33,14 +34,7 @@ export default function GlobalSearch({
 
   // Cargar datos propios si no se pasan desde el padre
   useEffect(() => {
-    if (!negocio?.id) return
-    if (clientes.length > 0 || servicios.length > 0 || empleados.length > 0) {
-      setLocalClientes(clientes)
-      setLocalServicios(servicios)
-      setLocalEmpleados(empleados)
-      setDataLoaded(true)
-      return
-    }
+    if (!negocio?.id || tieneDatosDelPadre) return
 
     let cancelled = false
     ;(async () => {
@@ -94,7 +88,7 @@ export default function GlobalSearch({
       }
     })()
     return () => { cancelled = true }
-  }, [negocio?.id])
+  }, [negocio?.id, tieneDatosDelPadre])
 
   // Acciones estáticas siempre disponibles
   const ACCIONES = [
@@ -124,13 +118,10 @@ export default function GlobalSearch({
     onClose()
   }, [negocio, onNavigate, onClose])
 
-  // Search logic
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults(ACCIONES.slice(0, 6))
-      setSelectedIdx(0)
-      return
-    }
+  // Los resultados son un DERIVADO de la búsqueda: con un useEffect + setState
+  // se disparaba un render extra en cada tecla.
+  const results = useMemo(() => {
+    if (!query.trim()) return ACCIONES.slice(0, 6)
 
     const q = query.toLowerCase().trim()
     const matched = []
@@ -196,9 +187,12 @@ export default function GlobalSearch({
       .slice(0, 4)
       .forEach(a => matched.push(a))
 
-    setResults(matched.slice(0, 10))
-    setSelectedIdx(0)
+    return matched.slice(0, 10)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, localClientes, localServicios, localEmpleados])
+
+  // Al cambiar la búsqueda, el foco vuelve al primer resultado.
+  useEffect(() => { setSelectedIdx(0) }, [query])
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {

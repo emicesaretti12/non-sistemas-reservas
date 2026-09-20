@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../supabaseClient'
-import { getVocabulario } from '../utils/vocabulario'
 import { useToast } from './Toast'
 import { useConfirm } from '../contexts/ConfirmContext'
 
@@ -11,10 +10,9 @@ const STOCK_LEVELS = {
   ok: { color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', label: 'OK' },
 }
 
-export default function InventarioPro({ negocioId, rubro }) {
+export default function InventarioPro({ negocioId }) {
   const toast = useToast()
   const { showConfirm } = useConfirm()
-  const vocab = getVocabulario(rubro)
   
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -70,8 +68,11 @@ export default function InventarioPro({ negocioId, rubro }) {
       if (error) throw error
       setItems(data || [])
     } catch (e) {
-      console.error('Error cargando:', e.message)
-      toast('Error al cargar inventario')
+      console.error('Error cargando inventario:', e.message)
+      // Si la tabla todavía no existe (migración sin correr), avisamos claro.
+      toast.error(/relation .* does not exist/i.test(e.message)
+        ? 'El inventario no está habilitado todavía. Ejecutá la migración de la base.'
+        : 'No pudimos cargar el inventario. Revisá tu conexión.')
     } finally {
       setLoading(false)
     }
@@ -79,25 +80,47 @@ export default function InventarioPro({ negocioId, rubro }) {
 
   async function guardar(e) {
     e.preventDefault()
+
+    const nombre = String(form.nombre || '').trim()
+    if (!nombre) return toast.error('Poné un nombre para el producto.')
+
+    const numero = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0 }
+    if (numero(form.cantidad) < 0) return toast.error('La cantidad no puede ser negativa.')
+    if (numero(form.precio_costo) < 0 || numero(form.precio_venta) < 0) {
+      return toast.error('Los precios no pueden ser negativos.')
+    }
+
+    const payload = {
+      nombre,
+      descripcion: String(form.descripcion || '').trim(),
+      categoria: form.categoria || 'General',
+      cantidad: Math.round(numero(form.cantidad)),
+      stock_minimo: Math.max(0, Math.round(numero(form.stock_minimo))),
+      precio_costo: numero(form.precio_costo),
+      precio_venta: numero(form.precio_venta),
+      unidad: form.unidad || 'unidad',
+    }
+
     setGuardando(true)
     try {
       if (modoEdicion) {
         const { error } = await supabase
           .from('inventario')
-          .update({ ...form, actualizado_en: new Date().toISOString() })
+          .update({ ...payload, actualizado_en: new Date().toISOString() })
           .eq('id', modoEdicion)
+          .eq('negocio_id', negocioId)
         if (error) throw error
       } else {
         const { error } = await supabase
           .from('inventario')
-          .insert({ ...form, negocio_id: negocioId })
+          .insert({ ...payload, negocio_id: negocioId })
         if (error) throw error
       }
       cerrarModal()
       cargar()
-      toast('Producto guardado exitosamente')
+      toast.success('Producto guardado')
     } catch (e) {
-      toast('Error: ' + e.message)
+      toast.error('No se pudo guardar: ' + e.message)
     } finally {
       setGuardando(false)
     }
@@ -105,16 +128,17 @@ export default function InventarioPro({ negocioId, rubro }) {
 
   async function registrarMovimiento(e) {
     e.preventDefault()
-    if (!movForm.cantidad || parseInt(movForm.cantidad) <= 0) {
-      toast('Cantidad inválida')
+    if (!movForm.cantidad || parseInt(movForm.cantidad, 10) <= 0) {
+      toast.error('Poné una cantidad mayor a cero.')
       return
     }
     
     setGuardando(true)
     try {
-      const cant = parseInt(movForm.cantidad)
+      const cant = parseInt(movForm.cantidad, 10)
       const item = items.find(i => i.id === modalMovimiento)
-      let nuevaCantidad = item.cantidad
+      if (!item) { toast.error('No encontramos el producto.'); setGuardando(false); return }
+      let nuevaCantidad = Number(item.cantidad) || 0
 
       if (movForm.tipo === 'entrada') nuevaCantidad += cant
       else if (movForm.tipo === 'salida') nuevaCantidad = Math.max(0, nuevaCantidad - cant)
@@ -128,17 +152,19 @@ export default function InventarioPro({ negocioId, rubro }) {
         motivo: movForm.motivo
       })
 
-      await supabase
+      const { error: errStock } = await supabase
         .from('inventario')
         .update({ cantidad: nuevaCantidad, actualizado_en: new Date().toISOString() })
         .eq('id', modalMovimiento)
+        .eq('negocio_id', negocioId)
+      if (errStock) throw errStock
 
       setModalMovimiento(null)
       setMovForm({ tipo: 'entrada', cantidad: '', motivo: '' })
       cargar()
-      toast('Movimiento registrado')
+      toast.success(`Stock actualizado: ${nuevaCantidad} ${item.unidad || 'u'}`)
     } catch (e) {
-      toast('Error: ' + e.message)
+      toast.error('No se pudo registrar el movimiento: ' + e.message)
     } finally {
       setGuardando(false)
     }
@@ -151,9 +177,14 @@ export default function InventarioPro({ negocioId, rubro }) {
       confirmText: 'Desactivar',
       isDestructive: true,
       onConfirm: async () => {
-        await supabase.from('inventario').update({ activo: false }).eq('id', id)
+        const { error } = await supabase
+          .from('inventario')
+          .update({ activo: false })
+          .eq('id', id)
+          .eq('negocio_id', negocioId)
         cargar()
-        toast('Producto desactivado')
+        if (error) toast.error('No se pudo desactivar el producto.')
+        else toast.success('Producto desactivado')
       }
     })
   }

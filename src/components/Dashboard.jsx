@@ -914,7 +914,6 @@ export default function Dashboard({ session }) {
       {searchOpen && negocio && !negocio.es_admin_plataforma && (
         <GlobalSearch
           negocio={negocio}
-          session={session}
           onNavigate={(t) => setTab(t)}
           onClose={() => setSearchOpen(false)}
         />
@@ -1143,7 +1142,6 @@ export default function Dashboard({ session }) {
                   <DashboardHome
                     negocio={negocio}
                     vocab={vocab}
-                    colorPrimario={colorPrimario}
                     onNavigate={(t) => setTab(t)}
                     publicLink={publicLink}
                     showToast={showToast}
@@ -1160,11 +1158,11 @@ export default function Dashboard({ session }) {
                   el resto del panel sigue funcionando. */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                 {tab === 'agenda' && <ErrorGuard fallbackMessage="No pudimos mostrar la agenda"><div id="tour-agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div></ErrorGuard>}
-                {tab === 'reportes' && <ErrorGuard fallbackMessage="No pudimos generar los reportes"><Reportes negocioId={negocio.id} colorPrimario={colorPrimario} rubro={negocio.rubro} /></ErrorGuard>}
+                {tab === 'reportes' && <ErrorGuard fallbackMessage="No pudimos generar los reportes"><Reportes negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
                 {tab === 'servicios' && <ErrorGuard fallbackMessage="No pudimos mostrar tus servicios"><div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div></ErrorGuard>}
                 {tab === 'equipo' && <ErrorGuard fallbackMessage="No pudimos mostrar tu equipo"><Empleados negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
                 {tab === 'horarios' && <ErrorGuard fallbackMessage="No pudimos mostrar los horarios"><ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} /></ErrorGuard>}
-                {tab === 'inventario' && <ErrorGuard fallbackMessage="No pudimos mostrar el inventario"><InventarioPro negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
+                {tab === 'inventario' && <ErrorGuard fallbackMessage="No pudimos mostrar el inventario"><InventarioPro negocioId={negocio.id} /></ErrorGuard>}
                 {tab === 'flyer' && <ErrorGuard fallbackMessage="No pudimos abrir el creador de flyers"><FlyerCreatorPro negocio={negocio} publicLink={publicLink} /></ErrorGuard>}
               </div>
 

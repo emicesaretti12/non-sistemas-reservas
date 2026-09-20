@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
-import { verificarDisponibilidad, parseFecha, ocupaHorario } from '../utils/reservas'
+import { verificarDisponibilidad, parseFecha } from '../utils/reservas'
 import { useToast } from './Toast'
 import { IconRobot } from './NoniIcons'
 
@@ -310,7 +310,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         return
       }
 
-      const { hora, empleado_id, ...turnoData } = nuevoTurno
+      const { hora: _hora, empleado_id, ...turnoData } = nuevoTurno
       const { error } = await supabase.from('turnos').insert([{
         ...turnoData,
         cliente_nombre: nombre,
@@ -369,9 +369,10 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const fechaAmigable = fechaTurno.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
     const esResuelto = t.estado === 'completado' || t.estado === 'no_show' || t.estado === 'cancelado'
     const esFuturo = fechaTurno > new Date()
+    const tituloAccesible = `${t.cliente_nombre} · ${fechaAmigable} a las ${horaLocal}${esFuturo ? '' : ' (ya pasó)'}`
 
     return (
-      <div key={t.id} className={`rounded-2xl p-4 md:p-5 border flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-5 group transition-all ${t.estado === 'completado' ? 'bg-emerald-50/60 border-emerald-200/60 opacity-80' :
+      <div key={t.id} title={tituloAccesible} className={`rounded-2xl p-4 md:p-5 border flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-5 group transition-all ${t.estado === 'completado' ? 'bg-emerald-50/60 border-emerald-200/60 opacity-80' :
           t.estado === 'no_show' ? 'bg-red-50/40 border-red-200/50 opacity-65' :
           t.estado === 'cancelado' ? 'bg-slate-50 border-slate-200 opacity-60' :
             'bg-white border-[#EDE8F7] hover:border-[#5B3DF5]/30 hover:shadow-md'

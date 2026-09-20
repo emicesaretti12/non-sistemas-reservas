@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from './Toast'
 
@@ -61,7 +61,6 @@ const SIZES = [
 
 export default function FlyerCreatorPro({ negocio, publicLink }) {
   const toast = useToast()
-  const canvasRef = useRef(null)
 
   const [selectedTemplate, setSelectedTemplate] = useState(PROFESSIONAL_TEMPLATES[0])
   const [selectedSize, setSelectedSize] = useState(SIZES[0])

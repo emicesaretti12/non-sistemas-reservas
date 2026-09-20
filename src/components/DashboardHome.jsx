@@ -22,7 +22,6 @@ const fmtHora = (d) => new Date(d).toLocaleTimeString('es-AR', { hour: '2-digit'
 export default function DashboardHome({
   negocio,
   vocab,
-  colorPrimario = '#5B3DF5',
   onNavigate,
   publicLink,
   showToast,
@@ -34,7 +33,9 @@ export default function DashboardHome({
   const [turnosHoy, setTurnosHoy] = useState([])
   const [servicios, setServicios] = useState([])
   const [empleados, setEmpleados] = useState([])
-  const [tick, setTick] = useState(0)
+  // Reloj interno: se refresca cada minuto para que el countdown de la próxima
+  // cita y los "lugares libres" no queden congelados con la pantalla abierta.
+  const [ahora, setAhora] = useState(() => new Date())
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showInstallBtn, setShowInstallBtn] = useState(false)
 
@@ -59,9 +60,8 @@ export default function DashboardHome({
     setDeferredPrompt(null);
   };
 
-  // Re-render cada minuto para countdowns / "ahora"
   useEffect(() => {
-    const t = setInterval(() => setTick((x) => x + 1), 60000)
+    const t = setInterval(() => setAhora(new Date()), 60000)
     return () => clearInterval(t)
   }, [])
 
@@ -92,14 +92,12 @@ export default function DashboardHome({
       setLoading(false)
     })()
     return () => { cancel = true }
-  }, [negocio?.id, tick === -1])
-
-  const ahora = new Date()
+  }, [negocio?.id])
 
   // ── Derivados de citas de hoy ──────────────────────────────────────────────
   const proximos = useMemo(
     () => turnosHoy.filter((t) => new Date(t.fecha_hora) > ahora),
-    [turnosHoy, tick]
+    [turnosHoy, ahora]
   )
   const atendidos = turnosHoy.length - proximos.length
   const ingresosHoy = turnosHoy.reduce((a, t) => a + (t.servicios?.precio || 0), 0)
@@ -152,7 +150,7 @@ export default function DashboardHome({
     free.forEach((s) => { (byTime[s.timeStr] = byTime[s.timeStr] || []).push(s.emp) })
     const slots = Object.keys(byTime).sort().map((time) => ({ time, emps: byTime[time] }))
     return { estado: slots.length ? 'ok' : 'lleno', slots }
-  }, [negocio?.horarios, servicios, empleados, turnosHoy, tick])
+  }, [negocio?.horarios, servicios, empleados, turnosHoy, ahora, vocab?.fallbackStaff])
 
   const lugaresCount = lugares.slots.length
 
@@ -167,7 +165,6 @@ export default function DashboardHome({
     setTurnosHoy((prev) => prev.map((x) => (x.id === t.id ? { ...x, recordatorio_enviado: true } : x)))
   }
 
-  const accent = colorPrimario || '#5B3DF5'
   const maxSem = Math.max(...distribucionSemanal, 1)
   const hoyIdx = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1
   const fechaLarga = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })

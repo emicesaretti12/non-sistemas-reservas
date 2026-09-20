@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IconRobot, IconCheckCircle, IconBolt, IconChart, IconCalendar, IconPalette, IconRocket } from './NoniIcons'
 
-const ASSISTANT_KEY = 'ns_noni_v4_state'
+const ASSISTANT_KEY_BASE = 'ns_noni_v4_state'
 
 /**
  * Noni Assistant V4 — Asistente IA Mejorado
@@ -162,6 +162,47 @@ function TypingIndicator() {
   )
 }
 
+/**
+ * Acciones rápidas según lo que falta configurar. Antes el componente recibía
+ * `setupData`, `onNavigate`, `onStartTour` y `publicLink` y no usaba ninguno:
+ * el asistente no podía llevarte a ningún lado.
+ */
+function accionesSugeridas({ setupData = {}, vocab = {}, tab, onNavigate, onStartTour, publicLink, onCopiado }) {
+  const acciones = []
+
+  if (!setupData.hasServicios) {
+    acciones.push({ icon: '🧾', tab: 'servicios', text: `Crear mi primer ${vocab.servicio || 'servicio'}`, run: () => onNavigate?.('servicios') })
+  }
+  if (!setupData.hasHorarios) {
+    acciones.push({ icon: '🕒', tab: 'horarios', text: 'Configurar mis horarios', run: () => onNavigate?.('horarios') })
+  }
+  if (!setupData.hasEmpleados) {
+    acciones.push({ icon: '👥', tab: 'equipo', text: `Agregar ${vocab.empleado || 'a mi equipo'}`, run: () => onNavigate?.('equipo') })
+  }
+  if (!setupData.hasBranding) {
+    acciones.push({ icon: '🎨', tab: 'ajustes', text: 'Personalizar mi marca', run: () => onNavigate?.('ajustes') })
+  }
+  if (!setupData.hasShared && publicLink) {
+    acciones.push({
+      icon: '🔗',
+      text: 'Copiar mi link de reservas',
+      run: () => {
+        navigator.clipboard.writeText(publicLink).catch(() => {})
+        try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
+        onCopiado?.()
+      },
+    })
+  }
+
+  // Siempre disponibles
+  acciones.push({ icon: '📅', tab: 'agenda', text: 'Ver mi agenda', run: () => onNavigate?.('agenda') })
+  acciones.push({ icon: '📊', tab: 'reportes', text: 'Ver mis reportes', run: () => onNavigate?.('reportes') })
+  if (onStartTour) acciones.push({ icon: '🧭', text: 'Hacer el tour guiado', run: () => onStartTour() })
+
+  // No ofrecemos llevarte a la pestaña en la que ya estás parado.
+  return acciones.filter((a) => a.tab !== tab).slice(0, 4)
+}
+
 export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartAlerts, publicLink, onNavigate, onStartTour }) {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([])
@@ -172,6 +213,10 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
   const messagesEndRef = useRef(null)
   const panelRef = useRef(null)
 
+  // El historial se guarda por negocio: con la clave global, al cambiar de
+  // cuenta en el mismo navegador aparecía la conversación del negocio anterior.
+  const ASSISTANT_KEY = `${ASSISTANT_KEY_BASE}_${negocio?.id || 'anon'}`
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem(ASSISTANT_KEY)
@@ -180,12 +225,20 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
         if (parsed.dismissed) setDismissed(true)
         if (parsed.messages) setMessages(parsed.messages)
       }
-    } catch {}
-  }, [])
+    } catch {
+      // Storage no disponible (modo privado): arrancamos sin historial.
+    }
+  }, [ASSISTANT_KEY])
 
   useEffect(() => {
-    localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed, messages }))
-  }, [dismissed, messages])
+    try {
+      // Guardamos sólo los últimos 30 mensajes: el historial completo podía
+      // llenar la cuota de localStorage y tirar QuotaExceededError.
+      localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed, messages: messages.slice(-30) }))
+    } catch {
+      // Sin storage disponible; el chat sigue funcionando en memoria.
+    }
+  }, [dismissed, messages, ASSISTANT_KEY])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -199,6 +252,19 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  const acciones = accionesSugeridas({
+    setupData,
+    vocab,
+    tab,
+    onNavigate,
+    onStartTour,
+    publicLink,
+    onCopiado: () => setMessages((prev) => [...prev, {
+      role: 'assistant',
+      content: '¡Listo! Copié tu link de reservas. Pegalo en WhatsApp, Instagram o donde quieras y tus clientes ya pueden reservar solos.',
+    }]),
+  })
 
   const handleSendMessage = useCallback(async () => {
     if (!input.trim() || loading) return
@@ -215,7 +281,7 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
       const response = getSmartResponse(userMsg, smartAlerts)
       setMessages((prev) => [...prev, { role: 'assistant', content: response }])
       setMood('happy')
-    } catch (e) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: 'Hubo un problema. Intentá nuevamente.' },
@@ -268,7 +334,7 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
           className="ns-assistant-panel"
         >
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-sky-500 to-sky-400 flex items-center justify-between rounded-t-3xl">
+          <div className="p-4 flex items-center justify-between rounded-t-3xl" style={{ background: 'var(--ns-gradient-1)' }}>
             <div className="flex items-center gap-3">
               <NoniAvatar size={40} mood={mood} />
               <div>
@@ -294,6 +360,28 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
                     Soy tu asistente inteligente. Preguntame sobre tus métricas, cómo mejorar tu negocio o cómo usar el sistema.
                   </p>
                 </div>
+
+                {/* Acciones rápidas según lo que falta configurar */}
+                {acciones.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">Hacelo en un toque:</p>
+                    {acciones.map((a, i) => (
+                      <motion.button
+                        key={a.text}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        onClick={() => { a.run(); setOpen(false) }}
+                        className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-2"
+                        style={{ background: 'var(--ns-primary-bg)', borderColor: 'var(--ns-border)', color: 'var(--ns-primary)' }}
+                        whileHover={{ x: 4 }}
+                      >
+                        <span>{a.icon}</span>
+                        {a.text}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Preguntas comunes:</p>
@@ -355,14 +443,17 @@ export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartA
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage() } }}
+              aria-label="Escribile a Noni" 
               placeholder="Preguntame algo..."
-              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#5B3DF5] focus:ring-2 focus:ring-[#5B3DF5]/20"
             />
             <button
               onClick={handleSendMessage}
               disabled={loading || !input.trim()}
-              className="px-3 py-2 rounded-lg bg-sky-500 text-white font-bold text-sm hover:bg-sky-600 disabled:opacity-50 transition-all"
+              aria-label="Enviar mensaje"
+              className="px-3 py-2 rounded-lg text-white font-bold text-sm disabled:opacity-50 transition-all"
+              style={{ background: 'var(--ns-primary)' }}
             >
               →
             </button>
