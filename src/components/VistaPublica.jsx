@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { getVocabulario, esGastronomia } from '../utils/vocabulario'
+import { getVocabulario } from '../utils/vocabulario'
 import { getEstadoSuscripcion } from '../utils/suscripcion'
 import { ocupaHorario, duracionTurno, parseFecha, seSolapan, verificarDisponibilidad, mapaEmbedUrl } from '../utils/reservas'
 import { useToast } from './Toast'
@@ -461,7 +461,10 @@ export default function VistaPublica() {
 
   // Vocabulario dinámico según rubro
   const vocab = getVocabulario(negocio.rubro)
-  const isRestaurante = esGastronomia(negocio.rubro)
+  // Cada rubro define su propio dato extra (comensales, modelo del auto, idea
+  // del tatuaje). Antes sólo se mostraba para gastronomía y el resto de los
+  // rubros perdía ese dato aunque lo tuvieran configurado.
+  const pideCampoExtra = Boolean(vocab.campoExtra)
 
   // --- CARRITO HELPERS ---
   const addToCart = (prodId) => {
@@ -881,12 +884,22 @@ export default function VistaPublica() {
                          </div>
                       </div>
                       
-                      {isRestaurante && (
+                      {pideCampoExtra && (
                         <div className="space-y-1">
-                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>Comensales</label>
+                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--ns-primary)' }}>{vocab.campoExtraLabel || 'Dato adicional'}</label>
                           <div className="ns-input-wrapper">
                              <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                             <input type="number" min="1" max="20" inputMode="numeric" required className="ns-input" placeholder="Cantidad de personas" value={reserva.campoExtra} onChange={(e) => setReserva(prev => ({ ...prev, campoExtra: e.target.value }))} />
+                             <input
+                               type={vocab.campoExtraTipo === 'number' ? 'number' : 'text'}
+                               min={vocab.campoExtraTipo === 'number' ? 1 : undefined}
+                               max={vocab.campoExtraTipo === 'number' ? 50 : undefined}
+                               inputMode={vocab.campoExtraTipo === 'number' ? 'numeric' : 'text'}
+                               required
+                               className="ns-input"
+                               placeholder={vocab.campoExtraPlaceholder || ''}
+                               value={reserva.campoExtra}
+                               onChange={(e) => setReserva(prev => ({ ...prev, campoExtra: e.target.value }))}
+                             />
                           </div>
                         </div>
                       )}
@@ -912,7 +925,7 @@ export default function VistaPublica() {
                       )}
                       {reserva.campoExtra && (
                          <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between">
-                           <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{vocab.campoExtraLabel || 'Comensales'}</span>
+                           <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{vocab.campoExtraLabel || 'Dato adicional'}</span>
                            <span className="text-sm font-bold text-white">{reserva.campoExtra}</span>
                          </div>
                       )}

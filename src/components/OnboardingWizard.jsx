@@ -9,10 +9,55 @@ import OnboardingComplete from './OnboardingComplete'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
-const COLORES = ['#0f172a','#1e40af','#7c3aed','#db2777','#dc2626','#ea580c','#ca8a04','#16a34a','#0891b2','#0ea5e9']
+const COLORES = ['#5B3DF5','#0f172a','#1e40af','#7c3aed','#db2777','#dc2626','#ea580c','#ca8a04','#16a34a','#0891b2']
 
 // Sugerencias inteligentes por rubro
 const SUGERENCIAS = {
+  'Uñas / Manicuría': {
+    servicios: ['Semipermanente', 'Kapping', 'Esculpidas', 'Retirada + Esmaltado'],
+    precios: [6000, 9000, 13000, 4000],
+    duraciones: [60, 90, 120, 45],
+    staff: ['Sofía', 'Lucía'],
+    especialidad: 'Manicura',
+    descripcion: 'Uñas prolijas y duraderas, con la mejor atención.',
+    color: '#db2777',
+  },
+  'Tatuajes / Piercings': {
+    servicios: ['Tattoo chico', 'Tattoo mediano', 'Retoque', 'Piercing'],
+    precios: [25000, 60000, 0, 15000],
+    duraciones: [60, 180, 45, 30],
+    staff: ['Juan', 'Mica'],
+    especialidad: 'Tatuador/a',
+    descripcion: 'Diseños únicos, materiales de primera y todo esterilizado.',
+    color: '#0f172a',
+  },
+  'Bar / Cervecería': {
+    servicios: ['Mesa para 2', 'Mesa para 4', 'Mesa para 6', 'Barra'],
+    precios: [0, 0, 0, 0],
+    duraciones: [90, 120, 120, 60],
+    staff: ['Salón', 'Patio'],
+    especialidad: 'Sector',
+    descripcion: 'Birra fría, buena música y mejor gente.',
+    color: '#ca8a04',
+  },
+  'Gimnasio / Entrenamiento': {
+    servicios: ['Funcional', 'Musculación', 'Entrenamiento personalizado'],
+    precios: [0, 0, 12000],
+    duraciones: [60, 60, 60],
+    staff: ['Profe Nico', 'Profe Ana'],
+    especialidad: 'Profesor/a',
+    descripcion: 'Entrenamiento acompañado, para todos los niveles.',
+    color: '#16a34a',
+  },
+  'Taller / Servicio Técnico': {
+    servicios: ['Diagnóstico', 'Cambio de aceite', 'Service completo'],
+    precios: [8000, 25000, 70000],
+    duraciones: [30, 60, 180],
+    staff: ['Box 1', 'Box 2'],
+    especialidad: 'Puesto de trabajo',
+    descripcion: 'Trabajo prolijo, presupuesto claro y entrega a tiempo.',
+    color: '#1e40af',
+  },
   'Barbería / Peluquería': {
     servicios: ['Corte Clásico', 'Corte + Barba', 'Afeitado Premium', 'Degradé', 'Coloración'],
     precios: [2500, 3500, 2800, 3000, 5000],
@@ -56,13 +101,13 @@ const SUGERENCIAS = {
     staff: ['Dr. Martínez', 'Dra. Pérez'],
     especialidad: 'Médico/a',
     descripcion: 'Tu salud, nuestra misión.',
-    color: '#0ea5e9',
+    color: '#5B3DF5',
   },
 }
 
 // ── Live Preview (right panel) ─────────────────────────────────────────────
 function LivePreview({ data }) {
-  const color = data.color || '#0ea5e9'
+  const color = data.color || '#5B3DF5'
   return (
     <div className="flex-1 overflow-y-auto bg-white" style={{ fontFamily: 'system-ui, sans-serif' }}>
       <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${color} 150%)` }}>
@@ -171,7 +216,7 @@ export default function OnboardingWizard({ session, onComplete }) {
   const steps = buildSteps()
   const [stepIdx, setStepIdx] = useState(0)
   const [data, setData] = useState({
-    nombre:'', rubro:'', color:'#0ea5e9', logo_url:'', descripcion:'', instagram:'',
+    nombre:'', rubro:'', color:'#5B3DF5', logo_url:'', descripcion:'', instagram:'',
     svcNombre:'', svcPrecio:'', svcDuracion:'30', staffNombre:'', staffEspecialidad:''
   })
   const [input, setInput] = useState('')
@@ -305,10 +350,10 @@ export default function OnboardingWizard({ session, onComplete }) {
   // ── Saving screen ────────────────────────────────────────────────────────
   if (saving) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <div className="min-h-screen bg-[#1E1B4B] flex items-center justify-center">
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center space-y-6">
           <motion.div animate={{rotate:360}} transition={{repeat:Infinity,duration:1,ease:'linear'}}
-            className="w-14 h-14 border-4 border-white/10 border-t-sky-400 rounded-full mx-auto" />
+            className="w-14 h-14 border-4 border-white/10 border-t-violet-300 rounded-full mx-auto" />
           <div>
             <p className="text-white font-bold text-lg">Creando tu plataforma...</p>
             <p className="text-slate-500 text-sm mt-1">Esto toma unos segundos</p>
@@ -320,13 +365,13 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Input renderers ──────────────────────────────────────────────────────
   const renderInput = () => {
-    const base = "w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-sky-400 focus:bg-white/15 transition-all font-medium"
+    const base = "w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-violet-300 focus:bg-white/15 transition-all font-medium"
     switch (step.type) {
       case 'text':
         return (
           <form onSubmit={e => { e.preventDefault(); if(input.trim()) next({ [step.id]: input.trim() }) }} className="space-y-3">
             <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} className={base} />
-            <button type="submit" disabled={!input.trim()} className="w-full py-4 bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-white font-black rounded-2xl transition-all">Continuar →</button>
+            <button type="submit" disabled={!input.trim()} className="w-full py-4 bg-violet-500 hover:bg-violet-300 disabled:opacity-40 text-white font-black rounded-2xl transition-all">Continuar →</button>
           </form>
         )
       case 'textarea': {
@@ -335,14 +380,14 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="space-y-3">
             {sug?.descripcion && (
               <button onClick={() => setInput(sug.descripcion)}
-                className="w-full text-left px-4 py-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-300 text-sm font-medium hover:bg-sky-500/20 transition-all">
+                className="w-full text-left px-4 py-3 bg-violet-500/10 border border-violet-500/30 rounded-xl text-violet-300 text-sm font-medium hover:bg-violet-500/20 transition-all">
                 Sugerencia: "{sug.descripcion}"
               </button>
             )}
             <textarea ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} rows={3} className={base + " resize-none"} />
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => next({ [step.id]: '' })} className="py-4 bg-white/10 hover:bg-white/20 text-white/70 font-bold rounded-2xl transition-all">Omitir</button>
-              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="py-4 bg-sky-500 hover:bg-sky-400 text-white font-black rounded-2xl transition-all">Continuar →</button>
+              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="py-4 bg-violet-500 hover:bg-violet-300 text-white font-black rounded-2xl transition-all">Continuar →</button>
             </div>
           </div>
         )
@@ -350,13 +395,13 @@ export default function OnboardingWizard({ session, onComplete }) {
       case 'instagram':
         return (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-2xl px-4 focus-within:border-sky-400 transition-all">
-              <span className="text-sky-400 font-black text-lg">@</span>
+            <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-2xl px-4 focus-within:border-violet-300 transition-all">
+              <span className="text-violet-300 font-black text-lg">@</span>
               <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder="tu_cuenta" className="flex-1 py-4 bg-transparent text-white placeholder:text-white/30 outline-none font-medium" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => next({ instagram: '' })} className="py-4 bg-white/10 text-white/70 font-bold rounded-2xl">Omitir</button>
-              <button onClick={() => next({ instagram: input })} className="py-4 bg-sky-500 text-white font-black rounded-2xl">Continuar →</button>
+              <button onClick={() => next({ instagram: input })} className="py-4 bg-violet-500 text-white font-black rounded-2xl">Continuar →</button>
             </div>
           </div>
         )
@@ -366,7 +411,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             {RUBROS_DISPONIBLES.map(opt => (
               <motion.button key={opt} whileTap={{scale:.95}}
                 onClick={() => next({ rubro: opt })}
-                className="px-4 py-2.5 bg-white/10 hover:bg-sky-500 border border-white/20 hover:border-sky-400 text-white text-sm font-semibold rounded-full transition-all">
+                className="px-4 py-2.5 bg-white/10 hover:bg-violet-500 border border-white/20 hover:border-violet-300 text-white text-sm font-semibold rounded-full transition-all">
                 {opt}
               </motion.button>
             ))}
@@ -386,7 +431,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 <span className="text-white/50 text-lg">+</span>
               </label>
             </div>
-            <button onClick={() => next()} className="w-full py-4 bg-sky-500 text-white font-black rounded-2xl">Confirmar Color →</button>
+            <button onClick={() => next()} className="w-full py-4 bg-violet-500 text-white font-black rounded-2xl">Confirmar Color →</button>
           </div>
         )
       case 'logo':
@@ -394,15 +439,15 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="space-y-3">
             {uploading ? (
               <div className="py-10 flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-4 border-sky-400/30 border-t-sky-400 rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-violet-300/30 border-t-violet-300 rounded-full animate-spin" />
                 <p className="text-white/50 text-sm">Subiendo imagen...</p>
               </div>
             ) : (
               <>
-                <label className="w-full py-10 bg-white/5 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-3 cursor-pointer hover:border-sky-400 hover:bg-white/10 transition-all">
+                <label className="w-full py-10 bg-white/5 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-3 cursor-pointer hover:border-violet-300 hover:bg-white/10 transition-all">
                   <input type="file" accept="image/*" className="hidden" onChange={uploadLogo} />
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg className="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   </div>
                   <p className="text-white/60 text-sm font-medium">Tocar para subir logo</p>
                 </label>
@@ -420,7 +465,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 {sug.servicios.map((s, i) => (
                   <button key={s} onClick={() => setData(d => ({ ...d, svcNombre: s, svcPrecio: String(sug.precios[i] || 0), svcDuracion: String(sug.duraciones[i] || 30) }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
-                      data.svcNombre === s ? 'bg-sky-500 border-sky-400 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                      data.svcNombre === s ? 'bg-violet-500 border-violet-300 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
                     }`}>
                     {s}
                   </button>
@@ -436,7 +481,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => next({ svcNombre:'' })} className="py-4 bg-white/10 text-white/70 font-bold rounded-2xl">Omitir</button>
-              <button disabled={!data.svcNombre} onClick={() => next()} className="py-4 bg-sky-500 disabled:opacity-40 text-white font-black rounded-2xl">Continuar →</button>
+              <button disabled={!data.svcNombre} onClick={() => next()} className="py-4 bg-violet-500 disabled:opacity-40 text-white font-black rounded-2xl">Continuar →</button>
             </div>
           </div>
         )
@@ -450,7 +495,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 {sug.staff.map(s => (
                   <button key={s} onClick={() => setData(d => ({ ...d, staffNombre: s, staffEspecialidad: d.staffEspecialidad || sug.especialidad }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
-                      data.staffNombre === s ? 'bg-sky-500 border-sky-400 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                      data.staffNombre === s ? 'bg-violet-500 border-violet-300 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
                     }`}>
                     {s}
                   </button>
@@ -461,7 +506,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             <input value={data.staffEspecialidad} onChange={e=>setData(d=>({...d,staffEspecialidad:e.target.value}))} placeholder={vocab.placeholderEspecialidad || 'Especialidad'} className={base} />
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => next({ staffNombre:'' })} className="py-4 bg-white/10 text-white/70 font-bold rounded-2xl">Omitir</button>
-              <button disabled={!data.staffNombre} onClick={() => next()} className="py-4 bg-sky-500 disabled:opacity-40 text-white font-black rounded-2xl">Finalizar ✓</button>
+              <button disabled={!data.staffNombre} onClick={() => next()} className="py-4 bg-violet-500 disabled:opacity-40 text-white font-black rounded-2xl">Finalizar ✓</button>
             </div>
           </div>
         )
@@ -472,12 +517,12 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Main layout ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#020617] flex">
+    <div className="min-h-screen bg-[#1E1B4B] flex">
       {/* Left: Chat / Form panel */}
       <div className="flex-1 flex flex-col max-w-2xl mx-auto lg:mx-0 p-6 lg:p-12">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-300 to-blue-600 flex items-center justify-center shadow-lg">
             <span className="text-white font-black text-sm italic">NS</span>
           </div>
           <div>
@@ -491,7 +536,7 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="flex justify-between items-center mb-2">
             <div className="flex gap-1.5">
               {steps.map((s, i) => (
-                <motion.div key={s.id} animate={{ width: i === stepIdx ? 24 : 8, backgroundColor: i < stepIdx ? '#0ea5e9' : i === stepIdx ? '#fff' : 'rgba(255,255,255,0.15)' }}
+                <motion.div key={s.id} animate={{ width: i === stepIdx ? 24 : 8, backgroundColor: i < stepIdx ? '#5B3DF5' : i === stepIdx ? '#fff' : 'rgba(255,255,255,0.15)' }}
                   className="h-2 rounded-full transition-all" />
               ))}
             </div>

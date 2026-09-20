@@ -19,7 +19,7 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#1a0f3f] to-[#020617] flex items-center justify-center p-6 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#1E1B4B] via-[#312E81] to-[#1E1B4B] flex items-center justify-center p-6 overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <motion.div
@@ -93,7 +93,7 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
           className="bg-white/10 border border-white/20 rounded-2xl p-5 cursor-pointer hover:bg-white/15 hover:border-white/40 transition-all backdrop-blur-sm"
         >
           <p className="text-xs text-white/50 uppercase tracking-widest mb-2 font-bold">Tu link de reservas</p>
-          <code className="text-sm text-sky-300 block truncate font-mono">{link}</code>
+          <code className="text-sm text-violet-300 block truncate font-mono">{link}</code>
           <p className="text-[10px] text-white/30 mt-3 uppercase tracking-widest">👆 Tocar para copiar</p>
         </motion.div>
 
@@ -107,13 +107,13 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
           <p className="text-xs font-black text-white/70 uppercase tracking-widest mb-3">Próximos pasos</p>
           <ul className="space-y-2 text-sm text-white/60">
             <li className="flex items-center gap-2">
-              <span className="text-sky-400">✓</span> Compartir link en WhatsApp
+              <span className="text-violet-300">✓</span> Compartir link en WhatsApp
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-sky-400">✓</span> Agregar más servicios
+              <span className="text-violet-300">✓</span> Agregar más servicios
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-sky-400">✓</span> Personalizar tu marca
+              <span className="text-violet-300">✓</span> Personalizar tu marca
             </li>
           </ul>
         </motion.div>

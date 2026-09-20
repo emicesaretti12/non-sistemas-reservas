@@ -38,6 +38,7 @@ import DashboardTour, { useTour } from './DashboardTourV2'
 import FloatingAssistant from './NoniAssistantV4'
 import DashboardHome from './DashboardHome'
 import NotificationCenter from './NotificationCenterV2'
+import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
 import '../components/PlastilinaStyles.css'
 import '../components/MobileOptimized.css'
@@ -167,6 +168,16 @@ export default function Dashboard({ session }) {
       inicializarPanel()
     }
   }, [session])
+
+  // Cerrar sesión limpiando la suscripción de tiempo real: si no, el canal de
+  // Supabase del negocio anterior quedaba abierto al cambiar de cuenta.
+  async function cerrarSesion() {
+    try { notificationService.destroy() } catch { /* nada que cerrar */ }
+    await supabase.auth.signOut()
+  }
+
+  // Al salir del panel, cortamos la suscripción de notificaciones.
+  useEffect(() => () => { notificationService.destroy() }, [])
 
   // --- GLOBAL SEARCH KEYBOARD SHORTCUT (Cmd+K / Ctrl+K) ---
   useEffect(() => {
@@ -731,7 +742,7 @@ export default function Dashboard({ session }) {
             <div className="h-3 w-px mx-1 bg-slate-200"></div>
             <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-slate-400">{esVencido ? 'Suscripción Vencida' : 'Cuenta Suspendida'}</p>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-opacity" data-testid="blocked-logout">Salir</button>
+          <button onClick={cerrarSesion} className="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-opacity" data-testid="blocked-logout">Salir</button>
         </nav>
 
         {/* Contenido de bloqueo */}
@@ -811,7 +822,7 @@ export default function Dashboard({ session }) {
                 Ya pagué · Actualizar
               </button>
               <button
-                onClick={() => supabase.auth.signOut()}
+                onClick={cerrarSesion}
                 className="w-full py-3 text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-slate-600 transition-all"
               >
                 Cerrar sesión
@@ -906,7 +917,7 @@ export default function Dashboard({ session }) {
               </button>
             </>
           )}
-          <button onClick={() => supabase.auth.signOut()} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-colors" style={{ color: '#EF444480' }}>Salir</button>
+          <button onClick={cerrarSesion} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-colors" style={{ color: '#EF444480' }}>Salir</button>
         </div>
       </nav>
 
@@ -1582,7 +1593,7 @@ export default function Dashboard({ session }) {
                       </div>
                       <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
-                    <button onClick={() => supabase.auth.signOut()} className="ns-settings-row cursor-pointer w-full text-left hover:bg-red-50 group">
+                    <button onClick={cerrarSesion} className="ns-settings-row cursor-pointer w-full text-left hover:bg-red-50 group">
                       <div className="flex items-center gap-3">
                         <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         <span className="text-sm font-bold text-red-500">Cerrar Sesión</span>

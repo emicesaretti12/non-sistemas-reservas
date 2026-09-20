@@ -6,7 +6,14 @@ import { IconCheckCircle, IconBolt, IconCalendar } from './NoniIcons'
 export default function NotificationCenterV2({ negocioId }) {
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clear } = useNotifications(negocioId)
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clear, pedirPermiso } = useNotifications(negocioId)
+
+  // Estado del permiso de notificaciones del navegador. Ahora se pide desde un
+  // click del usuario: al pedirlo automáticamente al entrar, Chrome lo
+  // descartaba de plano y las alertas nunca llegaban.
+  const [permiso, setPermiso] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+  )
 
   // Close on outside click
   useEffect(() => {
@@ -21,7 +28,7 @@ export default function NotificationCenterV2({ negocioId }) {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'new_reservation':
-        return <IconCalendar className="w-5 h-5 text-sky-500" />
+        return <IconCalendar className="w-5 h-5 text-violet-500" />
       case 'reservation_update':
         return <IconCheckCircle className="w-5 h-5 text-emerald-500" />
       default:
@@ -32,7 +39,7 @@ export default function NotificationCenterV2({ negocioId }) {
   const getNotificationColor = (type) => {
     switch (type) {
       case 'new_reservation':
-        return 'bg-sky-50 border-sky-200'
+        return 'bg-violet-50 border-violet-200'
       case 'reservation_update':
         return 'bg-emerald-50 border-emerald-200'
       default:
@@ -98,7 +105,7 @@ export default function NotificationCenterV2({ negocioId }) {
             className="absolute top-full right-0 mt-2 w-96 max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200"
           >
             {/* Header */}
-            <div className="p-4 bg-gradient-to-r from-sky-500 to-sky-400 flex items-center justify-between">
+            <div className="p-4 bg-gradient-to-r from-violet-500 to-violet-400 flex items-center justify-between">
               <h3 className="font-black text-white">Notificaciones</h3>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
@@ -118,6 +125,26 @@ export default function NotificationCenterV2({ negocioId }) {
                 </button>
               </div>
             </div>
+
+            {/* Activar avisos del navegador */}
+            {permiso === 'default' && (
+              <button
+                onClick={async () => setPermiso((await pedirPermiso()) ? 'granted' : 'denied')}
+                className="w-full px-4 py-3 text-left border-b border-slate-100 bg-violet-50/60 hover:bg-violet-50 transition-all flex items-center gap-3"
+              >
+                <span className="text-lg">🔔</span>
+                <span className="flex-1">
+                  <span className="block text-[13px] font-bold text-slate-900">Activar avisos en este dispositivo</span>
+                  <span className="block text-[11px] text-slate-500">Te avisamos apenas entra una reserva nueva</span>
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-violet-600">Activar</span>
+              </button>
+            )}
+            {permiso === 'denied' && (
+              <p className="px-4 py-2.5 text-[11px] text-slate-500 border-b border-slate-100 bg-slate-50">
+                Bloqueaste los avisos para este sitio. Podés reactivarlos desde el candado de la barra de direcciones.
+              </p>
+            )}
 
             {/* Notifications list */}
             <div className="max-h-96 overflow-y-auto">
@@ -157,7 +184,7 @@ export default function NotificationCenterV2({ negocioId }) {
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-bold text-slate-900 text-sm">{notification.title}</h4>
                             {!notification.read && (
-                              <div className="w-2 h-2 rounded-full bg-sky-500" />
+                              <div className="w-2 h-2 rounded-full bg-violet-500" />
                             )}
                           </div>
                           <p className="text-sm text-slate-600 line-clamp-2">{notification.message}</p>

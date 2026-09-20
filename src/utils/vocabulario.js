@@ -91,6 +91,380 @@ const VOCABULARIOS = {
     iconoServicio: 'M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z',
   },
 
+  // ===== BAR / CERVECERÍA =====
+  'Bar / Cervecería': {
+    servicio: 'mesa',
+    servicios: 'mesas',
+    servicioPlural: 'Mesas y Espacios',
+    nuevoServicio: 'Nuevo Tipo de Mesa',
+    editarServicio: 'Modificar Mesa',
+    placeholderServicio: 'Ej: Mesa alta para 4, Barra, Reservado',
+
+    empleado: 'sector',
+    empleados: 'sectores',
+    empleadoPlural: 'Sectores del Bar',
+    nuevoEmpleado: 'Nuevo Sector',
+    editarEmpleado: 'Editar Sector',
+    placeholderEmpleado: 'Ej: Barra, Patio, Planta alta',
+    especialidad: 'Descripción',
+    placeholderEspecialidad: 'Ej: Al aire libre, con pantalla, techado',
+
+    turno: 'reserva',
+    turnos: 'reservas',
+    turnoPlural: 'Reservas',
+    nuevaCita: 'Nueva Reserva',
+    proximaCita: 'Próxima Reserva',
+    citasRegistradas: 'Reservas Registradas',
+    citasAsignadas: 'Reservas de la Noche',
+    confirmarCita: 'Confirmar Reserva',
+
+    cliente: 'cliente',
+    clientes: 'clientes',
+    clientePlural: 'Base de Clientes',
+
+    paso1Titulo: '¿Qué mesa querés reservar?',
+    paso2Titulo: 'Elegí el sector',
+    paso2Volver: 'Mesas',
+    paso3Volver: 'Sector',
+    paso4Titulo: 'Datos de la Reserva',
+    paso4Volver: 'Horario',
+    ticketTitulo: 'Reserva',
+    exitoTitulo: '¡Mesa Reservada!',
+    exitoMensaje: 'Tu reserva para el',
+    exitoMensaje2: 'quedó confirmada.',
+    nuevaReservaBtn: 'Nueva Reserva',
+    avanzarBtn: 'Confirmar Horario',
+    confirmarBtn: 'Reservar Mesa',
+
+    campoExtra: true,
+    campoExtraLabel: 'Cantidad de Personas',
+    campoExtraPlaceholder: 'Ej: 6',
+    campoExtraTipo: 'number',
+
+    monitorTurnos: 'Reservas Próximas',
+    monitorIngresos: 'Ingresos Proyec.',
+    monitorSemana: 'Esta Semana',
+    monitorPopular: 'Más Reservada',
+    accionNueva: 'Nueva Reserva',
+    accionServicio: 'Agregar Mesa',
+    actividadReciente: 'Actividad Reciente',
+    linkDescripcion: 'Compartí este link para que reserven mesa sin llamarte.',
+    shareWA: 'Reservá tu mesa en',
+
+    tabServicios: 'Mesas',
+    tabStaff: 'Sectores',
+    tabClientes: 'Clientes',
+    filtroTodos: 'Todos los Sectores',
+    seleccionarServicio: 'Seleccionar Mesa',
+    seleccionarEmpleado: 'Seleccionar Sector',
+    labelServicioRequerido: 'Tipo de Mesa',
+    labelEmpleado: 'Sector',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu reserva${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmada. ¡Te esperamos!`,
+
+    usarIconoCustom: true,
+    iconoServicio: 'M3 2l1.5 11h15L21 2H3zm2.7 9l-.8-6h14.2l-.8 6H5.7zM12 14v6H8v2h8v-2h-4v-6z',
+  },
+
+  // ===== UÑAS / MANICURÍA =====
+  'Uñas / Manicuría': {
+    servicio: 'servicio',
+    servicios: 'servicios',
+    servicioPlural: 'Servicios de Uñas',
+    nuevoServicio: 'Nuevo Servicio',
+    editarServicio: 'Modificar Servicio',
+    placeholderServicio: 'Ej: Kapping, Esculpidas, Semipermanente',
+
+    empleado: 'manicura',
+    empleados: 'manicuras',
+    empleadoPlural: 'Equipo',
+    nuevoEmpleado: 'Nueva Manicura',
+    editarEmpleado: 'Editar Perfil',
+    placeholderEmpleado: 'Ej: Sofía',
+    especialidad: 'Especialidad',
+    placeholderEspecialidad: 'Ej: Nail art, Esculpidas',
+
+    turno: 'turno',
+    turnos: 'turnos',
+    turnoPlural: 'Turnos',
+    nuevaCita: 'Nuevo Turno',
+    proximaCita: 'Próximo Turno',
+    citasRegistradas: 'Turnos Registrados',
+    citasAsignadas: 'Turnos del Día',
+    confirmarCita: 'Confirmar Turno',
+
+    cliente: 'clienta',
+    clientes: 'clientas',
+    clientePlural: 'Base de Clientas',
+
+    paso1Titulo: 'Elegí tu servicio',
+    paso2Titulo: '¿Con quién querés atenderte?',
+    paso2Volver: 'Servicios',
+    paso3Volver: 'Profesional',
+    paso4Titulo: 'Tus Datos',
+    paso4Volver: 'Horario',
+    ticketTitulo: 'Turno',
+    exitoTitulo: '¡Turno Confirmado!',
+    exitoMensaje: 'Tu turno para el',
+    exitoMensaje2: 'quedó reservado.',
+    nuevaReservaBtn: 'Nuevo Turno',
+    avanzarBtn: 'Confirmar Horario',
+    confirmarBtn: 'Confirmar Turno',
+
+    campoExtra: false,
+
+    monitorTurnos: 'Turnos Próximos',
+    monitorIngresos: 'Ingresos Proyec.',
+    monitorSemana: 'Esta Semana',
+    monitorPopular: 'Más Pedido',
+    accionNueva: 'Nuevo Turno',
+    accionServicio: 'Agregar Servicio',
+    actividadReciente: 'Actividad Reciente',
+    linkDescripcion: 'Compartí este link para que saquen turno solas.',
+    shareWA: 'Sacá tu turno en',
+
+    tabServicios: 'Servicios',
+    tabStaff: 'Equipo',
+    tabClientes: 'Clientas',
+    filtroTodos: 'Todas',
+    seleccionarServicio: 'Seleccionar Servicio',
+    seleccionarEmpleado: 'Seleccionar Profesional',
+    labelServicioRequerido: 'Servicio',
+    labelEmpleado: 'Profesional',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu turno${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmado. ¡Te esperamos!`,
+
+    usarIconoCustom: false,
+    iconoServicio: 'M9.5 3A1.5 1.5 0 008 4.5v9a4 4 0 008 0v-9A1.5 1.5 0 0014.5 3h-5z',
+  },
+
+  // ===== GIMNASIO / ENTRENAMIENTO =====
+  'Gimnasio / Entrenamiento': {
+    servicio: 'clase',
+    servicios: 'clases',
+    servicioPlural: 'Clases y Entrenamientos',
+    nuevoServicio: 'Nueva Clase',
+    editarServicio: 'Modificar Clase',
+    placeholderServicio: 'Ej: Funcional, Spinning, Personalizado',
+
+    empleado: 'profesor',
+    empleados: 'profesores',
+    empleadoPlural: 'Profesores',
+    nuevoEmpleado: 'Nuevo Profesor',
+    editarEmpleado: 'Editar Profesor',
+    placeholderEmpleado: 'Ej: Nicolás',
+    especialidad: 'Especialidad',
+    placeholderEspecialidad: 'Ej: Musculación, Crossfit',
+
+    turno: 'clase',
+    turnos: 'clases',
+    turnoPlural: 'Clases Agendadas',
+    nuevaCita: 'Nueva Clase',
+    proximaCita: 'Próxima Clase',
+    citasRegistradas: 'Clases Registradas',
+    citasAsignadas: 'Clases del Día',
+    confirmarCita: 'Confirmar Clase',
+
+    cliente: 'alumno',
+    clientes: 'alumnos',
+    clientePlural: 'Base de Alumnos',
+
+    paso1Titulo: 'Elegí tu clase',
+    paso2Titulo: '¿Con qué profesor?',
+    paso2Volver: 'Clases',
+    paso3Volver: 'Profesor',
+    paso4Titulo: 'Tus Datos',
+    paso4Volver: 'Horario',
+    ticketTitulo: 'Clase Reservada',
+    exitoTitulo: '¡Lugar Reservado!',
+    exitoMensaje: 'Tu clase del',
+    exitoMensaje2: 'quedó confirmada.',
+    nuevaReservaBtn: 'Reservar Otra',
+    avanzarBtn: 'Confirmar Horario',
+    confirmarBtn: 'Reservar Lugar',
+
+    campoExtra: false,
+
+    monitorTurnos: 'Clases Próximas',
+    monitorIngresos: 'Ingresos Proyec.',
+    monitorSemana: 'Esta Semana',
+    monitorPopular: 'Más Elegida',
+    accionNueva: 'Nueva Clase',
+    accionServicio: 'Agregar Clase',
+    actividadReciente: 'Actividad Reciente',
+    linkDescripcion: 'Compartí este link para que reserven su lugar en las clases.',
+    shareWA: 'Reservá tu lugar en',
+
+    tabServicios: 'Clases',
+    tabStaff: 'Profesores',
+    tabClientes: 'Alumnos',
+    filtroTodos: 'Todos',
+    seleccionarServicio: 'Seleccionar Clase',
+    seleccionarEmpleado: 'Seleccionar Profesor',
+    labelServicioRequerido: 'Clase',
+    labelEmpleado: 'Profesor',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu lugar${servicio ? ` en ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmado. ¡Te esperamos!`,
+
+    usarIconoCustom: true,
+    iconoServicio: 'M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z',
+  },
+
+  // ===== TATUAJES / PIERCINGS =====
+  'Tatuajes / Piercings': {
+    servicio: 'sesión',
+    servicios: 'sesiones',
+    servicioPlural: 'Tipos de Sesión',
+    nuevoServicio: 'Nuevo Tipo de Sesión',
+    editarServicio: 'Modificar Sesión',
+    placeholderServicio: 'Ej: Tattoo chico, Retoque, Piercing',
+
+    empleado: 'artista',
+    empleados: 'artistas',
+    empleadoPlural: 'Artistas',
+    nuevoEmpleado: 'Nuevo Artista',
+    editarEmpleado: 'Editar Artista',
+    placeholderEmpleado: 'Ej: Juan',
+    especialidad: 'Estilo',
+    placeholderEspecialidad: 'Ej: Blackwork, Realismo, Fineline',
+
+    turno: 'sesión',
+    turnos: 'sesiones',
+    turnoPlural: 'Sesiones',
+    nuevaCita: 'Nueva Sesión',
+    proximaCita: 'Próxima Sesión',
+    citasRegistradas: 'Sesiones Registradas',
+    citasAsignadas: 'Sesiones del Día',
+    confirmarCita: 'Confirmar Sesión',
+
+    cliente: 'cliente',
+    clientes: 'clientes',
+    clientePlural: 'Base de Clientes',
+
+    paso1Titulo: '¿Qué te querés hacer?',
+    paso2Titulo: 'Elegí tu artista',
+    paso2Volver: 'Sesiones',
+    paso3Volver: 'Artista',
+    paso4Titulo: 'Tus Datos',
+    paso4Volver: 'Horario',
+    ticketTitulo: 'Sesión',
+    exitoTitulo: '¡Sesión Reservada!',
+    exitoMensaje: 'Tu sesión del',
+    exitoMensaje2: 'quedó confirmada.',
+    nuevaReservaBtn: 'Nueva Sesión',
+    avanzarBtn: 'Confirmar Horario',
+    confirmarBtn: 'Reservar Sesión',
+
+    campoExtra: true,
+    campoExtraLabel: 'Idea / Zona del cuerpo',
+    campoExtraPlaceholder: 'Ej: Antebrazo, línea fina',
+    campoExtraTipo: 'text',
+
+    monitorTurnos: 'Sesiones Próximas',
+    monitorIngresos: 'Ingresos Proyec.',
+    monitorSemana: 'Esta Semana',
+    monitorPopular: 'Más Pedido',
+    accionNueva: 'Nueva Sesión',
+    accionServicio: 'Agregar Sesión',
+    actividadReciente: 'Actividad Reciente',
+    linkDescripcion: 'Compartí este link para que reserven su sesión.',
+    shareWA: 'Reservá tu sesión en',
+
+    tabServicios: 'Sesiones',
+    tabStaff: 'Artistas',
+    tabClientes: 'Clientes',
+    filtroTodos: 'Todos',
+    seleccionarServicio: 'Seleccionar Sesión',
+    seleccionarEmpleado: 'Seleccionar Artista',
+    labelServicioRequerido: 'Tipo de Sesión',
+    labelEmpleado: 'Artista',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu sesión${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmada. ¡Te esperamos!`,
+
+    usarIconoCustom: false,
+    iconoServicio: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+  },
+
+  // ===== TALLER / SERVICIO TÉCNICO =====
+  'Taller / Servicio Técnico': {
+    servicio: 'servicio',
+    servicios: 'servicios',
+    servicioPlural: 'Servicios del Taller',
+    nuevoServicio: 'Nuevo Servicio',
+    editarServicio: 'Modificar Servicio',
+    placeholderServicio: 'Ej: Cambio de aceite, Diagnóstico',
+
+    empleado: 'puesto',
+    empleados: 'puestos',
+    empleadoPlural: 'Puestos / Técnicos',
+    nuevoEmpleado: 'Nuevo Puesto',
+    editarEmpleado: 'Editar Puesto',
+    placeholderEmpleado: 'Ej: Box 1, Técnico Martín',
+    especialidad: 'Especialidad',
+    placeholderEspecialidad: 'Ej: Mecánica general, Electricidad',
+
+    turno: 'turno',
+    turnos: 'turnos',
+    turnoPlural: 'Turnos',
+    nuevaCita: 'Nuevo Turno',
+    proximaCita: 'Próximo Turno',
+    citasRegistradas: 'Turnos Registrados',
+    citasAsignadas: 'Turnos del Día',
+    confirmarCita: 'Confirmar Turno',
+
+    cliente: 'cliente',
+    clientes: 'clientes',
+    clientePlural: 'Base de Clientes',
+
+    paso1Titulo: '¿Qué necesitás?',
+    paso2Titulo: 'Elegí el puesto',
+    paso2Volver: 'Servicios',
+    paso3Volver: 'Puesto',
+    paso4Titulo: 'Tus Datos',
+    paso4Volver: 'Horario',
+    ticketTitulo: 'Turno',
+    exitoTitulo: '¡Turno Confirmado!',
+    exitoMensaje: 'Tu turno del',
+    exitoMensaje2: 'quedó reservado.',
+    nuevaReservaBtn: 'Nuevo Turno',
+    avanzarBtn: 'Confirmar Horario',
+    confirmarBtn: 'Confirmar Turno',
+
+    campoExtra: true,
+    campoExtraLabel: 'Marca y modelo',
+    campoExtraPlaceholder: 'Ej: Gol Trend 2015',
+    campoExtraTipo: 'text',
+
+    monitorTurnos: 'Turnos Próximos',
+    monitorIngresos: 'Ingresos Proyec.',
+    monitorSemana: 'Esta Semana',
+    monitorPopular: 'Más Pedido',
+    accionNueva: 'Nuevo Turno',
+    accionServicio: 'Agregar Servicio',
+    actividadReciente: 'Actividad Reciente',
+    linkDescripcion: 'Compartí este link para que saquen turno sin llamarte.',
+    shareWA: 'Sacá tu turno en',
+
+    tabServicios: 'Servicios',
+    tabStaff: 'Puestos',
+    tabClientes: 'Clientes',
+    filtroTodos: 'Todos',
+    seleccionarServicio: 'Seleccionar Servicio',
+    seleccionarEmpleado: 'Seleccionar Puesto',
+    labelServicioRequerido: 'Servicio',
+    labelEmpleado: 'Puesto',
+    fallbackStaff: 'Sin asignar',
+    waConfirmacion: (nombre, servicio, fecha, hora) =>
+      `Hola ${nombre}, tu turno${servicio ? ` de ${servicio}` : ''} el ${fecha} a las ${hora} hs está confirmado. ¡Te esperamos!`,
+
+    usarIconoCustom: false,
+    iconoServicio: 'M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z',
+  },
+
   // ===== BARBERÍA / PELUQUERÍA =====
   'Barbería / Peluquería': {
     servicio: 'servicio',
@@ -474,16 +848,29 @@ export function getVocabulario(rubro) {
  */
 export const RUBROS_DISPONIBLES = [
   'Barbería / Peluquería',
-  'Restaurante / Gastronomía',
+  'Uñas / Manicuría',
   'Centro de Estética',
+  'Tatuajes / Piercings',
+  'Restaurante / Gastronomía',
+  'Bar / Cervecería',
+  'Gimnasio / Entrenamiento',
   'Veterinaria',
   'Salud / Clínica',
+  'Taller / Servicio Técnico',
   'Otros Servicios',
 ]
 
 /**
- * Detecta si un rubro es de tipo gastronómico
+ * Detecta si un rubro es de tipo gastronómico (pide cantidad de comensales).
  */
 export function esGastronomia(rubro) {
-  return rubro === 'Restaurante / Gastronomía'
+  return rubro === 'Restaurante / Gastronomía' || rubro === 'Bar / Cervecería'
+}
+
+/**
+ * ¿El rubro pide un dato extra en el formulario público?
+ * (comensales, modelo del auto, idea del tatuaje...)
+ */
+export function tieneCampoExtra(rubro) {
+  return Boolean(getVocabulario(rubro).campoExtra)
 }
