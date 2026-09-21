@@ -835,12 +835,82 @@ const VOCABULARIO_DEFAULT = {
 }
 
 /**
+ * Normaliza un rubro para poder compararlo: sin acentos, en minúsculas y sin
+ * espacios de más alrededor de la barra.
+ *
+ * La búsqueda era `VOCABULARIOS[rubro]`, una coincidencia exacta. Alcanzaba
+ * con que el rubro guardado en la base tuviera otra tilde, otra mayúscula o un
+ * espacio distinto ("Barberia / Peluqueria") para que TODO el vocabulario
+ * cayera al genérico: el cliente veía "Seleccione un recurso" en vez de
+ * "Seleccione un especialista".
+ */
+function normalizarRubro(rubro) {
+  return String(rubro || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')   // saca acentos
+    .toLowerCase()
+    .replace(/\s*\/\s*/g, '/')         // "A / B" -> "a/b"
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Índice normalizado -> vocabulario, construido una sola vez.
+const INDICE_VOCABULARIOS = Object.fromEntries(
+  Object.entries(VOCABULARIOS).map(([clave, valor]) => [normalizarRubro(clave), valor])
+)
+
+/**
+ * Rubros escritos de otra forma (versiones viejas de la app, o cargados a
+ * mano) que apuntan a un vocabulario existente.
+ */
+const ALIAS_RUBROS = {
+  'barberia': 'Barbería / Peluquería',
+  'peluqueria': 'Barbería / Peluquería',
+  'barberia/peluqueria': 'Barbería / Peluquería',
+  'restaurante': 'Restaurante / Gastronomía',
+  'gastronomia': 'Restaurante / Gastronomía',
+  'bar': 'Bar / Cervecería',
+  'cerveceria': 'Bar / Cervecería',
+  'estetica': 'Centro de Estética',
+  'centro de estetica': 'Centro de Estética',
+  'spa': 'Centro de Estética',
+  'unas': 'Uñas / Manicuría',
+  'manicuria': 'Uñas / Manicuría',
+  'nails': 'Uñas / Manicuría',
+  'tatuajes': 'Tatuajes / Piercings',
+  'tattoo': 'Tatuajes / Piercings',
+  'gimnasio': 'Gimnasio / Entrenamiento',
+  'gym': 'Gimnasio / Entrenamiento',
+  'veterinaria': 'Veterinaria',
+  'salud': 'Salud / Clínica',
+  'clinica': 'Salud / Clínica',
+  'consultorio': 'Salud / Clínica',
+  'taller': 'Taller / Servicio Técnico',
+  'servicio tecnico': 'Taller / Servicio Técnico',
+}
+
+/**
  * Obtiene el vocabulario del negocio según su rubro.
+ * Tolera diferencias de acentos, mayúsculas y espaciado.
  * @param {string} rubro - El rubro del negocio (ej: "Restaurante / Gastronomía")
  * @returns {Object} Objeto con toda la terminología adaptada
  */
 export function getVocabulario(rubro) {
-  return VOCABULARIOS[rubro] || VOCABULARIO_DEFAULT
+  const clave = normalizarRubro(rubro)
+  if (!clave) return VOCABULARIO_DEFAULT
+
+  const exacto = INDICE_VOCABULARIOS[clave]
+  if (exacto) return exacto
+
+  const porAlias = ALIAS_RUBROS[clave]
+  if (porAlias) return VOCABULARIOS[porAlias]
+
+  // Último intento: que el rubro guardado contenga (o esté contenido en) uno
+  // conocido. Cubre casos como "Barbería Premium" o "Bar".
+  const parcial = Object.keys(INDICE_VOCABULARIOS).find(
+    (k) => k.includes(clave) || clave.includes(k.split('/')[0])
+  )
+  return parcial ? INDICE_VOCABULARIOS[parcial] : VOCABULARIO_DEFAULT
 }
 
 /**
@@ -864,7 +934,8 @@ export const RUBROS_DISPONIBLES = [
  * Detecta si un rubro es de tipo gastronómico (pide cantidad de comensales).
  */
 export function esGastronomia(rubro) {
-  return rubro === 'Restaurante / Gastronomía' || rubro === 'Bar / Cervecería'
+  const v = getVocabulario(rubro)
+  return v === VOCABULARIOS['Restaurante / Gastronomía'] || v === VOCABULARIOS['Bar / Cervecería']
 }
 
 /**

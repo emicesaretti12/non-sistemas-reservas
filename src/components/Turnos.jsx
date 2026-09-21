@@ -374,7 +374,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const tituloAccesible = `${t.cliente_nombre} · ${fechaAmigable} a las ${horaLocal}${esFuturo ? '' : ' (ya pasó)'}`
 
     return (
-      <div key={t.id} title={tituloAccesible} className={`rounded-2xl p-4 md:p-5 border flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-5 group transition-all ${t.estado === 'completado' ? 'bg-emerald-50/60 border-emerald-200/60 opacity-80' :
+      <div key={t.id} title={tituloAccesible} className={`rounded-2xl p-4 md:p-5 border flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-3 md:gap-5 group transition-all ${t.estado === 'completado' ? 'bg-emerald-50/60 border-emerald-200/60 opacity-80' :
           t.estado === 'no_show' ? 'bg-red-50/40 border-red-200/50 opacity-65' :
           t.estado === 'cancelado' ? 'bg-slate-50 border-slate-200 opacity-60' :
             'bg-white border-[#EDE8F7] hover:border-[#5B3DF5]/30 hover:shadow-md'
@@ -398,7 +398,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
         <div className="hidden md:block w-px h-14 bg-[#EDE8F7] shrink-0"></div>
 
-        <div className="flex-1 overflow-hidden w-full">
+        <div className="flex-1 overflow-hidden w-full md:min-w-[200px]">
           <h4 className={`text-base md:text-lg font-bold truncate leading-tight mb-0.5 ${esResuelto ? 'text-[#A09CB5] line-through decoration-1' : 'text-[#1A1630]'}`}>{t.cliente_nombre}</h4>
 
           <div className="flex items-center gap-2 mb-2 text-[#6B6489]">
@@ -437,7 +437,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         </div>
 
         {/* Action buttons */}
-        <div className="flex flex-row gap-1.5 shrink-0 w-full md:w-auto mt-1 md:mt-0 justify-end border-t md:border-none border-[#EDE8F7] pt-3 md:pt-0">
+        <div className="flex flex-row flex-wrap gap-1.5 shrink-0 w-full md:w-auto md:ml-auto mt-1 md:mt-0 justify-end border-t md:border-none border-[#EDE8F7] pt-3 md:pt-0">
           {esResuelto ? (
             /* Resolved state — only show undo */
             <button onClick={() => marcarEstado(t.id, 'confirmado')} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F7F5FF] text-[#A09CB5] hover:bg-[#E8DEFF] hover:text-[#5B3DF5] text-[9px] font-bold uppercase tracking-widest transition-all" title="Revertir estado">
@@ -752,7 +752,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       {/* MODAL BOTTOM-SHEET PARA VER TURNOS DEL DIA SELECCIONADO */}
       {modalDiaAbierto && (
         <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-[#1A1630]/50 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl h-[85vh] sm:h-[80vh] flex flex-col animate-in slide-in-from-bottom-[60%] sm:zoom-in-95 duration-500 overflow-hidden sm:m-4 border border-[#EDE8F7]">
+          <div className="bg-white w-full max-w-lg sm:max-w-2xl lg:max-w-4xl rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl h-[85vh] sm:h-[80vh] flex flex-col animate-in slide-in-from-bottom-[60%] sm:zoom-in-95 duration-500 overflow-hidden sm:m-4 border border-[#EDE8F7]">
 
             <div className="px-6 pt-7 pb-5 border-b border-[#EDE8F7] flex justify-between items-center bg-white shrink-0 z-10">
               <div>

@@ -456,6 +456,10 @@ export default function VistaPublica() {
   const accentGlow = hexToRgba(accent, 0.3)
   const accentDark = hexToRgba(accent, 0.85)
 
+  // Los precios del catálogo ya usaban toLocaleString pero los de los
+  // servicios salían crudos ("$8000" en vez de "$8.000") en la misma pantalla.
+  const precio = (valor) => `$${Number(valor || 0).toLocaleString('es-AR')}`
+
   // Sólo embebemos mapas de Google (el campo lo escribe el dueño del negocio).
   const mapaUrlSegura = mapaEmbedUrl(negocio.mapa_url, negocio.direccion)
 
@@ -701,7 +705,7 @@ export default function VistaPublica() {
                            </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                           <span className="font-black text-base md:text-lg tracking-tighter" style={{ color: 'var(--ns-text)' }}>${s.precio}</span>
+                           <span className="font-black text-base md:text-lg tracking-tighter" style={{ color: 'var(--ns-text)' }}>{precio(s.precio)}</span>
                            <svg className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover:translate-x-1 transition-transform" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
                         </div>
                      </button>
@@ -920,7 +924,7 @@ export default function VistaPublica() {
                       {servicioSeleccionado && (
                         <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
                           <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{servicioSeleccionado.nombre}</span>
-                          <span className="text-sm font-bold text-white">${servicioSeleccionado.precio}</span>
+                          <span className="text-sm font-bold text-white">{precio(servicioSeleccionado.precio)}</span>
                         </div>
                       )}
                       {reserva.campoExtra && (
@@ -964,7 +968,7 @@ export default function VistaPublica() {
                   <div className="h-px" style={{ background: 'var(--ns-border)' }}></div>
                   <div className="flex justify-between items-center">
                     <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Precio</span>
-                    <span className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>${servicioSeleccionado?.precio}</span>
+                    <span className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>{precio(servicioSeleccionado?.precio)}</span>
                   </div>
                 </div>
 
@@ -981,7 +985,7 @@ export default function VistaPublica() {
                       const end = new Date(start.getTime() + dur * 60000)
                       const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "")
                       const titulo = encodeURIComponent(`${servicioSeleccionado?.nombre} — ${negocio.nombre}`)
-                      const detalles = encodeURIComponent(`Reserva confirmada en ${negocio.nombre}\n${servicioSeleccionado?.nombre}\nCon: ${empleadoSeleccionado?.nombre}\n\nPrecio: $${servicioSeleccionado?.precio}`)
+                      const detalles = encodeURIComponent(`Reserva confirmada en ${negocio.nombre}\n${servicioSeleccionado?.nombre}\nCon: ${empleadoSeleccionado?.nombre}\n\nPrecio: ${precio(servicioSeleccionado?.precio)}`)
                       window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${fmt(start)}/${fmt(end)}&details=${detalles}&sf=true&output=xml`, '_blank')
                     }}
                     className="ns-cta-primary"
@@ -1085,7 +1089,7 @@ export default function VistaPublica() {
                            <div className="mt-auto flex items-end justify-between gap-2 pt-2">
                              <div>
                                {prod.precio > 0 ? (
-                                 <p className="text-lg md:text-xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>${prod.precio.toLocaleString()}</p>
+                                 <p className="text-lg md:text-xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>{precio(prod.precio)}</p>
                                ) : (
                                  <p className="text-sm font-bold" style={{ color: 'var(--ns-text-muted)' }}>Consultar</p>
                                )}
@@ -1127,7 +1131,7 @@ export default function VistaPublica() {
                  </div>
                  <span className="text-[11px] font-black uppercase tracking-widest ml-1">Ver Carrito</span>
                </div>
-               <span className="text-base font-black">${totalCarrito.toLocaleString()}</span>
+               <span className="text-base font-black">{precio(totalCarrito)}</span>
              </button>
            </div>
          )}
@@ -1162,7 +1166,7 @@ export default function VistaPublica() {
                    <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-md" style={{ backgroundColor: accentUltraSoft, color: accent }}>{productoDetalle.categoria}</span>
                  </div>
                  <h2 className="text-2xl font-extrabold text-zinc-900 tracking-tight leading-tight mb-3">{productoDetalle.nombre}</h2>
-                 {productoDetalle.precio > 0 && <p className="text-2xl font-black text-zinc-900 mb-4">${productoDetalle.precio.toLocaleString()}</p>}
+                 {productoDetalle.precio > 0 && <p className="text-2xl font-black text-zinc-900 mb-4">{precio(productoDetalle.precio)}</p>}
                  
                  <div className="space-y-4">
                    {productoDetalle.descripcion ? (
@@ -1233,7 +1237,7 @@ export default function VistaPublica() {
                            </div>
                            <div className="flex-1 min-w-0">
                              <h5 className="text-[13px] font-bold text-zinc-900 truncate">{p.nombre}</h5>
-                             <p className="text-[11px] font-medium text-zinc-400">${p.precio.toLocaleString()} c/u</p>
+                             <p className="text-[11px] font-medium text-zinc-400">{precio(p.precio)} c/u</p>
                              <div className="mt-1 flex items-center justify-between">
                                <div className="flex items-center gap-2 border border-zinc-200 rounded-lg overflow-hidden h-7">
                                  <button onClick={() => removeFromCart(pid)} className="w-7 h-full flex items-center justify-center text-zinc-500 hover:bg-zinc-50 font-bold">−</button>
@@ -1269,7 +1273,7 @@ export default function VistaPublica() {
                <div className="p-5 border-t border-zinc-100 bg-zinc-50/50 shrink-0" style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
                  <div className="flex items-center justify-between mb-4">
                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Total del pedido</span>
-                   <span className="text-2xl font-black text-zinc-900">${totalCarrito.toLocaleString()}</span>
+                   <span className="text-2xl font-black text-zinc-900">{precio(totalCarrito)}</span>
                  </div>
                  
                  {!checkoutActivo ? (
