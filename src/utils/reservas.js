@@ -53,9 +53,23 @@ export function parseFecha(valor) {
   if (!valor) return null
   if (valor instanceof Date) return isNaN(valor.getTime()) ? null : valor
   let raw = String(valor).replace(' ', 'T')
-  // La zona puede venir como "Z", "+00", "+0000" o "+00:00" según el driver.
-  const tieneZona = /(Z|[+-]\d{2}(:?\d{2})?)$/.test(raw.slice(10))
-  if (!tieneZona) raw += 'Z'
+
+  // La zona puede venir como "Z", "+00", "+0000" o "+00:00" según la versión
+  // del driver. V8 sólo acepta "+HH:MM", así que normalizamos: sin esto,
+  // `new Date('2026-09-20T15:00:00+00')` devolvía Invalid Date y el turno
+  // desaparecía de la agenda.
+  const zona = raw.slice(10).match(/(Z|[+-]\d{2}(:?\d{2})?)$/)
+
+  if (!zona) {
+    raw += 'Z'
+  } else if (zona[0] !== 'Z') {
+    const signo = zona[0][0]
+    const digitos = zona[0].slice(1).replace(':', '')
+    const horas = digitos.slice(0, 2)
+    const minutos = digitos.length >= 4 ? digitos.slice(2, 4) : '00'
+    raw = raw.slice(0, raw.length - zona[0].length) + `${signo}${horas}:${minutos}`
+  }
+
   const d = new Date(raw)
   return isNaN(d.getTime()) ? null : d
 }

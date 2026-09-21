@@ -5,7 +5,13 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'landing']),
+  // Los tests corren con el runner nativo de Node, no en el navegador.
+  {
+    files: ['**/*.test.js'],
+    languageOptions: { globals: globals.node },
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
   {
     files: ['**/*.{js,jsx}'],
     extends: [
