@@ -25,6 +25,8 @@ dist-ssr
 .env
 .env.*
 *.env
+# El archivo de ejemplo SÍ va al repo: documenta las variables necesarias.
+!.env.example
 credentials.json
 *.pem
 *.key

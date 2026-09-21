@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
+import { ocupaHorario, precioTurno } from '../utils/reservas'
 
 /**
  * DashboardHome — Centro de mando oscuro y mobile-first.
@@ -86,7 +87,8 @@ export default function DashboardHome({
       ])
 
       if (cancel) return
-      setTurnosHoy((tRes.data || []).filter((t) => t.estado !== 'cancelado'))
+      // Cancelados y ausencias no ocupan lugar ni cuentan (utils/reservas.js).
+      setTurnosHoy((tRes.data || []).filter(ocupaHorario))
       setServicios(sRes.data || [])
       setEmpleados(eRes.data || [])
       setLoading(false)
@@ -95,12 +97,15 @@ export default function DashboardHome({
   }, [negocio?.id])
 
   // ── Derivados de citas de hoy ──────────────────────────────────────────────
+  // "Por venir" = todavía no empezó Y no fue marcado como resuelto.
   const proximos = useMemo(
-    () => turnosHoy.filter((t) => new Date(t.fecha_hora) > ahora),
+    () => turnosHoy.filter((t) => (
+      new Date(t.fecha_hora) > ahora && t.estado !== 'completado' && t.estado !== 'no_show'
+    )),
     [turnosHoy, ahora]
   )
   const atendidos = turnosHoy.length - proximos.length
-  const ingresosHoy = turnosHoy.reduce((a, t) => a + (t.servicios?.precio || 0), 0)
+  const ingresosHoy = turnosHoy.reduce((a, t) => a + precioTurno(t), 0)
   const proximaCita = proximos[0] || null
 
   let countdown = ''
