@@ -218,3 +218,30 @@
   outline: 2px solid var(--ns-primary) !important;
   outline-offset: 2px !important;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ESCRITORIO — La barra inferior es SÓLO para móvil
+   
+   Los bloques de arriba (.noni-shell .ns-bottom-nav y
+   .ns-mobile-content-area) se escribieron sin media query, con
+   !important y con más especificidad que la regla de index.css
+   que ocultaba la barra en escritorio. Resultado: en desktop
+   quedaba un dock flotante tapando el contenido —encima de la
+   grilla del calendario en la Agenda— y 100px de espacio muerto
+   al pie de todas las pantallas, aun cuando la navegación por
+   pestañas de arriba ya cumple esa función.
+   ═══════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+  .noni-shell .ns-bottom-nav {
+    display: none !important;
+  }
+
+  .noni-shell .ns-mobile-content-area {
+    padding-bottom: 0 !important;
+  }
+
+  .noni-shell .ns-has-bottom-nav {
+    padding-bottom: 0 !important;
+  }
+}

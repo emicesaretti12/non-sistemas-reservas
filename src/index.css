@@ -3009,3 +3009,23 @@ body {
   white-space: nowrap;
   border: 0;
 }
+
+/* ============================================================
+   PESTAÑAS DE ESCRITORIO — una sola fila
+   Con 10 secciones, el padding de 18px hacía que la barra
+   necesitara ~1229px contra los 1212px disponibles: se pasaba
+   por 17px y la última pestaña ("Ajustes") caía sola a una
+   segunda fila.
+
+   El contenedor está limitado por max-w-7xl (1280px), así que su
+   ancho útil nunca pasa de ~1216px por más grande que sea la
+   pantalla: el ajuste aplica a todo el rango de escritorio.
+   ============================================================ */
+
+@media (min-width: 768px) {
+  .noni-shell .ns-tab {
+    padding-left: 13px;
+    padding-right: 13px;
+    letter-spacing: 0.05em;
+  }
+}
