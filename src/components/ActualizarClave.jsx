@@ -11,11 +11,27 @@ export default function ActualizarClave() {
   const [mensaje, setMensaje] = useState(null)
   const navigate = useNavigate()
 
+  // ¿Llegó con un enlace de recuperación válido? Si el link venció o se abrió
+  // en otro navegador no hay sesión, y `updateUser` devolvía el críptico
+  // "Auth session missing!" sin explicar qué hacer.
+  const [sesionValida, setSesionValida] = useState(null) // null = verificando
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') console.log('Sesión de recuperación detectada.')
+    let activo = true
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (activo) setSesionValida(Boolean(session))
+    }).catch(() => { if (activo) setSesionValida(false) })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!activo) return
+      if (event === 'PASSWORD_RECOVERY' || session) setSesionValida(true)
     })
-    return () => subscription.unsubscribe()
+
+    return () => {
+      activo = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const strength = useMemo(() => {
@@ -46,7 +62,13 @@ export default function ActualizarClave() {
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
-      setMensaje({ tipo: 'error', texto: error.message })
+      const esSesion = /session|jwt|token/i.test(error.message || '')
+      setMensaje({
+        tipo: 'error',
+        texto: esSesion
+          ? 'El enlace de recuperación venció. Pedí uno nuevo desde "¿La olvidaste?" en el login.'
+          : error.message,
+      })
       setLoading(false)
     } else {
       setMensaje({ tipo: 'exito', texto: 'Contraseña actualizada. Redirigiendo...' })
@@ -60,6 +82,37 @@ export default function ActualizarClave() {
     { id: 'num', text: 'Número', test: /[0-9]/.test(password) },
     { id: 'spec', text: 'Símbolo', test: /[^A-Za-z0-9]/.test(password) },
   ]
+
+  if (sesionValida === false) {
+    return (
+      <div
+        className="min-h-dvh w-full flex items-center justify-center px-6 py-12"
+        style={{ background: 'var(--ns-bg)', color: 'var(--ns-text)', fontFamily: '"Inter Tight", "Inter", sans-serif' }}
+        data-testid="reset-link-invalido"
+      >
+        <div className="max-w-sm w-full text-center">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-black tracking-tight mb-2">Este enlace ya no sirve</h1>
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
+            Los enlaces para cambiar la contraseña vencen al rato y sólo funcionan
+            en el navegador donde los pediste. Pedí uno nuevo y abrilo desde el
+            mismo dispositivo.
+          </p>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-3.5 rounded-xl text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95"
+            style={{ background: 'var(--ns-primary)' }}
+          >
+            Ir al login
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div

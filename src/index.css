@@ -2957,3 +2957,55 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   ACCESIBILIDAD — BASE GLOBAL
+   Los estilos de foco existían sólo dentro de .noni-shell y
+   .booking-shell, así que el login, la landing y los modales
+   (confirmación, tour, asistente) quedaban sin indicador visible
+   al navegar con teclado.
+   ============================================================ */
+
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid rgba(91, 61, 245, 0.45);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* El foco del teclado nunca debe quedar tapado por la barra inferior */
+.ns-has-bottom-nav :focus-visible {
+  scroll-margin-bottom: 120px;
+}
+
+/* Área táctil mínima en controles chicos (Apple HIG / Material: 44px) */
+.ns-bottom-nav-item,
+.ns-export-btn {
+  min-height: 44px;
+}
+
+/* Respetar "reducir movimiento" del sistema operativo.
+   La app usa muchas animaciones; para quien las tiene desactivadas
+   por mareos o sensibilidad vestibular, se apagan. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Texto sólo para lectores de pantalla */
+.ns-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
