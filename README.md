@@ -48,8 +48,6 @@ VITE_PLAN_PRECIO=9990
 
 > ⚠️ Todo lo que empieza con `VITE_` se incrusta en el bundle y es **público**.
 > Nunca pongas ahí la `service_role` key de Supabase.
-> Si `VITE_CONTACTO_WHATSAPP` queda vacía, los botones de activación caen al
-> email de soporte y el panel de administrador muestra un aviso.
 
 En Vercel se cargan en *Settings → Environment Variables*. Vite las resuelve en
 tiempo de build: **un cambio recién tiene efecto en el siguiente deploy**.

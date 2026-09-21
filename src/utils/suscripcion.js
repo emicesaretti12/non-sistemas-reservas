@@ -14,13 +14,12 @@
  * Los datos de cobro se leen de variables de entorno para no tener que tocar
  * código al cambiarlos. Definilas en `.env` (local) y en Vercel (producción):
  *
- *   VITE_CONTACTO_WHATSAPP=5493511234567   ← tu número, internacional, sin "+"
+ *   VITE_CONTACTO_WHATSAPP=5493513522968   ← internacional, sin "+"
  *   VITE_CONTACTO_EMAIL=soporte@nonsistemas.com
  *   VITE_PLAN_PRECIO=9990
  *   VITE_PLAN_NOMBRE=Profesional
  *
- * Si VITE_CONTACTO_WHATSAPP no está seteada, los botones de activación caen al
- * email y la app muestra un aviso en Ajustes para que lo completes.
+ * Si no se definen, se usan los valores por defecto de abajo.
  */
 
 const env = import.meta.env
@@ -36,8 +35,14 @@ export const PLAN = {
   cicloDias: 30,
 }
 
+// Número de contacto para activaciones. Formato internacional sin "+":
+//   54 (Argentina) + 9 (móvil) + 351 (Córdoba) + 3522968
+// La variable de entorno tiene prioridad, así que se puede cambiar desde
+// Vercel sin tocar el código ni volver a desplegar desde acá.
+const WHATSAPP_POR_DEFECTO = '5493513522968'
+
 export const CONTACTO_PAGO = {
-  whatsapp: (env.VITE_CONTACTO_WHATSAPP || '').replace(/[^0-9]/g, ''),
+  whatsapp: (env.VITE_CONTACTO_WHATSAPP || WHATSAPP_POR_DEFECTO).replace(/[^0-9]/g, ''),
   email: env.VITE_CONTACTO_EMAIL || 'soporte@nonsistemas.com',
 }
 
