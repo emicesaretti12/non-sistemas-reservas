@@ -301,11 +301,11 @@ export default function Login() {
           <span
             key={r.id}
             className="inline-flex items-center gap-1.5 text-[11px] font-semibold"
-            style={{ color: r.test ? '#10B981' : '#9CA3AF' }}
+            style={{ color: r.test ? '#D28F95' : '#D28F95' }}
           >
             <span
               className="w-1.5 h-1.5 rounded-full transition-colors"
-              style={{ background: r.test ? '#10B981' : '#EDE9FE' }}
+              style={{ background: r.test ? '#D28F95' : '#F6E7E7' }}
             />
             {r.text}
           </span>
@@ -354,10 +354,10 @@ export default function Login() {
             <span className="text-white font-black text-xl tracking-tighter">N</span>
           </div>
           <div className="leading-none">
-            <p className="font-black text-xl tracking-tight text-[#1E1B4B]">
-              Noni<span className="text-[#5B3DF5]">.</span>
+            <p className="font-black text-xl tracking-tight text-[#990011]">
+              Noni<span className="text-[#AF3643]">.</span>
             </p>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mt-1">
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#D28F95] mt-1">
               Sistema de reservas
             </p>
           </div>
@@ -365,14 +365,14 @@ export default function Login() {
 
         {/* Title */}
         <div className="mb-8">
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-[#1E1B4B] leading-[1.05] mb-2">
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-[#990011] leading-[1.05] mb-2">
             {configUI[mode].titulo}{' '}
-            <span className="text-[#5B3DF5]">
+            <span className="text-[#AF3643]">
               {configUI[mode].acento}
               {mode === 'login' || mode === 'registro' ? '.' : ''}
             </span>
           </h2>
-          <p className="text-[13px] font-medium text-[#6B7280] leading-relaxed">
+          <p className="text-[13px] font-medium text-[#B94F5A] leading-relaxed">
             {configUI[mode].subtitulo}
           </p>
         </div>
@@ -385,10 +385,10 @@ export default function Login() {
             className="mb-6 p-4 text-[13px] font-medium flex items-start gap-3 rounded-2xl border"
             style={{
               background:
-                mensaje.tipo === 'error' ? 'rgba(239, 68, 68, 0.06)' : 'rgba(16, 185, 129, 0.06)',
-              color: mensaje.tipo === 'error' ? '#EF4444' : '#10B981',
+                mensaje.tipo === 'error' ? 'rgba(153,0,17,0.06)' : 'rgba(153,0,17,0.06)',
+              color: mensaje.tipo === 'error' ? '#C36771' : '#D28F95',
               borderColor:
-                mensaje.tipo === 'error' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                mensaje.tipo === 'error' ? 'rgba(153,0,17,0.15)' : 'rgba(153,0,17,0.15)',
             }}
           >
             <div className="shrink-0 mt-0.5">
@@ -405,12 +405,12 @@ export default function Login() {
             <div className="flex-1">
               <p className="leading-snug">{mensaje.texto}</p>
               {cooldown > 0 && mensaje.tipo === 'error' && (
-                <div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-[#EDE9FE]">
+                <div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-[#F6E7E7]">
                   <div
                     className="h-full transition-all duration-1000 ease-linear"
                     style={{
                       width: `${(cooldown / COOLDOWN_SEGUNDOS) * 100}%`,
-                      background: '#EF4444',
+                      background: '#C36771',
                     }}
                   />
                 </div>
@@ -443,16 +443,16 @@ export default function Login() {
                 disabled={loading || cooldown > 0}
                 className="ns-login-social-btn"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1E1B4B">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#990011">
                   <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                 </svg>
                 <span>GitHub</span>
               </button>
             </div>
             <div className="relative mb-6 flex items-center gap-3">
-              <div className="flex-1 h-px bg-[#EDE9FE]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#9CA3AF]">O con email</span>
-              <div className="flex-1 h-px bg-[#EDE9FE]" />
+              <div className="flex-1 h-px bg-[#F6E7E7]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#D28F95]">O con email</span>
+              <div className="flex-1 h-px bg-[#F6E7E7]" />
             </div>
           </>
         )}
@@ -460,7 +460,7 @@ export default function Login() {
         {/* Form */}
         <form onSubmit={handleAuth} className="space-y-4" data-testid="auth-form">
           <div>
-            <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] mb-2">Email</label>
+            <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95] mb-2">Email</label>
             <input
               id="email"
               type="email"
@@ -477,9 +477,9 @@ export default function Login() {
           {mode !== 'recuperar' && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Contraseña</label>
+                <label htmlFor="password" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95]">Contraseña</label>
                 {mode === 'login' && (
-                  <button type="button" onClick={() => cambiarModo('recuperar')} className="text-[10px] font-bold uppercase tracking-widest text-[#5B3DF5] hover:text-[#4328D4] transition-colors">¿La olvidaste?</button>
+                  <button type="button" onClick={() => cambiarModo('recuperar')} className="text-[10px] font-bold uppercase tracking-widest text-[#AF3643] hover:text-[#9D0A1A] transition-colors">¿La olvidaste?</button>
                 )}
               </div>
               <div className="relative">
@@ -497,7 +497,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#5B3DF5] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D28F95] hover:text-[#AF3643] transition-colors"
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
@@ -512,7 +512,7 @@ export default function Login() {
 
           {mode === 'registro' && (
             <div>
-              <label htmlFor="confirmPassword" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF] mb-2">Confirmar contraseña</label>
+              <label htmlFor="confirmPassword" className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95] mb-2">Confirmar contraseña</label>
               <input
                 id="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
@@ -524,7 +524,7 @@ export default function Login() {
                 autoComplete="new-password"
                 data-testid="confirm-password-input"
                 className="ns-login-input"
-                style={confirmPassword.length > 0 && password !== confirmPassword ? { borderColor: '#EF4444' } : undefined}
+                style={confirmPassword.length > 0 && password !== confirmPassword ? { borderColor: '#C36771' } : undefined}
               />
             </div>
           )}
@@ -537,13 +537,13 @@ export default function Login() {
                 onChange={(e) => setAcceptTerms(e.target.checked)}
                 disabled={cooldown > 0}
                 data-testid="terms-checkbox"
-                className="mt-0.5 w-4 h-4 rounded cursor-pointer accent-[#5B3DF5]"
+                className="mt-0.5 w-4 h-4 rounded cursor-pointer accent-[#AF3643]"
               />
-              <span className="text-[12px] leading-snug text-[#6B7280]">
+              <span className="text-[12px] leading-snug text-[#B94F5A]">
                 Acepto los{' '}
-                <button type="button" onClick={() => setLegalSheet('terms')} className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Términos</button>
+                <button type="button" onClick={() => setLegalSheet('terms')} className="font-semibold underline-offset-4 hover:underline text-[#AF3643]">Términos</button>
                 {' '}y la{' '}
-                <button type="button" onClick={() => setLegalSheet('privacy')} className="font-semibold underline-offset-4 hover:underline text-[#5B3DF5]">Política de Privacidad</button>.
+                <button type="button" onClick={() => setLegalSheet('privacy')} className="font-semibold underline-offset-4 hover:underline text-[#AF3643]">Política de Privacidad</button>.
               </span>
             </label>
           )}
@@ -558,12 +558,12 @@ export default function Login() {
         </form>
 
         {/* Switch */}
-        <div className="mt-8 pt-6 border-t border-[#EDE9FE]">
+        <div className="mt-8 pt-6 border-t border-[#F6E7E7]">
           {mode === 'recuperar' ? (
             <button
               type="button"
               onClick={() => cambiarModo('login')}
-              className="text-[11px] font-black uppercase tracking-widest text-[#9CA3AF] hover:text-[#1E1B4B] transition-all flex items-center gap-2"
+              className="text-[11px] font-black uppercase tracking-widest text-[#D28F95] hover:text-[#990011] transition-all flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -571,12 +571,12 @@ export default function Login() {
               Volver al inicio de sesión
             </button>
           ) : (
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF]">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#D28F95]">
               {mode === 'login' ? '¿Primera vez por acá?' : '¿Ya tenés cuenta?'}{' '}
               <button
                 type="button"
                 onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
-                className="text-[#5B3DF5] hover:text-[#4328D4] transition-colors ml-2 font-bold"
+                className="text-[#AF3643] hover:text-[#9D0A1A] transition-colors ml-2 font-bold"
               >
                 {mode === 'login' ? 'Creá una cuenta gratis' : 'Iniciá sesión'}
               </button>
@@ -585,10 +585,10 @@ export default function Login() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t border-[#EDE9FE] flex items-center justify-between text-[9px] uppercase tracking-[0.2em] text-[#9CA3AF]">
+        <div className="mt-8 pt-4 border-t border-[#F6E7E7] flex items-center justify-between text-[9px] uppercase tracking-[0.2em] text-[#D28F95]">
           <span>© {new Date().getFullYear()} Noni</span>
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D28F95]" />
             Online
           </span>
         </div>
@@ -596,20 +596,20 @@ export default function Login() {
 
       {legalSheet && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-5" role="presentation">
-          <button type="button" aria-label="Cerrar información legal" className="absolute inset-0 bg-[#18152e]/45 backdrop-blur-sm" onClick={() => setLegalSheet(null)} />
+          <button type="button" aria-label="Cerrar información legal" className="absolute inset-0 bg-[#990011]/45 backdrop-blur-sm" onClick={() => setLegalSheet(null)} />
           <section role="dialog" aria-modal="true" aria-labelledby="legal-sheet-title" className="relative w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] bg-white p-6 sm:p-7 shadow-2xl animate-in slide-in-from-bottom-6 duration-300">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="inline-flex rounded-full bg-[#EEEBFF] px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#5B3DF5]">Noni</span>
-                <h2 id="legal-sheet-title" className="mt-3 text-xl font-black tracking-tight text-[#1E1B4B]">
+                <span className="inline-flex rounded-full bg-[#F8ECEC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#AF3643]">Noni</span>
+                <h2 id="legal-sheet-title" className="mt-3 text-xl font-black tracking-tight text-[#990011]">
                   {legalSheet === 'terms' ? 'Términos de uso' : 'Política de privacidad'}
                 </h2>
               </div>
-              <button type="button" aria-label="Cerrar" onClick={() => setLegalSheet(null)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F5F3FF] text-[#5B3DF5] transition-colors hover:bg-[#E8DEFF]">
+              <button type="button" aria-label="Cerrar" onClick={() => setLegalSheet(null)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#FAF1F0] text-[#AF3643] transition-colors hover:bg-[#F2DDDE]">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6l12 12" strokeLinecap="round" /></svg>
               </button>
             </div>
-            <div className="mt-5 space-y-3 text-sm leading-relaxed text-[#656273]">
+            <div className="mt-5 space-y-3 text-sm leading-relaxed text-[#B13B48]">
               {legalSheet === 'terms' ? (
                 <>
                   <p>Al crear una cuenta, usás Noni para administrar reservas y la información operativa de tu negocio. Debés proporcionar datos correctos y mantener el acceso a tu cuenta de forma responsable.</p>
@@ -622,7 +622,7 @@ export default function Login() {
                 </>
               )}
             </div>
-            <button type="button" onClick={() => setLegalSheet(null)} className="mt-6 min-h-11 w-full rounded-2xl bg-[#5B3DF5] px-4 py-3 text-xs font-black uppercase tracking-[0.13em] text-white shadow-[0_10px_22px_rgba(91,61,245,0.25)] transition-transform active:scale-[0.98]">Entendido</button>
+            <button type="button" onClick={() => setLegalSheet(null)} className="mt-6 min-h-11 w-full rounded-2xl bg-[#AF3643] px-4 py-3 text-xs font-black uppercase tracking-[0.13em] text-white shadow-[0_10px_22px_rgba(153,0,17,0.25)] transition-transform active:scale-[0.98]">Entendido</button>
           </section>
         </div>
       )}

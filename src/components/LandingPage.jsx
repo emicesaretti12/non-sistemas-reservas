@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import { CinematicHero } from './ui/cinematic-landing-hero'
 
 function Counter({ end, suffix = '', prefix = '' }) {
   const [val, setVal] = useState(0)
@@ -47,17 +46,17 @@ function PhoneMockup() {
   const [screen, setScreen] = useState(0)
   useEffect(() => { const t = setInterval(() => setScreen(s => (s + 1) % 4), 3000); return () => clearInterval(t) }, [])
   const screens = [
-    { title: 'Reserva Online', color: '#6c5ce7', items: ['Corte Clásico — $3.500','Barba Premium — $2.800','Combo Completo — $5.500'], badge: 'Paso 1: Elegí servicio' },
-    { title: 'Dashboard', color: '#0f172a', items: ['12 turnos hoy','$42.000 ingresos','98% ocupación'], badge: 'Panel en tiempo real' },
-    { title: 'CRM Clientes', color: '#059669', items: ['Martín — VIP (23 visitas)','Lucía — Frecuente (8)','Carlos — Nuevo (1)'], badge: 'Base automática' },
-    { title: '✓ Confirmado', color: '#6c5ce7', items: ['Corte + Barba','Hoy 15:30 hs','Carlos López'], badge: 'Confirmación instantánea' },
+    { title: 'Reserva Online', color: '#B94F5A', items: ['Corte Clásico — $3.500','Barba Premium — $2.800','Combo Completo — $5.500'], badge: 'Paso 1: Elegí servicio' },
+    { title: 'Dashboard', color: '#990011', items: ['12 turnos hoy','$42.000 ingresos','98% ocupación'], badge: 'Panel en tiempo real' },
+    { title: 'CRM Clientes', color: '#C36771', items: ['Martín — VIP (23 visitas)','Lucía — Frecuente (8)','Carlos — Nuevo (1)'], badge: 'Base automática' },
+    { title: '✓ Confirmado', color: '#B94F5A', items: ['Corte + Barba','Hoy 15:30 hs','Carlos López'], badge: 'Confirmación instantánea' },
   ]
   const s = screens[screen]
   return (
     <div className="max-w-sm mx-auto px-5 pb-12 md:pb-16">
       <div className="relative mx-auto w-[260px] md:w-[280px]">
         {/* Phone frame */}
-        <div className="rounded-[2.5rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl overflow-hidden" style={{boxShadow:'0 40px 80px rgba(0,0,0,0.2)'}}>
+        <div className="rounded-[2.5rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl overflow-hidden" style={{boxShadow:'0 40px 80px rgba(153,0,17,0.2)'}}>
           {/* Notch */}
           <div className="relative bg-slate-900 flex justify-center pt-2 pb-1"><div className="w-20 h-5 bg-slate-900 rounded-full"/></div>
           {/* Screen */}
@@ -78,7 +77,7 @@ function PhoneMockup() {
                   <span className="text-xs font-bold text-slate-700">{item}</span>
                 </div>
               ))}
-              {screen === 3 && <div className="mt-4 py-3 rounded-xl text-center text-white font-black text-[10px] uppercase tracking-widest" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}>Reserva Confirmada ✓</div>}
+              {screen === 3 && <div className="mt-4 py-3 rounded-xl text-center text-white font-black text-[10px] uppercase tracking-widest" style={{background:'var(--ns-gradient-1)'}}>Reserva Confirmada ✓</div>}
             </div>
           </div>
           {/* Home bar */}
@@ -100,12 +99,12 @@ export default function LandingPage() {
   const Ic = ({ d, cls = 'w-5 h-5' }) => <svg className={cls} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d={d} strokeLinecap="round" strokeLinejoin="round"/></svg>
 
   return (
-    <div className="min-h-screen bg-[#FAFAFE] text-slate-900 font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-[#FEFBFA] text-slate-900 font-sans antialiased overflow-x-hidden">
       {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-100 shadow-[0_1px_3px_rgba(153,0,17,0.03)]">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 md:px-8 h-16">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}><span className="text-white font-black text-[10px] italic">NS</span></div>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'var(--ns-gradient-1)' }}><span className="text-white font-black text-[10px] italic">NS</span></div>
             <span className="text-sm font-black tracking-tight">Non Sistemas</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
@@ -113,30 +112,17 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <button onClick={()=>nav('/login')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 px-3 py-2 transition-colors hidden sm:block">Iniciar Sesión</button>
-            <button onClick={()=>nav('/login')} className="text-[10px] font-black uppercase tracking-[0.15em] text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}>Empezar Gratis</button>
+            <button onClick={()=>nav('/login')} className="neo-btn neo-btn--primary neo-btn--quiet">Empezar gratis</button>
           </div>
         </div>
       </nav>
-
-      {/* CINEMATIC HERO */}
-      <CinematicHero
-        brandName="Non Sistemas"
-        tagline1="Automatizá las reservas,"
-        tagline2="profesionalizá tu negocio."
-        cardHeading="Gestión inteligente."
-        cardDescription={<><span className="text-white font-semibold">Non Sistemas</span> automatiza reservas, clientes e inventario para que te enfoques en lo que importa: hacer crecer tu negocio.</>}
-        metricValue={200}
-        metricLabel="Negocios"
-        ctaHeading="Empezá hoy."
-        ctaDescription="Unite a los negocios que ya automatizan su gestión con Non Sistemas. Configuración en 5 minutos."
-      />
 
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute w-[700px] h-[700px] rounded-full bg-purple-200/25 -top-[300px] -left-[200px] blur-[140px]"/>
           <div className="absolute w-[500px] h-[500px] rounded-full bg-cyan-200/15 top-[20%] -right-[200px] blur-[120px]"/>
-          <div className="absolute inset-0 opacity-[0.015]" style={{backgroundImage:'radial-gradient(circle,#6c5ce7 1px,transparent 1px)',backgroundSize:'40px 40px'}}/>
+          <div className="absolute inset-0 opacity-[0.015]" style={{backgroundImage:'radial-gradient(circle,#B94F5A 1px,transparent 1px)',backgroundSize:'40px 40px'}}/>
         </div>
         <div className="max-w-6xl mx-auto px-5 md:px-8 pt-16 md:pt-28 pb-16 md:pb-24 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
@@ -145,17 +131,17 @@ export default function LandingPage() {
               <span className="text-[10px] font-bold text-purple-600 uppercase tracking-widest">+200 negocios activos</span>
             </div>
             <h1 className="text-[2.5rem] md:text-7xl font-black tracking-[-0.04em] leading-[0.92] mb-5 ns-fade-up" style={{animationDelay:'0.1s'}}>
-              El sistema de reservas que <span className="ns-hero-gradient">tu negocio merece</span>
+              El sistema de reservas que <span className="ns-gradient-text">tu negocio merece</span>
             </h1>
             <p className="text-base md:text-xl text-slate-500 font-medium leading-relaxed max-w-xl mx-auto mb-8 ns-fade-up" style={{animationDelay:'0.2s'}}>
               Automatizá turnos, conocé a tus clientes y hacé crecer tu negocio. Todo desde una plataforma que se configura en 5 minutos.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center ns-fade-up" style={{animationDelay:'0.3s'}}>
-              <button onClick={()=>nav('/login')} className="ns-shimmer-btn px-8 py-4 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-xl hover:shadow-2xl active:scale-95 transition-all" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}>
-                Probar 7 Días Gratis
+              <button onClick={()=>nav('/login')} className="neo-btn neo-btn--primary ns-shimmer-btn px-8">
+                Probar 7 días gratis
               </button>
-              <a href="#como" className="px-8 py-4 bg-white border border-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-[0.15em] rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300 active:scale-95 transition-all text-center">
-                Ver Demo
+              <a href="#como" className="neo-btn px-8">
+                Ver demo
               </a>
             </div>
             <p className="text-[10px] text-slate-400 font-medium mt-5 ns-fade-up" style={{animationDelay:'0.4s'}}>Sin tarjeta de crédito • Configuración en 5 min • Cancelá cuando quieras</p>
@@ -164,7 +150,7 @@ export default function LandingPage() {
 
         {/* SOCIAL PROOF STATS */}
         <div className="max-w-4xl mx-auto px-5 md:px-8 pb-8 md:pb-12">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100">
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(153,0,17,0.04)] grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100">
             {[{n:200,s:'+',l:'Negocios Activos'},{n:15000,s:'+',l:'Reservas/mes'},{n:98,s:'%',l:'Uptime'},{n:4.9,s:'★',l:'Satisfacción',dec:true}].map((s,i)=>(
               <div key={i} className="ns-stat-landing py-6 md:py-8">
                 <p className="text-2xl md:text-4xl font-black tracking-tighter text-slate-900">{s.dec?s.n:<Counter end={s.n}/>}{s.s}</p>
@@ -316,7 +302,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button onClick={()=>nav('/login')} className="ns-shimmer-btn w-full py-4 rounded-2xl text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}>Empezar 7 Días Gratis</button>
+                <button onClick={()=>nav('/login')} className="ns-shimmer-btn w-full py-4 rounded-2xl text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95" style={{background:'var(--ns-gradient-1)'}}>Empezar 7 Días Gratis</button>
                 <p className="text-[10px] text-white/30 text-center mt-4">Sin tarjeta de crédito</p>
               </div>
             </div>
@@ -350,13 +336,13 @@ export default function LandingPage() {
       {/* CTA FINAL */}
       <section className="py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-5 md:px-8">
-          <div className="relative rounded-[2.5rem] overflow-hidden p-10 md:p-16 text-center text-white" style={{background:'linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#312e81 100%)'}}>
+          <div className="relative rounded-[2.5rem] overflow-hidden p-10 md:p-16 text-center text-white" style={{background:'var(--ns-gradient-1)'}}>
             <div className="absolute -top-20 -left-20 w-60 h-60 bg-purple-500/30 rounded-full blur-[100px]"/>
             <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-cyan-400/20 rounded-full blur-[100px]"/>
             <div className="relative z-10">
               <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">¿Listo para profesionalizar tu negocio?</h2>
               <p className="text-sm md:text-base text-white/50 font-medium mb-8 max-w-lg mx-auto">Unite a los negocios que ya automatizan sus reservas.</p>
-              <button onClick={()=>nav('/login')} className="ns-shimmer-btn px-10 py-4 rounded-2xl text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}>Crear Mi Cuenta Gratis</button>
+              <button onClick={()=>nav('/login')} className="ns-shimmer-btn px-10 py-4 rounded-2xl text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95" style={{background:'var(--ns-gradient-1)'}}>Crear Mi Cuenta Gratis</button>
             </div>
           </div>
         </div>
@@ -366,7 +352,7 @@ export default function LandingPage() {
       <footer className="border-t border-slate-100 py-10 bg-white">
         <div className="max-w-6xl mx-auto px-5 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background:'linear-gradient(135deg,#6c5ce7,#a29bfe)'}}><span className="text-white font-black text-[8px] italic">NS</span></div>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background:'var(--ns-gradient-1)'}}><span className="text-white font-black text-[8px] italic">NS</span></div>
             <span className="text-xs font-bold text-slate-400">Non Sistemas © {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-6">

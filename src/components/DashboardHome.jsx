@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { supabase } from '../supabaseClient'
-import { ocupaHorario, precioTurno } from '../utils/reservas'
+import { ocupaHorario, precioTurno, normalizarHorarios } from '../utils/reservas'
 
 /**
  * DashboardHome — Centro de mando oscuro y mobile-first.
@@ -31,6 +31,8 @@ export default function DashboardHome({
   distribucionSemanal = [0, 0, 0, 0, 0, 0, 0],
 }) {
   const [loading, setLoading] = useState(true)
+  const [falloCarga, setFalloCarga] = useState(false)
+  const cancelRef = useRef(false)
   const [turnosHoy, setTurnosHoy] = useState([])
   const [servicios, setServicios] = useState([])
   const [empleados, setEmpleados] = useState([])
@@ -66,15 +68,15 @@ export default function DashboardHome({
     return () => clearInterval(t)
   }, [])
 
-  useEffect(() => {
+  const cargar = useCallback(async () => {
     if (!negocio?.id) return
-    let cancel = false
-    ;(async () => {
-      setLoading(true)
-      const hoy = new Date()
-      const ini = new Date(hoy); ini.setHours(0, 0, 0, 0)
-      const fin = new Date(hoy); fin.setHours(23, 59, 59, 999)
+    setLoading(true)
+    setFalloCarga(false)
+    const hoy = new Date()
+    const ini = new Date(hoy); ini.setHours(0, 0, 0, 0)
+    const fin = new Date(hoy); fin.setHours(23, 59, 59, 999)
 
+    try {
       const [tRes, sRes, eRes] = await Promise.all([
         supabase.from('turnos')
           .select('*, servicios(nombre, precio, duracion_minutos), empleados(nombre, foto_url)')
@@ -86,15 +88,26 @@ export default function DashboardHome({
         supabase.from('empleados').select('id, nombre, estado, foto_url').eq('negocio_id', negocio.id),
       ])
 
-      if (cancel) return
+      if (cancelRef.current) return
+      if (tRes.error || sRes.error || eRes.error) setFalloCarga(true)
       // Cancelados y ausencias no ocupan lugar ni cuentan (utils/reservas.js).
       setTurnosHoy((tRes.data || []).filter(ocupaHorario))
       setServicios(sRes.data || [])
       setEmpleados(eRes.data || [])
-      setLoading(false)
-    })()
-    return () => { cancel = true }
+    } catch {
+      // Sin señal o servidor caído: antes la promesa quedaba colgada y el
+      // panel se quedaba girando para siempre, sin forma de reintentar.
+      if (!cancelRef.current) setFalloCarga(true)
+    } finally {
+      if (!cancelRef.current) setLoading(false)
+    }
   }, [negocio?.id])
+
+  useEffect(() => {
+    cancelRef.current = false
+    cargar()
+    return () => { cancelRef.current = true }
+  }, [cargar])
 
   // ── Derivados de citas de hoy ──────────────────────────────────────────────
   // "Por venir" = todavía no empezó Y no fue marcado como resuelto.
@@ -118,7 +131,7 @@ export default function DashboardHome({
 
   // ── Lugares disponibles hoy (mismo algoritmo que la Agenda) ─────────────────
   const lugares = useMemo(() => {
-    const horarios = negocio?.horarios
+    const horarios = negocio?.horarios ? normalizarHorarios(negocio.horarios) : null
     if (!horarios) return { estado: 'sin-config', slots: [] }
     const config = horarios[DIAS_MAP[ahora.getDay()]]
     if (!config || !config.abierto) return { estado: 'cerrado', slots: [] }
@@ -175,10 +188,34 @@ export default function DashboardHome({
   const fechaLarga = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
 
   if (loading) {
+    // Esqueleto en vez de un spinner suelto: se ve la forma de lo que viene
+    // y la espera se siente más corta.
     return (
-      <div className="flex justify-center items-center py-24" data-testid="home-loading">
-        <div className="ns-spinner" style={{ borderTopColor: 'var(--ns-primary)', borderColor: 'var(--ns-border)' }} />
+      <div className="space-y-4 md:space-y-5" data-testid="home-loading" aria-busy="true">
+        <div className="ns-skeleton" style={{ height: 132 }} />
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          <div className="ns-skeleton" style={{ height: 96 }} />
+          <div className="ns-skeleton" style={{ height: 96 }} />
+          <div className="ns-skeleton" style={{ height: 96 }} />
+        </div>
+        <div className="ns-skeleton" style={{ height: 220 }} />
+        <span className="ns-sr-only">Cargando tu resumen del día…</span>
       </div>
+    )
+  }
+
+  if (falloCarga) {
+    return (
+      <section className="neo-card p-7 text-center" data-testid="home-error">
+        <span className="neo-avatar w-14 h-14 mx-auto mb-4">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </span>
+        <h2 className="font-display text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>No pudimos traer tu día</h2>
+        <p className="text-[13px] mt-2 mb-5 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>
+          Puede ser la conexión. Tus datos están a salvo: probá de nuevo en un momento.
+        </p>
+        <button onClick={cargar} className="neo-btn neo-btn--primary">Reintentar</button>
+      </section>
     )
   }
 
@@ -187,40 +224,40 @@ export default function DashboardHome({
 
       {/* ═══════════ HERO / SALUDO — Bento Dark Card ═══════════ */}
       <header
-        className="relative overflow-hidden rounded-3xl p-6 md:p-10 border border-[#EDE8F7] bg-white"
-        style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}
+        className="relative overflow-hidden rounded-3xl p-6 md:p-10 border border-[#F6E7E7] bg-white"
+        style={{ boxShadow: '0 4px 20px rgba(153,0,17,0.05)' }}
         data-testid="home-hero"
       >
         <div
           className="absolute -top-24 -right-20 w-96 h-96 rounded-full blur-[100px] opacity-20 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #5B3DF5 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, #AF3643 0%, transparent 70%)' }}
         />
         <div
           className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full blur-[80px] opacity-10 pointer-events-none"
-          style={{ background: '#8B7CF6' }}
+          style={{ background: '#C9767E' }}
         />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex items-center justify-center shrink-0" style={{ background: '#F7F5FF', border: '1px solid #EDE8F7' }}>
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex items-center justify-center shrink-0" style={{ background: '#FCF6F5', border: '1px solid #F6E7E7' }}>
               {negocio?.logo_url
                 ? <img src={negocio.logo_url} alt="logo" className="w-full h-full object-cover" />
-                : <span className="text-[#5B3DF5] font-black text-xl">{negocio?.nombre?.charAt(0) || 'N'}</span>}
+                : <span className="text-[#AF3643] font-black text-xl">{negocio?.nombre?.charAt(0) || 'N'}</span>}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#6B6489]">{saludo()}</span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#B3404C]">{saludo()}</span>
               </div>
-              <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[#1A1630] mb-1">{negocio?.nombre || 'Tu negocio'}</h1>
-              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#A09CB5]">{fechaLarga}</p>
+              <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[#990011] mb-1">{negocio?.nombre || 'Tu negocio'}</h1>
+              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#D28F95]">{fechaLarga}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3 md:ml-auto">
             <button
               onClick={() => window.open(publicLink, '_blank')}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-[#1A1630] transition-all active:scale-90 hover:text-[#5B3DF5] hover:bg-[#E8DEFF]/40" style={{ background: '#F7F5FF', border: '1px solid #EDE8F7' }}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-[#990011] transition-all active:scale-90 hover:text-[#AF3643] hover:bg-[#F2DDDE]/40" style={{ background: '#FCF6F5', border: '1px solid #F6E7E7' }}
               title="Ver app pública"
               data-testid="home-view-app"
             >
@@ -228,7 +265,7 @@ export default function DashboardHome({
             </button>
             <button
               onClick={() => onNavigate?.('ajustes')}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-[#1A1630] transition-all active:scale-90 hover:text-[#5B3DF5] hover:bg-[#E8DEFF]/40" style={{ background: '#F7F5FF', border: '1px solid #EDE8F7' }}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-[#990011] transition-all active:scale-90 hover:text-[#AF3643] hover:bg-[#F2DDDE]/40" style={{ background: '#FCF6F5', border: '1px solid #F6E7E7' }}
               title="Ajustes"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 md:w-5 md:h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -239,19 +276,19 @@ export default function DashboardHome({
         {/* Banner de Instalación PWA */}
         {showInstallBtn && (
           <div className="mt-4">
-            <div className="p-4 md:p-5 rounded-2xl flex items-center justify-between gap-4 border" style={{ background: '#F7F5FF', borderColor: '#EDE8F7' }}>
+            <div className="p-4 md:p-5 rounded-2xl flex items-center justify-between gap-4 border" style={{ background: '#FCF6F5', borderColor: '#F6E7E7' }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'white', border: '1px solid #EDE8F7' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-[#1A1630]"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'white', border: '1px solid #F6E7E7' }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-[#990011]"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
                 <div>
-                  <p className="text-[#1A1630] font-black text-sm leading-tight">Instalar App</p>
-                  <p className="text-[#6B6489] text-[9px] md:text-[10px] font-medium">Agregá Noni a tu pantalla de inicio.</p>
+                  <p className="text-[#990011] font-black text-sm leading-tight">Instalar App</p>
+                  <p className="text-[#B3404C] text-[9px] md:text-[10px] font-medium">Agregá Noni a tu pantalla de inicio.</p>
                 </div>
               </div>
               <button
                 onClick={handleInstallClick}
-                className="px-4 py-2.5 rounded-xl bg-[#5B3DF5] text-white font-black text-[9px] uppercase tracking-widest shadow-lg active:scale-95 transition-all shrink-0"
+                className="px-4 py-2.5 rounded-xl bg-[#AF3643] text-white font-black text-[9px] uppercase tracking-widest shadow-lg active:scale-95 transition-all shrink-0"
               >
                 Instalar
               </button>
@@ -263,7 +300,7 @@ export default function DashboardHome({
       {/* ═══════════ 3 MÉTRICAS CLAVE DEL DÍA — Bento Grid ═══════════ */}
       <div className="grid grid-cols-3 gap-3 md:gap-4" data-testid="home-today-stats">
         <button onClick={() => onNavigate?.('agenda')} className="nh-metric" data-testid="metric-citas">
-          <div className="absolute top-0 left-0 w-1 h-full" style={{ background: '#5B3DF5' }} />
+          <div className="absolute top-0 left-0 w-1 h-full" style={{ background: '#AF3643' }} />
           <span className="nh-metric-label">{vocab?.turnos || 'Citas'} hoy</span>
           <span className="nh-metric-value" style={{ color: 'var(--ns-text)' }}>{turnosHoy.length}</span>
           <span className="nh-metric-foot" style={{ color: 'var(--ns-primary)' }}>
@@ -292,7 +329,7 @@ export default function DashboardHome({
       {proximaCita && (
         <div className="nh-card nh-next p-5 md:p-6 relative overflow-hidden group" data-testid="home-next-appointment">
           <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20 rotate-12 text-[#5B3DF5]"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20 rotate-12 text-[#AF3643]"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
           
           <div className="flex items-center gap-4 relative z-10">
@@ -308,7 +345,7 @@ export default function DashboardHome({
               <p className="text-base md:text-xl font-black truncate leading-tight mb-0.5" style={{ color: 'var(--ns-text)' }}>{proximaCita.cliente_nombre || 'Cliente'}</p>
               <div className="flex items-center gap-2 text-[11px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>
                 <span className="truncate">{proximaCita.servicios?.nombre || vocab?.servicio}</span>
-                <span className="w-0.5 h-0.5 rounded-full bg-[#EDE9FE]" />
+                <span className="w-0.5 h-0.5 rounded-full bg-[#F6E7E7]" />
                 <span className="truncate">{proximaCita.empleados?.nombre?.split(' ')[0] || vocab?.fallbackStaff || ''}</span>
               </div>
             </div>
@@ -345,7 +382,7 @@ export default function DashboardHome({
             </div>
             <h3 className="text-[12px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Agenda despejada</h3>
             <p className="text-[11px] mt-2 max-w-[200px] mx-auto leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>No hay más turnos programados para el resto del día.</p>
-            <button onClick={() => { navigator.clipboard?.writeText(publicLink); showToast?.('¡Link copiado!') }} className="mt-4 px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white transition-all active:scale-95" style={{ background: 'var(--ns-primary)', boxShadow: '0 4px 12px rgba(91, 61, 245, 0.2)' }}>
+            <button onClick={() => { navigator.clipboard?.writeText(publicLink); showToast?.('¡Link copiado!') }} className="mt-4 px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white transition-all active:scale-95" style={{ background: 'var(--ns-primary)', boxShadow: '0 4px 12px rgba(153,0,17,0.2)' }}>
               Compartir mi link
             </button>
           </div>
@@ -358,7 +395,7 @@ export default function DashboardHome({
                 <div key={t.id} className="nh-row py-3.5" style={{ borderBottom: '1px solid var(--ns-border)' }} data-testid={`home-turno-${t.id}`}>
                   <div className="nh-row-time w-14">
                     <span className="text-[14px] font-black tabular-nums" style={{ color: 'var(--ns-text)' }}>{fmtHora(t.fecha_hora)}</span>
-                    <span className={`text-[8px] font-black uppercase tracking-widest ${soon ? 'text-[#F59E0B] animate-pulse' : ''}`} style={{ color: soon ? '#F59E0B' : 'var(--ns-text-muted)' }}>
+                    <span className={`text-[8px] font-black uppercase tracking-widest ${soon ? 'text-[#DAA2A7] animate-pulse' : ''}`} style={{ color: soon ? '#DAA2A7' : 'var(--ns-text-muted)' }}>
                       {diff < 60 ? `${diff}m` : `${Math.floor(diff / 60)}h`}
                     </span>
                   </div>
@@ -366,7 +403,7 @@ export default function DashboardHome({
                     <p className="text-[13px] font-bold truncate mb-0.5" style={{ color: 'var(--ns-text)' }}>{t.cliente_nombre || 'Cliente'}</p>
                     <div className="flex items-center gap-1.5 text-[10px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>
                       <span>{t.servicios?.nombre || vocab?.servicio}</span>
-                      <span className="w-0.5 h-0.5 rounded-full bg-[#EDE9FE]" />
+                      <span className="w-0.5 h-0.5 rounded-full bg-[#F6E7E7]" />
                       <span>{t.empleados?.nombre?.split(' ')[0] || vocab?.fallbackStaff || ''}</span>
                     </div>
                   </div>
@@ -394,7 +431,7 @@ export default function DashboardHome({
       <section className="nh-card overflow-hidden" data-testid="home-available">
         <div className="nh-section-head px-5 py-4" style={{ borderBottom: '1px solid var(--ns-border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-emerald-500"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
@@ -487,7 +524,7 @@ export default function DashboardHome({
                   style={{
                     height: `${Math.max((val / maxSem) * 100, 5)}%`,
                     background: idx === hoyIdx ? 'var(--ns-primary)' : 'var(--ns-primary-bg)',
-                    boxShadow: idx === hoyIdx ? '0 0 20px rgba(91, 61, 245, 0.15)' : 'none',
+                    boxShadow: idx === hoyIdx ? '0 0 20px rgba(153,0,17,0.15)' : 'none',
                   }}
                 />
               </div>

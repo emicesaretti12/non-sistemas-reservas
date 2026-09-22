@@ -1,102 +1,114 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconRobot, IconChart, IconCheckCircle, IconClipboard, IconBolt, IconCalendar, IconLink, IconPalette, IconRocket } from './NoniIcons'
+import {
+  IconRobot, IconChart, IconCheckCircle, IconClipboard, IconBolt,
+  IconCalendar, IconLink, IconPalette, IconRocket,
+} from './NoniIcons'
+import { haptic } from '../utils/haptics'
 
 const TOUR_KEY = 'ns_tour_completed_v2'
 
+/**
+ * Tour guiado del panel.
+ *
+ * Qué estaba roto antes:
+ *  · Los pasos apuntaban a ids (`tour-servicios`, `tour-agenda`, `tour-ajustes`)
+ *    que existían dos veces en el documento —en la pestaña y en el contenido—,
+ *    así que `getElementById` siempre resaltaba el botón y nunca la sección.
+ *  · `tour-link` directamente no existía: ese paso quedaba sin posición y la
+ *    tarjeta aparecía tirada arriba de todo, fuera de la pantalla.
+ *  · El tour no cambiaba de pestaña, así que los pasos de Servicios, Agenda y
+ *    Ajustes hablaban de secciones que no estaban montadas.
+ *  · No había foco ni recorte: se veía el texto pero nada quedaba resaltado.
+ *  · `tour-tabs` estaba oculto en móvil (`hidden md:flex`): el paso apuntaba a
+ *    un elemento de tamaño cero.
+ *
+ * Cómo funciona ahora: cada paso declara uno o más objetivos `data-tour` y, si
+ * hace falta, la pestaña donde viven. El tour cambia de pestaña, espera a que
+ * el nodo exista, lo recorta del velo, lo trae a la vista y ancla la tarjeta al
+ * espacio libre. Si un objetivo no aparece, el paso se muestra centrado en vez
+ * de romperse.
+ */
+
 const STEPS = [
   {
-    target: null,
-    title: '¡Hola! Soy Noni 👋',
-    message: 'Te voy a guiar paso a paso por tu panel de control. En menos de 1 minuto vas a saber cómo funciona todo.',
-    position: 'center',
+    id: 'bienvenida',
+    title: '¡Hola! Soy Noni',
+    message: 'Te muestro tu panel en un minuto. Podés salir cuando quieras y retomar después desde el botón de ayuda.',
     Icon: IconRobot,
-    iconBg: 'bg-violet-100',
-    iconColor: 'text-violet-600',
   },
   {
-    target: 'tour-monitor',
-    title: 'Centro de control',
-    message: 'Acá ves todo de un vistazo: turnos del día, ingresos y actividad reciente. Se actualiza solo con cada reserva nueva.',
-    position: 'bottom',
+    id: 'monitor',
+    targets: ['monitor'],
+    tab: 'inicio',
+    title: 'Tu resumen del día',
+    message: 'Turnos de hoy, ingresos y próximos clientes. Se actualiza solo cada vez que entra una reserva nueva.',
     Icon: IconChart,
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
   },
   {
-    target: 'tour-setup',
-    title: 'Pasos iniciales',
-    message: 'Esta checklist te indica qué falta configurar para que tu sistema quede al 100%. ¡Empezá por acá!',
-    position: 'bottom',
+    id: 'setup',
+    targets: ['setup'],
+    tab: 'inicio',
+    title: 'Primeros pasos',
+    message: 'Esta lista te dice qué falta para que tus clientes puedan reservar. Cuando está completa, tu link ya funciona solo.',
     Icon: IconCheckCircle,
-    iconBg: 'bg-emerald-100',
-    iconColor: 'text-emerald-600',
   },
   {
-    target: 'tour-tabs',
-    title: 'Navegación del panel',
-    message: 'Desde estas pestañas accedés a todas las secciones: Agenda, Servicios, Equipo, Horarios, y Ajustes.',
-    position: 'bottom',
+    id: 'nav',
+    targets: ['nav', 'tabs', 'nav-mobile'],
+    title: 'Navegación',
+    message: 'Desde acá entrás a todas las secciones: agenda, servicios, equipo, horarios, clientes y ajustes.',
     Icon: IconClipboard,
-    iconBg: 'bg-slate-100',
-    iconColor: 'text-slate-600',
-    actionLabel: 'Ir a Servicios',
-    actionTab: 'servicios',
   },
   {
-    target: 'tour-servicios',
+    id: 'servicios',
+    targets: ['servicios'],
+    tab: 'servicios',
     title: 'Tus servicios',
-    message: 'Definí qué ofrecés: nombre, precio y duración. Por ejemplo: "Corte Clásico — $3500 — 30 min". Tus clientes los ven al reservar.',
-    position: 'bottom',
+    message: 'Cargá qué ofrecés con su precio y duración — por ejemplo "Corte clásico · $3500 · 30 min". Es lo primero que ven tus clientes al reservar.',
     Icon: IconBolt,
-    iconBg: 'bg-amber-100',
-    iconColor: 'text-amber-600',
-    actionLabel: 'Crear servicio',
+    actionLabel: 'Quedarme acá',
     actionTab: 'servicios',
   },
   {
-    target: 'tour-agenda',
-    title: 'Tu agenda de turnos',
-    message: 'Acá aparecen todos los turnos: los de tus clientes y los que vos creés. Podés confirmar, cancelar o contactar por WhatsApp.',
-    position: 'bottom',
+    id: 'agenda',
+    targets: ['agenda'],
+    tab: 'agenda',
+    title: 'Tu agenda',
+    message: 'Todos los turnos en un solo lugar: los que reservan tus clientes y los que cargás vos. Podés confirmar, cancelar o escribir por WhatsApp.',
     Icon: IconCalendar,
-    iconBg: 'bg-violet-100',
-    iconColor: 'text-violet-600',
-    actionLabel: 'Ver Agenda',
+    actionLabel: 'Ir a la agenda',
     actionTab: 'agenda',
   },
   {
-    target: 'tour-link',
+    id: 'link',
+    targets: ['link'],
+    tab: 'ajustes',
     title: 'Tu link de reservas',
-    message: 'Este es tu link público. Compartilo por WhatsApp, Instagram o donde quieras. ¡Tus clientes reservan solos sin llamarte!',
-    position: 'top',
+    message: 'Este es tu link público. Compartilo por WhatsApp o Instagram y tus clientes reservan solos, sin llamarte.',
     Icon: IconLink,
-    iconBg: 'bg-cyan-100',
-    iconColor: 'text-cyan-600',
-    actionLabel: 'Copiar link',
+    actionLabel: 'Copiar mi link',
     actionCopyLink: true,
   },
   {
-    target: 'tour-ajustes',
-    title: 'Personalizá tu marca',
-    message: 'Subí tu logo, elegí tu color, escribí tu bio. Todo esto aparece en tu app de reservas y le da identidad a tu negocio.',
-    position: 'bottom',
+    id: 'marca',
+    targets: ['ajustes'],
+    tab: 'ajustes',
+    title: 'Tu marca',
+    message: 'Subí tu logo, escribí tu descripción y cargá tu dirección. Todo eso aparece en la app que ven tus clientes.',
     Icon: IconPalette,
-    iconBg: 'bg-pink-100',
-    iconColor: 'text-pink-600',
-    actionLabel: 'Ir a Ajustes',
-    actionTab: 'ajustes',
   },
   {
-    target: null,
-    title: '¡Todo listo! 🚀',
-    message: 'Ahora solo tenés que:\n\n1. Crear tus servicios\n2. Agregar tu equipo\n3. Configurar tus horarios\n4. Compartir tu link\n\nSi necesitás ayuda, tocá el ícono de Noni.',
-    position: 'center',
+    id: 'final',
+    title: '¡Listo!',
+    message: 'Ya conocés el panel. Si te trabás en algo, tocá el botón de Noni abajo a la derecha y te doy una mano.',
     Icon: IconRocket,
-    iconBg: 'bg-violet-100',
-    iconColor: 'text-violet-600',
+    finish: true,
   },
 ]
+
+const PAD = 12
+const CARD_W = 372
 
 export function useTour() {
   const [active, setActive] = useState(false)
@@ -106,345 +118,392 @@ export function useTour() {
     try { completado = localStorage.getItem(TOUR_KEY) === '1' } catch { /* modo privado */ }
     if (completado) return
 
-    const t = setTimeout(() => setActive(true), 1500)
+    const t = setTimeout(() => setActive(true), 1400)
     return () => clearTimeout(t)
   }, [])
 
-  const start = () => setActive(true)
-  const dismiss = () => {
+  const start = useCallback(() => setActive(true), [])
+  const dismiss = useCallback(() => {
     try { localStorage.setItem(TOUR_KEY, '1') } catch { /* modo privado */ }
     setActive(false)
-  }
+  }, [])
 
   return { active, start, dismiss }
 }
 
+/** Devuelve el primer nodo visible de la lista de objetivos del paso. */
+function resolveTarget(targets) {
+  if (!targets?.length) return null
+  for (const key of targets) {
+    const nodos = document.querySelectorAll(`[data-tour="${key}"]`)
+    for (const nodo of nodos) {
+      const r = nodo.getBoundingClientRect()
+      // Un elemento oculto por media query mide 0 y no sirve como ancla.
+      if (r.width > 8 && r.height > 8) return nodo
+    }
+  }
+  return null
+}
+
 export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate, publicLink }) {
   const [step, setStep] = useState(0)
-  const [targetRect, setTargetRect] = useState(null)
-  const [copyToast, setCopyToast] = useState(false)
+  const [rect, setRect] = useState(null)
+  const [copiado, setCopiado] = useState(false)
+  const cardRef = useRef(null)
+  const rafRef = useRef(0)
+  // `onNavigate` es una función nueva en cada render del panel; guardarla en
+  // un ref evita que el efecto se reinicie (y vuelva a hacer scroll) cada vez
+  // que el dashboard se refresca por una reserva nueva.
+  const navigateRef = useRef(onNavigate)
+  useEffect(() => { navigateRef.current = onNavigate }, [onNavigate])
+
   const current = STEPS[step]
   const total = STEPS.length
+  const esCentrado = !rect
 
-  const recalcTarget = useCallback(() => {
-    if (!active || !current.target) {
-      // Diferido: medir y pintar en el mismo tick encadena renders.
-      requestAnimationFrame(() => setTargetRect(null))
-      return
-    }
-    const el = document.getElementById(current.target)
-    if (el) {
-      // Usar requestAnimationFrame para mejor timing
-      requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect()
-        setTargetRect(rect)
-
-        // Centramos el elemento sin pasarnos del final del documento.
-        const elementTop = el.offsetTop
-        const elementHeight = el.offsetHeight
-        const viewportHeight = window.innerHeight
-        const maxScroll = Math.max(0, document.documentElement.scrollHeight - viewportHeight)
-        const targetScroll = Math.min(
-          maxScroll,
-          Math.max(0, elementTop - viewportHeight / 2 + elementHeight / 2)
-        )
-
-        window.scrollTo({
-          top: targetScroll,
-          // En móvil el scroll suave se pelea con el reposicionamiento del
-          // tooltip y el resaltado queda desalineado.
-          behavior: window.innerWidth < 768 ? 'auto' : 'smooth',
-        })
-      })
-    } else {
-      requestAnimationFrame(() => setTargetRect(null))
-    }
-  }, [active, current.target])
-
+  // ── Cambio de pestaña + medición del objetivo ─────────────────────────────
   useEffect(() => {
-    // El paso se resetea al cerrar el tour (`cerrarTour`), no acá, para no
-    // encadenar renders. `recalcTarget` ya difiere su setState a un rAF.
-    if (!active) return
-    recalcTarget()
-  }, [step, active, recalcTarget])
+    if (!active) return undefined
+    let vivo = true
+    let intentos = 0
 
+    if (current.tab) navigateRef.current?.(current.tab)
+
+    const medir = () => {
+      if (!vivo) return
+      const el = resolveTarget(current.targets)
+      if (!el) {
+        // La sección puede tardar en montarse (carga de datos): reintentamos
+        // un rato corto antes de caer al modo centrado.
+        if (intentos++ < 12) {
+          rafRef.current = window.setTimeout(medir, 120)
+          return
+        }
+        setRect(null)
+        return
+      }
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      // Esperamos a que el scroll suave termine antes de fijar el recorte,
+      // si no el agujero del velo queda corrido respecto del elemento.
+      rafRef.current = window.setTimeout(() => {
+        if (!vivo) return
+        const r = el.getBoundingClientRect()
+        setRect({ top: r.top, left: r.left, width: r.width, height: r.height })
+      }, 340)
+    }
+
+    // Un frame para que React monte la pestaña nueva antes de buscar el nodo.
+    rafRef.current = window.setTimeout(medir, current.tab ? 90 : 0)
+
+    return () => {
+      vivo = false
+      clearTimeout(rafRef.current)
+    }
+  }, [active, step, current])
+
+  // ── Reposicionar si cambia el viewport ────────────────────────────────────
   useEffect(() => {
-    if (!active) return
-    const handler = () => {
-      if (current.target) {
-        const el = document.getElementById(current.target)
-        if (el) setTargetRect(el.getBoundingClientRect())
+    if (!active || !current.targets) return undefined
+    const recolocar = () => {
+      const el = resolveTarget(current.targets)
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height })
+    }
+    window.addEventListener('resize', recolocar)
+    window.addEventListener('scroll', recolocar, true)
+    return () => {
+      window.removeEventListener('resize', recolocar)
+      window.removeEventListener('scroll', recolocar, true)
+    }
+  }, [active, current])
+
+  const cerrar = useCallback(() => {
+    setStep(0)
+    setRect(null)
+    onDismiss?.()
+  }, [onDismiss])
+
+  const siguiente = useCallback(() => {
+    haptic('select')
+    setRect(null)
+    setStep((s) => (s < total - 1 ? s + 1 : s))
+    if (step >= total - 1) cerrar()
+  }, [step, total, cerrar])
+
+  const anterior = useCallback(() => {
+    if (step === 0) return
+    haptic()
+    setRect(null)
+    setStep((s) => s - 1)
+  }, [step])
+
+  // ── Teclado ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!active) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); cerrar() }
+      else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); siguiente() }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); anterior() }
+      else if (e.key === 'Tab' && cardRef.current) {
+        // El foco no debe escaparse a la página de atrás mientras el tour manda.
+        const focusables = cardRef.current.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')
+        if (!focusables.length) return
+        const primero = focusables[0]
+        const ultimo = focusables[focusables.length - 1]
+        if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus() }
+        else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus() }
       }
     }
-    window.addEventListener('resize', handler)
-    window.addEventListener('scroll', handler, true)
-    return () => {
-      window.removeEventListener('resize', handler)
-      window.removeEventListener('scroll', handler, true)
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [active, cerrar, siguiente, anterior])
+
+  useEffect(() => {
+    if (!active) return
+    // Anunciamos el paso a lectores de pantalla y damos foco al panel.
+    const t = setTimeout(() => cardRef.current?.focus(), 80)
+    return () => clearTimeout(t)
+  }, [active, step])
+
+  // ── Posición de la tarjeta ────────────────────────────────────────────────
+  const cardStyle = useMemo(() => {
+    if (typeof window === 'undefined') return {}
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const compacto = vw < 720
+
+    if (!rect) {
+      return compacto
+        ? { left: 12, right: 12, bottom: 'max(16px, env(safe-area-inset-bottom, 0px))', width: 'auto' }
+        : { left: (vw - CARD_W) / 2, top: Math.max(24, vh / 2 - 190), width: CARD_W }
     }
-  }, [active, current.target])
 
-  const cerrarTour = () => {
-    setStep(0)
-    onDismiss?.()
+    // Un objetivo más alto que la pantalla no deja hueco arriba ni abajo: en
+    // ese caso la tarjeta se ancla a una esquina y no tapa el centro.
+    if (rect.height > vh * 0.62) {
+      return compacto
+        ? { left: 12, right: 12, bottom: 'max(16px, env(safe-area-inset-bottom, 0px))', width: 'auto' }
+        : { right: 28, bottom: 28, width: CARD_W }
+    }
+
+    // En pantallas chicas la tarjeta vive abajo, como una hoja nativa, y el
+    // recorte se ve arriba. Es más estable que perseguir al elemento.
+    if (compacto) {
+      const abajoDelObjetivo = rect.top + rect.height + PAD
+      const cabeAbajo = vh - abajoDelObjetivo > 250
+      return cabeAbajo
+        ? { left: 12, right: 12, top: abajoDelObjetivo, width: 'auto' }
+        : { left: 12, right: 12, bottom: 'max(16px, env(safe-area-inset-bottom, 0px))', width: 'auto' }
+    }
+
+    const left = Math.min(Math.max(16, rect.left + rect.width / 2 - CARD_W / 2), vw - CARD_W - 16)
+    const espacioAbajo = vh - (rect.top + rect.height)
+    if (espacioAbajo > 280) return { left, top: rect.top + rect.height + PAD, width: CARD_W }
+    if (rect.top > 280) return { left, bottom: vh - rect.top + PAD, width: CARD_W }
+    return { left, top: Math.max(16, vh / 2 - 180), width: CARD_W }
+  }, [rect])
+
+  const copiarLink = () => {
+    if (!publicLink) return
+    navigator.clipboard?.writeText(publicLink).catch(() => {})
+    try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
+    haptic('success')
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2600)
   }
 
-  const next = () => {
-    if (step < total - 1) setStep((s) => s + 1)
-    else cerrarTour()
-  }
-  const prev = () => {
-    if (step > 0) setStep((s) => s - 1)
+  const ejecutarAccion = () => {
+    if (current.actionCopyLink) copiarLink()
+    else if (current.actionTab) { haptic(); navigateRef.current?.(current.actionTab) }
   }
 
   if (!active) return null
 
-  const PAD = 14
-
-  const getTooltipPosition = () => {
-    if (!targetRect || current.position === 'center') return {}
-
-    const isMobile = window.innerWidth < 640
-    const tooltipWidth = isMobile ? window.innerWidth - 32 : 380
-    const safeLeft = Math.max(16, Math.min(targetRect.left + targetRect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - 16))
-
-    if (current.position === 'bottom') {
-      const topPos = targetRect.bottom + PAD
-      const maxTop = window.innerHeight - 300
-      return {
-        position: 'fixed',
-        zIndex: 9999,
-        width: tooltipWidth,
-        top: Math.min(topPos, maxTop),
-        left: safeLeft,
-      }
-    }
-    if (current.position === 'top') {
-      return {
-        position: 'fixed',
-        zIndex: 9999,
-        width: tooltipWidth,
-        bottom: Math.max(16, window.innerHeight - targetRect.top + PAD),
-        left: safeLeft,
-      }
-    }
-    return { position: 'fixed', zIndex: 9999, width: tooltipWidth }
-  }
-
-  const handleAction = () => {
-    if (current.actionCopyLink && publicLink) {
-      navigator.clipboard.writeText(publicLink).catch(() => {})
-      try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
-      setCopyToast(true)
-      setTimeout(() => setCopyToast(false), 3000)
-    } else if (current.actionTab) {
-      onNavigate?.(current.actionTab)
-    }
-  }
-
-  const progressPercent = ((step + 1) / total) * 100
-
-  const renderDots = () => (
-    <div className="flex items-center gap-1">
-      {STEPS.map((_, i) => (
-        <motion.div
-          key={i}
-          className="h-1.5 rounded-full transition-all duration-500"
-          animate={{
-            width: i === step ? 24 : 8,
-            background: i === step ? 'var(--ns-primary)' : i < step ? 'var(--ns-primary-light)' : '#e2e8f0',
-          }}
-        />
-      ))}
-    </div>
-  )
-
-  const renderCenterModal = () => (
-    <motion.div
-      key={`modal-${step}`}
-      initial={{ opacity: 0, scale: 0.9, y: 30 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 pointer-events-auto"
-    >
-      <div className="bg-white rounded-[1.75rem] sm:rounded-[2.5rem] shadow-[0_32px_80px_rgba(0,0,0,0.25)] max-w-[360px] w-full overflow-hidden">
-        <div className="h-1 bg-slate-100">
-          <motion.div
-            className="h-full bg-gradient-to-r from-[#8B7CF6] to-[#5B3DF5]"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPercent}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-
-        <div className="p-6 sm:p-8 text-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', damping: 12, stiffness: 200, delay: 0.15 }}
-            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[1.4rem] ${current.iconBg} flex items-center justify-center mx-auto mb-5`}
-          >
-            <current.Icon size={32} className={current.iconColor} />
-          </motion.div>
-
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">{current.title}</h2>
-
-          {negocio && step === 0 && <p className="text-violet-600 font-bold mt-1.5 text-sm">{negocio.nombre}</p>}
-
-          <p className="text-slate-500 text-[13px] sm:text-sm mt-3 leading-relaxed whitespace-pre-line">{current.message}</p>
-
-          <div className="flex justify-center mt-5 mb-1">{renderDots()}</div>
-          <p className="text-[10px] text-slate-400 font-semibold mt-1">
-            Paso {step + 1} de {total}
-          </p>
-
-          <div className="flex gap-2.5 mt-5">
-            {step === 0 ? (
-              <>
-                <button
-                  onClick={cerrarTour}
-                  className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-all active:scale-95"
-                >
-                  Saltar
-                </button>
-                <button
-                  onClick={next}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#5B3DF5] to-[#8B7CF6] text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-[#5B3DF5]/25 active:scale-95"
-                >
-                  ¡Empecemos! →
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={prev}
-                  className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-all active:scale-95"
-                >
-                  ← Atrás
-                </button>
-                <button
-                  onClick={next}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#5B3DF5] to-[#8B7CF6] text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-[#5B3DF5]/25 active:scale-95 flex items-center justify-center gap-2"
-                >
-                  <IconRocket size={15} /> Siguiente →
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
-
-  const renderTooltip = () => (
-    <motion.div
-      key={`tooltip-${step}`}
-      initial={{ opacity: 0, y: current.position === 'top' ? -12 : 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: current.position === 'top' ? -8 : 8 }}
-      transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-      className="z-[9999] pointer-events-auto"
-      style={getTooltipPosition()}
-    >
-      <div className="bg-white rounded-2xl sm:rounded-[1.4rem] shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-slate-200/60 overflow-hidden">
-        <div className="h-1 bg-slate-100">
-          <motion.div
-            className="h-full bg-gradient-to-r from-[#8B7CF6] to-[#5B3DF5]"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPercent}%` }}
-            transition={{ duration: 0.4 }}
-          />
-        </div>
-
-        <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-0 flex items-start gap-3">
-          <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${current.iconBg} flex items-center justify-center shrink-0`}>
-            <current.Icon size={20} className={current.iconColor} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-black text-slate-900 text-[15px] sm:text-base tracking-tight leading-tight">{current.title}</h3>
-            <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-              Paso {step + 1} de {total}
-            </p>
-          </div>
-          <button
-            onClick={cerrarTour}
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all shrink-0 text-base leading-none active:scale-90"
-          >
-            ×
-          </button>
-        </div>
-
-        <div className="px-4 sm:px-5 pt-2.5 pb-4 sm:pb-5">
-          <p className="text-slate-600 text-[13px] sm:text-sm leading-relaxed">{current.message}</p>
-
-          {current.actionLabel && (
-            <button
-              onClick={handleAction}
-              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-2 bg-violet-50 text-violet-600 text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-violet-500 hover:text-white transition-all active:scale-95"
-            >
-              {current.actionCopyLink && (
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
-                </svg>
-              )}
-              {current.actionLabel}
-            </button>
-          )}
-        </div>
-
-        <div className="px-4 sm:px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
-          {renderDots()}
-          <div className="flex gap-2 shrink-0">
-            {step > 0 && (
-              <button
-                onClick={prev}
-                className="px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-500 text-[11px] sm:text-xs font-bold hover:bg-slate-100 transition-all active:scale-95"
-              >
-                ←
-              </button>
-            )}
-            <button
-              onClick={next}
-              className="px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-500 text-[11px] sm:text-xs font-bold hover:bg-slate-100 transition-all active:scale-95"
-            >
-              →
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
+  const progreso = ((step + 1) / total) * 100
+  const Icono = current.Icon
 
   return (
     <>
-      {copyToast && (
-        <div className="ns-copy-toast" style={{ zIndex: 10001 }}>
-          <span className="text-lg">🔗</span>
+      {/* ═══ Velo con recorte sobre el elemento resaltado ═══ */}
+      <motion.div
+        className="ns-tour-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        aria-hidden="true"
+        style={{
+          // El velo se recorta con clip-path: el elemento resaltado queda
+          // nítido y además se puede seguir tocando durante el tour.
+          background: 'rgba(94,0,10,0.42)',
+          clipPath: rect
+            ? `polygon(
+                0% 0%, 0% 100%, ${rect.left - 6}px 100%, ${rect.left - 6}px ${rect.top - 6}px,
+                ${rect.left + rect.width + 6}px ${rect.top - 6}px,
+                ${rect.left + rect.width + 6}px ${rect.top + rect.height + 6}px,
+                ${rect.left - 6}px ${rect.top + rect.height + 6}px, ${rect.left - 6}px 100%,
+                100% 100%, 100% 0%
+              )`
+            : undefined,
+        }}
+      />
+
+      {/* ═══ Aro alrededor del objetivo ═══ */}
+      {rect && (
+        <motion.div
+          className="ns-tour-ring"
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          style={{
+            top: rect.top - 6,
+            left: rect.left - 6,
+            width: rect.width + 12,
+            height: rect.height + 12,
+          }}
+        />
+      )}
+
+      {/* ═══ Tarjeta del paso ═══ */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current.id}
+          ref={cardRef}
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ns-tour-title"
+          aria-describedby="ns-tour-desc"
+          className="ns-tour-card outline-none"
+          initial={{ opacity: 0, y: 14, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.98 }}
+          transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+          style={cardStyle}
+        >
+          <div className="neo-progress" style={{ height: 4, borderRadius: 0 }}>
+            <motion.div
+              className="neo-progress__fill"
+              style={{ borderRadius: 0 }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progreso}%` }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+
+          <div className={`p-5 ${esCentrado ? 'sm:p-7 text-center' : 'sm:p-6'}`}>
+            <div className={`flex items-start gap-3.5 ${esCentrado ? 'flex-col items-center' : ''}`}>
+              <motion.span
+                className="neo-avatar neo-avatar--brand shrink-0"
+                style={{ width: esCentrado ? 60 : 46, height: esCentrado ? 60 : 46 }}
+                initial={{ scale: 0.4, rotate: -12 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', damping: 13, stiffness: 240, delay: 0.1 }}
+              >
+                <Icono size={esCentrado ? 28 : 22} />
+              </motion.span>
+
+              <div className="flex-1 min-w-0">
+                <h2
+                  id="ns-tour-title"
+                  className={`font-display font-black tracking-tight leading-tight ${esCentrado ? 'text-2xl mt-3' : 'text-[17px]'}`}
+                  style={{ color: 'var(--ns-text)' }}
+                >
+                  {current.title}
+                </h2>
+                {step === 0 && negocio?.nombre && (
+                  <p className="text-[12px] font-bold mt-1" style={{ color: 'var(--ns-primary)' }}>{negocio.nombre}</p>
+                )}
+                <p className="neo-eyebrow mt-1.5">Paso {step + 1} de {total}</p>
+              </div>
+
+              {!esCentrado && (
+                <button
+                  onClick={cerrar}
+                  className="neo-icon-btn w-9 h-9 shrink-0"
+                  aria-label="Cerrar el tour"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
+              )}
+            </div>
+
+            <p
+              id="ns-tour-desc"
+              className="text-[13.5px] leading-relaxed mt-3.5"
+              style={{ color: 'var(--ns-text-secondary)' }}
+            >
+              {current.message}
+            </p>
+
+            {current.actionLabel && (
+              <button
+                onClick={ejecutarAccion}
+                className="neo-btn neo-btn--quiet mt-3.5"
+                style={{ color: 'var(--ns-primary)' }}
+              >
+                {current.actionCopyLink && (
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                )}
+                {copiado ? '¡Copiado!' : current.actionLabel}
+              </button>
+            )}
+
+            {/* Puntos de progreso */}
+            <div className={`flex items-center gap-1.5 mt-5 ${esCentrado ? 'justify-center' : ''}`}>
+              {STEPS.map((s, i) => (
+                <button
+                  key={s.id}
+                  onClick={() => { haptic(); setRect(null); setStep(i) }}
+                  aria-label={`Ir al paso ${i + 1}: ${s.title}`}
+                  aria-current={i === step ? 'step' : undefined}
+                  className="h-1.5 rounded-full transition-all duration-300"
+                  style={{
+                    width: i === step ? 22 : 7,
+                    background: i <= step ? 'var(--ns-primary)' : 'var(--ns-line-strong)',
+                    opacity: i <= step ? 1 : 0.7,
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="flex gap-2.5 mt-4">
+              {step === 0 ? (
+                <>
+                  <button onClick={cerrar} className="neo-btn flex-1">Ahora no</button>
+                  <button onClick={siguiente} className="neo-btn neo-btn--primary flex-[1.6]">Empecemos</button>
+                </>
+              ) : current.finish ? (
+                <button onClick={cerrar} className="neo-btn neo-btn--primary neo-btn--block">
+                  Ir a mi panel
+                </button>
+              ) : (
+                <>
+                  <button onClick={anterior} className="neo-btn" aria-label="Paso anterior">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  <button onClick={cerrar} className="neo-btn neo-btn--ghost flex-1">Saltar</button>
+                  <button onClick={siguiente} className="neo-btn neo-btn--primary flex-[1.4]">
+                    Siguiente
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {copiado && (
+        <div className="ns-copy-toast" role="status" style={{ zIndex: 10001 }}>
+          <span className="neo-avatar w-9 h-9">
+            <IconLink size={18} />
+          </span>
           <div>
             <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
             <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Pegalo en WhatsApp o Instagram</p>
           </div>
         </div>
-      )}
-
-      <AnimatePresence mode="wait">
-        {current.position === 'center' ? renderCenterModal() : renderTooltip()}
-      </AnimatePresence>
-
-      {/* Overlay */}
-      {current.position === 'center' && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={cerrarTour}
-          className="fixed inset-0 z-[9998] bg-black/40 pointer-events-auto"
-        />
       )}
     </>
   )

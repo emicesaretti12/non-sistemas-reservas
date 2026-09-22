@@ -1,0 +1,705 @@
+/* ============================================================
+   NONI — APP SHELL
+   Estructura tipo app nativa: rail lateral en escritorio,
+   dock flotante en móvil, barra superior traslúcida, hojas
+   inferiores con gesto y modales centrados.
+   ============================================================ */
+
+@layer components {
+
+  /* ═══════════════ LAYOUT ═══════════════ */
+
+  .noni-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--ns-bg);
+    color: var(--ns-text);
+  }
+
+  .noni-layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .noni-main {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding: 16px;
+    padding-bottom: calc(120px + var(--sab));
+  }
+
+  @media (min-width: 768px) {
+    .noni-main {
+      padding: 24px 28px 40px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .noni-main {
+      padding: 28px 40px 48px;
+    }
+  }
+
+  .noni-container {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════ RAIL LATERAL (escritorio) ═══════════════ */
+
+  .noni-rail {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    width: 248px;
+    flex-shrink: 0;
+    padding: 20px 14px 24px;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--ns-bg);
+    box-shadow: var(--neo-rail);
+    z-index: 30;
+  }
+
+  @media (min-width: 1024px) {
+    .noni-rail {
+      display: flex;
+    }
+  }
+
+  .noni-rail__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px 18px;
+  }
+
+  .noni-rail__group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .noni-rail__label {
+    padding: 16px 12px 6px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ns-text-faint);
+  }
+
+  .noni-rail__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: transparent;
+    color: var(--ns-text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-spring);
+  }
+
+  .noni-rail__item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform var(--dur-2) var(--ease-spring);
+  }
+
+  .noni-rail__item:hover {
+    color: var(--ns-primary);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+  }
+
+  .noni-rail__item:active {
+    transform: scale(0.98);
+  }
+
+  .noni-rail__item.is-active {
+    color: var(--ns-primary);
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  .noni-rail__item.is-active svg {
+    transform: scale(1.08);
+  }
+
+  /* Marca de posición: una barrita moldeada a la izquierda. */
+  .noni-rail__item.is-active::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    width: 3px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    transform: translateY(-50%);
+    animation: ns-pop-in var(--dur-3) var(--ease-spring) both;
+  }
+
+  .noni-rail__spacer {
+    flex: 1;
+  }
+
+  .noni-rail__footer {
+    padding-top: 14px;
+  }
+
+  /* ═══════════════ BARRA SUPERIOR ═══════════════ */
+
+  .noni-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 60px;
+    padding: 8px 14px;
+    padding-top: calc(8px + var(--sat));
+    background: var(--ns-glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 6px 22px rgba(153, 0, 17, 0.05);
+    transition: box-shadow var(--dur-3) var(--ease-out);
+  }
+
+  @media (min-width: 768px) {
+    .noni-topbar {
+      min-height: 68px;
+      padding: 10px 28px;
+      padding-top: calc(10px + var(--sat));
+    }
+  }
+
+  /* Al hacer scroll la barra se "despega" del contenido. */
+  .noni-topbar.is-stuck {
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px rgba(153, 0, 17, 0.1);
+  }
+
+  .noni-topbar__title {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* ═══════════════ DOCK INFERIOR (móvil) ═══════════════ */
+
+  .ns-bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: calc(10px + var(--sab));
+    translate: -50% 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 2px;
+    width: calc(100% - 20px);
+    max-width: 420px;
+    padding: 7px 8px;
+    border-radius: 26px;
+    background: var(--ns-glass-bg-strong);
+    backdrop-filter: blur(26px) saturate(190%);
+    -webkit-backdrop-filter: blur(26px) saturate(190%);
+    box-shadow: var(--neo-dock);
+    animation: ns-dock-in var(--dur-4) var(--ease-spring) both;
+  }
+
+  @media (min-width: 1024px) {
+    .ns-bottom-nav {
+      display: none;
+    }
+  }
+
+  .ns-bottom-nav-item {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 48px;
+    padding: 6px 2px;
+    border: 0;
+    border-radius: 18px;
+    background: transparent;
+    color: var(--ns-text-muted);
+    cursor: pointer;
+    transition:
+      color var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-bottom-nav-item svg {
+    width: 21px;
+    height: 21px;
+    transition: transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ns-bottom-nav-item span {
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .ns-bottom-nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 4px 6px;
+    border-radius: 16px;
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ns-bottom-nav-item > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ns-bottom-nav-item.active {
+    color: var(--ns-primary);
+  }
+
+  .ns-bottom-nav-item.active::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .ns-bottom-nav-item.active svg {
+    transform: translateY(-1px) scale(1.06);
+  }
+
+  .ns-bottom-nav-item:active {
+    transform: scale(0.9);
+  }
+
+  /* Punto de aviso sobre un ítem del dock. */
+  .ns-bottom-nav-item[data-badge]::after {
+    content: attr(data-badge);
+    position: absolute;
+    top: 2px;
+    right: 22%;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    color: var(--ns-paper);
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 15px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(153, 0, 17, 0.35);
+    z-index: 2;
+  }
+
+  /* Espacio para que el dock no tape el final del contenido. */
+  .ns-has-bottom-nav {
+    padding-bottom: calc(96px + var(--sab));
+  }
+
+  @media (min-width: 1024px) {
+    .ns-has-bottom-nav {
+      padding-bottom: 0;
+    }
+  }
+
+  /* ═══════════════ MODALES Y HOJAS ═══════════════ */
+
+  .neo-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(94, 0, 10, 0.32);
+    backdrop-filter: blur(6px) saturate(140%);
+    -webkit-backdrop-filter: blur(6px) saturate(140%);
+    animation: ns-fade-in var(--dur-2) var(--ease-out) both;
+  }
+
+  .neo-modal {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 26px;
+    border-radius: var(--ns-radius-2xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-float);
+    animation: ns-pop-in var(--dur-4) var(--ease-spring) both;
+  }
+
+  /* Hoja inferior con manija, como una app nativa. */
+  .neo-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 110;
+    max-height: 88dvh;
+    padding-bottom: var(--sab);
+    border-radius: var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0;
+    background: var(--ns-surface);
+    box-shadow: var(--neo-sheet);
+    animation: ns-sheet-up var(--dur-4) var(--ease-out) both;
+    overscroll-behavior: contain;
+  }
+
+  .neo-sheet__handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0 6px;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .neo-sheet__handle::before {
+    content: '';
+    width: 38px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--ns-line-strong);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  @media (min-width: 768px) {
+    .neo-sheet {
+      left: auto;
+      right: 22px;
+      bottom: 22px;
+      width: 400px;
+      max-height: 78dvh;
+      border-radius: var(--ns-radius-2xl);
+      animation: ns-pop-in var(--dur-4) var(--ease-spring) both;
+    }
+
+    .neo-sheet__handle {
+      display: none;
+    }
+  }
+
+  /* ═══════════════ BÚSQUEDA GLOBAL ═══════════════ */
+
+  .ns-search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12vh 16px 16px;
+    background: rgba(94, 0, 10, 0.28);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    animation: ns-fade-in var(--dur-2) var(--ease-out) both;
+  }
+
+  .ns-search-modal {
+    width: 100%;
+    max-width: 480px;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-float);
+    overflow: hidden;
+    animation: ns-pop-in var(--dur-3) var(--ease-spring) both;
+  }
+
+  .ns-search-input {
+    width: 100%;
+    padding: 18px 20px;
+    border: 0;
+    background: transparent;
+    color: var(--ns-text);
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+  }
+
+  .ns-search-input::placeholder {
+    color: var(--ns-text-faint);
+  }
+
+  .ns-search-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 18px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--dur-1) var(--ease-out);
+  }
+
+  .ns-search-item:hover,
+  .ns-search-item:focus-visible,
+  .ns-search-item.is-active,
+  .ns-search-selected {
+    background: var(--ns-primary-bg);
+  }
+
+  .ns-search-selected {
+    box-shadow: inset 3px 0 0 var(--ns-primary);
+  }
+
+  /* ═══════════════ AVISOS FLOTANTES ═══════════════ */
+
+  .ns-copy-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(110px + var(--sab));
+    translate: -50% 0;
+    z-index: 130;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-float);
+    animation: ns-pop-in var(--dur-3) var(--ease-spring) both;
+  }
+
+  @media (min-width: 1024px) {
+    .ns-copy-toast {
+      bottom: 32px;
+    }
+  }
+
+  /* ═══════════════ TOUR GUIADO ═══════════════ */
+
+  .ns-tour-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 9990;
+    pointer-events: auto;
+  }
+
+  .ns-tour-ring {
+    position: fixed;
+    z-index: 9992;
+    border-radius: var(--ns-radius-lg);
+    box-shadow:
+      0 0 0 3px var(--ns-primary),
+      0 0 0 9px rgba(153, 0, 17, 0.22),
+      0 18px 50px rgba(94, 0, 10, 0.35);
+    pointer-events: none;
+    transition:
+      top var(--dur-4) var(--ease-out),
+      left var(--dur-4) var(--ease-out),
+      width var(--dur-4) var(--ease-out),
+      height var(--dur-4) var(--ease-out);
+  }
+
+  .ns-tour-card {
+    position: fixed;
+    z-index: 9995;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-float);
+    overflow: hidden;
+  }
+
+  /* ═══════════════ ASISTENTE ═══════════════ */
+
+  .ns-assistant-fab {
+    position: fixed;
+    right: 16px;
+    bottom: calc(104px + var(--sab));
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border: 0;
+    border-radius: 20px;
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-lg);
+    cursor: pointer;
+    transition:
+      box-shadow var(--dur-3) var(--ease-out),
+      transform var(--dur-2) var(--ease-spring);
+  }
+
+  @media (min-width: 1024px) {
+    .ns-assistant-fab {
+      right: 26px;
+      bottom: 26px;
+      width: 62px;
+      height: 62px;
+    }
+  }
+
+  .ns-assistant-fab:hover {
+    box-shadow: var(--neo-float);
+    transform: translateY(-2px);
+  }
+
+  .ns-assistant-fab:active {
+    box-shadow: var(--neo-pressed);
+    transform: scale(0.93);
+  }
+
+  .ns-assistant-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    color: var(--ns-paper);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 20px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(153, 0, 17, 0.4);
+    animation: ns-pop-in var(--dur-4) var(--ease-spring) both;
+  }
+
+  .ns-assistant-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 115;
+    display: flex;
+    flex-direction: column;
+    max-height: 86dvh;
+    border-radius: var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0;
+    background: var(--ns-surface);
+    box-shadow: var(--neo-sheet);
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .ns-assistant-panel {
+      left: auto;
+      right: 22px;
+      bottom: 22px;
+      width: 396px;
+      max-height: min(640px, 80dvh);
+      border-radius: var(--ns-radius-2xl);
+    }
+  }
+
+  .ns-assistant-chat-msg {
+    max-width: 86%;
+    padding: 11px 15px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    white-space: pre-line;
+    animation: ns-fade-up var(--dur-2) var(--ease-out) both;
+  }
+
+  .ns-chat-user {
+    align-self: flex-end;
+    border-radius: 18px 18px 5px 18px;
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+    box-shadow: var(--neo-brand);
+  }
+
+  .ns-chat-assistant {
+    align-self: flex-start;
+    border-radius: 18px 18px 18px 5px;
+    background: var(--ns-surface);
+    color: var(--ns-text);
+    box-shadow: var(--neo-raised-sm);
+  }
+
+  .ns-typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    animation: ns-typing-dot 1.1s ease-in-out infinite;
+  }
+}
+
+/* ============================================================
+   PANEL INTERNO (Nucleus) — mismo par de colores, invertido.
+   Es la vista de administración de la plataforma: el fondo pasa
+   a ser la marca y el papel queda como tinta.
+   ============================================================ */
+
+@layer components {
+  .ns-admin-shell {
+    background: var(--ns-brand);
+    color: var(--ns-paper);
+  }
+
+  .ns-admin-shell .noni-topbar {
+    background: rgba(122, 0, 14, 0.75);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(60, 0, 7, 0.35);
+  }
+
+  .ns-admin-shell .noni-topbar p,
+  .ns-admin-shell h1,
+  .ns-admin-shell h2,
+  .ns-admin-shell h3,
+  .ns-admin-shell h4 {
+    color: var(--ns-paper);
+  }
+
+  .ns-admin-shell .neo-icon-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ns-paper);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+
+  .ns-admin-shell .neo-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--ns-paper);
+  }
+
+  .ns-admin-shell .neo-avatar--brand {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ns-paper);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  .ns-admin-shell input {
+    color: var(--ns-paper);
+  }
+
+  .ns-admin-shell input::placeholder {
+    color: rgba(252, 246, 245, 0.45);
+  }
+}

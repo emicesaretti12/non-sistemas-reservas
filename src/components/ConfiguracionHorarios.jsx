@@ -116,7 +116,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
             className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40 relative overflow-hidden"
             style={{
               background: saved ? 'var(--ns-success)' : 'var(--ns-primary)',
-              boxShadow: saved ? '0 4px 16px rgba(16,185,129,0.35)' : 'var(--ns-plastilina-btn)'
+              boxShadow: saved ? '0 4px 16px rgba(153,0,17,0.35)' : 'var(--ns-plastilina-btn)'
             }}
           >
             {/* Shine overlay */}
@@ -204,7 +204,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                       borderRadius: '999px',
                       background: isOpen ? 'var(--ns-primary)' : 'var(--ns-border)',
                       boxShadow: isOpen
-                        ? '0 0 0 3px rgba(91,61,245,0.15), 0 4px 12px rgba(91,61,245,0.25), inset 0 1px 0 rgba(255,255,255,0.2)'
+                        ? '0 0 0 3px rgba(153,0,17,0.15), 0 4px 12px rgba(153,0,17,0.25), inset 0 1px 0 rgba(255,255,255,0.2)'
                         : 'var(--ns-shadow-inner)',
                       border: 'none',
                       cursor: 'pointer',
@@ -217,7 +217,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         width: '20px',
                         height: '20px',
                         left: isOpen ? 'calc(100% - 24px)' : '4px',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                        boxShadow: '0 2px 6px rgba(153,0,17,0.2)',
                       }}
                     />
                   </button>
@@ -300,24 +300,24 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                     {dataDia.pausa && (
                       <div className="flex items-center gap-2 ns-slide-right">
                         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
-                          style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                          style={{ background: 'rgba(153,0,17,0.08)', border: '1px solid rgba(153,0,17,0.2)' }}>
                           <input
                             type="time"
                             value={dataDia.inicioPausa || '13:00'}
                             onChange={(e) => cambiarHora(dia.id, 'inicioPausa', e.target.value)}
                             className="bg-transparent font-bold outline-none text-xs"
-                            style={{ color: '#D97706', minWidth: '70px' }}
+                            style={{ color: '#CB7B83', minWidth: '70px' }}
                           />
                         </div>
-                        <div className="w-3 h-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.3)' }} />
+                        <div className="w-3 h-0.5 rounded-full" style={{ background: 'rgba(153,0,17,0.3)' }} />
                         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
-                          style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                          style={{ background: 'rgba(153,0,17,0.08)', border: '1px solid rgba(153,0,17,0.2)' }}>
                           <input
                             type="time"
                             value={dataDia.finPausa || '17:00'}
                             onChange={(e) => cambiarHora(dia.id, 'finPausa', e.target.value)}
                             className="bg-transparent font-bold outline-none text-xs"
-                            style={{ color: '#D97706', minWidth: '70px' }}
+                            style={{ color: '#CB7B83', minWidth: '70px' }}
                           />
                         </div>
                       </div>
@@ -330,8 +330,8 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                   <span
                     className="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest"
                     style={{
-                      background: isOpen ? 'rgba(16,185,129,0.1)' : 'var(--ns-border)',
-                      color: isOpen ? '#059669' : 'var(--ns-text-muted)',
+                      background: isOpen ? 'rgba(153,0,17,0.1)' : 'var(--ns-border)',
+                      color: isOpen ? '#C36771' : 'var(--ns-text-muted)',
                     }}
                   >
                     {isOpen ? 'Abierto' : 'Cerrado'}
@@ -351,7 +351,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
           className="w-full py-4 rounded-2xl text-white font-black text-[11px] uppercase tracking-widest transition-all active:scale-97 disabled:opacity-40 flex items-center justify-center gap-2.5 relative overflow-hidden"
           style={{
             background: saved ? 'var(--ns-success)' : 'var(--ns-primary)',
-            boxShadow: saved ? '0 8px 24px rgba(16,185,129,0.35)' : 'var(--ns-plastilina-btn)',
+            boxShadow: saved ? '0 8px 24px rgba(153,0,17,0.35)' : 'var(--ns-plastilina-btn)',
           }}
         >
           <span className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.15) 0%,transparent 100%)' }} />

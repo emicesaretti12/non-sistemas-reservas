@@ -28,11 +28,11 @@ export default function NotificationCenterV2({ negocioId }) {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'new_reservation':
-        return <IconCalendar className="w-5 h-5 text-violet-500" />
+        return <IconCalendar className="w-5 h-5" style={{ color: 'var(--ns-primary)' }} />
       case 'reservation_update':
-        return <IconCheckCircle className="w-5 h-5 text-emerald-500" />
+        return <IconCheckCircle className="w-5 h-5" style={{ color: 'var(--ns-primary)' }} />
       default:
-        return <IconBolt className="w-5 h-5 text-slate-500" />
+        return <IconBolt className="w-5 h-5" style={{ color: 'var(--ns-text-muted)' }} />
     }
   }
 
@@ -69,10 +69,10 @@ export default function NotificationCenterV2({ negocioId }) {
         onClick={() => setOpen(!open)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="relative p-2.5 rounded-lg hover:bg-slate-100 transition-all"
+        className="ns-notif-bell relative"
         title="Notificaciones"
       >
-        <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -86,7 +86,8 @@ export default function NotificationCenterV2({ negocioId }) {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center"
+            className="absolute -top-1 -right-1 w-5 h-5 text-[10px] font-black rounded-full flex items-center justify-center"
+            style={{ background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: '0 2px 8px rgba(153,0,17,0.4)' }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
           </motion.div>
@@ -102,10 +103,10 @@ export default function NotificationCenterV2({ negocioId }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="absolute top-full right-0 mt-2 w-96 max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200"
+            className="neo-card absolute top-full right-0 mt-3 w-96 max-w-[calc(100vw-32px)] overflow-hidden z-50"
           >
             {/* Header */}
-            <div className="p-4 bg-gradient-to-r from-violet-500 to-violet-400 flex items-center justify-between">
+            <div className="p-4 flex items-center justify-between" style={{ background: 'var(--ns-gradient-1)' }}>
               <h3 className="font-black text-white">Notificaciones</h3>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (

@@ -164,22 +164,22 @@ export default function Servicios({ negocioId, rubro }) {
       )}
 
 
-      <header className="flex items-center justify-between bg-white p-8 md:p-10 rounded-[2.5rem] border border-[#EDE8F7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
+      <header className="flex items-center justify-between bg-white p-8 md:p-10 rounded-[2.5rem] border border-[#F6E7E7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" /></svg>
         </div>
         <div className="relative z-10">
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#1A1630] leading-none">{vocab.servicioPlural}</h2>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#990011] leading-none">{vocab.servicioPlural}</h2>
           <div className="flex items-center gap-2 mt-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#5B3DF5] animate-pulse" />
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#A09CB5]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#AF3643] animate-pulse" />
+            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#D28F95]">
               {servicios.length} {vocab.servicios} activos
             </p>
           </div>
         </div>
         <button
           onClick={abrirModalCrear}
-          className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-[#5B3DF5] text-white flex items-center justify-center shadow-2xl shadow-[#5B3DF5]/40 active:scale-95 transition-all gap-3 hover:bg-[#5B3DF5] border border-white/20 relative z-10"
+          className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-[#AF3643] text-white flex items-center justify-center shadow-2xl shadow-[#AF3643]/40 active:scale-95 transition-all gap-3 hover:bg-[#AF3643] border border-white/20 relative z-10"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
           <span className="hidden md:inline text-[11px] font-black uppercase tracking-[0.3em]">{vocab.nuevoServicio}</span>
@@ -232,16 +232,16 @@ export default function Servicios({ negocioId, rubro }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             {servicios.map((srv) => (
-              <div key={srv.id} className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-[#EDE8F7] flex flex-col justify-between gap-6 group hover:bg-[#F7F5FF] transition-all relative overflow-hidden shadow-2xl">
+              <div key={srv.id} className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-[#F6E7E7] flex flex-col justify-between gap-6 group hover:bg-[#FCF6F5] transition-all relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" /></svg>
                 </div>
                 
                 <div className="flex justify-between items-start relative z-10">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-black text-xl md:text-2xl text-[#1A1630] leading-tight mb-3 truncate">{srv.nombre}</h4>
+                    <h4 className="font-black text-xl md:text-2xl text-[#990011] leading-tight mb-3 truncate">{srv.nombre}</h4>
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F7F5FF] text-[10px] font-black text-[#5B3DF5] tracking-[0.2em] uppercase border border-[#EDE8F7]">
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FCF6F5] text-[10px] font-black text-[#AF3643] tracking-[0.2em] uppercase border border-[#F6E7E7]">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {srv.duracion_minutos} min
                       </span>
@@ -249,12 +249,12 @@ export default function Servicios({ negocioId, rubro }) {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-2xl md:text-3xl font-black text-[#1A1630] tracking-tighter leading-none">${srv.precio}</span>
+                    <span className="text-2xl md:text-3xl font-black text-[#990011] tracking-tighter leading-none">${srv.precio}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-6 border-t border-[#EDE8F7] relative z-10">
-                  <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-3.5 rounded-2xl bg-[#F7F5FF] text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5] hover:bg-[#E8DEFF]/40 hover:text-[#5B3DF5] transition-all active:scale-95 border border-[#EDE8F7]">
+                <div className="flex items-center gap-3 pt-6 border-t border-[#F6E7E7] relative z-10">
+                  <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-3.5 rounded-2xl bg-[#FCF6F5] text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95] hover:bg-[#F2DDDE]/40 hover:text-[#AF3643] transition-all active:scale-95 border border-[#F6E7E7]">
                     Editar
                   </button>
                   <button onClick={() => eliminarServicio(srv)} aria-label={`Eliminar ${srv.nombre}`}
@@ -270,30 +270,30 @@ export default function Servicios({ negocioId, rubro }) {
 
       {modalAbierto && (
         <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-2xl animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-[#EDE8F7] relative overflow-hidden">
+          <div className="bg-white w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(153,0,17,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-[#F6E7E7] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#5B3DF5]/10 blur-[80px]" />
+              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#AF3643]/10 blur-[80px]" />
             </div>
 
             <div className="flex justify-between items-center mb-10 relative z-10">
               <div>
-                <h2 className="text-3xl font-black tracking-tighter text-[#1A1630] leading-none">{modoEdicion ? vocab.editarServicio : vocab.nuevoServicio}</h2>
+                <h2 className="text-3xl font-black tracking-tighter text-[#990011] leading-none">{modoEdicion ? vocab.editarServicio : vocab.nuevoServicio}</h2>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5B3DF5] animate-pulse" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB5]">Catálogo de servicios</p>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#AF3643] animate-pulse" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95]">Catálogo de servicios</p>
                 </div>
               </div>
-              <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-[#F7F5FF] hover:bg-[#E8DEFF]/40 rounded-2xl flex items-center justify-center text-[#A09CB5] hover:text-[#5B3DF5] transition-all active:scale-90 border border-[#EDE8F7]">
+              <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-[#FCF6F5] hover:bg-[#F2DDDE]/40 rounded-2xl flex items-center justify-center text-[#D28F95] hover:text-[#AF3643] transition-all active:scale-90 border border-[#F6E7E7]">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
               </button>
             </div>
 
             <form onSubmit={guardarServicio} className="space-y-6 relative z-10">
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#A09CB5] ml-2">Nombre del {vocab.servicio}</label>
+                <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#D28F95] ml-2">Nombre del {vocab.servicio}</label>
                 <input
                   required
-                  className="w-full p-5 bg-[#F7F5FF] rounded-2xl outline-none font-bold text-[#1A1630] border border-[#EDE8F7] focus:border-[#5B3DF5] focus:bg-white transition-all text-base placeholder:text-[#A09CB5]"
+                  className="w-full p-5 bg-[#FCF6F5] rounded-2xl outline-none font-bold text-[#990011] border border-[#F6E7E7] focus:border-[#AF3643] focus:bg-white transition-all text-base placeholder:text-[#D28F95]"
                   placeholder={vocab.placeholderServicio}
                   value={form.nombre}
                   onChange={e => setForm({ ...form, nombre: e.target.value })}
@@ -302,12 +302,12 @@ export default function Servicios({ negocioId, rubro }) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#A09CB5] ml-2">Duración (Mins)</label>
+                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#D28F95] ml-2">Duración (Mins)</label>
                   <input
                     required
                     type="number"
                     min="1"
-                    className="w-full p-5 bg-[#F7F5FF] rounded-2xl outline-none font-bold text-[#1A1630] border border-[#EDE8F7] focus:border-[#5B3DF5] focus:bg-white transition-all text-base placeholder:text-[#A09CB5]"
+                    className="w-full p-5 bg-[#FCF6F5] rounded-2xl outline-none font-bold text-[#990011] border border-[#F6E7E7] focus:border-[#AF3643] focus:bg-white transition-all text-base placeholder:text-[#D28F95]"
                     placeholder="Ej: 30"
                     value={form.duracion}
                     onChange={e => setForm({ ...form, duracion: e.target.value })}
@@ -315,13 +315,13 @@ export default function Servicios({ negocioId, rubro }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#A09CB5] ml-2">Precio Total ($)</label>
+                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#D28F95] ml-2">Precio Total ($)</label>
                   <input
                     required
                     type="number"
                     min="0"
                     step="0.01"
-                    className="w-full p-5 bg-[#F7F5FF] rounded-2xl outline-none font-bold text-[#1A1630] border border-[#EDE8F7] focus:border-[#5B3DF5] focus:bg-white transition-all text-base placeholder:text-[#A09CB5]"
+                    className="w-full p-5 bg-[#FCF6F5] rounded-2xl outline-none font-bold text-[#990011] border border-[#F6E7E7] focus:border-[#AF3643] focus:bg-white transition-all text-base placeholder:text-[#D28F95]"
                     placeholder="Ej: 5000"
                     value={form.precio}
                     onChange={e => setForm({ ...form, precio: e.target.value })}
@@ -332,7 +332,7 @@ export default function Servicios({ negocioId, rubro }) {
               <button
                 disabled={guardando}
                 type="submit"
-                className="w-full py-6 rounded-2xl bg-[#5B3DF5] text-white font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-[#5B3DF5]/40 active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 hover:bg-[#5B3DF5] border border-white/20 disabled:opacity-30"
+                className="w-full py-6 rounded-2xl bg-[#AF3643] text-white font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-[#AF3643]/40 active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 hover:bg-[#AF3643] border border-white/20 disabled:opacity-30"
               >
                 {guardando ? <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? `Actualizar ${vocab.servicio}` : 'Confirmar y Guardar')}
               </button>

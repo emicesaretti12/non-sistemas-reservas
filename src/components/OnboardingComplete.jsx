@@ -19,7 +19,7 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1E1B4B] via-[#312E81] to-[#1E1B4B] flex items-center justify-center p-6 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#990011] via-[#990011] to-[#990011] flex items-center justify-center p-6 overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <motion.div

@@ -41,17 +41,18 @@ const ICONS = {
   ),
 }
 
-const STYLES = {
-  success: { bg: '#ecfdf5', border: '#a7f3d0', text: '#065f46', icon: '#10b981' },
-  error:   { bg: '#fef2f2', border: '#fecaca', text: '#991b1b', icon: '#ef4444' },
-  warning: { bg: '#fffbeb', border: '#fde68a', text: '#92400e', icon: '#f59e0b' },
-  info:    { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af', icon: '#3b82f6' },
-  copy:    { bg: '#f5f3ff', border: '#ddd6fe', text: '#5b21b6', icon: '#8b5cf6' },
+// Con una sola tinta, el tipo de aviso se distingue por el ícono y por el
+// relieve del soporte, no por el color: los cinco avisos son la misma pieza.
+const ENFASIS = {
+  success: 'solid',
+  error: 'solid',
+  warning: 'inset',
+  info: 'inset',
+  copy: 'inset',
 }
 
 function ToastItem({ toast, onDismiss }) {
   const [exiting, setExiting] = useState(false)
-  const style = STYLES[toast.type] || STYLES.info
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -61,17 +62,21 @@ function ToastItem({ toast, onDismiss }) {
     return () => clearTimeout(timer)
   }, [toast.id, toast.duration, onDismiss])
 
+  const solido = ENFASIS[toast.type] === 'solid'
+
   return (
     <div
       className={`ns-toast-item ${exiting ? 'ns-toast-exit' : 'ns-toast-enter'}`}
-      style={{
-        background: style.bg,
-        borderColor: style.border,
-        color: style.text,
-      }}
       role="alert"
     >
-      <div className="ns-toast-icon" style={{ color: style.icon }}>
+      <div
+        className="ns-toast-icon"
+        style={solido ? {
+          background: 'var(--ns-primary)',
+          color: 'var(--ns-paper)',
+          boxShadow: 'var(--neo-brand)',
+        } : undefined}
+      >
         {ICONS[toast.type] || ICONS.info}
       </div>
       <div className="ns-toast-content">
@@ -88,14 +93,11 @@ function ToastItem({ toast, onDismiss }) {
         </svg>
       </button>
 
-      {/* Progress bar */}
-      <div className="ns-toast-progress" style={{ backgroundColor: style.icon }}>
+      {/* Cuenta regresiva hasta que el aviso se va solo */}
+      <div className="ns-toast-progress">
         <div
           className="ns-toast-progress-fill"
-          style={{
-            animationDuration: `${toast.duration || 3500}ms`,
-            backgroundColor: style.icon,
-          }}
+          style={{ animationDuration: `${toast.duration || 3500}ms` }}
         />
       </div>
     </div>

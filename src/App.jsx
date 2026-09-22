@@ -82,22 +82,22 @@ function FaltaConfiguracion() {
   return (
     <div
       className="min-h-dvh flex items-center justify-center p-6"
-      style={{ background: '#F5F3FF', fontFamily: '"Inter Tight", system-ui, sans-serif' }}
+      style={{ background: '#FAF1F0', fontFamily: '"Inter Tight", system-ui, sans-serif' }}
       data-testid="config-missing"
     >
-      <div className="max-w-md w-full bg-white rounded-3xl border border-[#E4DAFF] p-8 text-center shadow-xl">
+      <div className="max-w-md w-full bg-white rounded-3xl border border-[#F0D8DA] p-8 text-center shadow-xl">
         <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
           <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h1 className="text-xl font-black tracking-tight text-[#1E1B4B] mb-2">Falta configurar la app</h1>
-        <p className="text-sm text-[#5B5580] leading-relaxed mb-5">
+        <h1 className="text-xl font-black tracking-tight text-[#990011] mb-2">Falta configurar la app</h1>
+        <p className="text-sm text-[#A92735] leading-relaxed mb-5">
           No están definidas las variables de conexión a la base de datos. Agregalas
           en el entorno de despliegue (o en un archivo <code className="font-mono text-[12px]">.env</code> local)
           y volvé a publicar.
         </p>
-        <pre className="text-left text-[11px] font-mono bg-[#F5F3FF] border border-[#E4DAFF] rounded-xl p-4 text-[#4328D4] overflow-x-auto">
+        <pre className="text-left text-[11px] font-mono bg-[#FAF1F0] border border-[#F0D8DA] rounded-xl p-4 text-[#9D0A1A] overflow-x-auto">
 VITE_SUPABASE_URL=...{'\n'}VITE_SUPABASE_ANON_KEY=...
         </pre>
       </div>

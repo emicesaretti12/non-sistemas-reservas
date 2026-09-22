@@ -9,7 +9,7 @@ import OnboardingComplete from './OnboardingComplete'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
-const COLORES = ['#5B3DF5','#0f172a','#1e40af','#7c3aed','#db2777','#dc2626','#ea580c','#ca8a04','#16a34a','#0891b2']
+const COLORES = ['#AF3643','#990011','#9B0516','#B3404C','#BB545F','#B94F5A','#C56C75','#CC8088','#C9767E','#C56C75']
 
 // Sugerencias inteligentes por rubro
 const SUGERENCIAS = {
@@ -20,7 +20,7 @@ const SUGERENCIAS = {
     staff: ['Sofía', 'Lucía'],
     especialidad: 'Manicura',
     descripcion: 'Uñas prolijas y duraderas, con la mejor atención.',
-    color: '#db2777',
+    color: '#BB545F',
   },
   'Tatuajes / Piercings': {
     servicios: ['Tattoo chico', 'Tattoo mediano', 'Retoque', 'Piercing'],
@@ -29,7 +29,7 @@ const SUGERENCIAS = {
     staff: ['Juan', 'Mica'],
     especialidad: 'Tatuador/a',
     descripcion: 'Diseños únicos, materiales de primera y todo esterilizado.',
-    color: '#0f172a',
+    color: '#990011',
   },
   'Bar / Cervecería': {
     servicios: ['Mesa para 2', 'Mesa para 4', 'Mesa para 6', 'Barra'],
@@ -38,7 +38,7 @@ const SUGERENCIAS = {
     staff: ['Salón', 'Patio'],
     especialidad: 'Sector',
     descripcion: 'Birra fría, buena música y mejor gente.',
-    color: '#ca8a04',
+    color: '#CC8088',
   },
   'Gimnasio / Entrenamiento': {
     servicios: ['Funcional', 'Musculación', 'Entrenamiento personalizado'],
@@ -47,7 +47,7 @@ const SUGERENCIAS = {
     staff: ['Profe Nico', 'Profe Ana'],
     especialidad: 'Profesor/a',
     descripcion: 'Entrenamiento acompañado, para todos los niveles.',
-    color: '#16a34a',
+    color: '#C9767E',
   },
   'Taller / Servicio Técnico': {
     servicios: ['Diagnóstico', 'Cambio de aceite', 'Service completo'],
@@ -56,7 +56,7 @@ const SUGERENCIAS = {
     staff: ['Box 1', 'Box 2'],
     especialidad: 'Puesto de trabajo',
     descripcion: 'Trabajo prolijo, presupuesto claro y entrega a tiempo.',
-    color: '#1e40af',
+    color: '#9B0516',
   },
   'Barbería / Peluquería': {
     servicios: ['Corte Clásico', 'Corte + Barba', 'Afeitado Premium', 'Degradé', 'Coloración'],
@@ -65,7 +65,7 @@ const SUGERENCIAS = {
     staff: ['Carlos', 'Martín', 'Diego'],
     especialidad: 'Barbero',
     descripcion: 'Los mejores cortes de la ciudad. Estilo y tradición.',
-    color: '#0f172a',
+    color: '#990011',
   },
   'Restaurante / Gastronomía': {
     servicios: ['Mesa para 2', 'Mesa para 4', 'Mesa Privada VIP', 'Brunch Especial'],
@@ -74,7 +74,7 @@ const SUGERENCIAS = {
     staff: ['Salón Principal', 'Terraza'],
     especialidad: 'Interior',
     descripcion: 'Sabores únicos en un ambiente inigualable.',
-    color: '#92400e',
+    color: '#A72231',
   },
   'Centro de Estética': {
     servicios: ['Limpieza Facial', 'Masaje Relajante', 'Depilación Laser', 'Manicura Premium'],
@@ -83,7 +83,7 @@ const SUGERENCIAS = {
     staff: ['Valentina', 'Lucía', 'María'],
     especialidad: 'Esteticista',
     descripcion: 'Tu bienestar y belleza son nuestra prioridad.',
-    color: '#db2777',
+    color: '#BB545F',
   },
   'Veterinaria': {
     servicios: ['Consulta General', 'Vacunación', 'Baño y Peluquería', 'Cirugía'],
@@ -92,7 +92,7 @@ const SUGERENCIAS = {
     staff: ['Dr. García', 'Dra. López'],
     especialidad: 'Veterinario/a',
     descripcion: 'Cuidamos a tu mascota como si fuera la nuestra.',
-    color: '#0891b2',
+    color: '#C56C75',
   },
   'Salud / Clínica': {
     servicios: ['Consulta General', 'Revisión', 'Consulta Especializada'],
@@ -101,16 +101,16 @@ const SUGERENCIAS = {
     staff: ['Dr. Martínez', 'Dra. Pérez'],
     especialidad: 'Médico/a',
     descripcion: 'Tu salud, nuestra misión.',
-    color: '#5B3DF5',
+    color: '#AF3643',
   },
 }
 
 // ── Live Preview (right panel) ─────────────────────────────────────────────
 function LivePreview({ data }) {
-  const color = data.color || '#5B3DF5'
+  const color = data.color || '#AF3643'
   return (
     <div className="flex-1 overflow-y-auto bg-white" style={{ fontFamily: 'system-ui, sans-serif' }}>
-      <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${color} 150%)` }}>
+      <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, #990011 0%, ${color} 150%)` }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
         <motion.div layout className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-[2rem] border-[5px] border-white flex items-center justify-center shadow-xl overflow-hidden bg-white">
           {data.logo_url
@@ -177,7 +177,7 @@ function PhoneShell({ data }) {
   return (
     <div className="hidden lg:flex flex-col w-[360px] h-[720px] shrink-0 relative">
       {/* Frame */}
-      <div className="absolute inset-0 rounded-[3rem] bg-slate-900 shadow-[0_30px_80px_rgba(0,0,0,0.35)]" />
+      <div className="absolute inset-0 rounded-[3rem] bg-slate-900 shadow-[0_30px_80px_rgba(153,0,17,0.35)]" />
       <div className="absolute inset-[3px] rounded-[2.8rem] bg-white overflow-hidden flex flex-col">
         {/* Notch */}
         <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-10 pointer-events-none">
@@ -216,7 +216,7 @@ export default function OnboardingWizard({ session, onComplete }) {
   const steps = buildSteps()
   const [stepIdx, setStepIdx] = useState(0)
   const [data, setData] = useState({
-    nombre:'', rubro:'', color:'#5B3DF5', logo_url:'', descripcion:'', instagram:'',
+    nombre:'', rubro:'', color:'#AF3643', logo_url:'', descripcion:'', instagram:'',
     svcNombre:'', svcPrecio:'', svcDuracion:'30', staffNombre:'', staffEspecialidad:''
   })
   const [input, setInput] = useState('')
@@ -350,7 +350,7 @@ export default function OnboardingWizard({ session, onComplete }) {
   // ── Saving screen ────────────────────────────────────────────────────────
   if (saving) {
     return (
-      <div className="min-h-screen bg-[#1E1B4B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#990011] flex items-center justify-center">
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center space-y-6">
           <motion.div animate={{rotate:360}} transition={{repeat:Infinity,duration:1,ease:'linear'}}
             className="w-14 h-14 border-4 border-white/10 border-t-violet-300 rounded-full mx-auto" />
@@ -517,7 +517,7 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Main layout ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#1E1B4B] flex">
+    <div className="min-h-screen bg-[#990011] flex">
       {/* Left: Chat / Form panel */}
       <div className="flex-1 flex flex-col max-w-2xl mx-auto lg:mx-0 p-6 lg:p-12">
         {/* Header */}
@@ -536,7 +536,7 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="flex justify-between items-center mb-2">
             <div className="flex gap-1.5">
               {steps.map((s, i) => (
-                <motion.div key={s.id} animate={{ width: i === stepIdx ? 24 : 8, backgroundColor: i < stepIdx ? '#5B3DF5' : i === stepIdx ? '#fff' : 'rgba(255,255,255,0.15)' }}
+                <motion.div key={s.id} animate={{ width: i === stepIdx ? 24 : 8, backgroundColor: i < stepIdx ? '#AF3643' : i === stepIdx ? '#FCF6F5' : 'rgba(255,255,255,0.15)' }}
                   className="h-2 rounded-full transition-all" />
               ))}
             </div>
@@ -559,7 +559,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       </div>
 
       {/* Right: Live Preview Phone */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-12 bg-[#0a0a0f] border-l border-white/5">
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12 bg-[#990011] border-l border-white/5">
         <div className="text-center space-y-6">
           <div>
             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Vista en tiempo real</p>

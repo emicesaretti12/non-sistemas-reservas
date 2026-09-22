@@ -1,12 +1,12 @@
 /**
  * Sparkline — micro SVG line chart with optional area fill
- * Usage: <Sparkline data={[12, 18, 9, 22, 30, 15, 28]} color="#FF4F00" />
+ * Usage: <Sparkline data={[12, 18, 9, 22, 30, 15, 28]} color="#C9767E" />
  */
-export default function Sparkline({ data = [], color = '#0EA5E9', height = 28, fill = true, strokeWidth = 1.5 }) {
+export default function Sparkline({ data = [], color = '#D08A91', height = 28, fill = true, strokeWidth = 1.5 }) {
   if (!data || data.length < 2) {
     return (
       <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full" style={{ height }}>
-        <line x1="0" y1="20" x2="100" y2="20" stroke="#E7E5E4" strokeWidth="1" strokeDasharray="2 3" />
+        <line x1="0" y1="20" x2="100" y2="20" stroke="#F4E2E3" strokeWidth="1" strokeDasharray="2 3" />
       </svg>
     )
   }
@@ -44,7 +44,7 @@ export default function Sparkline({ data = [], color = '#0EA5E9', height = 28, f
       {fill && <path d={areaPath} fill={`url(#grad-${color.replace('#', '')})`} />}
       <path d={path} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       {last && (
-        <circle cx={last[0]} cy={last[1]} r="1.6" fill={color} stroke={isUp ? '#fff' : '#fff'} strokeWidth="0.8" />
+        <circle cx={last[0]} cy={last[1]} r="1.6" fill={color} stroke={isUp ? '#FCF6F5' : '#FCF6F5'} strokeWidth="0.8" />
       )}
     </svg>
   )

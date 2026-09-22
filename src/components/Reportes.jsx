@@ -155,7 +155,7 @@ export default function Reportes({ negocioId, rubro }) {
   if (loading) return (
     <div className="flex flex-col justify-center items-center h-56 gap-4">
       <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'var(--ns-primary-bg)', boxShadow: 'var(--ns-plastilina-card)' }}>
-        <div className="w-5 h-5 border-2 border-[#E8DEFF] border-t-[#5B3DF5] rounded-full animate-spin"></div>
+        <div className="w-5 h-5 border-2 border-[#F2DDDE] border-t-[#AF3643] rounded-full animate-spin"></div>
       </div>
       <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Cargando reportes...</p>
     </div>
@@ -201,11 +201,11 @@ export default function Reportes({ negocioId, rubro }) {
         {/* Ingresos */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-1">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #5B3DF5, #8B7CF6)', boxShadow: 'var(--ns-plastilina-btn)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-plastilina-btn)' }}>
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
             <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[9px] font-black ${variacionIngresos >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
-              style={{ background: variacionIngresos >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)' }}>
+              style={{ background: variacionIngresos >= 0 ? 'rgba(153,0,17,0.1)' : 'rgba(153,0,17,0.08)' }}>
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                 <path d={variacionIngresos >= 0 ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -219,17 +219,17 @@ export default function Reportes({ negocioId, rubro }) {
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             vs. ${datos.comparacion.ingresosAnterior.toLocaleString()} período anterior
           </p>
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(91,61,245,0.08)' }} />
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(153,0,17,0.08)' }} />
         </div>
 
         {/* Turnos */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-2">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #7C3AED, #A78BFA)', boxShadow: '0 4px 12px rgba(124,58,237,0.3)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 4px 12px rgba(153,0,17,0.3)' }}>
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
             <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[9px] font-black ${variacionTurnos >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
-              style={{ background: variacionTurnos >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)' }}>
+              style={{ background: variacionTurnos >= 0 ? 'rgba(153,0,17,0.1)' : 'rgba(153,0,17,0.08)' }}>
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                 <path d={variacionTurnos >= 0 ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -243,13 +243,13 @@ export default function Reportes({ negocioId, rubro }) {
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             vs. {datos.comparacion.turnosAnterior} período anterior
           </p>
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(124,58,237,0.08)' }} />
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(153,0,17,0.08)' }} />
         </div>
 
         {/* Ticket Promedio */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-3">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0EA5E9, #38BDF8)', boxShadow: '0 4px 12px rgba(14,165,233,0.3)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 4px 12px rgba(153,0,17,0.3)' }}>
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
             <span className="text-[9px] font-black px-2.5 py-1 rounded-xl" style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}>
@@ -263,7 +263,7 @@ export default function Reportes({ negocioId, rubro }) {
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             por {vocab.turno} confirmado
           </p>
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(14,165,233,0.08)' }} />
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(153,0,17,0.08)' }} />
         </div>
       </div>
 
@@ -300,12 +300,12 @@ export default function Reportes({ negocioId, rubro }) {
                     style={{
                       height: `${pct}%`,
                       background: isToday
-                        ? 'linear-gradient(180deg, #A78BFA 0%, #5B3DF5 100%)'
+                        ? 'var(--ns-gradient-1)'
                         : d.valor > 0
-                        ? 'linear-gradient(180deg, #8B7CF6 0%, #5B3DF5 100%)'
+                        ? 'var(--ns-gradient-1)'
                         : 'var(--ns-border)',
                       opacity: d.valor > 0 ? 1 : 0.4,
-                      boxShadow: d.valor > 0 ? '0 -2px 8px rgba(91,61,245,0.2)' : 'none',
+                      boxShadow: d.valor > 0 ? '0 -2px 8px rgba(153,0,17,0.2)' : 'none',
                     }}
                   />
                 </div>
@@ -347,11 +347,11 @@ export default function Reportes({ negocioId, rubro }) {
                   <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors group/item" style={{ '--hover-bg': 'var(--ns-accent-bg)' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--ns-accent-bg)'}
                     onMouseLeave={e => e.currentTarget.style.background = ''}>
-                    <span className="text-[10px] font-black w-5 shrink-0 group-hover/item:text-[#5B3DF5] transition-colors" style={{ color: 'var(--ns-text-muted)' }}>{idx + 1}</span>
+                    <span className="text-[10px] font-black w-5 shrink-0 group-hover/item:text-[#AF3643] transition-colors" style={{ color: 'var(--ns-text-muted)' }}>{idx + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-black truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{s.nombre}</p>
                       <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)' }}>
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #5B3DF5, #8B7CF6)' }} />
+                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%`, background: 'var(--ns-gradient-1)' }} />
                       </div>
                     </div>
                     <div className="text-right shrink-0">
@@ -369,8 +369,8 @@ export default function Reportes({ negocioId, rubro }) {
         <div className="ns-kpi-card ns-stagger-in ns-delay-6 p-0 overflow-hidden">
           <div className="p-5 md:p-6 border-b relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                <svg className="w-4 h-4" style={{ color: '#7C3AED' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                <svg className="w-4 h-4" style={{ color: '#B3404C' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div>
                 <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.empleadoPlural} por rendimiento</h4>
@@ -397,7 +397,7 @@ export default function Reportes({ negocioId, rubro }) {
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-black truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{e.nombre}</p>
                       <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)' }}>
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${(e.revenue / maxRev) * 100}%`, background: 'linear-gradient(90deg, #7C3AED, #A78BFA)' }} />
+                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${(e.revenue / maxRev) * 100}%`, background: 'var(--ns-gradient-1)' }} />
                       </div>
                     </div>
                     <div className="text-right shrink-0">
@@ -418,8 +418,8 @@ export default function Reportes({ negocioId, rubro }) {
         {/* HORAS PICO */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-7">
           <div className="flex items-center gap-3 mb-5 relative z-10">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
-              <svg className="w-4 h-4" style={{ color: '#D97706' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
+              <svg className="w-4 h-4" style={{ color: '#CB7B83' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
             <div>
               <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>Horas con más demanda</h4>
@@ -438,12 +438,12 @@ export default function Reportes({ negocioId, rubro }) {
                 .slice(0, 6)
                 .map(([hora, count], idx) => (
                   <div key={hora} className="flex items-center gap-3">
-                    <span className="text-[10px] font-black w-12 shrink-0" style={{ color: idx === 0 ? '#D97706' : 'var(--ns-text-muted)' }}>{hora}:00</span>
+                    <span className="text-[10px] font-black w-12 shrink-0" style={{ color: idx === 0 ? '#CB7B83' : 'var(--ns-text-muted)' }}>{hora}:00</span>
                     <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
                       <div className="h-full rounded-full transition-all duration-1000"
                         style={{
                           width: `${(count / maxHoraPico) * 100}%`,
-                          background: idx === 0 ? 'linear-gradient(90deg, #F59E0B, #FBBF24)' : 'linear-gradient(90deg, #5B3DF5, #8B7CF6)'
+                          background: idx === 0 ? 'var(--ns-gradient-1)' : 'var(--ns-gradient-1)'
                         }} />
                     </div>
                     <span className="text-[11px] font-black w-5 text-right" style={{ color: 'var(--ns-text)' }}>{count}</span>
@@ -457,8 +457,8 @@ export default function Reportes({ negocioId, rubro }) {
         <div className="ns-kpi-card ns-stagger-in ns-delay-8 p-0 overflow-hidden">
           <div className="p-5 md:p-6 border-b relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                <svg className="w-4 h-4" style={{ color: '#059669' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                <svg className="w-4 h-4" style={{ color: '#C36771' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div>
                 <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.clientePlural.replace('Base de ', '')} destacados</h4>
@@ -477,7 +477,7 @@ export default function Reportes({ negocioId, rubro }) {
                   onMouseEnter={ev => ev.currentTarget.style.background = 'var(--ns-accent-bg)'}
                   onMouseLeave={ev => ev.currentTarget.style.background = ''}>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
-                    style={{ background: idx === 0 ? 'linear-gradient(135deg, #FEF3C7, #FDE68A)' : 'var(--ns-primary-bg)', color: idx === 0 ? '#D97706' : 'var(--ns-primary)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                    style={{ background: idx === 0 ? 'var(--ns-gradient-soft)' : 'var(--ns-primary-bg)', color: idx === 0 ? '#CB7B83' : 'var(--ns-primary)', boxShadow: 'var(--ns-shadow-sm)' }}>
                     {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -486,7 +486,7 @@ export default function Reportes({ negocioId, rubro }) {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-[12px] font-black" style={{ color: 'var(--ns-text)' }}>${c.revenue.toLocaleString()}</p>
-                    {idx === 0 && <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#D97706' }}>Top</p>}
+                    {idx === 0 && <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#CB7B83' }}>Top</p>}
                   </div>
                 </div>
               ))}

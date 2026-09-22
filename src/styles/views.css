@@ -1,0 +1,460 @@
+/* ============================================================
+   NONI — VISTAS
+   Login, app pública de reservas y landing.
+   ============================================================ */
+
+@layer components {
+
+  /* ═══════════════ LOGIN ═══════════════ */
+
+  .ns-login-shell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px 18px calc(24px + var(--sab));
+    overflow: hidden;
+  }
+
+  .ns-login-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--ns-bg);
+    pointer-events: none;
+  }
+
+  /* Manchas de marca muy diluidas: dan profundidad sin ruido. */
+  .ns-login-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+    animation: ns-blob 16s ease-in-out infinite;
+  }
+
+  .ns-login-orb-1 {
+    top: -12%;
+    left: -10%;
+    width: 46vw;
+    height: 46vw;
+    max-width: 420px;
+    max-height: 420px;
+    background: rgba(153, 0, 17, 0.1);
+  }
+
+  .ns-login-orb-2 {
+    bottom: -16%;
+    right: -12%;
+    width: 52vw;
+    height: 52vw;
+    max-width: 460px;
+    max-height: 460px;
+    background: rgba(153, 0, 17, 0.07);
+    animation-delay: 3s;
+  }
+
+  .ns-login-orb-3 {
+    top: 42%;
+    right: 18%;
+    width: 24vw;
+    height: 24vw;
+    max-width: 240px;
+    max-height: 240px;
+    background: rgba(153, 0, 17, 0.05);
+    animation-delay: 6s;
+  }
+
+  .ns-login-card {
+    padding: 28px 24px;
+    border-radius: var(--ns-radius-2xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-float);
+    animation: ns-pop-in var(--dur-5) var(--ease-spring) both;
+  }
+
+  @media (min-width: 768px) {
+    .ns-login-card {
+      padding: 40px 38px;
+    }
+  }
+
+  .ns-login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--ns-radius-sm);
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+    box-shadow: var(--neo-brand);
+  }
+
+  .ns-login-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 48px;
+    padding: 13px 16px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-surface);
+    color: var(--ns-text);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: var(--neo-raised-sm);
+    cursor: pointer;
+    transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-login-social-btn:hover {
+    box-shadow: var(--neo-raised);
+    transform: translateY(-1px);
+  }
+
+  .ns-login-social-btn:active {
+    box-shadow: var(--neo-pressed);
+    transform: scale(0.97);
+  }
+
+  .ns-login-social-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .ns-login-submit-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 15px 20px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: var(--neo-brand);
+    cursor: pointer;
+    overflow: hidden;
+    transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-login-submit-btn:hover {
+    box-shadow: var(--neo-brand-lg);
+    transform: translateY(-2px);
+  }
+
+  .ns-login-submit-btn:active {
+    box-shadow: var(--neo-brand-pressed);
+    transform: scale(0.98);
+  }
+
+  .ns-login-submit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .ns-login-divider-bg {
+    background: var(--ns-surface);
+  }
+
+  /* ═══════════════ APP PÚBLICA DE RESERVAS ═══════════════ */
+
+  .booking-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--ns-bg);
+    color: var(--ns-text);
+  }
+
+  .ns-public-identity-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 22px 20px;
+    border-radius: var(--ns-radius-2xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised);
+  }
+
+  .ns-public-logo {
+    width: 78px;
+    height: 78px;
+    margin-top: -46px;
+    margin-bottom: 12px;
+    padding: 5px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised);
+    transition: transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ns-public-logo:hover {
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  .ns-public-logo img,
+  .ns-public-logo > div {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: calc(var(--ns-radius-md) - 5px);
+  }
+
+  .ns-progress-nav {
+    position: sticky;
+    top: calc(8px + var(--sat));
+    z-index: 40;
+    margin: 14px 0 10px;
+    padding: 9px 12px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-glass-bg-strong);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--neo-raised-sm);
+  }
+
+  .ns-public-service-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    width: 100%;
+    padding: 15px 16px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-public-service-item:hover {
+    background: var(--ns-primary-bg);
+  }
+
+  .ns-public-service-item:active {
+    transform: scale(0.985);
+  }
+
+  .ns-public-service-ic {
+    width: 44px;
+    height: 44px;
+    transition: transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ns-public-service-item:hover .ns-public-service-ic {
+    transform: scale(1.07);
+  }
+
+  .ns-public-employee-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 15px 10px;
+    border: 0;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    cursor: pointer;
+    transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-public-employee-card:hover {
+    box-shadow: var(--neo-raised);
+    transform: translateY(-3px);
+  }
+
+  .ns-public-employee-card:active {
+    box-shadow: var(--neo-pressed);
+    transform: scale(0.95);
+  }
+
+  .ns-public-form-card,
+  .ns-public-summary-card {
+    padding: 20px;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised);
+  }
+
+  /* Ticket de confirmación: papel troquelado. */
+  .ns-public-ticket {
+    position: relative;
+    padding: 24px 20px;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-lg);
+    overflow: hidden;
+  }
+
+  .ns-public-ticket::before,
+  .ns-public-ticket::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--ns-bg);
+    box-shadow: var(--neo-inset-sm);
+    transform: translateY(-50%);
+  }
+
+  .ns-public-ticket::before { left: -13px; }
+  .ns-public-ticket::after { right: -13px; }
+
+  .ns-public-product-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
+  }
+
+  .ns-public-product-card:hover {
+    box-shadow: var(--neo-raised-lg);
+    transform: translateY(-3px);
+  }
+
+  .ns-public-product-card:active {
+    transform: scale(0.985);
+  }
+
+  .ns-public-product-card img {
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .ns-public-product-card:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Franja de horarios: pastillas moldeadas. */
+  .brand-date-hover:hover {
+    box-shadow: var(--neo-raised);
+    transform: translateY(-2px);
+  }
+
+  /* ═══════════════ LANDING ═══════════════ */
+
+  .ns-hero-gradient {
+    background:
+      radial-gradient(1000px 520px at 15% -10%, rgba(153, 0, 17, 0.1), transparent 62%),
+      radial-gradient(760px 460px at 92% 6%, rgba(153, 0, 17, 0.07), transparent 58%),
+      var(--ns-bg);
+  }
+
+  .ns-feature-pro {
+    position: relative;
+    padding: 22px;
+    overflow: hidden;
+  }
+
+  .ns-feature-pro::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ns-gradient-1);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+
+  .ns-feature-pro:hover::before {
+    transform: scaleX(1);
+  }
+
+  .ns-testimonial {
+    padding: 22px;
+  }
+
+  .ns-stat-landing {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .ns-pricing-glow {
+    box-shadow: var(--neo-raised-lg), 0 0 0 2px rgba(153, 0, 17, 0.14);
+  }
+
+  /* ═══════════════ TOGGLES DE HORARIOS ═══════════════ */
+
+  .ns-day-toggle {
+    position: relative;
+    width: 52px;
+    height: 30px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
+  }
+
+  .ns-day-toggle.off {
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  .ns-day-toggle.on {
+    background: var(--ns-primary);
+    box-shadow: inset 0 2px 5px rgba(122, 0, 14, 0.45);
+  }
+
+  .ns-day-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--ns-surface);
+    box-shadow: var(--neo-knob);
+    transition: transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ns-day-toggle.on .ns-day-toggle-thumb {
+    transform: translateX(22px);
+    background: var(--ns-paper);
+  }
+
+  /* ═══════════════ PLANTILLAS DE FLYER ═══════════════ */
+
+  .ns-template-card {
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    cursor: pointer;
+    overflow: hidden;
+    transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-template-card:hover {
+    box-shadow: var(--neo-raised);
+    transform: translateY(-3px);
+  }
+
+  .ns-template-card:active {
+    transform: scale(0.97);
+  }
+
+  .ns-template-card.selected {
+    box-shadow: var(--neo-inset-sm), 0 0 0 2px var(--ns-primary);
+  }
+}

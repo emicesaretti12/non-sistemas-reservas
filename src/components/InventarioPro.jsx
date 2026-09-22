@@ -5,9 +5,9 @@ import { useToast } from './Toast'
 import { useConfirm } from '../contexts/ConfirmContext'
 
 const STOCK_LEVELS = {
-  critical: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', label: 'Crítico' },
-  low: { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', label: 'Bajo' },
-  ok: { color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', label: 'OK' },
+  critical: { color: '#C36771', bg: 'rgba(153,0,17,0.1)', label: 'Crítico' },
+  low: { color: '#DAA2A7', bg: 'rgba(153,0,17,0.1)', label: 'Bajo' },
+  ok: { color: '#D28F95', bg: 'rgba(153,0,17,0.1)', label: 'OK' },
 }
 
 export default function InventarioPro({ negocioId }) {
@@ -302,13 +302,13 @@ export default function InventarioPro({ negocioId }) {
           transition={{ delay: 0.2 }}
           className="ns-stat-card"
           style={{
-            background: stockBajo > 0 ? 'rgba(239, 68, 68, 0.05)' : 'var(--ns-surface)'
+            background: stockBajo > 0 ? 'rgba(153,0,17,0.05)' : 'var(--ns-surface)'
           }}
         >
           <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ns-text-muted)' }}>
             Stock Bajo
           </p>
-          <p className="text-2xl md:text-3xl font-black" style={{ color: stockBajo > 0 ? '#ef4444' : '#10b981' }}>
+          <p className="text-2xl md:text-3xl font-black" style={{ color: stockBajo > 0 ? '#C36771' : '#D28F95' }}>
             {stockBajo}
           </p>
         </motion.div>

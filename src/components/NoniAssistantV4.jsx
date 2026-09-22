@@ -1,465 +1,366 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { IconRobot, IconCheckCircle, IconBolt, IconChart, IconCalendar, IconPalette, IconRocket } from './NoniIcons'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { motion, AnimatePresence, useDragControls } from 'framer-motion'
+import { responder, sugerencias } from '../utils/asistente'
+import { haptic } from '../utils/haptics'
 
 const ASSISTANT_KEY_BASE = 'ns_noni_v4_state'
 
+/** Lee el historial guardado; si no hay o el storage está bloqueado, vacío. */
+function leerHistorial(key) {
+  try {
+    const guardado = localStorage.getItem(key)
+    if (!guardado) return []
+    const parsed = JSON.parse(guardado)
+    return Array.isArray(parsed?.mensajes) ? parsed.mensajes : []
+  } catch {
+    return []
+  }
+}
+
 /**
- * Noni Assistant V4 — Asistente IA Mejorado
- * - Respuestas inteligentes basadas en contexto real
- * - Integración completa con dashboard
- * - UI 3D plastilina tipo Apple
- * - Mobile-first responsive
+ * Noni — asistente del panel.
+ * Hoja inferior en móvil, tarjeta flotante en escritorio. Responde con los
+ * datos reales del negocio y, cuando la respuesta implica ir a algún lado,
+ * ofrece el botón que te lleva.
  */
 
-const SMART_RESPONSES = {
-  ocupacion: {
-    bajo: (ocupacion) =>
-      `Tu ocupación está en ${ocupacion}%. Podés mejorarla:\n\n1️⃣ Compartí tu link en redes sociales\n2️⃣ Ofrece descuentos a clientes nuevos\n3️⃣ Activa recordatorios por WhatsApp`,
-    normal: (ocupacion) =>
-      `Ocupación en ${ocupacion}%. Vas bien. Mantené activos los recordatorios y seguí promocionando en redes.`,
-    alto: (ocupacion) =>
-      `¡Excelente! Ocupación al ${ocupacion}%. Estás en un buen ritmo. Considera agregar más empleados si es necesario.`,
-  },
-  turnos: {
-    cero: () =>
-      'Hoy no tenés turnos agendados. ¿Querés que te ayude a promocionar tu link de reservas?',
-    pocos: (turnos) =>
-      `Tenés ${turnos} turno${turnos > 1 ? 's' : ''} hoy. Buen inicio. Seguí compartiendo tu link.`,
-    muchos: (turnos, ingresos) =>
-      `¡Excelente! ${turnos} turno${turnos > 1 ? 's' : ''} hoy con ingresos estimados de $${ingresos?.toLocaleString() || '0'}. Día productivo.`,
-  },
-  setup: {
-    inicio: () =>
-      'Empecemos por lo básico:\n\n1️⃣ Crea tus servicios\n2️⃣ Agrega tu equipo\n3️⃣ Configura horarios\n4️⃣ Personaliza tu marca\n5️⃣ Comparte tu link',
-    servicios: () =>
-      'Los servicios son lo que ofrecés. Agregá nombre, duración y precio. Tus clientes los ven al reservar.',
-    empleados: () =>
-      'El equipo son los profesionales que atienden. Agregá nombre, especialidad, foto y datos de contacto.',
-    horarios: () =>
-      'Los horarios definen cuándo atiendés. Configurá días y rango horario para que los clientes vean disponibilidad.',
-    branding: () =>
-      'Personalizá tu marca: logo, color, descripción. Esto aparece en tu app de reservas y le da identidad a tu negocio.',
-    compartir: () =>
-      'Tu link de reservas permite que clientes reserven sin llamarte. Compartilo en WhatsApp, Instagram, Facebook, etc.',
-  },
-  clientes: {
-    vip: (cantidad) =>
-      `Tenés ${cantidad} cliente${cantidad > 1 ? 's' : ''} VIP. Considerá ofrecerles un beneficio especial para mantenerlos felices.`,
-    nuevos: (cantidad) =>
-      `Ganaste ${cantidad} cliente${cantidad > 1 ? 's' : ''} nuevo${cantidad > 1 ? 's' : ''} esta semana. ¡Excelente! Mantené el ritmo.`,
-  },
-  stock: {
-    bajo: (cantidad) =>
-      `Hay ${cantidad} producto${cantidad > 1 ? 's' : ''} con stock bajo. Revisá tu inventario para no quedarte sin stock.`,
-  },
-  general: {
-    hola: () =>
-      '¡Hola! Soy Noni, tu asistente inteligente. Puedo ayudarte con:\n\n📊 Análisis de métricas\n💡 Tips para mejorar\n🎯 Guía de configuración\n❓ Preguntas sobre el sistema',
-    ayuda: () =>
-      'Puedo ayudarte con:\n\n• Preguntas sobre cómo usar el sistema\n• Análisis de tus métricas\n• Tips para atraer más clientes\n• Guía de configuración inicial',
-    gracias: () => '¡De nada! Estoy acá para ayudarte. ¿Hay algo más que necesites?',
-    chau: () => '¡Hasta luego! Volvé cuando necesites ayuda. 👋',
-  },
-}
-
-function getSmartResponse(query, context) {
-  const q = query.toLowerCase()
-
-  if (q.includes('ocupación') || q.includes('ocupacion') || q.includes('cliente')) {
-    const ocupacion = context.ocupacion || 0
-    if (ocupacion < 40) return SMART_RESPONSES.ocupacion.bajo(ocupacion)
-    if (ocupacion < 70) return SMART_RESPONSES.ocupacion.normal(ocupacion)
-    return SMART_RESPONSES.ocupacion.alto(ocupacion)
-  }
-
-  if (q.includes('turno') || q.includes('reserva') || q.includes('hoy')) {
-    const turnos = context.turnosHoy || 0
-    const ingresos = context.ingresosHoy || 0
-    if (turnos === 0) return SMART_RESPONSES.turnos.cero()
-    if (turnos < 5) return SMART_RESPONSES.turnos.pocos(turnos)
-    return SMART_RESPONSES.turnos.muchos(turnos, ingresos)
-  }
-
-  if (q.includes('empez') || q.includes('primero') || q.includes('como empiez')) {
-    return SMART_RESPONSES.setup.inicio()
-  }
-  if (q.includes('servicio')) return SMART_RESPONSES.setup.servicios()
-  if (q.includes('empleado') || q.includes('equipo') || q.includes('staff')) {
-    return SMART_RESPONSES.setup.empleados()
-  }
-  if (q.includes('horario') || q.includes('hora')) return SMART_RESPONSES.setup.horarios()
-  if (q.includes('marca') || q.includes('logo') || q.includes('color') || q.includes('personaliz')) {
-    return SMART_RESPONSES.setup.branding()
-  }
-  if (q.includes('compartir') || q.includes('link') || q.includes('promocion')) {
-    return SMART_RESPONSES.setup.compartir()
-  }
-
-  if (q.includes('vip')) {
-    const vip = context.clientesVIP || 0
-    if (vip > 0) return SMART_RESPONSES.clientes.vip(vip)
-    return 'Aún no tenés clientes VIP. Cuando alguien reserve varias veces, se marcarán como VIP.'
-  }
-
-  if (q.includes('stock') || q.includes('inventario')) {
-    const stock = context.stockBajo || 0
-    if (stock > 0) return SMART_RESPONSES.stock.bajo(stock)
-    return 'Tu inventario está bien. No hay productos con stock bajo.'
-  }
-
-  if (q.includes('hola') || q.includes('hey') || q.includes('qué onda')) {
-    return SMART_RESPONSES.general.hola()
-  }
-  if (q.includes('ayuda') || q.includes('que podes')) {
-    return SMART_RESPONSES.general.ayuda()
-  }
-  if (q.includes('gracias')) return SMART_RESPONSES.general.gracias()
-  if (q.includes('chau') || q.includes('adiós') || q.includes('bye')) {
-    return SMART_RESPONSES.general.chau()
-  }
-
-  return `Hmm, no estoy seguro sobre eso. Probá preguntando sobre:\n\n• Cómo mejorar ocupación\n• Tus turnos de hoy\n• Cómo configurar servicios\n• Tus métricas\n\n¿Hay algo específico que necesites?`
-}
-
-function NoniAvatar({ size = 56, mood = 'happy' }) {
-  const eyeRy = mood === 'thinking' ? 1 : 2.5
-  const mouthPath = mood === 'happy' ? 'M18 28 Q22 31 26 28' : 'M18 28 Q22 29 26 28'
+/** Carita de Noni, moldeada en los dos colores de la marca. */
+function NoniAvatar({ size = 44, mood = 'happy' }) {
+  const ry = mood === 'thinking' ? 0.9 : 2.6
+  const boca = mood === 'happy' ? 'M18.5 29.5 Q24 33 29.5 29.5' : 'M19 30 Q24 31.4 29 30'
 
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="25" r="20" fill="#5B3DF5" opacity="0.1" />
-      <rect x="8" y="12" width="32" height="26" rx="8" fill="url(#noniGrad)" />
-      <rect x="8" y="12" width="32" height="26" rx="8" stroke="#8B7CF6" strokeWidth="1.5" fill="none" />
-      <rect x="12" y="17" width="24" height="14" rx="5" fill="#1A1630" opacity="0.9" />
-      <circle cx="19" cy="24" r="4" fill="#A78BFA" opacity="0.2" />
-      <circle cx="29" cy="24" r="4" fill="#A78BFA" opacity="0.2" />
-      <ellipse cx="19" cy="24" rx="2.5" ry={eyeRy} fill="#A78BFA" />
-      <ellipse cx="29" cy="24" rx="2.5" ry={eyeRy} fill="#A78BFA" />
-      <path d={mouthPath} stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <defs>
-        <linearGradient id="noniGrad" x1="8" y1="12" x2="40" y2="38">
-          <stop offset="0%" stopColor="#E8DEFF" />
-          <stop offset="100%" stopColor="#C4B5FD" />
+        <linearGradient id="noniShell" x1="10" y1="10" x2="40" y2="40">
+          <stop offset="0%" stopColor="#A81322" />
+          <stop offset="100%" stopColor="#8A000F" />
         </linearGradient>
       </defs>
+      {/* antena */}
+      <path d="M24 9V5" stroke="#990011" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="24" cy="4" r="2.6" fill="#990011" />
+      {/* cuerpo */}
+      <rect x="7" y="10" width="34" height="28" rx="11" fill="url(#noniShell)" />
+      <rect x="7" y="10" width="34" height="28" rx="11" fill="none" stroke="#FCF6F5" strokeOpacity="0.22" strokeWidth="1.2" />
+      {/* visor hundido */}
+      <rect x="12" y="16" width="24" height="16" rx="7" fill="#7A000E" />
+      {/* ojos + boca */}
+      <ellipse cx="19" cy="23.5" rx="2.4" ry={ry} fill="#FCF6F5" />
+      <ellipse cx="29" cy="23.5" rx="2.4" ry={ry} fill="#FCF6F5" />
+      <path d={boca} stroke="#FCF6F5" strokeWidth="1.7" strokeLinecap="round" fill="none" />
+      {/* orejas */}
+      <rect x="4" y="20" width="3" height="8" rx="1.5" fill="#990011" />
+      <rect x="41" y="20" width="3" height="8" rx="1.5" fill="#990011" />
     </svg>
   )
 }
 
-function TypingIndicator() {
+function Escribiendo() {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-2">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="w-2 h-2 rounded-full bg-slate-400"
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 0.6, delay: i * 0.1, repeat: Infinity }}
-        />
-      ))}
+    <div className="ns-chat-assistant ns-assistant-chat-msg flex items-center gap-1.5" aria-label="Noni está escribiendo">
+      <span className="ns-typing-dot" />
+      <span className="ns-typing-dot" style={{ animationDelay: '0.15s' }} />
+      <span className="ns-typing-dot" style={{ animationDelay: '0.3s' }} />
     </div>
   )
 }
 
-/**
- * Acciones rápidas según lo que falta configurar. Antes el componente recibía
- * `setupData`, `onNavigate`, `onStartTour` y `publicLink` y no usaba ninguno:
- * el asistente no podía llevarte a ningún lado.
- */
-function accionesSugeridas({ setupData = {}, vocab = {}, tab, onNavigate, onStartTour, publicLink, onCopiado }) {
+/** Atajos según lo que todavía falta configurar. */
+function accionesPendientes({ setupData = {}, vocab = {}, tab, publicLink }) {
   const acciones = []
-
-  if (!setupData.hasServicios) {
-    acciones.push({ icon: '🧾', tab: 'servicios', text: `Crear mi primer ${vocab.servicio || 'servicio'}`, run: () => onNavigate?.('servicios') })
-  }
-  if (!setupData.hasHorarios) {
-    acciones.push({ icon: '🕒', tab: 'horarios', text: 'Configurar mis horarios', run: () => onNavigate?.('horarios') })
-  }
-  if (!setupData.hasEmpleados) {
-    acciones.push({ icon: '👥', tab: 'equipo', text: `Agregar ${vocab.empleado || 'a mi equipo'}`, run: () => onNavigate?.('equipo') })
-  }
-  if (!setupData.hasBranding) {
-    acciones.push({ icon: '🎨', tab: 'ajustes', text: 'Personalizar mi marca', run: () => onNavigate?.('ajustes') })
-  }
-  if (!setupData.hasShared && publicLink) {
-    acciones.push({
-      icon: '🔗',
-      text: 'Copiar mi link de reservas',
-      run: () => {
-        navigator.clipboard.writeText(publicLink).catch(() => {})
-        try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
-        onCopiado?.()
-      },
-    })
-  }
-
-  // Siempre disponibles
-  acciones.push({ icon: '📅', tab: 'agenda', text: 'Ver mi agenda', run: () => onNavigate?.('agenda') })
-  acciones.push({ icon: '📊', tab: 'reportes', text: 'Ver mis reportes', run: () => onNavigate?.('reportes') })
-  if (onStartTour) acciones.push({ icon: '🧭', text: 'Hacer el tour guiado', run: () => onStartTour() })
-
-  // No ofrecemos llevarte a la pestaña en la que ya estás parado.
-  return acciones.filter((a) => a.tab !== tab).slice(0, 4)
+  if (!setupData.hasServicios) acciones.push({ id: 'servicios', tab: 'servicios', texto: `Cargar mi primer ${vocab.servicio || 'servicio'}` })
+  if (!setupData.hasHorarios) acciones.push({ id: 'horarios', tab: 'horarios', texto: 'Definir mis horarios' })
+  if (!setupData.hasEmpleados) acciones.push({ id: 'equipo', tab: 'equipo', texto: `Sumar ${vocab.empleado || 'a mi equipo'}` })
+  if (!setupData.hasBranding) acciones.push({ id: 'marca', tab: 'ajustes', texto: 'Subir mi logo' })
+  if (!setupData.hasShared && publicLink) acciones.push({ id: 'link', copiarLink: true, texto: 'Copiar mi link de reservas' })
+  return acciones.filter((a) => a.tab !== tab).slice(0, 3)
 }
 
-export default function NoniAssistantV4({ tab, setupData, vocab, negocio, smartAlerts, publicLink, onNavigate, onStartTour }) {
+export default function NoniAssistantV4({
+  tab, setupData, vocab, negocio, smartAlerts, publicLink, onNavigate, onStartTour,
+}) {
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [mood, setMood] = useState('happy')
-  const [dismissed, setDismissed] = useState(false)
-  const messagesEndRef = useRef(null)
+  const [mensajes, setMensajes] = useState(() => leerHistorial(`${ASSISTANT_KEY_BASE}_${negocio?.id || 'anon'}`))
+  const [texto, setTexto] = useState('')
+  const [pensando, setPensando] = useState(false)
+  const finRef = useRef(null)
+  const dragControls = useDragControls()
   const panelRef = useRef(null)
+  const inputRef = useRef(null)
 
-  // El historial se guarda por negocio: con la clave global, al cambiar de
+  // El historial se guarda por negocio: con una clave global, al cambiar de
   // cuenta en el mismo navegador aparecía la conversación del negocio anterior.
-  const ASSISTANT_KEY = `${ASSISTANT_KEY_BASE}_${negocio?.id || 'anon'}`
+  const KEY = `${ASSISTANT_KEY_BASE}_${negocio?.id || 'anon'}`
 
+  const pendientes = useMemo(
+    () => accionesPendientes({ setupData, vocab, tab, publicLink }),
+    [setupData, vocab, tab, publicLink]
+  )
+
+  const preguntas = useMemo(
+    () => sugerencias({ setupData, smartAlerts }),
+    [setupData, smartAlerts]
+  )
+
+  // Si se cambia de negocio en la misma pestaña, recargamos su historial.
+  const keyRef = useRef(KEY)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(ASSISTANT_KEY)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        if (parsed.dismissed) setDismissed(true)
-        if (parsed.messages) setMessages(parsed.messages)
-      }
-    } catch {
-      // Storage no disponible (modo privado): arrancamos sin historial.
-    }
-  }, [ASSISTANT_KEY])
+    if (keyRef.current === KEY) return undefined
+    keyRef.current = KEY
+    const id = requestAnimationFrame(() => setMensajes(leerHistorial(KEY)))
+    return () => cancelAnimationFrame(id)
+  }, [KEY])
 
   useEffect(() => {
     try {
       // Guardamos sólo los últimos 30 mensajes: el historial completo podía
       // llenar la cuota de localStorage y tirar QuotaExceededError.
-      localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ dismissed, messages: messages.slice(-30) }))
-    } catch {
-      // Sin storage disponible; el chat sigue funcionando en memoria.
+      localStorage.setItem(KEY, JSON.stringify({ mensajes: mensajes.slice(-30) }))
+    } catch { /* sin storage: el chat sigue en memoria */ }
+  }, [mensajes, KEY])
+
+  useEffect(() => {
+    // Sólo seguimos la conversación hacia abajo cuando ya hay mensajes: si no,
+    // al abrir el panel el saludo quedaba scrolleado fuera de la vista.
+    if (open && (mensajes.length > 0 || pensando)) {
+      finRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
-  }, [dismissed, messages, ASSISTANT_KEY])
+  }, [mensajes, pensando, open])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
-
-  useEffect(() => {
-    if (!open) return
-    const handler = (e) => {
+    if (!open) return undefined
+    const alTocarAfuera = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    const alTeclear = (e) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', alTocarAfuera)
+    document.addEventListener('keydown', alTeclear)
+    const t = setTimeout(() => {
+      // En móvil no enfocamos solo: el teclado tapando media pantalla apenas
+      // se abre el asistente es justo lo contrario de sentirse cómodo.
+      if (window.innerWidth >= 768) inputRef.current?.focus()
+    }, 260)
+    return () => {
+      document.removeEventListener('mousedown', alTocarAfuera)
+      document.removeEventListener('keydown', alTeclear)
+      clearTimeout(t)
+    }
   }, [open])
 
-  const acciones = accionesSugeridas({
-    setupData,
-    vocab,
-    tab,
-    onNavigate,
-    onStartTour,
-    publicLink,
-    onCopiado: () => setMessages((prev) => [...prev, {
-      role: 'assistant',
-      content: '¡Listo! Copié tu link de reservas. Pegalo en WhatsApp, Instagram o donde quieras y tus clientes ya pueden reservar solos.',
-    }]),
-  })
+  const contexto = useMemo(() => ({ ...smartAlerts, negocio, vocab }), [smartAlerts, negocio, vocab])
 
-  const handleSendMessage = useCallback(async () => {
-    if (!input.trim() || loading) return
-
-    const userMsg = input.trim()
-    setInput('')
-    setMessages((prev) => [...prev, { role: 'user', content: userMsg }])
-    setLoading(true)
-    setMood('thinking')
-
-    await new Promise((resolve) => setTimeout(resolve, 600))
-
-    try {
-      const response = getSmartResponse(userMsg, smartAlerts)
-      setMessages((prev) => [...prev, { role: 'assistant', content: response }])
-      setMood('happy')
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Hubo un problema. Intentá nuevamente.' },
-      ])
-      setMood('happy')
-    } finally {
-      setLoading(false)
+  const ejecutar = useCallback((accion) => {
+    if (!accion) return
+    haptic('select')
+    if (accion.copiarLink && publicLink) {
+      navigator.clipboard?.writeText(publicLink).catch(() => {})
+      try { localStorage.setItem('ns_link_shared', '1') } catch { /* modo privado */ }
+      setMensajes((prev) => [...prev, {
+        rol: 'noni',
+        texto: '¡Listo, copiado! Pegalo en WhatsApp, en tu bio de Instagram o donde quieras. Tus clientes ya pueden reservar solos.',
+      }])
+      return
     }
-  }, [input, loading, smartAlerts])
+    if (accion.tour) { setOpen(false); onStartTour?.(); return }
+    if (accion.tab) { setOpen(false); onNavigate?.(accion.tab) }
+  }, [publicLink, onNavigate, onStartTour])
 
-  if (dismissed) {
-    return (
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        onClick={() => {
-          setDismissed(false)
-          setOpen(true)
-        }}
-        className="ns-assistant-fab"
-        title="Mostrar a Noni"
-      >
-        <NoniAvatar size={56} mood={mood} />
-      </motion.button>
-    )
+  const enviar = useCallback((consulta) => {
+    const pregunta = String(consulta ?? '').trim()
+    if (!pregunta || pensando) return
+
+    haptic()
+    setTexto('')
+    setMensajes((prev) => [...prev, { rol: 'yo', texto: pregunta }])
+    setPensando(true)
+
+    // Una pausa corta: una respuesta instantánea se siente a "buscador",
+    // no a alguien que te está contestando.
+    const t = setTimeout(() => {
+      const r = responder(pregunta, contexto)
+      setMensajes((prev) => [...prev, { rol: 'noni', texto: r.texto, accion: r.accion }])
+      setPensando(false)
+    }, 520)
+    return () => clearTimeout(t)
+  }, [pensando, contexto])
+
+  const limpiar = () => {
+    setMensajes([])
+    try { localStorage.removeItem(KEY) } catch { /* modo privado */ }
   }
 
+  const pendientesCount = pendientes.length
+
   return (
-    <AnimatePresence>
-      {!open && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 20 }}
-          onClick={() => setOpen(true)}
-          className="ns-assistant-fab"
-          whileTap={{ scale: 0.95 }}
-        >
-          <NoniAvatar size={56} mood={mood} />
-        </motion.button>
-      )}
+    <>
+      <AnimatePresence>
+        {!open && (
+          <motion.button
+            key="fab"
+            initial={{ opacity: 0, scale: 0.7, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.7, y: 18 }}
+            transition={{ type: 'spring', damping: 18, stiffness: 320 }}
+            onClick={() => { haptic(); setOpen(true) }}
+            className="ns-assistant-fab"
+            aria-label="Abrir el asistente Noni"
+            title="Hablar con Noni"
+          >
+            <NoniAvatar size={38} mood={pensando ? 'thinking' : 'happy'} />
+            {pendientesCount > 0 && (
+              <span className="ns-assistant-badge" aria-hidden="true">{pendientesCount}</span>
+            )}
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-      {open && (
-        <motion.div
-          ref={panelRef}
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="ns-assistant-panel"
-        >
-          {/* Header */}
-          <div className="p-4 flex items-center justify-between rounded-t-3xl" style={{ background: 'var(--ns-gradient-1)' }}>
-            <div className="flex items-center gap-3">
-              <NoniAvatar size={40} mood={mood} />
-              <div>
-                <h3 className="font-black text-white text-sm">Noni</h3>
-                <p className="text-xs text-white/70">Tu asistente inteligente</p>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="panel"
+            ref={panelRef}
+            role="dialog"
+            aria-label="Asistente Noni"
+            initial={{ opacity: 0, y: 40, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.98 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className="ns-assistant-panel"
+            drag="y"
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.45 }}
+            onDragEnd={(_, info) => {
+              // Arrastrar la hoja hacia abajo la cierra, como en iOS.
+              if (info.offset.y > 110 || info.velocity.y > 650) setOpen(false)
+            }}
+          >
+            {/* Manija: sólo desde acá arranca el gesto de arrastre */}
+            <div
+              className="neo-sheet__handle md:hidden"
+              onPointerDown={(e) => dragControls.start(e)}
+              role="presentation"
+            />
+
+            {/* Cabecera */}
+            <div className="flex items-center gap-3 px-4 pb-3 pt-1 md:pt-4" style={{ boxShadow: 'inset 0 -1px 0 var(--ns-line)' }}>
+              <span className="neo-avatar w-11 h-11 shrink-0" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>
+                <NoniAvatar size={30} mood={pensando ? 'thinking' : 'happy'} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-black tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>Noni</p>
+                <p className="text-[11px] font-semibold mt-1" style={{ color: 'var(--ns-text-muted)' }}>
+                  {pensando ? 'Escribiendo…' : 'Tu asistente del panel'}
+                </p>
               </div>
+              {mensajes.length > 0 && (
+                <button onClick={limpiar} className="neo-btn neo-btn--ghost neo-btn--quiet" title="Borrar la conversación">
+                  Limpiar
+                </button>
+              )}
+              <button onClick={() => setOpen(false)} className="neo-icon-btn w-9 h-9" aria-label="Cerrar el asistente">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
             </div>
-            <button
-              onClick={() => setOpen(false)}
-              className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all"
+
+            {/* Conversación */}
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain flex flex-col gap-2.5 px-4 py-4"
+              style={{ background: 'var(--ns-sunken)', minHeight: 240, maxHeight: '52dvh' }}
             >
-              ✕
-            </button>
-          </div>
+              {mensajes.length === 0 && (
+                <div className="flex flex-col gap-3">
+                  <div className="ns-chat-assistant ns-assistant-chat-msg" style={{ maxWidth: '100%' }}>
+                    {`¡Hola${negocio?.nombre ? `, ${negocio.nombre}` : ''}! Soy Noni.\n\nPreguntame cómo viene tu día, qué te falta configurar o cómo funciona cualquier parte del panel.`}
+                  </div>
 
-          {/* Messages */}
-          <div className="h-80 overflow-y-auto flex flex-col gap-3 p-4 bg-slate-50">
-            {messages.length === 0 && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-                <div className="bg-white rounded-2xl p-4 border border-slate-200">
-                  <p className="text-sm font-bold text-slate-900">¡Hola! Soy Noni 👋</p>
-                  <p className="text-xs text-slate-600 mt-2">
-                    Soy tu asistente inteligente. Preguntame sobre tus métricas, cómo mejorar tu negocio o cómo usar el sistema.
-                  </p>
-                </div>
+                  {pendientes.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <p className="neo-eyebrow px-1">Te falta esto</p>
+                      {pendientes.map((a, i) => (
+                        <motion.button
+                          key={a.id}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          onClick={() => ejecutar(a)}
+                          className="neo-btn neo-btn--quiet justify-start w-full"
+                          style={{ color: 'var(--ns-primary)' }}
+                        >
+                          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          {a.texto}
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Acciones rápidas según lo que falta configurar */}
-                {acciones.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">Hacelo en un toque:</p>
-                    {acciones.map((a, i) => (
+                  <div className="flex flex-col gap-2">
+                    <p className="neo-eyebrow px-1">Preguntas frecuentes</p>
+                    {preguntas.map((q, i) => (
                       <motion.button
-                        key={a.text}
-                        initial={{ opacity: 0, x: -10 }}
+                        key={q}
+                        initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.04 }}
-                        onClick={() => { a.run(); setOpen(false) }}
-                        className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-2"
-                        style={{ background: 'var(--ns-primary-bg)', borderColor: 'var(--ns-border)', color: 'var(--ns-primary)' }}
-                        whileHover={{ x: 4 }}
+                        transition={{ delay: 0.15 + i * 0.05 }}
+                        onClick={() => enviar(q)}
+                        className="neo-btn neo-btn--quiet justify-start w-full text-left"
                       >
-                        <span>{a.icon}</span>
-                        {a.text}
+                        {q}
                       </motion.button>
                     ))}
                   </div>
-                )}
-
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Preguntas comunes:</p>
-                  {[
-                    { icon: '📊', text: '¿Cómo va mi ocupación?' },
-                    { icon: '📅', text: '¿Cuántos turnos tengo hoy?' },
-                    { icon: '🚀', text: '¿Cómo empiezo?' },
-                    { icon: '💡', text: '¿Cómo atraer clientes?' },
-                  ].map((q, i) => (
-                    <motion.button
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      onClick={() => {
-                        setInput(q.text)
-                        setTimeout(() => {
-                          setMessages((prev) => [...prev, { role: 'user', content: q.text }])
-                          setLoading(true)
-                          setMood('thinking')
-                          setTimeout(() => {
-                            const response = getSmartResponse(q.text, smartAlerts)
-                            setMessages((prev) => [...prev, { role: 'assistant', content: response }])
-                            setMood('happy')
-                            setLoading(false)
-                            setInput('')
-                          }, 600)
-                        }, 50)
-                      }}
-                      className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 transition-all border border-slate-200 flex items-center gap-2"
-                      whileHover={{ x: 4 }}
-                    >
-                      <span>{q.icon}</span>
-                      {q.text}
-                    </motion.button>
-                  ))}
                 </div>
-              </motion.div>
-            )}
+              )}
 
-            {messages.map((msg, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`ns-assistant-chat-msg ${msg.role === 'user' ? 'ns-chat-user' : 'ns-chat-assistant'}`}
-              >
-                {msg.content}
-              </motion.div>
-            ))}
+              {mensajes.map((m, i) => (
+                <div key={i} className="flex flex-col gap-2" style={{ alignItems: m.rol === 'yo' ? 'flex-end' : 'flex-start' }}>
+                  <div className={`ns-assistant-chat-msg ${m.rol === 'yo' ? 'ns-chat-user' : 'ns-chat-assistant'}`}>
+                    {m.texto}
+                  </div>
+                  {m.accion && (
+                    <button onClick={() => ejecutar(m.accion)} className="neo-btn neo-btn--primary neo-btn--quiet">
+                      {m.accion.label}
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </button>
+                  )}
+                </div>
+              ))}
 
-            {loading && <TypingIndicator />}
-            <div ref={messagesEndRef} />
-          </div>
+              {pensando && <Escribiendo />}
+              <div ref={finRef} />
+            </div>
 
-          {/* Input */}
-          <div className="p-4 bg-white border-t border-slate-200 rounded-b-3xl flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage() } }}
-              aria-label="Escribile a Noni" 
-              placeholder="Preguntame algo..."
-              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#5B3DF5] focus:ring-2 focus:ring-[#5B3DF5]/20"
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={loading || !input.trim()}
-              aria-label="Enviar mensaje"
-              className="px-3 py-2 rounded-lg text-white font-bold text-sm disabled:opacity-50 transition-all"
-              style={{ background: 'var(--ns-primary)' }}
+            {/* Entrada */}
+            <form
+              className="flex items-center gap-2 p-3"
+              style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}
+              onSubmit={(e) => { e.preventDefault(); enviar(texto) }}
             >
-              →
-            </button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              <input
+                ref={inputRef}
+                type="text"
+                value={texto}
+                onChange={(e) => setTexto(e.target.value)}
+                placeholder="Escribime lo que necesites…"
+                aria-label="Escribile a Noni"
+                className="neo-field flex-1"
+                enterKeyHint="send"
+              />
+              <button
+                type="submit"
+                disabled={pensando || !texto.trim()}
+                className="neo-btn neo-btn--primary shrink-0"
+                style={{ width: 48, minHeight: 48, padding: 0 }}
+                aria-label="Enviar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

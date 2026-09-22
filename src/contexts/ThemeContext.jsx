@@ -22,9 +22,10 @@ export function ThemeProvider({ children }) {
     root.setAttribute('data-theme', theme)
     root.style.colorScheme = theme
     try { localStorage.setItem(STORAGE_KEY, theme) } catch { /* noop */ }
-    // Update meta theme-color
+    // El sistema de diseño es de un solo tema: la barra del navegador toma
+    // siempre el color del papel para que el borde superior no se corte.
     const meta = document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#020617' : '#F8FAFC')
+    if (meta) meta.setAttribute('content', '#FCF6F5')
   }, [theme])
 
   const setTheme = useCallback((t) => setThemeState(t), [])

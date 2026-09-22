@@ -1,0 +1,547 @@
+/* ============================================================
+   NONI — NEUMORFISMO
+   Todo nace de una sola superficie (#FCF6F5) que se levanta o
+   se hunde. La luz entra siempre desde arriba-izquierda, así
+   que el relieve se lee igual en toda la app.
+   Acento único: #990011.
+   ============================================================ */
+
+@layer components {
+
+  /* ═══════════════ SUPERFICIES ═══════════════ */
+
+  .neo-surface {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-lg);
+  }
+
+  /* Relieve: el bloque sale del papel. */
+  .neo-raised {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-lg);
+    box-shadow: var(--neo-raised);
+  }
+
+  .neo-raised-sm {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-sm);
+    box-shadow: var(--neo-raised-sm);
+  }
+
+  .neo-raised-lg {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-xl);
+    box-shadow: var(--neo-raised-lg);
+  }
+
+  /* Hueco: el bloque se hunde en el papel (campos, pistas, wells). */
+  .neo-inset {
+    background: var(--ns-sunken);
+    border-radius: var(--ns-radius-lg);
+    box-shadow: var(--neo-inset);
+  }
+
+  .neo-inset-sm {
+    background: var(--ns-sunken);
+    border-radius: var(--ns-radius-sm);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  /* Tarjeta base de la app. */
+  .neo-card {
+    position: relative;
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-lg);
+    box-shadow: var(--neo-raised);
+    transition:
+      box-shadow var(--dur-3) var(--ease-out),
+      transform var(--dur-3) var(--ease-out);
+  }
+
+  /* Borde de luz superior: el detalle que hace que se vea moldeado. */
+  .neo-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0) 45%,
+      rgba(153, 0, 17, 0.06)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .neo-card--interactive {
+    cursor: pointer;
+  }
+
+  .neo-card--interactive:hover {
+    box-shadow: var(--neo-raised-lg);
+    transform: translateY(-2px);
+  }
+
+  .neo-card--interactive:active {
+    box-shadow: var(--neo-pressed);
+    transform: translateY(0) scale(0.995);
+  }
+
+  /* ═══════════════ BOTONES ═══════════════ */
+
+  .neo-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-surface);
+    color: var(--ns-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    box-shadow: var(--neo-raised-sm);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-spring),
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+
+  .neo-btn:hover {
+    box-shadow: var(--neo-raised);
+    transform: translateY(-1px);
+  }
+
+  .neo-btn:active {
+    box-shadow: var(--neo-pressed);
+    transform: translateY(0) scale(0.975);
+  }
+
+  .neo-btn:disabled,
+  .neo-btn[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: var(--neo-flat);
+    transform: none;
+  }
+
+  /* Primario: la única pieza que usa el rojo lleno. */
+  .neo-btn--primary {
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+    box-shadow: var(--neo-brand);
+  }
+
+  .neo-btn--primary:hover {
+    box-shadow: var(--neo-brand-lg);
+    transform: translateY(-1px);
+  }
+
+  .neo-btn--primary:active {
+    box-shadow: var(--neo-brand-pressed);
+    transform: translateY(0) scale(0.975);
+  }
+
+  /* Brillo diagonal que recorre el botón al pasar el mouse. */
+  .neo-btn--primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 40%;
+    background: linear-gradient(
+      100deg,
+      transparent,
+      rgba(255, 255, 255, 0.22),
+      transparent
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+
+  .neo-btn--primary:hover::after {
+    animation: ns-sweep 0.75s var(--ease-out);
+  }
+
+  /* Secundario: mismo papel, sólo relieve. */
+  .neo-btn--ghost {
+    background: transparent;
+    box-shadow: none;
+    color: var(--ns-text-secondary);
+  }
+
+  .neo-btn--ghost:hover {
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    color: var(--ns-primary);
+  }
+
+  .neo-btn--quiet {
+    min-height: 38px;
+    padding: 9px 14px;
+    font-size: 12px;
+    border-radius: var(--ns-radius-sm);
+  }
+
+  .neo-btn--block {
+    width: 100%;
+  }
+
+  .neo-btn--pill {
+    border-radius: 999px;
+  }
+
+  /* Botón icono cuadrado (barra superior, acciones de fila). */
+  .neo-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: var(--ns-radius-sm);
+    background: var(--ns-surface);
+    color: var(--ns-text-secondary);
+    box-shadow: var(--neo-raised-sm);
+    cursor: pointer;
+    transition:
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-spring),
+      color var(--dur-2) var(--ease-out);
+  }
+
+  .neo-icon-btn:hover {
+    color: var(--ns-primary);
+    box-shadow: var(--neo-raised);
+    transform: translateY(-1px);
+  }
+
+  .neo-icon-btn:active {
+    box-shadow: var(--neo-pressed);
+    transform: scale(0.92);
+  }
+
+  .neo-icon-btn--active {
+    color: var(--ns-primary);
+    box-shadow: var(--neo-pressed);
+    background: var(--ns-sunken);
+  }
+
+  /* ═══════════════ CAMPOS ═══════════════ */
+
+  .neo-field {
+    width: 100%;
+    padding: 13px 16px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-sunken);
+    color: var(--ns-text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--neo-inset-sm);
+    outline: none;
+    transition:
+      box-shadow var(--dur-2) var(--ease-out),
+      background var(--dur-2) var(--ease-out);
+  }
+
+  .neo-field::placeholder {
+    color: var(--ns-text-faint);
+    font-weight: 500;
+  }
+
+  .neo-field:focus,
+  .neo-field:focus-visible {
+    background: var(--ns-surface);
+    box-shadow: var(--neo-inset-sm), 0 0 0 3px var(--ns-focus);
+    outline: none;
+  }
+
+  .neo-field:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  textarea.neo-field {
+    min-height: 96px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  .neo-field-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 6px 4px 14px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+    transition: box-shadow var(--dur-2) var(--ease-out);
+  }
+
+  .neo-field-group:focus-within {
+    box-shadow: var(--neo-inset-sm), 0 0 0 3px var(--ns-focus);
+  }
+
+  .neo-field-group > input {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 0;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ns-text);
+  }
+
+  /* ═══════════════ CHIPS Y ESTADOS ═══════════════ */
+
+  /* Con una sola tinta, el estado se distingue por forma y peso,
+     no por color: lleno = confirmado, contorno = pendiente,
+     hundido = inactivo, rayado = cancelado. */
+  .neo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .neo-chip--solid {
+    background: var(--ns-primary);
+    color: var(--ns-paper);
+    box-shadow: 0 2px 6px rgba(153, 0, 17, 0.28);
+  }
+
+  .neo-chip--outline {
+    background: transparent;
+    color: var(--ns-primary);
+    box-shadow: inset 0 0 0 1.5px var(--ns-primary);
+  }
+
+  .neo-chip--soft {
+    background: var(--ns-primary-bg);
+    color: var(--ns-primary);
+  }
+
+  .neo-chip--quiet {
+    background: var(--ns-sunken);
+    color: var(--ns-text-muted);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  .neo-chip--cancelled {
+    background: var(--ns-sunken);
+    color: var(--ns-text-faint);
+    box-shadow: var(--neo-inset-sm);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* ═══════════════ CONTROLES ═══════════════ */
+
+  /* Interruptor: la perilla sale del hueco. */
+  .neo-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 52px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+    cursor: pointer;
+    transition: background var(--dur-3) var(--ease-out);
+  }
+
+  .neo-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--ns-surface);
+    box-shadow: var(--neo-knob);
+    transition: transform var(--dur-3) var(--ease-spring), background var(--dur-3) var(--ease-out);
+  }
+
+  .neo-switch[aria-checked='true'],
+  .neo-switch.is-on {
+    background: var(--ns-primary);
+    box-shadow: inset 0 2px 5px rgba(122, 0, 14, 0.45);
+  }
+
+  .neo-switch[aria-checked='true']::after,
+  .neo-switch.is-on::after {
+    transform: translateX(22px);
+    background: var(--ns-paper);
+  }
+
+  /* Segmentado tipo iOS, en versión neumórfica. */
+  .neo-segment {
+    display: inline-flex;
+    gap: 4px;
+    padding: 5px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  .neo-segment button {
+    flex: 1;
+    min-height: 36px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: calc(var(--ns-radius-md) - 5px);
+    background: transparent;
+    color: var(--ns-text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-spring);
+  }
+
+  .neo-segment button:active {
+    transform: scale(0.96);
+  }
+
+  .neo-segment button.is-active,
+  .neo-segment button[aria-selected='true'] {
+    background: var(--ns-surface);
+    color: var(--ns-primary);
+    box-shadow: var(--neo-raised-sm);
+  }
+
+  /* Barra de progreso hundida con relleno moldeado. */
+  .neo-progress {
+    position: relative;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+    overflow: hidden;
+  }
+
+  .neo-progress__fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ns-gradient-1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+    transition: width var(--dur-5) var(--ease-out);
+  }
+
+  .neo-progress--indeterminate .neo-progress__fill {
+    width: 45%;
+    animation: ns-progress-indeterminate 1.4s var(--ease-in-out) infinite;
+  }
+
+  /* Spinner: aro hundido con un arco de marca girando. */
+  .neo-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 3px solid var(--ns-line);
+    border-top-color: var(--ns-primary);
+    animation: ns-spin 0.75s linear infinite;
+  }
+
+  .neo-spinner--sm {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+  }
+
+  /* Avatar / soporte de icono moldeado. */
+  .neo-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-surface);
+    color: var(--ns-primary);
+    font-weight: 800;
+    box-shadow: var(--neo-raised-sm);
+    overflow: hidden;
+  }
+
+  .neo-avatar--brand {
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+    box-shadow: var(--neo-brand);
+  }
+
+  /* ═══════════════ TIPOGRAFÍA DE APOYO ═══════════════ */
+
+  .neo-eyebrow {
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ns-text-muted);
+  }
+
+  .neo-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: var(--ns-text);
+  }
+
+  .neo-metric {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    color: var(--ns-text);
+  }
+
+  .ns-gradient-text {
+    background: var(--ns-gradient-1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Divisor que se lee como una ranura en el papel. */
+  .neo-divider {
+    height: 2px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      rgba(153, 0, 17, 0.09),
+      rgba(255, 255, 255, 0.9)
+    );
+  }
+}

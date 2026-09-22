@@ -2,56 +2,86 @@ import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from './Toast'
 
+/**
+ * Plantillas del flyer.
+ *
+ * Los colores viajan como listas de hex y no como cadenas CSS: el lienzo
+ * (`canvas`) no entiende `var(--token)`, y antes se sacaban los colores del
+ * string del degradado con una expresión regular. Si la plantilla traía un
+ * solo color, el cálculo del stop quedaba en `0/0` y la descarga fallaba con
+ * "Error al generar el flyer".
+ */
 const PROFESSIONAL_TEMPLATES = [
   {
-    id: 'premium-dark',
-    name: 'Premium Oscuro',
-    bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
-    accent: 'linear-gradient(135deg, #5B3DF5 0%, #8B7CF6 100%)',
-    textColor: '#ffffff',
-    secondaryText: '#e8deff',
+    id: 'marca-solida',
+    name: 'Marca sólida',
+    bgColors: ['#990011', '#8A000F'],
+    accentColors: ['#FCF6F5', '#F2DDDE'],
+    textColor: '#FCF6F5',
+    secondaryText: '#EACACC',
   },
   {
-    id: 'premium-violet',
-    name: 'Violeta Premium',
-    bg: 'linear-gradient(135deg, #5B3DF5 0%, #7C5CF8 50%, #9B7EFF 100%)',
-    accent: 'linear-gradient(135deg, #ffffff 0%, #f3eeff 100%)',
-    textColor: '#ffffff',
-    secondaryText: '#e8deff',
+    id: 'degrade-profundo',
+    name: 'Degradé profundo',
+    bgColors: ['#A81322', '#990011', '#7A000E'],
+    accentColors: ['#FCF6F5'],
+    textColor: '#FCF6F5',
+    secondaryText: '#E8C5C7',
   },
   {
-    id: 'modern-light',
-    name: 'Moderno Claro',
-    bg: 'linear-gradient(135deg, #f5f3ff 0%, #e8deff 100%)',
-    accent: 'linear-gradient(135deg, #5B3DF5 0%, #8B7CF6 100%)',
-    textColor: '#1e1b4b',
-    secondaryText: '#5b5580',
+    id: 'papel-claro',
+    name: 'Papel claro',
+    bgColors: ['#FCF6F5', '#F2DDDE'],
+    accentColors: ['#990011', '#A81322'],
+    textColor: '#990011',
+    secondaryText: '#AD313F',
   },
   {
-    id: 'luxury-gold',
-    name: 'Lujo Dorado',
-    bg: 'linear-gradient(135deg, #1a1410 0%, #2d2015 50%, #3d2f1f 100%)',
-    accent: 'linear-gradient(135deg, #d4af37 0%, #f4d03f 100%)',
-    textColor: '#ffffff',
-    secondaryText: '#f4d03f',
+    id: 'papel-tinta',
+    name: 'Papel y tinta',
+    bgColors: ['#F6E7E7', '#E8C5C7'],
+    accentColors: ['#990011'],
+    textColor: '#990011',
+    secondaryText: '#A31928',
   },
   {
-    id: 'vibrant-neon',
-    name: 'Vibrante Neón',
-    bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-    accent: 'linear-gradient(135deg, #00d9ff 0%, #ff006e 100%)',
-    textColor: '#ffffff',
-    secondaryText: '#00d9ff',
+    id: 'contraste',
+    name: 'Alto contraste',
+    bgColors: ['#990011'],
+    accentColors: ['#FCF6F5'],
+    textColor: '#FCF6F5',
+    secondaryText: '#F2DDDE',
   },
   {
-    id: 'elegant-rose',
-    name: 'Elegante Rosé',
-    bg: 'linear-gradient(135deg, #3d1f2d 0%, #5a2e42 50%, #7a3d52 100%)',
-    accent: 'linear-gradient(135deg, #ff6b9d 0%, #ffa6c1 100%)',
-    textColor: '#ffffff',
-    secondaryText: '#ffa6c1',
+    id: 'humo',
+    name: 'Humo',
+    bgColors: ['#C56C75', '#990011'],
+    accentColors: ['#FCF6F5', '#EED4D5'],
+    textColor: '#FCF6F5',
+    secondaryText: '#F2DDDE',
   },
 ]
+
+/** Degradado CSS a partir de la lista de colores de la plantilla. */
+function degradadoCss(colores) {
+  const lista = colores?.length ? colores : ['#990011']
+  return lista.length === 1
+    ? lista[0]
+    : `linear-gradient(135deg, ${lista.join(', ')})`
+}
+
+/** Pinta una lista de colores como degradado, tolerando un solo color. */
+function degradado(ctx, colores, x0, y0, x1, y1) {
+  const lista = colores?.length ? colores : ['#990011']
+  const grad = ctx.createLinearGradient(x0, y0, x1, y1)
+  if (lista.length === 1) {
+    grad.addColorStop(0, lista[0])
+    grad.addColorStop(1, lista[0])
+  } else {
+    lista.forEach((c, i) => grad.addColorStop(i / (lista.length - 1), c))
+  }
+  return grad
+}
 
 const SIZES = [
   { id: 'story', label: 'Story Instagram', w: 1080, h: 1920, aspect: '9/16', previewH: 400, previewW: 225 },
@@ -79,16 +109,12 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
       const ctx = canvas.getContext('2d')
 
       // Fondo gradiente
-      const gradBg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
-      const bgColors = selectedTemplate.bg.match(/#[0-9a-fA-F]{6}/g) || ['#0f172a', '#5B3DF5']
-      bgColors.forEach((c, i) => gradBg.addColorStop(i / (bgColors.length - 1), c))
-      ctx.fillStyle = gradBg
+      ctx.fillStyle = degradado(ctx, selectedTemplate.bgColors, 0, 0, canvas.width, canvas.height)
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       // Elementos decorativos (círculos borrosos)
       ctx.globalAlpha = 0.08
-      const accentColors = selectedTemplate.accent.match(/#[0-9a-fA-F]{6}/g) || ['#5B3DF5']
-      ctx.fillStyle = accentColors[0]
+      ctx.fillStyle = selectedTemplate.accentColors[0]
       ctx.beginPath()
       ctx.arc(canvas.width * 0.85, canvas.height * 0.15, canvas.width * 0.4, 0, Math.PI * 2)
       ctx.fill()
@@ -123,16 +149,13 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
       const ctaX = (canvas.width - ctaWidth) / 2
 
       // Botón con gradiente
-      const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX, ctaY + ctaHeight)
-      const ctaColors = selectedTemplate.accent.match(/#[0-9a-fA-F]{6}/g) || ['#5B3DF5']
-      ctaColors.forEach((c, i) => ctaGrad.addColorStop(i / (ctaColors.length - 1), c))
-      ctx.fillStyle = ctaGrad
+      ctx.fillStyle = degradado(ctx, selectedTemplate.accentColors, ctaX, ctaY, ctaX, ctaY + ctaHeight)
       ctx.beginPath()
       ctx.roundRect(ctaX, ctaY, ctaWidth, ctaHeight, canvas.width * 0.05)
       ctx.fill()
 
-      // Texto del botón
-      ctx.fillStyle = '#ffffff'
+      // Texto del botón: contrasta contra el acento de la plantilla.
+      ctx.fillStyle = selectedTemplate.accentColors[0] === '#FCF6F5' ? '#990011' : '#FCF6F5'
       ctx.font = `bold ${Math.floor(canvas.width * 0.07)}px "Inter", sans-serif`
       ctx.fillText(cta, canvas.width / 2, ctaY + ctaHeight / 2 - canvas.width * 0.025)
 
@@ -143,13 +166,13 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
         const qrY = canvas.height - qrSize - canvas.height * 0.05
 
         // Fondo blanco para QR
-        ctx.fillStyle = '#ffffff'
+        ctx.fillStyle = '#FCF6F5'
         ctx.beginPath()
         ctx.roundRect(qrX - canvas.width * 0.02, qrY - canvas.width * 0.02, qrSize + canvas.width * 0.04, qrSize + canvas.width * 0.04, canvas.width * 0.02)
         ctx.fill()
 
         // Placeholder QR (en producción usar librería qrcode.js)
-        ctx.fillStyle = '#000000'
+        ctx.fillStyle = '#990011'
         ctx.fillRect(qrX, qrY, qrSize, qrSize)
       }
 
@@ -246,7 +269,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
                       : 'border-transparent'
                   }`}
                   style={{
-                    background: template.bg,
+                    background: degradadoCss(template.bgColors),
                     borderColor: selectedTemplate.id === template.id ? 'var(--ns-primary)' : 'transparent',
                   }}
                 >
@@ -334,7 +357,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
               style={{
                 width: `${selectedSize.previewW}px`,
                 height: `${selectedSize.previewH}px`,
-                background: selectedTemplate.bg,
+                background: degradadoCss(selectedTemplate.bgColors),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -351,7 +374,8 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
                 </div>
                 <div
                   style={{
-                    background: selectedTemplate.accent,
+                    background: degradadoCss(selectedTemplate.accentColors),
+                    color: selectedTemplate.accentColors[0] === '#FCF6F5' ? '#990011' : '#FCF6F5',
                     padding: '8px 16px',
                     borderRadius: '6px',
                     marginBottom: '12px',

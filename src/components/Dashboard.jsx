@@ -31,6 +31,7 @@ import { ErrorGuard } from './ErrorBoundary'
 
 // Suscripción / planes
 import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN, cobroSinConfigurar, formatearPrecio } from '../utils/suscripcion'
+import { haptic } from '../utils/haptics'
 import { ocupaHorario, factura, precioTurno, parseFecha, tieneHorariosConfigurados, mapaEmbedUrl } from '../utils/reservas'
 
 // Componentes del Dashboard
@@ -40,9 +41,6 @@ import DashboardHome from './DashboardHome'
 import NotificationCenter from './NotificationCenterV2'
 import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
-import '../components/PlastilinaStyles.css'
-import '../components/MobileOptimized.css'
-import '../components/NavbarPremium.css'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
@@ -66,7 +64,7 @@ export default function Dashboard({ session }) {
   const [subiendoPortada, setSubiendoPortada] = useState(false)
 
   // --- ESTADOS: BRANDING & UI ---
-  const [colorPrimario, setColorPrimario] = useState('#0f172a')
+  const [colorPrimario, setColorPrimario] = useState('#990011')
   const [descripcion, setDescripcion] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
   const [portadaUrl, setPortadaUrl] = useState('')
@@ -103,6 +101,21 @@ export default function Dashboard({ session }) {
   // --- TOUR GUIADO ---
   const tour = useTour()
 
+  // Al cambiar de sección arrancamos arriba, como cualquier app nativa:
+  // antes entrabas a Ajustes y aparecías en la mitad de la pantalla.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [tab])
+
+  // --- BARRA SUPERIOR: sombra sólo cuando hay contenido por encima ---
+  const [scrolleado, setScrolleado] = useState(false)
+  useEffect(() => {
+    const alScrollear = () => setScrolleado(window.scrollY > 6)
+    alScrollear()
+    window.addEventListener('scroll', alScrollear, { passive: true })
+    return () => window.removeEventListener('scroll', alScrollear)
+  }, [])
+
   // --- UTILIDADES DE EXPORTACIÓN ---
   function exportToCSV(data, filename, columns) {
     const header = columns.map(c => c.label).join(',')
@@ -129,12 +142,12 @@ export default function Dashboard({ session }) {
     ))
     // Generate a printable HTML report and trigger print dialog
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)} - ${esc(negocioNombre)}</title>
-    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#0f172a}
-    h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#64748b;border-bottom:1px solid #e2e8f0;padding-bottom:8px}
-    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;flex:1;text-align:center}
-    .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
-    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#f1f5f9;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b}
-    td{padding:8px 12px;border-bottom:1px solid #f1f5f9}.meta{font-size:11px;color:#94a3b8;margin-top:4px}</style></head><body>
+    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#990011}
+    h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#B94F5A;border-bottom:1px solid #F4E2E3;padding-bottom:8px}
+    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#FDF8F8;border:1px solid #F4E2E3;border-radius:12px;padding:16px;flex:1;text-align:center}
+    .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#D28F95;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#FAF1F0;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#B94F5A}
+    td{padding:8px 12px;border-bottom:1px solid #FAF1F0}.meta{font-size:11px;color:#D28F95;margin-top:4px}</style></head><body>
     <h1>${esc(title)}</h1><p class="meta">${esc(negocioNombre)} — ${new Date().toLocaleDateString('es-ES', { day:'numeric',month:'long',year:'numeric' })}</p>`
     + sections.map(s => {
       let content = `<h2>${esc(s.title)}</h2>`
@@ -234,7 +247,7 @@ export default function Dashboard({ session }) {
 
       if (data && data.id) {
         setNegocio(data)
-        setColorPrimario(data?.color_primario || '#0f172a')
+        setColorPrimario(data?.color_primario || '#990011')
         setDescripcion(data.descripcion || '')
         setLogoUrl(data.logo_url || '')
         setPortadaUrl(data.portada_url || '')
@@ -747,7 +760,7 @@ export default function Dashboard({ session }) {
   ]
 
   if (loading) return (
-    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]' : 'bg-white'}`}>
+    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#990011]' : 'bg-white'}`}>
       <div className={`w-6 h-6 border-2 rounded-full animate-spin ${negocio?.es_admin_plataforma ? 'border-white/10 border-t-white' : 'border-slate-200 border-t-slate-800'}`}></div>
     </div>
   )
@@ -757,7 +770,7 @@ export default function Dashboard({ session }) {
   if (negocio && !accesoSub.acceso && !negocio.es_admin_plataforma) {
     const esVencido = accesoSub.estado === 'vencido'
     return (
-      <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased flex flex-col" style={{ colorScheme: 'light' }}>
+      <div className="min-h-screen bg-[#FDF8F8] font-sans antialiased flex flex-col" style={{ colorScheme: 'light' }}>
         {/* Navbar mínimo */}
         <nav className="h-14 border-b bg-white/90 backdrop-blur-md border-slate-200 shadow-sm flex items-center justify-between px-4 sticky top-0 z-50">
           <div className="flex items-center gap-2">
@@ -896,13 +909,21 @@ export default function Dashboard({ session }) {
   const clientesFrecuentes = clientes.filter(c => c.frecuencia === 'Frecuente').length
 
 
+  const esPanelNegocio = Boolean(negocio) && !negocio.es_admin_plataforma
+  const tituloSeccion = tabsConfig.find((t) => t.id === tab)?.label || 'Panel'
+
   return (
-    <div className={`noni-shell min-h-screen font-sans antialiased ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B] text-slate-100' : negocio ? 'ns-owner-dark' : 'bg-[#FAFAFC] text-slate-900'} ns-has-bottom-nav`} style={{ colorScheme: negocio ? 'light' : 'light' }}>
+    <div
+      className={`noni-shell font-sans antialiased ${negocio?.es_admin_plataforma ? 'ns-admin-shell' : ''}`}
+      style={{ colorScheme: 'light' }}
+    >
 
       {/* Copy-link toast */}
       {copyToast && (
-        <div className="ns-copy-toast">
-          <IconCheckCircle size={20} className="text-emerald-500 shrink-0" />
+        <div className="ns-copy-toast" role="status">
+          <span className="neo-avatar w-9 h-9">
+            <IconCheckCircle size={18} />
+          </span>
           <div>
             <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
             <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Compartilo por WhatsApp o redes</p>
@@ -910,41 +931,89 @@ export default function Dashboard({ session }) {
         </div>
       )}
 
-      {/* GLOBAL NAVBAR — Bento Minimal */}
-      <nav className={`h-16 md:h-20 flex items-center justify-between px-4 md:px-10 sticky top-0 z-[100] ${negocio?.es_admin_plataforma ? 'bg-[#0A0A0B]/80 backdrop-blur-2xl border-b border-white/5 shadow-2xl' : 'ns-nav-dark'}`}>
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-shadow-glow)' }}>
-            <span className="text-white font-black text-sm md:text-lg tracking-tighter">N</span>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-[11px] md:text-[13px] font-black tracking-[0.1em] leading-none" style={{ color: 'var(--ns-text)' }}>
-              {negocio?.es_admin_plataforma ? 'Nucleus Master' : (negocio?.nombre || 'Panel')}
-            </p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <p className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase" style={{ color: 'var(--ns-text-muted)' }}>
-                {negocio?.rubro || 'Gestión de Reservas'}
+      {/* ══════════ RAIL LATERAL — navegación de escritorio ══════════ */}
+      <div className="noni-layout">
+        {esPanelNegocio && (
+          <aside className="noni-rail" data-tour="nav" aria-label="Navegación del panel">
+            <div className="noni-rail__brand">
+              <span className="neo-avatar neo-avatar--brand w-11 h-11 text-base">N</span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-black tracking-tight truncate" style={{ color: 'var(--ns-text)' }}>
+                  {negocio?.nombre || 'Panel'}
+                </p>
+                <p className="neo-eyebrow truncate">{negocio?.rubro || 'Reservas'}</p>
+              </div>
+            </div>
+
+            <button onClick={() => setSearchOpen(true)} className="noni-rail__item" aria-keyshortcuts="Control+K">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              Buscar
+              <kbd className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded-md" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-faint)' }}>⌘K</kbd>
+            </button>
+
+            <p className="noni-rail__label">Gestión</p>
+            <div className="noni-rail__group">
+              {tabsConfig.map((i) => (
+                <button
+                  key={i.id}
+                  onClick={() => { haptic(); setTab(i.id) }}
+                  aria-current={tab === i.id ? 'page' : undefined}
+                  className={`noni-rail__item ${tab === i.id ? 'is-active' : ''}`}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  {i.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="noni-rail__spacer" />
+
+            <div className="noni-rail__footer noni-rail__group">
+              <button onClick={() => window.open(publicLink, '_blank')} className="noni-rail__item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                Ver mi app
+              </button>
+              <button onClick={cerrarSesion} className="noni-rail__item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                Cerrar sesión
+              </button>
+            </div>
+          </aside>
+        )}
+
+        <div className="flex-1 min-w-0 flex flex-col">
+
+        {/* ══════════ BARRA SUPERIOR ══════════ */}
+        <header className={`noni-topbar ${scrolleado ? 'is-stuck' : ''}`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className={`neo-avatar neo-avatar--brand w-10 h-10 text-sm ${esPanelNegocio ? 'lg:hidden' : ''}`}>N</span>
+            <div className="noni-topbar__title">
+              <p className="text-[14px] md:text-[15px] font-black tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
+                {negocio?.es_admin_plataforma ? 'Nucleus Master' : (esPanelNegocio ? tituloSeccion : (negocio?.nombre || 'Panel'))}
               </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="ns-live-dot" style={{ width: 6, height: 6 }} />
+                <p className="text-[9px] font-bold tracking-[0.16em] uppercase truncate" style={{ color: 'var(--ns-text-muted)' }}>
+                  {esPanelNegocio ? (negocio?.nombre || '') : (negocio?.rubro || 'Gestión de Reservas')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3 md:gap-6">
-          {negocio && !negocio.es_admin_plataforma && (
-            <>
-              <NotificationCenter negocioId={negocio.id} rubro={negocio.rubro} />
-              <button onClick={() => setSearchOpen(true)} aria-label="Buscar (Ctrl+K)" className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all group" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text-muted)' }}>
-                <svg className="w-3.5 h-3.5 group-hover:opacity-70" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Buscar
-              </button>
-              <button onClick={() => window.open(publicLink, '_blank')} className="hidden md:flex text-[9px] font-black uppercase tracking-[0.15em] items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Ver App
-              </button>
-            </>
-          )}
-          <button onClick={cerrarSesion} className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-colors" style={{ color: '#EF444480' }}>Salir</button>
-        </div>
-      </nav>
+
+          <div className="flex items-center gap-2">
+            {esPanelNegocio && (
+              <>
+                <button onClick={() => { haptic(); setSearchOpen(true) }} aria-label="Buscar (Ctrl+K)" className="neo-icon-btn lg:hidden">
+                  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
+                <NotificationCenter negocioId={negocio.id} rubro={negocio.rubro} />
+              </>
+            )}
+            <button onClick={cerrarSesion} className="neo-icon-btn lg:hidden" aria-label="Cerrar sesión" title="Cerrar sesión">
+              <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          </div>
+        </header>
 
       {/* GLOBAL SEARCH MODAL (Cmd+K) */}
       {searchOpen && negocio && !negocio.es_admin_plataforma && (
@@ -955,7 +1024,8 @@ export default function Dashboard({ session }) {
         />
       )}
 
-      <main className={`max-w-7xl mx-auto p-4 md:p-8 ${!negocio?.es_admin_plataforma && negocio ? 'ns-has-bottom-nav' : ''}`}>
+      <main className={`noni-main ${esPanelNegocio ? 'ns-has-bottom-nav' : ''}`}>
+        <div className="noni-container">
 
         {!negocio ? (
           /* ESCENARIO: ONBOARDING WIZARD GUIADO */
@@ -971,12 +1041,12 @@ export default function Dashboard({ session }) {
                 <p className="text-slate-500 font-medium mt-1 md:mt-2 text-sm md:text-lg tracking-tight">Arquitectura centralizada de Non Sistemas.</p>
               </div>
               <div className="flex items-center gap-3 md:gap-4 bg-white/5 border border-white/10 px-4 md:px-6 py-2.5 md:py-3 rounded-[1rem] md:rounded-2xl">
-                <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(153,0,17,0.5)]"></div>
                 <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60">Sistema Estable</span>
               </div>
             </header>
             {cobroSinConfigurar && (
-              <div className="rounded-2xl border p-4 md:p-5 flex items-start gap-3" style={{ background: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.35)' }} data-testid="aviso-cobro">
+              <div className="rounded-2xl border p-4 md:p-5 flex items-start gap-3" style={{ background: 'rgba(153,0,17,0.1)', borderColor: 'rgba(153,0,17,0.35)' }} data-testid="aviso-cobro">
                 <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 <div>
                   <p className="text-sm font-bold text-amber-300">Falta configurar el canal de cobro</p>
@@ -1062,18 +1132,18 @@ export default function Dashboard({ session }) {
 
             {/* BANNER DE SUSCRIPCIÓN — Bento */}
             {(accesoSub.estado === 'trial' || (accesoSub.estado === 'activo' && accesoSub.diasRestantes != null && accesoSub.diasRestantes <= 5)) && (
-              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-[#E8DEFF] border-[#C4B5FD]' : 'bg-[#FEF3C7] border-[#FCD34D]'}`} data-testid="subscription-banner">
+              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-[#F2DDDE] border-[#E0B1B5]' : 'bg-[#FAF1F0] border-[#ECCFD1]'}`} data-testid="subscription-banner">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-[#5B3DF5]' : 'bg-[#F59E0B]'}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-[#AF3643]' : 'bg-[#DAA2A7]'}`}>
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-[#1E1B4B]' : 'text-[#92400E]'}`}>
+                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-[#990011]' : 'text-[#A72231]'}`}>
                       {accesoSub.estado === 'trial'
                         ? `Prueba gratis · te ${accesoSub.diasRestantes === 1 ? 'queda 1 día' : `quedan ${accesoSub.diasRestantes} días`}`
                         : `Tu plan vence en ${accesoSub.diasRestantes === 1 ? '1 día' : `${accesoSub.diasRestantes} días`}`}
                     </p>
-                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-[#5B3DF5]' : 'text-[#D97706]'}`}>
+                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-[#AF3643]' : 'text-[#CB7B83]'}`}>
                       Plan {PLAN.nombre} · {formatearPrecio()}/mes · activá para no perder el acceso
                     </p>
                   </div>
@@ -1082,7 +1152,7 @@ export default function Dashboard({ session }) {
                   href={whatsappActivacion(negocio, session.user.email)}
                   target="_blank" rel="noopener noreferrer"
                   data-testid="subscription-banner-cta"
-                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-[#5B3DF5]' : 'bg-[#F59E0B]'}`}
+                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-[#AF3643]' : 'bg-[#DAA2A7]'}`}
                 >
                   {accesoSub.estado === 'trial' ? 'Activar plan' : 'Renovar'}
                 </a>
@@ -1095,22 +1165,22 @@ export default function Dashboard({ session }) {
                 onClick={() => setTab('horarios')}
                 data-testid="aviso-sin-horarios"
                 className="w-full text-left flex items-center gap-3 px-4 md:px-5 py-3.5 rounded-2xl border transition-all active:scale-[0.99]"
-                style={{ background: '#FEF3C7', borderColor: '#FCD34D' }}
+                style={{ background: '#FAF1F0', borderColor: '#ECCFD1' }}
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#F59E0B' }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#DAA2A7' }}>
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-[#92400E]">Todavía no configuraste tus horarios</p>
-                  <p className="text-[11px] font-medium text-[#D97706]">Sin horarios, tu link de reservas muestra todos los días cerrados. Tocá acá para configurarlos.</p>
+                  <p className="text-[13px] font-bold text-[#A72231]">Todavía no configuraste tus horarios</p>
+                  <p className="text-[11px] font-medium text-[#CB7B83]">Sin horarios, tu link de reservas muestra todos los días cerrados. Tocá acá para configurarlos.</p>
                 </div>
-                <svg className="w-4 h-4 text-[#D97706] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className="w-4 h-4 text-[#CB7B83] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
             )}
 
             {/* BRAND HERO — Bento Card Light (sólo en pestañas que no son el inicio) */}
             {tab !== 'inicio' && (
-            <header className="relative overflow-hidden rounded-3xl p-6 md:p-10 bg-[#FFFFFF] border group animate-in fade-in slide-in-from-top-4 duration-700" style={{ borderColor: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
+            <header className="relative overflow-hidden rounded-3xl p-6 md:p-10 bg-[#FCF6F5] border group animate-in fade-in slide-in-from-top-4 duration-700" style={{ borderColor: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
               <div className="relative z-10 flex items-center justify-between gap-6">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-3">
@@ -1121,7 +1191,7 @@ export default function Dashboard({ session }) {
                   <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--ns-primary)' }}>{negocio.rubro}</p>
                 </div>
                 {logoUrl && (
-                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-[#E8DEFF] p-1 shrink-0 transform group-hover:scale-105 transition-transform duration-500">
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-[#F2DDDE] p-1 shrink-0 transform group-hover:scale-105 transition-transform duration-500">
                     <img src={logoUrl} className="w-full h-full object-cover rounded-[1rem] md:rounded-[1.5rem]" alt="Logo" />
                   </div>
                 )}
@@ -1130,35 +1200,22 @@ export default function Dashboard({ session }) {
             </header>
             )}
 
-            {/* TAB SELECTOR — Desktop Bento Pills */}
-            <div id="tour-tabs" className="hidden md:flex flex-wrap gap-2 p-2 rounded-2xl no-scrollbar" style={{ background: 'var(--ns-bg)', border: '1px solid var(--ns-border)' }}>
-              {tabsConfig.map(i => (
-                <button 
-                  key={i.id} 
-                  id={i.id === 'servicios' ? 'tour-servicios' : i.id === 'agenda' ? 'tour-agenda' : i.id === 'ajustes' ? 'tour-ajustes' : undefined} 
-                  onClick={() => setTab(i.id)}
-                  aria-current={tab === i.id ? 'page' : undefined}
-                  className={`ns-tab ${tab === i.id ? 'active' : ''}`}
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  {i.label}
-                </button>
-              ))}
-            </div>
-
-            {/* MOBILE TAB PILLS */}
-            <div className="flex md:hidden flex-wrap gap-2 no-scrollbar px-1">
-              {tabsConfig.filter(t => !bottomNavTabs.find(bn => bn.id === t.id)).map(i => (
-                <button 
-                  key={i.id} 
-                  onClick={() => setTab(i.id)} 
-                  className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border ${tab === i.id ? 'text-white shadow-md' : ''}`}
-                  style={tab === i.id ? { background: 'var(--ns-primary)', borderColor: 'var(--ns-primary)', boxShadow: '0 4px 12px rgba(91, 61, 245, 0.2)' } : { background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text-muted)' }}
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  {i.label}
-                </button>
-              ))}
+            {/* ══════════ PESTAÑAS — barra deslizable bajo 1024px ══════════ */}
+            <div className="lg:hidden -mx-1 px-1 overflow-x-auto no-scrollbar" data-tour="tabs">
+              <div className="flex gap-1.5 w-max p-1.5 rounded-[22px]" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>
+                {tabsConfig.map((i) => (
+                  <button
+                    key={i.id}
+                    onClick={() => { haptic(); setTab(i.id) }}
+                    aria-current={tab === i.id ? 'page' : undefined}
+                    className={`ns-tab ${tab === i.id ? 'active' : ''}`}
+                    style={tab === i.id ? { background: 'var(--ns-surface)', boxShadow: 'var(--neo-raised-sm)' } : undefined}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    {i.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* AREA DE CONTENIDO PRINCIPAL */}
@@ -1166,7 +1223,7 @@ export default function Dashboard({ session }) {
 
               {tab === 'inicio' && (
                 <ErrorGuard fallbackMessage="No pudimos mostrar el resumen">
-                <div id="tour-monitor">
+                <div data-tour="monitor">
                   {/* Panel de configuración guiada: estaba importado pero nunca
                       se renderizaba, así que el usuario nuevo caía en un panel
                       vacío sin saber qué hacer. */}
@@ -1194,9 +1251,9 @@ export default function Dashboard({ session }) {
                   Cada sección va dentro de su propio ErrorGuard: si una falla,
                   el resto del panel sigue funcionando. */}
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                {tab === 'agenda' && <ErrorGuard fallbackMessage="No pudimos mostrar la agenda"><div id="tour-agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div></ErrorGuard>}
+                {tab === 'agenda' && <ErrorGuard fallbackMessage="No pudimos mostrar la agenda"><div data-tour="agenda"><Turnos negocioId={negocio.id} rubro={negocio.rubro} negocio={negocio} /></div></ErrorGuard>}
                 {tab === 'reportes' && <ErrorGuard fallbackMessage="No pudimos generar los reportes"><Reportes negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
-                {tab === 'servicios' && <ErrorGuard fallbackMessage="No pudimos mostrar tus servicios"><div id="tour-servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div></ErrorGuard>}
+                {tab === 'servicios' && <ErrorGuard fallbackMessage="No pudimos mostrar tus servicios"><div data-tour="servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div></ErrorGuard>}
                 {tab === 'equipo' && <ErrorGuard fallbackMessage="No pudimos mostrar tu equipo"><Empleados negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
                 {tab === 'horarios' && <ErrorGuard fallbackMessage="No pudimos mostrar los horarios"><ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} /></ErrorGuard>}
                 {tab === 'inventario' && <ErrorGuard fallbackMessage="No pudimos mostrar el inventario"><InventarioPro negocioId={negocio.id} /></ErrorGuard>}
@@ -1275,13 +1332,13 @@ export default function Dashboard({ session }) {
                         <p className="text-xl md:text-2xl font-black" style={{ color: 'var(--ns-text)' }}>{clientes.length}</p>
                         <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-primary)' }}>Total</p>
                       </div>
-                      <div className="rounded-2xl p-3 text-center" style={{ background: 'rgba(245, 158, 11, 0.08)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                        <p className="text-xl md:text-2xl font-black" style={{ color: '#D97706' }}>{clientesVIP + clientesFrecuentes}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#B45309' }}>Recurrentes</p>
+                      <div className="rounded-2xl p-3 text-center" style={{ background: 'rgba(153,0,17,0.08)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                        <p className="text-xl md:text-2xl font-black" style={{ color: '#CB7B83' }}>{clientesVIP + clientesFrecuentes}</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#B74A55' }}>Recurrentes</p>
                       </div>
-                      <div className="rounded-2xl p-3 text-center" style={{ background: 'rgba(16, 185, 129, 0.08)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                        <p className="text-xl md:text-2xl font-black" style={{ color: '#059669' }}>${totalIngresosClientes.toLocaleString()}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#047857' }}>Facturado</p>
+                      <div className="rounded-2xl p-3 text-center" style={{ background: 'rgba(153,0,17,0.08)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                        <p className="text-xl md:text-2xl font-black" style={{ color: '#C36771' }}>${totalIngresosClientes.toLocaleString()}</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#B3404C' }}>Facturado</p>
                       </div>
                     </div>
 
@@ -1289,7 +1346,7 @@ export default function Dashboard({ session }) {
                     <div className="flex gap-2 relative z-10">
                       <div className="relative flex-1">
                         <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <input type="text" placeholder="Buscar cliente..." className="w-full rounded-2xl py-3.5 pl-10 pr-4 text-xs outline-none font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid var(--ns-border)', color: 'var(--ns-text)', boxShadow: 'var(--ns-shadow-inner)' }} value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} onFocus={e => { e.target.style.borderColor = 'var(--ns-primary)'; e.target.style.boxShadow = '0 0 0 4px rgba(91,61,245,0.12)'; }} onBlur={e => { e.target.style.borderColor = 'var(--ns-border)'; e.target.style.boxShadow = 'var(--ns-shadow-inner)'; }} />
+                        <input type="text" placeholder="Buscar cliente..." className="w-full rounded-2xl py-3.5 pl-10 pr-4 text-xs outline-none font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid var(--ns-border)', color: 'var(--ns-text)', boxShadow: 'var(--ns-shadow-inner)' }} value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} onFocus={e => { e.target.style.borderColor = 'var(--ns-primary)'; e.target.style.boxShadow = '0 0 0 4px rgba(153,0,17,0.12)'; }} onBlur={e => { e.target.style.borderColor = 'var(--ns-border)'; e.target.style.boxShadow = 'var(--ns-shadow-inner)'; }} />
                       </div>
                       <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} className="rounded-2xl px-3 py-3 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer" style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid var(--ns-border)', color: 'var(--ns-text-secondary)', boxShadow: 'var(--ns-shadow-sm)' }}>
                         <option value="visitas">Visitas</option>
@@ -1302,7 +1359,7 @@ export default function Dashboard({ session }) {
 
                   {cargandoClientes ? (
                     <div className="flex justify-center items-center h-40">
-                      <div className="w-8 h-8 border-4 border-[#E8DEFF] border-t-[#5B3DF5] rounded-full animate-spin"></div>
+                      <div className="w-8 h-8 border-4 border-[#F2DDDE] border-t-[#AF3643] rounded-full animate-spin"></div>
                     </div>
                   ) : clientesFiltrados.length === 0 ? (
                     <div className="rounded-[2rem] border-2 border-dashed p-12 flex flex-col items-center text-center ns-fade-up" style={{ borderColor: 'var(--ns-border)', background: 'var(--ns-accent-bg)' }}>
@@ -1317,8 +1374,8 @@ export default function Dashboard({ session }) {
                       {clientesFiltrados.map((c, idx) => (
                         <div key={idx} className="ns-cliente-card ns-stagger-in" style={{ animationDelay: `${idx * 0.04}s` }}>
                           {/* Avatar Plastilina */}
-                          <div className={`ns-cliente-avatar shrink-0 ${c.frecuencia === 'VIP' ? 'text-amber-500' : 'text-[#5B3DF5]'}`}
-                            style={{ background: c.frecuencia === 'VIP' ? 'linear-gradient(135deg, #FEF3C7, #FDE68A)' : 'linear-gradient(135deg, #E8DEFF, #D4C5FF)', boxShadow: c.frecuencia === 'VIP' ? '0 4px 12px rgba(245,158,11,0.2)' : 'var(--ns-shadow-md)' }}>
+                          <div className={`ns-cliente-avatar shrink-0 ${c.frecuencia === 'VIP' ? 'text-amber-500' : 'text-[#AF3643]'}`}
+                            style={{ background: c.frecuencia === 'VIP' ? 'var(--ns-gradient-soft)' : 'var(--ns-gradient-soft)', boxShadow: c.frecuencia === 'VIP' ? '0 4px 12px rgba(153,0,17,0.2)' : 'var(--ns-shadow-md)' }}>
                             {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           
@@ -1327,20 +1384,20 @@ export default function Dashboard({ session }) {
                               <h4 className="font-black text-base md:text-lg truncate leading-none" style={{ color: 'var(--ns-text)' }}>{c.nombre}</h4>
                               <span className={`text-[8px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest shrink-0 ${
                                 c.frecuencia === 'VIP' ? 'bg-amber-100 text-amber-600' :
-                                c.frecuencia === 'Frecuente' ? 'text-[#5B3DF5]' :
-                                c.frecuencia === 'Regular' ? 'text-[#7B6FA0]' :
+                                c.frecuencia === 'Frecuente' ? 'text-[#AF3643]' :
+                                c.frecuencia === 'Regular' ? 'text-[#BB545F]' :
                                 'text-emerald-600'
                               }`} style={{
                                 background: c.frecuencia === 'VIP' ? undefined :
                                   c.frecuencia === 'Frecuente' ? 'var(--ns-primary-bg)' :
                                   c.frecuencia === 'Regular' ? 'var(--ns-accent-bg)' :
-                                  'rgba(16,185,129,0.08)'
+                                  'rgba(153,0,17,0.08)'
                               }}>{c.frecuencia}</span>
                             </div>
                             <p className="text-[11px] font-semibold truncate" style={{ color: 'var(--ns-text-secondary)' }}>{c.telefono}{c.email ? ` · ${c.email}` : ''}</p>
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                               <span className="text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
-                              <span className="text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest" style={{ color: '#059669', background: 'rgba(16,185,129,0.08)' }}>${c.ingresoTotal.toLocaleString()}</span>
+                              <span className="text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest" style={{ color: '#C36771', background: 'rgba(153,0,17,0.08)' }}>${c.ingresoTotal.toLocaleString()}</span>
                               <span className="text-[9px] font-semibold" style={{ color: 'var(--ns-text-muted)' }}>Última: {formatearFechaRelativa(c.ultimaVisita)}</span>
                             </div>
                           </div>
@@ -1349,7 +1406,7 @@ export default function Dashboard({ session }) {
                             <button onClick={() => {
                               const num = c.telefono?.replace(/[^0-9]/g, '') || ''
                               window.open(`https://wa.me/${num}?text=${encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, te escribimos desde ${negocio.nombre}.`)}`, '_blank')
-                            }} className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90" style={{ background: 'rgba(37,211,102,0.1)', color: '#25D366', border: '1px solid rgba(37,211,102,0.2)' }} title="WhatsApp" aria-label={`Escribirle por WhatsApp a ${c.nombre}`}>
+                            }} className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90" style={{ background: 'rgba(153,0,17,0.1)', color: '#DEACB1', border: '1px solid rgba(153,0,17,0.2)' }} title="WhatsApp" aria-label={`Escribirle por WhatsApp a ${c.nombre}`}>
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
                             </button>
                             <button onClick={() => {
@@ -1368,7 +1425,7 @@ export default function Dashboard({ session }) {
 
               {/* ====== TAB: AJUSTES — COMPLETO ====== */}
               {tab === 'ajustes' && (
-                <div id="tour-ajustes" className="space-y-4 md:space-y-5 animate-in fade-in duration-700 max-w-2xl">
+                <div data-tour="ajustes" className="space-y-4 md:space-y-5 animate-in fade-in duration-700 max-w-2xl">
 
                   {/* SECCIÓN: PERFIL DEL NEGOCIO */}
                   <div className="ns-settings-card">
@@ -1483,7 +1540,7 @@ export default function Dashboard({ session }) {
                   </div>
 
                   {/* SECCIÓN: LINK PÚBLICO */}
-                  <div className="ns-settings-card">
+                  <div className="ns-settings-card" data-tour="link">
                     <div className="ns-settings-card-header">
                       <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <h4>Link Público</h4>
@@ -1498,7 +1555,7 @@ export default function Dashboard({ session }) {
                       {/* QR Code */}
                       <div className="mt-4 p-4 bg-white border border-slate-200 rounded-xl text-center">
                         <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicLink)}&bgcolor=ffffff&color=0f172a&margin=8`}
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicLink)}&bgcolor=FCF6F5&color=990011&margin=8`}
                           alt="QR de reservas"
                           className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-lg"
                           loading="lazy"
@@ -1517,7 +1574,7 @@ export default function Dashboard({ session }) {
                           Compartir WA
                         </button>
                         <button onClick={() => {
-                          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(publicLink)}&bgcolor=ffffff&color=0f172a&margin=16&format=png`
+                          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(publicLink)}&bgcolor=FCF6F5&color=990011&margin=16&format=png`
                           const a = document.createElement('a')
                           a.href = qrUrl
                           a.download = `qr-${negocio?.nombre?.replace(/\s+/g, '-')?.toLowerCase() || 'reservas'}.png`
@@ -1634,19 +1691,23 @@ export default function Dashboard({ session }) {
             </div>
           </div>
         )}
+        </div>
       </main>
 
-      {/* ====== BOTTOM NAVIGATION BAR — Bento Floating ====== */}
-      {negocio && !negocio.es_admin_plataforma && (
-        <nav className="ns-bottom-nav" aria-label="Navegación principal">
+        </div>
+      </div>
+
+      {/* ====== DOCK INFERIOR — navegación móvil ====== */}
+      {esPanelNegocio && (
+        <nav className="ns-bottom-nav" aria-label="Navegación principal" data-tour="nav-mobile">
           {bottomNavTabs.map(item => (
             <button
               key={item.id}
-              onClick={() => setTab(item.id)}
+              onClick={() => { haptic(); setTab(item.id) }}
               aria-current={tab === item.id ? 'page' : undefined}
               className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
               <span>{item.label}</span>
             </button>
           ))}

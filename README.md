@@ -6,6 +6,7 @@ propio link público donde sus clientes reservan solos, y un panel para manejar
 agenda, equipo, servicios, clientes, inventario y reportes.
 
 - **Stack**: React 19 · Vite 8 · Tailwind v4 · Supabase (auth + Postgres)
+- **Diseño**: neumorfismo de dos colores — `#990011` (marca) y `#FCF6F5` (papel)
 - **Hosting**: Vercel (SPA con rewrite a `index.html`, ver `vercel.json`)
 - **Imágenes**: Cloudinary (preset sin firma `non_sistemas`)
 
@@ -117,6 +118,42 @@ la migración de suscripciones no se bloquean solos.
 
 ---
 
+## Sistema de diseño
+
+La interfaz usa **dos colores y nada más**:
+
+| Token | Valor | Para qué |
+|---|---|---|
+| `--ns-paper` | `#FCF6F5` | Todas las superficies |
+| `--ns-brand` | `#990011` | Acento, tinta y estados |
+
+Cualquier otro tono de la app es una mezcla entre esos dos (`--ns-mix-*`). La
+paleta de Tailwind está reasignada en `@theme` dentro de `src/index.css`: las
+clases heredadas (`slate-*`, `violet-*`, `emerald-*`…) caen sobre la misma
+escala, así que no hay forma de que se escape un color ajeno.
+
+Como no hay una segunda tinta, **la jerarquía la da el relieve, no el color**:
+
+- lo accionable **sale** del papel (`--neo-raised`),
+- lo que está activo o es un campo **se hunde** (`--neo-inset`, `--neo-pressed`),
+- y los estados se distinguen por forma: relleno = confirmado, contorno =
+  pendiente, hundido = inactivo, tachado = cancelado (`.neo-chip--*`).
+
+```
+src/styles/
+  base.css          Reset, tipografía y comportamiento táctil nativo
+  animations.css    Curvas, keyframes y utilidades de movimiento
+  neumorphism.css   Piezas base: tarjetas, botones, campos, chips, switches
+  shell.css         Rail de escritorio, dock móvil, hojas y modales
+  screens.css       Componentes de pantalla del panel
+  views.css         Login, app pública de reservas y landing
+```
+
+Contraste verificado contra el papel: tinta principal 8.3:1, secundaria 6.0:1
+y apagada 4.6:1 — todas cumplen WCAG AA.
+
+---
+
 ## Estructura
 
 ```
@@ -131,10 +168,15 @@ src/
     Servicios / Empleados / ConfiguracionHorarios / InventarioPro / Reportes
     OnboardingWizard.jsx   Alta de negocio nuevo
     GuidedSetup.jsx        Checklist de configuración inicial
-    NoniAssistantV4.jsx    Asistente
+    NoniAssistantV4.jsx    Asistente (hoja inferior en móvil, panel en escritorio)
+    DashboardTourV2.jsx    Tour guiado con recorte sobre el elemento real
+  styles/                  Sistema de diseño (ver arriba)
   utils/
     reservas.js            Reglas de turnos: solapamiento, estados, horarios
     reservas.test.js       Tests de esa lógica
+    asistente.js           Motor de intenciones del asistente
+    asistente.test.js      Tests de clasificación y respuestas
+    haptics.js             Vibración corta al tocar (no-op donde no existe)
     suscripcion.js         Planes, prueba gratis y bloqueo
     vocabulario.js         Terminología por rubro (multirubro)
 sql/                       Migraciones

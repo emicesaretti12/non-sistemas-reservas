@@ -148,75 +148,46 @@ export default function GuidedSetup({
 
   return (
     <div
-      id="tour-setup"
+      data-tour="setup"
       className="mb-4 md:mb-6 animate-in slide-in-from-top-4 duration-700"
       data-testid="guided-setup"
     >
       {copyToast && (
-        <div className="ns-copy-toast">
-          <IconCheckCircle size={18} className="text-emerald-500" />
+        <div className="ns-copy-toast" role="status">
+          <span className="neo-avatar w-9 h-9"><IconCheckCircle size={18} /></span>
           <div>
-            <p className="text-xs font-bold text-slate-900">¡Link copiado!</p>
-            <p className="text-[10px] text-slate-400 font-medium">Compartilo por WhatsApp o redes</p>
+            <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Compartilo por WhatsApp o redes</p>
           </div>
         </div>
       )}
 
-      <div
-        className="relative overflow-hidden rounded-2xl md:rounded-3xl transition-all duration-500"
-        style={{
-          background: allDone
-            ? 'linear-gradient(135deg, #ffffff 0%, #ecfdf5 160%)'
-            : '#ffffff',
-          border: allDone ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.06)',
-        }}
-      >
+      <div className="neo-card overflow-hidden">
         {/* Header */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-full text-left px-5 md:px-7 py-4 md:py-5 flex items-center gap-4"
+          className="w-full text-left px-4 md:px-7 py-4 md:py-5 flex items-center gap-3 md:gap-4"
           data-testid="guided-setup-toggle"
         >
           {/* Avatar Noni */}
           <div className="relative shrink-0">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md"
-              style={{
-                background: allDone
-                  ? 'linear-gradient(135deg, #059669, #10b981)'
-                  : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              }}
-            >
-              <span
-                className="text-white font-black text-xl tracking-tighter"
-                style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
-              >
-                N
-              </span>
+            <div className="neo-avatar neo-avatar--brand w-12 h-12">
+              <span className="font-display font-black text-xl italic tracking-tighter">N</span>
             </div>
-            <span
-              className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
-              style={{
-                background: allDone ? '#10b981' : '#6366f1',
-                boxShadow: allDone ? '0 0 12px #10b981' : '0 0 12px #818cf8',
-              }}
-            />
+            <span className="ns-live-dot absolute -top-1 -right-1" />
           </div>
 
           {/* Text */}
           <div className="flex-1 min-w-0">
             <p
               className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
-              style={{
-                fontFamily: '"JetBrains Mono", monospace',
-                color: allDone ? '#059669' : '#6366f1',
-              }}
+              style={{ fontFamily: 'var(--font-mono-ui)', color: 'var(--ns-text-muted)' }}
             >
               {allDone ? 'Asistente · Listo' : 'Noni · Tu asistente'}
             </p>
             <h3
-              className="text-base md:text-lg font-bold tracking-tight leading-tight text-slate-900"
+              className="font-display text-[15px] md:text-lg font-black tracking-tight leading-snug"
+              style={{ color: 'var(--ns-text)' }}
             >
               {allDone
                 ? '¡Configuración completa!'
@@ -224,7 +195,7 @@ export default function GuidedSetup({
             </h3>
             <p
               className="text-[11px] md:text-[12px] mt-1 font-medium"
-              style={{ color: '#64748b' }}
+              style={{ color: 'var(--ns-text-muted)' }}
             >
               {allDone
                 ? 'Tu sistema está 100% operativo. ¡A recibir reservas!'
@@ -238,13 +209,13 @@ export default function GuidedSetup({
           <div className="flex items-center gap-3 shrink-0">
             <div className="relative w-12 h-12">
               <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
-                <circle cx="24" cy="24" r="20" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+                <circle cx="24" cy="24" r="20" fill="none" stroke="var(--ns-line)" strokeWidth="3" />
                 <circle
                   cx="24"
                   cy="24"
                   r="20"
                   fill="none"
-                  stroke={allDone ? '#10b981' : '#6366f1'}
+                  stroke="var(--ns-primary)"
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 20}`}
@@ -253,14 +224,15 @@ export default function GuidedSetup({
                 />
               </svg>
               <span
-                className="absolute inset-0 flex items-center justify-center text-[12px] font-black text-slate-700"
+                className="absolute inset-0 flex items-center justify-center text-[12px] font-black"
+                style={{ color: 'var(--ns-text)' }}
               >
                 {allDone ? '✓' : `${completedSteps.length}/${totalSteps}`}
               </span>
             </div>
             <svg
               className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
-              style={{ color: '#94a3b8' }}
+              style={{ color: 'var(--ns-text-muted)' }}
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
@@ -272,17 +244,9 @@ export default function GuidedSetup({
         </button>
 
         {/* Progress bar */}
-        <div className="px-5 md:px-7">
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
-            <div
-              className="h-full rounded-full transition-all duration-1000"
-              style={{
-                width: `${progress}%`,
-                background: allDone
-                  ? 'linear-gradient(90deg, #059669, #34d399)'
-                  : 'linear-gradient(90deg, #6366f1, #818cf8, #06b6d4)',
-              }}
-            />
+        <div className="px-4 md:px-7">
+          <div className="neo-progress" style={{ height: 8 }}>
+            <div className="neo-progress__fill" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
@@ -302,19 +266,14 @@ export default function GuidedSetup({
               return (
                 <div key={step.id}>
                   <div
-                    className="flex items-center gap-3 p-3 md:p-4 rounded-xl border transition-all duration-300"
+                    className="flex flex-wrap items-center gap-3 p-3 md:p-4 rounded-[18px] transition-all duration-300"
                     style={{
-                      background: done
-                        ? '#ecfdf5'
+                      background: done ? 'var(--ns-sunken)' : 'var(--ns-surface)',
+                      boxShadow: done
+                        ? 'var(--neo-inset-sm)'
                         : isNext
-                        ? '#eef2ff'
-                        : '#f8fafc',
-                      borderColor: done
-                        ? '#a7f3d0'
-                        : isNext
-                        ? '#c7d2fe'
-                        : '#e2e8f0',
-                      boxShadow: isNext ? '0 0 0 3px rgba(99, 102, 241, 0.10)' : 'none',
+                        ? 'var(--neo-raised), 0 0 0 2px var(--ns-primary)'
+                        : 'var(--neo-raised-sm)',
                       cursor: done ? 'default' : 'pointer',
                     }}
                     onClick={() => {
@@ -326,15 +285,10 @@ export default function GuidedSetup({
                   >
                     {/* Check / Number */}
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 font-black"
-                      style={{
-                        background: done
-                          ? '#10b981'
-                          : isNext
-                          ? '#6366f1'
-                          : '#e2e8f0',
-                        color: done || isNext ? '#fff' : '#64748b',
-                      }}
+                      className="neo-avatar w-9 h-9 font-black transition-all duration-500"
+                      style={done || isNext
+                        ? { background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)' }
+                        : { background: 'var(--ns-sunken)', color: 'var(--ns-text-muted)', boxShadow: 'var(--neo-inset-sm)' }}
                     >
                       {done ? (
                         <svg
@@ -356,29 +310,14 @@ export default function GuidedSetup({
                       <div className="flex items-center gap-2 flex-wrap">
                         <p
                           className="text-[13px] font-bold"
-                          style={{
-                            color: done ? '#059669' : '#1e293b',
-                            textDecoration: done ? 'line-through' : 'none',
-                            opacity: done ? 0.85 : 1,
-                          }}
+                          style={{ color: done ? 'var(--ns-text-muted)' : 'var(--ns-text)' }}
                         >
                           {step.title}
                         </p>
                         {!done && (
                           <span
                             className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
-                            style={{
-                              background: step.badge === 'Esencial'
-                                ? '#eef2ff'
-                                : step.badge === 'Final'
-                                ? '#ecfdf5'
-                                : '#ecfeff',
-                              color: step.badge === 'Esencial'
-                                ? '#4f46e5'
-                                : step.badge === 'Final'
-                                ? '#059669'
-                                : '#0891b2',
-                            }}
+                            style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}
                           >
                             {step.badge}
                           </span>
@@ -386,29 +325,25 @@ export default function GuidedSetup({
                       </div>
                       <p
                         className="text-[11px] font-medium mt-0.5"
-                        style={{ color: done ? '#059669' : '#64748b' }}
+                        style={{ color: 'var(--ns-text-muted)' }}
                       >
-                        {done ? 'Completado ✓' : step.desc}
+                        {done ? 'Listo' : step.desc}
                       </p>
                     </div>
 
-                    {/* Actions */}
+                    {/* Actions — en pantallas chicas bajan a su propia línea
+                        para no comerle el ancho al título del paso. */}
                     {!done && (
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 w-full justify-end sm:w-auto">
                         {isShareStep ? (
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-1.5 flex-wrap justify-end">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleCopyLink()
                               }}
                               data-testid="guided-share-copy"
-                              className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
-                              style={{
-                                background: '#eef2ff',
-                                color: '#4f46e5',
-                                border: '1px solid #c7d2fe',
-                              }}
+                              className="neo-btn neo-btn--quiet"
                             >
                               Copiar
                             </button>
@@ -418,8 +353,7 @@ export default function GuidedSetup({
                                 handleShare()
                               }}
                               data-testid="guided-share-wa"
-                              className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-white transition-all"
-                              style={{ background: '#10b981' }}
+                              className="neo-btn neo-btn--primary neo-btn--quiet"
                             >
                               WhatsApp
                             </button>
@@ -431,11 +365,7 @@ export default function GuidedSetup({
                                 e.stopPropagation()
                                 setExpandedStep(isExpanded ? null : step.id)
                               }}
-                              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-                              style={{
-                                background: '#f1f5f9',
-                                color: '#64748b',
-                              }}
+                              className="neo-icon-btn w-9 h-9"
                               title="Más info"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
@@ -453,11 +383,7 @@ export default function GuidedSetup({
                                   if (step.tab) onNavigate?.(step.tab)
                                 }}
                                 data-testid={`guided-step-go-${step.id}`}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-white transition-all animate-pulse"
-                                style={{
-                                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                  boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
-                                }}
+                                className="neo-btn neo-btn--primary neo-btn--quiet"
                               >
                                 Ir
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24">
@@ -467,7 +393,7 @@ export default function GuidedSetup({
                             ) : (
                               <svg
                                 className="w-4 h-4"
-                                style={{ color: '#94a3b8' }}
+                                style={{ color: 'var(--ns-text-faint)' }}
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -485,15 +411,12 @@ export default function GuidedSetup({
                   {/* Expanded description */}
                   {isExpanded && !done && (
                     <div
-                      className="ml-12 mt-2 mb-1 p-3.5 rounded-xl border animate-in slide-in-from-top-2 duration-300"
-                      style={{
-                        background: '#eef2ff',
-                        borderColor: '#c7d2fe',
-                      }}
+                      className="ml-12 mt-2 mb-1 p-3.5 rounded-[16px] ns-fade-down"
+                      style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}
                     >
                       <p
                         className="text-[12px] font-medium leading-relaxed"
-                        style={{ color: '#3730a3' }}
+                        style={{ color: 'var(--ns-text-secondary)' }}
                       >
                         {step.descLong}
                       </p>
@@ -501,7 +424,7 @@ export default function GuidedSetup({
                         <button
                           onClick={() => onNavigate?.(step.tab)}
                           className="mt-2 text-[10px] font-bold uppercase tracking-widest transition-colors"
-                          style={{ color: '#4f46e5' }}
+                          style={{ color: 'var(--ns-primary)' }}
                         >
                           Ir a {step.title.toLowerCase()} →
                         </button>
@@ -517,19 +440,16 @@ export default function GuidedSetup({
         {/* Bottom strip — dismiss option */}
         {!allDone && (
           <div
-            className="px-5 md:px-7 py-2.5 border-t flex items-center justify-between text-[11px]"
-            style={{
-              borderColor: '#e2e8f0',
-              background: '#f8fafc',
-            }}
+            className="px-4 md:px-7 py-3 flex items-center justify-between gap-3 text-[11px]"
+            style={{ boxShadow: 'inset 0 1px 0 var(--ns-line)' }}
           >
-            <span style={{ color: '#64748b' }}>
-              💡 Configuralo ahora — toma menos de 5 minutos
+            <span style={{ color: 'var(--ns-text-muted)' }}>
+              Toma menos de 5 minutos
             </span>
             <button
               onClick={cerrarPanel}
-              className="text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-slate-900"
-              style={{ color: '#94a3b8' }}
+              className="text-[10px] font-bold uppercase tracking-widest transition-colors"
+              style={{ color: 'var(--ns-text-faint)' }}
               data-testid="guided-setup-dismiss"
             >
               Ocultar
