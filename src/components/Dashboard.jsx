@@ -32,7 +32,9 @@ import { ErrorGuard } from './ErrorBoundary'
 // Suscripción / planes
 import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN, cobroSinConfigurar, formatearPrecio } from '../utils/suscripcion'
 import { haptic } from '../utils/haptics'
+import { useSwipeTabs } from '../hooks/useSwipeTabs'
 import { ocupaHorario, factura, precioTurno, parseFecha, tieneHorariosConfigurados, mapaEmbedUrl } from '../utils/reservas'
+import { PALETA_MARCA, colorSeguro } from '../utils/paleta'
 
 // Componentes del Dashboard
 import DashboardTour, { useTour } from './DashboardTourV2'
@@ -41,6 +43,7 @@ import DashboardHome from './DashboardHome'
 import NotificationCenter from './NotificationCenterV2'
 import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
+import Atajos from './neo/Atajos'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
@@ -759,9 +762,19 @@ export default function Dashboard({ session }) {
     tabsConfig.find(t => t.id === 'ajustes'),
   ]
 
+  // Deslizar de costado cambia de sección en móvil, como en una app nativa.
+  // Va acá abajo porque necesita `tabsConfig`, que se arma más arriba con el
+  // vocabulario del rubro.
+  useSwipeTabs({
+    tabs: tabsConfig.map((t) => t.id),
+    actual: tab,
+    onCambiar: (id) => { haptic('select'); setTab(id) },
+    habilitado: Boolean(negocio) && !negocio?.es_admin_plataforma,
+  })
+
   if (loading) return (
     <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#990011]' : 'bg-white'}`}>
-      <div className={`w-6 h-6 border-2 rounded-full animate-spin ${negocio?.es_admin_plataforma ? 'border-white/10 border-t-white' : 'border-slate-200 border-t-slate-800'}`}></div>
+      <span className="neo-spinner" role="status" aria-label="Cargando" />
     </div>
   )
 
@@ -770,58 +783,54 @@ export default function Dashboard({ session }) {
   if (negocio && !accesoSub.acceso && !negocio.es_admin_plataforma) {
     const esVencido = accesoSub.estado === 'vencido'
     return (
-      <div className="min-h-screen bg-[#FDF8F8] font-sans antialiased flex flex-col" style={{ colorScheme: 'light' }}>
-        {/* Navbar mínimo */}
-        <nav className="h-14 border-b bg-white/90 backdrop-blur-md border-slate-200 shadow-sm flex items-center justify-between px-4 sticky top-0 z-50">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-slate-900 rounded-[0.4rem] flex items-center justify-center shadow-lg border border-white/10">
-              <span className="text-white font-black text-[9px] italic">NS</span>
-            </div>
-            <div className="h-3 w-px mx-1 bg-slate-200"></div>
-            <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-slate-400">{esVencido ? 'Suscripción Vencida' : 'Cuenta Suspendida'}</p>
+      <div className="noni-shell font-sans antialiased" style={{ colorScheme: 'light' }}>
+        <header className="noni-topbar">
+          <div className="flex items-center gap-3">
+            <span className="neo-avatar neo-avatar--brand w-9 h-9 text-xs">N</span>
+            <p className="neo-eyebrow">{esVencido ? 'Suscripción vencida' : 'Cuenta suspendida'}</p>
           </div>
-          <button onClick={cerrarSesion} className="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-opacity" data-testid="blocked-logout">Salir</button>
-        </nav>
+          <button onClick={cerrarSesion} className="neo-btn neo-btn--ghost neo-btn--quiet" data-testid="blocked-logout">Salir</button>
+        </header>
 
         {/* Contenido de bloqueo */}
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="max-w-md w-full text-center animate-in zoom-in-95 duration-700" data-testid="subscription-blocked">
             {/* Icono */}
-            <div className={`w-20 h-20 mx-auto mb-6 rounded-[1.5rem] border-2 flex items-center justify-center ${esVencido ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'}`}>
+            <span className="neo-pod neo-pod--brand mx-auto mb-6" style={{ width: 76, height: 76, borderRadius: 'var(--ns-radius-lg)' }}>
               {esVencido ? (
-                <svg className="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               ) : (
-                <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               )}
-            </div>
+            </span>
 
             {/* Mensaje principal */}
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tighter text-slate-900 mb-2">
+            <h2 className="neo-head__title text-2xl md:text-3xl mb-2 justify-center">
               {esVencido ? (accesoSub.enTrial ? 'Tu prueba gratis terminó' : 'Tu suscripción venció') : 'Cuenta Suspendida'}
             </h2>
-            <p className="text-sm text-slate-500 font-medium leading-relaxed mb-8 max-w-sm mx-auto">
+            <p className="text-sm font-medium leading-relaxed mb-8 max-w-sm mx-auto" style={{ color: 'var(--ns-text-secondary)' }}>
               {esVencido ? (
-                <>Para seguir usando <span className="font-bold text-slate-700">{negocio.nombre}</span> y recibir reservas, activá el plan {PLAN.nombre}. Escribinos y te reactivamos la cuenta al instante.</>
+                <>Para seguir usando <span className="font-bold" style={{ color: 'var(--ns-text-secondary)' }}>{negocio.nombre}</span> y recibir reservas, activá el plan {PLAN.nombre}. Escribinos y te reactivamos la cuenta al instante.</>
               ) : (
-                <>Tu cuenta de <span className="font-bold text-slate-700">{negocio.nombre}</span> fue suspendida por el administrador. Mientras esté suspendida no podés acceder al panel ni recibir reservas.</>
+                <>Tu cuenta de <span className="font-bold" style={{ color: 'var(--ns-text-secondary)' }}>{negocio.nombre}</span> fue suspendida por el administrador. Mientras esté suspendida no podés acceder al panel ni recibir reservas.</>
               )}
             </p>
 
             {/* Plan card (solo vencido) */}
             {esVencido && (
-              <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5 mb-4 text-left">
+              <div className="neo-card p-5 mb-4 text-left">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Plan {PLAN.nombre}</span>
-                  <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-widest">{accesoSub.enTrial ? 'Prueba finalizada' : 'Vencido'}</span>
+                  <span className="neo-eyebrow">Plan {PLAN.nombre}</span>
+                  <span className="neo-chip neo-chip--outline text-[10px]">{accesoSub.enTrial ? 'Prueba finalizada' : 'Vencido'}</span>
                 </div>
                 <div className="flex items-end gap-1">
-                  <span className="text-3xl font-black tracking-tighter text-slate-900">{formatearPrecio()}</span>
-                  <span className="text-xs text-slate-400 font-bold mb-1">/mes</span>
+                  <span className="font-display text-3xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>{formatearPrecio()}</span>
+                  <span className="text-xs font-bold mb-1" style={{ color: 'var(--ns-text-muted)' }}>/mes</span>
                 </div>
                 <ul className="mt-3 space-y-1.5">
                   {['Reservas online ilimitadas', 'CRM de clientes + reportes', 'App de reservas con tu marca', 'Soporte por WhatsApp'].map(x => (
-                    <li key={x} className="flex items-center gap-2 text-[12px] text-slate-600 font-medium">
-                      <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <li key={x} className="flex items-center gap-2 text-[12px] font-medium" style={{ color: 'var(--ns-text-secondary)' }}>
+                      <svg className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       {x}
                     </li>
                   ))}
@@ -830,15 +839,15 @@ export default function Dashboard({ session }) {
             )}
 
             {/* Info card */}
-            <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5 mb-4 text-left space-y-3">
+            <div className="neo-card p-5 mb-4 text-left space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negocio</span>
-                <span className="text-sm font-bold text-slate-900">{negocio.nombre}</span>
+                <span className="neo-eyebrow">Negocio</span>
+                <span className="text-sm font-bold" style={{ color: 'var(--ns-text)' }}>{negocio.nombre}</span>
               </div>
-              <div className="h-px bg-slate-100"></div>
+              <div className="neo-divider" />
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Titular</span>
-                <span className="text-xs font-medium text-slate-600">{session.user.email}</span>
+                <span className="neo-eyebrow">Titular</span>
+                <span className="text-xs font-medium" style={{ color: 'var(--ns-text-secondary)' }}>{session.user.email}</span>
               </div>
             </div>
 
@@ -848,20 +857,20 @@ export default function Dashboard({ session }) {
                 href={whatsappActivacion(negocio, session.user.email)}
                 target="_blank" rel="noopener noreferrer"
                 data-testid="blocked-activate-cta"
-                className="w-full py-4 rounded-xl bg-emerald-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95"
+                className="neo-btn neo-btn--primary neo-btn--block py-4 text-[10px] uppercase tracking-[0.2em] gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 {esVencido ? 'Activar mi plan' : 'Contactar al administrador'}
               </a>
               <button
                 onClick={() => window.location.reload()}
-                className="w-full py-4 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 transition-all active:scale-95"
+                className="neo-btn neo-btn--block"
               >
                 Ya pagué · Actualizar
               </button>
               <button
                 onClick={cerrarSesion}
-                className="w-full py-3 text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-slate-600 transition-all"
+                className="neo-btn neo-btn--ghost neo-btn--block"
               >
                 Cerrar sesión
               </button>
@@ -1000,7 +1009,7 @@ export default function Dashboard({ session }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="relative flex items-center gap-2">
             {esPanelNegocio && (
               <>
                 <button onClick={() => { haptic(); setSearchOpen(true) }} aria-label="Buscar (Ctrl+K)" className="neo-icon-btn lg:hidden">
@@ -1034,94 +1043,167 @@ export default function Dashboard({ session }) {
           /* ==========================================================
              VISTA: SUPER ADMIN (NUCLEUS) — SIN CAMBIOS
              ========================================================== */
-          <div className="space-y-6 md:space-y-8 animate-in fade-in duration-1000">
+          <div className="space-y-5 md:space-y-7 animate-in fade-in duration-700">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6">
               <div>
-                <h2 className="text-3xl md:text-6xl font-bold tracking-tighter text-white">Nucleus Control</h2>
-                <p className="text-slate-500 font-medium mt-1 md:mt-2 text-sm md:text-lg tracking-tight">Arquitectura centralizada de Non Sistemas.</p>
+                <h2 className="text-3xl md:text-6xl font-bold tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>Nucleus Control</h2>
+                <p className="font-medium mt-1 md:mt-2 text-sm md:text-lg tracking-tight" style={{ color: 'rgba(252,246,245,0.6)' }}>
+                  Arquitectura centralizada de Non Sistemas.
+                </p>
               </div>
-              <div className="flex items-center gap-3 md:gap-4 bg-white/5 border border-white/10 px-4 md:px-6 py-2.5 md:py-3 rounded-[1rem] md:rounded-2xl">
-                <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(153,0,17,0.5)]"></div>
-                <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60">Sistema Estable</span>
+              <div className="neo-onbrand-chip is-active flex items-center gap-2.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute h-full w-full rounded-full opacity-60" style={{ background: 'var(--ns-paper)' }} />
+                  <span className="relative rounded-full h-2 w-2" style={{ background: 'var(--ns-paper)' }} />
+                </span>
+                Sistema estable
               </div>
             </header>
+
             {cobroSinConfigurar && (
-              <div className="rounded-2xl border p-4 md:p-5 flex items-start gap-3" style={{ background: 'rgba(153,0,17,0.1)', borderColor: 'rgba(153,0,17,0.35)' }} data-testid="aviso-cobro">
-                <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <div
+                className="rounded-[26px] p-5 flex items-start gap-3.5"
+                style={{ background: 'rgba(52,0,6,0.32)', boxShadow: 'inset 6px 6px 14px rgba(40,0,5,0.45), inset -5px -5px 12px rgba(255,255,255,0.07)' }}
+                data-testid="aviso-cobro"
+              >
+                <svg className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--ns-paper)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 <div>
-                  <p className="text-sm font-bold text-amber-300">Falta configurar el canal de cobro</p>
-                  <p className="text-[12px] text-amber-200/70 font-medium mt-1 leading-relaxed">
-                    Los botones "Activar plan" están cayendo al email de soporte. Definí <code className="font-mono">VITE_CONTACTO_WHATSAPP</code> (tu número internacional sin "+") en las variables de entorno de Vercel y volvé a desplegar.
+                  <p className="text-sm font-bold">Falta configurar el canal de cobro</p>
+                  <p className="text-[12px] font-medium mt-1 leading-relaxed" style={{ color: 'rgba(252,246,245,0.66)' }}>
+                    Los botones «Activar plan» están cayendo al email de soporte. Definí <code className="font-mono">VITE_CONTACTO_WHATSAPP</code> (tu número internacional sin «+») en las variables de entorno de Vercel y volvé a desplegar.
                   </p>
                 </div>
               </div>
             )}
 
+            {/* Métricas globales */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {[
                 { label: 'Totales', val: statsGlobales.total, trend: 'Nodos' },
-                { label: 'Activas', val: statsGlobales.activos, trend: 'Suscrito' },
-                { label: 'Suspenso', val: statsGlobales.suspendidos, col: 'text-red-500', trend: 'Inactivo' },
-                { label: 'Dominante', val: Object.keys(statsGlobales.rubros).reduce((a, b) => statsGlobales.rubros[a] > statsGlobales.rubros[b] ? a : b, '...'), col: 'text-blue-400', trend: 'Mercado', truncate: true }
-              ].map((s, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] flex flex-col justify-between group hover:border-white/20 transition-all">
-                  <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-500 truncate">{s.label}</p>
-                  <h3 className={`text-3xl md:text-5xl font-bold mt-4 md:mt-6 tracking-tighter group-hover:scale-105 transition-transform origin-left ${s.col || 'text-white'} ${s.truncate ? 'truncate text-2xl md:text-4xl' : ''}`}>{s.val}</h3>
-                  <p className="text-[8px] md:text-[10px] font-bold mt-3 md:mt-4 opacity-30 uppercase tracking-widest">{s.trend}</p>
+                { label: 'Activas', val: statsGlobales.activos, trend: 'Suscritos' },
+                { label: 'En suspenso', val: statsGlobales.suspendidos, trend: 'Inactivos' },
+                { label: 'Rubro dominante', val: Object.keys(statsGlobales.rubros).reduce((a, b) => statsGlobales.rubros[a] > statsGlobales.rubros[b] ? a : b, '...'), trend: 'Mercado', truncate: true }
+              ].map((st) => (
+                <div
+                  key={st.label}
+                  className="p-5 md:p-7 rounded-[26px] md:rounded-[32px] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1"
+                  style={{ background: 'rgba(252,246,245,0.09)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 10px 12px 28px rgba(45,0,5,0.3)' }}
+                >
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] truncate" style={{ color: 'rgba(252,246,245,0.55)' }}>{st.label}</p>
+                  <h3 className={`font-bold mt-4 md:mt-6 tracking-tighter ${st.truncate ? 'truncate text-2xl md:text-4xl' : 'text-3xl md:text-5xl'}`} style={{ fontFamily: 'var(--font-display)' }}>
+                    {st.val}
+                  </h3>
+                  <p className="text-[8px] md:text-[10px] font-black mt-3 md:mt-4 uppercase tracking-[0.18em]" style={{ color: 'rgba(252,246,245,0.32)' }}>{st.trend}</p>
                 </div>
               ))}
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 shadow-2xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-8 mb-6 md:mb-10">
+
+            {/* Directorio */}
+            <div
+              className="rounded-[32px] md:rounded-[40px] p-5 md:p-9"
+              style={{ background: 'rgba(252,246,245,0.07)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.16), 16px 18px 42px rgba(45,0,5,0.28)' }}
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-8 mb-6 md:mb-8">
                 <div>
-                  <h4 className="text-lg md:text-xl font-bold text-white">Directorio Global</h4>
-                  <p className="text-slate-500 text-xs md:text-sm mt-1">Gestión de licencias y accesos.</p>
+                  <h4 className="text-lg md:text-xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>Directorio global</h4>
+                  <p className="text-xs md:text-sm mt-1" style={{ color: 'rgba(252,246,245,0.55)' }}>Gestión de licencias y accesos.</p>
                 </div>
                 <div className="relative w-full md:w-80">
-                  <svg className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  <input type="text" placeholder="Buscar por ID o Nombre..." className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 pl-10 md:pl-12 pr-4 text-[11px] md:text-xs outline-none focus:border-white/30 transition-all font-medium text-white" value={filtroBusqueda} onChange={(e) => setFiltroBusqueda(e.target.value)} />
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(252,246,245,0.5)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Buscar por ID o nombre…"
+                    className="neo-onbrand-field w-full pl-11"
+                    value={filtroBusqueda}
+                    onChange={(e) => setFiltroBusqueda(e.target.value)}
+                    aria-label="Buscar negocios"
+                  />
                 </div>
               </div>
-              <div className="space-y-3">
-                {negociosFiltrados.map(n => {
-                  const sn = getEstadoSuscripcion(n)
-                  const badge = sn.estado === 'admin' ? { t: 'Admin', c: 'bg-white/10 text-white' }
-                    : sn.estado === 'trial' ? { t: `Prueba · ${sn.diasRestantes}d`, c: 'bg-indigo-500/15 text-indigo-300' }
-                    : sn.estado === 'activo' ? { t: `Activo${sn.diasRestantes != null ? ` · ${sn.diasRestantes}d` : ''}`, c: 'bg-green-500/15 text-green-400' }
-                    : sn.estado === 'vencido' ? { t: 'Vencido', c: 'bg-amber-500/15 text-amber-400' }
-                    : { t: 'Suspendido', c: 'bg-red-500/15 text-red-400' }
-                  return (
-                  <div key={n.id} className="bg-white/5 border border-white/5 hover:border-white/15 transition-all p-4 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 group">
-                    <div className="flex items-center gap-4 md:gap-6 w-full">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white text-black flex items-center justify-center font-black text-lg md:text-xl shadow-xl transition-transform group-hover:rotate-6 shrink-0">{(n.nombre || '?').charAt(0)}</div>
-                      <div className="overflow-hidden flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-white text-base md:text-lg tracking-tight leading-none truncate">{n.nombre || 'Sin nombre'}</p>
-                          <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${badge.c}`}>{badge.t}</span>
+
+              {negociosFiltrados.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-sm font-bold">No encontramos negocios</p>
+                  <p className="text-xs mt-1" style={{ color: 'rgba(252,246,245,0.55)' }}>
+                    {filtroBusqueda ? 'Probá con otro nombre o ID.' : 'Todavía no hay ninguno dado de alta.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {negociosFiltrados.map(n => {
+                    const sn = getEstadoSuscripcion(n)
+                    const badge = sn.estado === 'admin' ? { t: 'Admin', on: true }
+                      : sn.estado === 'trial' ? { t: `Prueba · ${sn.diasRestantes}d`, on: false }
+                      : sn.estado === 'activo' ? { t: `Activo${sn.diasRestantes != null ? ` · ${sn.diasRestantes}d` : ''}`, on: true }
+                      : sn.estado === 'vencido' ? { t: 'Vencido', on: false }
+                      : { t: 'Suspendido', on: false, tachado: true }
+                    return (
+                      <div
+                        key={n.id}
+                        className="p-4 md:p-5 rounded-[24px] md:rounded-[30px] flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 group"
+                        style={{ background: 'rgba(252,246,245,0.08)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 8px 10px 22px rgba(45,0,5,0.24)' }}
+                      >
+                        <div className="flex items-center gap-4 w-full min-w-0">
+                          <div
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-[18px] flex items-center justify-center font-black text-lg md:text-xl shrink-0 transition-transform duration-300 group-hover:rotate-6"
+                            style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)', boxShadow: '6px 7px 16px rgba(45,0,5,0.35)' }}
+                          >
+                            {(n.nombre || '?').charAt(0)}
+                          </div>
+                          <div className="overflow-hidden flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-bold text-base md:text-lg tracking-tight leading-none truncate">{n.nombre || 'Sin nombre'}</p>
+                              <span className={`neo-onbrand-chip text-[9px] ${badge.on ? 'is-active' : ''}`} style={badge.tachado ? { textDecoration: 'line-through' } : undefined}>
+                                {badge.t}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2.5 mt-2">
+                              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.16em] truncate" style={{ color: 'rgba(252,246,245,0.55)' }}>{n.rubro}</span>
+                              <span className="text-[9px] font-mono uppercase hidden sm:inline" style={{ color: 'rgba(252,246,245,0.3)' }}>• {n.id.slice(0, 8)}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 md:gap-3 mt-2">
-                          <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{n.rubro}</span>
-                          <span className="text-[8px] md:text-[9px] font-mono text-white/20 uppercase hidden sm:inline">• {n.id.slice(0, 8)}</span>
+
+                        <div className="flex items-center gap-2.5 w-full md:w-auto">
+                          <button
+                            onClick={() => { const slug = (n.nombre || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }}
+                            className="neo-onbrand-btn neo-onbrand-btn--ghost p-3.5"
+                            title="Ver la app pública"
+                            aria-label={`Ver la app pública de ${n.nombre || 'este negocio'}`}
+                          >
+                            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                              <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
+                          {sn.estado !== 'admin' && (
+                            <>
+                              <button
+                                onClick={() => registrarPago(n)}
+                                className="neo-onbrand-btn flex-1 md:flex-none text-[9px] md:text-[10px] uppercase tracking-[0.16em] px-5 py-3.5"
+                                title="Registrar pago (+30 días)"
+                              >
+                                +30 días
+                              </button>
+                              {sn.acceso && (
+                                <button
+                                  onClick={() => suspenderNegocio(n)}
+                                  className="neo-onbrand-btn neo-onbrand-btn--ghost flex-1 md:flex-none text-[9px] md:text-[10px] uppercase tracking-[0.16em] px-5 py-3.5"
+                                >
+                                  Suspender
+                                </button>
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-                      <button onClick={() => { const slug = (n.nombre || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }} className="p-3 md:p-4 bg-white/5 text-slate-400 hover:text-white rounded-xl md:rounded-2xl transition-all" title="Ver App Pública" aria-label={`Ver la app pública de ${n.nombre || 'este negocio'}`}>
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </button>
-                      {sn.estado !== 'admin' && (
-                        <>
-                          <button onClick={() => registrarPago(n)} className="flex-1 md:flex-none px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white" title="Registrar pago (+30 días)">+30 días</button>
-                          {sn.acceso && (
-                            <button onClick={() => suspenderNegocio(n)} className="flex-1 md:flex-none px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[10px] uppercase tracking-widest transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white">Suspender</button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -1327,18 +1409,18 @@ export default function Dashboard({ session }) {
                     </div>
 
                     {/* STATS RÁPIDOS DE CLIENTES — Plastilina Bento */}
-                    <div className="grid grid-cols-3 gap-2 relative z-10">
-                      <div className="rounded-2xl p-3 text-center" style={{ background: 'var(--ns-primary-bg)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                        <p className="text-xl md:text-2xl font-black" style={{ color: 'var(--ns-text)' }}>{clientes.length}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-primary)' }}>Total</p>
+                    <div className="grid grid-cols-3 gap-2.5 relative z-10">
+                      <div className="neo-tile !p-3.5 text-center items-center">
+                        <span className="neo-stat__value" style={{ fontSize: 'clamp(20px,4vw,28px)' }}>{clientes.length}</span>
+                        <span className="neo-stat__label">Total</span>
                       </div>
-                      <div className="rounded-2xl p-3 text-center" style={{ background: 'rgba(153,0,17,0.08)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                        <p className="text-xl md:text-2xl font-black" style={{ color: '#CB7B83' }}>{clientesVIP + clientesFrecuentes}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#B74A55' }}>Recurrentes</p>
+                      <div className="neo-tile !p-3.5 text-center items-center">
+                        <span className="neo-stat__value" style={{ fontSize: 'clamp(20px,4vw,28px)' }}>{clientesVIP + clientesFrecuentes}</span>
+                        <span className="neo-stat__label">Recurrentes</span>
                       </div>
-                      <div className="rounded-2xl p-3 text-center" style={{ background: 'rgba(153,0,17,0.08)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                        <p className="text-xl md:text-2xl font-black" style={{ color: '#C36771' }}>${totalIngresosClientes.toLocaleString()}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#B3404C' }}>Facturado</p>
+                      <div className="neo-tile !p-3.5 text-center items-center">
+                        <span className="neo-stat__value" style={{ fontSize: 'clamp(16px,3.2vw,22px)' }}>${totalIngresosClientes.toLocaleString('es-AR')}</span>
+                        <span className="neo-stat__label">Facturado</span>
                       </div>
                     </div>
 
@@ -1346,9 +1428,9 @@ export default function Dashboard({ session }) {
                     <div className="flex gap-2 relative z-10">
                       <div className="relative flex-1">
                         <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <input type="text" placeholder="Buscar cliente..." className="w-full rounded-2xl py-3.5 pl-10 pr-4 text-xs outline-none font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid var(--ns-border)', color: 'var(--ns-text)', boxShadow: 'var(--ns-shadow-inner)' }} value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} onFocus={e => { e.target.style.borderColor = 'var(--ns-primary)'; e.target.style.boxShadow = '0 0 0 4px rgba(153,0,17,0.12)'; }} onBlur={e => { e.target.style.borderColor = 'var(--ns-border)'; e.target.style.boxShadow = 'var(--ns-shadow-inner)'; }} />
+                        <input type="text" placeholder="Buscar cliente…" aria-label="Buscar cliente" className="neo-field pl-11" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
                       </div>
-                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} className="rounded-2xl px-3 py-3 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer" style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid var(--ns-border)', color: 'var(--ns-text-secondary)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} aria-label="Ordenar clientes" className="neo-field cursor-pointer w-auto shrink-0">
                         <option value="visitas">Visitas</option>
                         <option value="nombre">Nombre</option>
                         <option value="reciente">Reciente</option>
@@ -1358,46 +1440,50 @@ export default function Dashboard({ session }) {
                   </header>
 
                   {cargandoClientes ? (
-                    <div className="flex justify-center items-center h-40">
-                      <div className="w-8 h-8 border-4 border-[#F2DDDE] border-t-[#AF3643] rounded-full animate-spin"></div>
+                    <div className="flex flex-col gap-3" aria-busy="true">
+                      <div className="ns-skeleton" style={{ height: 84 }} />
+                      <div className="ns-skeleton" style={{ height: 84 }} />
+                      <div className="ns-skeleton" style={{ height: 84 }} />
                     </div>
                   ) : clientesFiltrados.length === 0 ? (
-                    <div className="rounded-[2rem] border-2 border-dashed p-12 flex flex-col items-center text-center ns-fade-up" style={{ borderColor: 'var(--ns-border)', background: 'var(--ns-accent-bg)' }}>
-                      <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-6" style={{ background: 'var(--ns-primary-bg)', boxShadow: 'var(--ns-plastilina-card)' }}>
-                        <svg className="w-10 h-10" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <div className="neo-card">
+                      <div className="neo-empty">
+                        <span className="neo-pod neo-pod--sunken neo-pod--lg">
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </span>
+                        <p className="neo-empty__title">{busquedaCliente ? 'Nadie con ese nombre' : 'Todavía sin clientes'}</p>
+                        <p className="neo-empty__text">
+                          {busquedaCliente
+                            ? 'Probá con otro nombre, teléfono o email.'
+                            : 'Se cargan solos con cada reserva que entra por tu link: no hace falta anotarlos a mano.'}
+                        </p>
+                        {!busquedaCliente && (
+                          <button onClick={showCopyToast} className="neo-btn neo-btn--primary mt-1">Copiar mi link</button>
+                        )}
                       </div>
-                      <h3 className="text-base font-black uppercase tracking-widest" style={{ color: 'var(--ns-text)' }}>Sin clientes aún</h3>
-                      <p className="text-[12px] font-medium mt-2 max-w-[260px] leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>Los clientes aparecerán automáticamente cuando recibas tu primera reserva.</p>
                     </div>
                   ) : (
                     <div className="grid gap-3">
                       {clientesFiltrados.map((c, idx) => (
                         <div key={idx} className="ns-cliente-card ns-stagger-in" style={{ animationDelay: `${idx * 0.04}s` }}>
                           {/* Avatar Plastilina */}
-                          <div className={`ns-cliente-avatar shrink-0 ${c.frecuencia === 'VIP' ? 'text-amber-500' : 'text-[#AF3643]'}`}
-                            style={{ background: c.frecuencia === 'VIP' ? 'var(--ns-gradient-soft)' : 'var(--ns-gradient-soft)', boxShadow: c.frecuencia === 'VIP' ? '0 4px 12px rgba(153,0,17,0.2)' : 'var(--ns-shadow-md)' }}>
+                          <span className={`neo-pod neo-pod--lg font-display text-xl shrink-0 ${c.frecuencia === 'VIP' ? 'neo-pod--brand' : ''}`}>
                             {c.nombre?.charAt(0)?.toUpperCase() || '?'}
-                          </div>
+                          </span>
                           
                           <div className="flex-1 overflow-hidden min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-black text-base md:text-lg truncate leading-none" style={{ color: 'var(--ns-text)' }}>{c.nombre}</h4>
-                              <span className={`text-[8px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest shrink-0 ${
-                                c.frecuencia === 'VIP' ? 'bg-amber-100 text-amber-600' :
-                                c.frecuencia === 'Frecuente' ? 'text-[#AF3643]' :
-                                c.frecuencia === 'Regular' ? 'text-[#BB545F]' :
-                                'text-emerald-600'
-                              }`} style={{
-                                background: c.frecuencia === 'VIP' ? undefined :
-                                  c.frecuencia === 'Frecuente' ? 'var(--ns-primary-bg)' :
-                                  c.frecuencia === 'Regular' ? 'var(--ns-accent-bg)' :
-                                  'rgba(153,0,17,0.08)'
-                              }}>{c.frecuencia}</span>
+                              <span className={`neo-chip shrink-0 ${
+                                c.frecuencia === 'VIP' ? 'neo-chip--solid'
+                                : c.frecuencia === 'Frecuente' ? 'neo-chip--outline'
+                                : 'neo-chip--quiet'
+                              }`}>{c.frecuencia}</span>
                             </div>
                             <p className="text-[11px] font-semibold truncate" style={{ color: 'var(--ns-text-secondary)' }}>{c.telefono}{c.email ? ` · ${c.email}` : ''}</p>
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                              <span className="text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
-                              <span className="text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-widest" style={{ color: '#C36771', background: 'rgba(153,0,17,0.08)' }}>${c.ingresoTotal.toLocaleString()}</span>
+                              <span className="neo-chip neo-chip--soft">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
+                              <span className="neo-chip neo-chip--quiet tabular-nums">${c.ingresoTotal.toLocaleString('es-AR')}</span>
                               <span className="text-[9px] font-semibold" style={{ color: 'var(--ns-text-muted)' }}>Última: {formatearFechaRelativa(c.ultimaVisita)}</span>
                             </div>
                           </div>
@@ -1406,14 +1492,14 @@ export default function Dashboard({ session }) {
                             <button onClick={() => {
                               const num = c.telefono?.replace(/[^0-9]/g, '') || ''
                               window.open(`https://wa.me/${num}?text=${encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, te escribimos desde ${negocio.nombre}.`)}`, '_blank')
-                            }} className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90" style={{ background: 'rgba(153,0,17,0.1)', color: '#DEACB1', border: '1px solid rgba(153,0,17,0.2)' }} title="WhatsApp" aria-label={`Escribirle por WhatsApp a ${c.nombre}`}>
+                            }} className="nh-wa-btn shrink-0" title="Escribir por WhatsApp" aria-label={`Escribirle por WhatsApp a ${c.nombre}`}>
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
                             </button>
                             <button onClick={() => {
                               const num = c.telefono?.replace(/[^0-9]/g, '') || ''
                               window.open(`tel:${num}`)
-                            }} className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90" style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)', border: '1px solid var(--ns-border)' }} title="Llamar" aria-label={`Llamar a ${c.nombre}`}>
-                              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            }} className="neo-icon-btn shrink-0" title="Llamar" aria-label={`Llamar a ${c.nombre}`}>
+                              <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
                           </div>
                         </div>
@@ -1430,53 +1516,88 @@ export default function Dashboard({ session }) {
                   {/* SECCIÓN: PERFIL DEL NEGOCIO */}
                   <div className="ns-settings-card">
                     <div className="ns-settings-card-header">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.172-1.172a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 115.656-5.656L10 6.343l1.172-1.172z" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.172-1.172a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 115.656-5.656L10 6.343l1.172-1.172z" /></svg>
                       <h4>Perfil y Marca</h4>
                     </div>
                     <div className="p-5 md:p-6 space-y-5">
-                      {/* Color Primario */}
+                      {/* Acento de tu app de reservas */}
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Color de Interfaz</label>
-                        <div className="flex gap-3 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 focus-within:border-slate-300 transition-all">
-                          <input type="color" value={colorPrimario} onChange={(e) => setColorPrimario(e.target.value)} className="w-8 h-8 md:w-10 md:h-10 rounded-lg cursor-pointer border-none bg-transparent" />
-                          <span className="font-mono text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">{colorPrimario}</span>
+                        <label className="neo-eyebrow mb-2">Acento de tu app de reservas</label>
+                        <div className="neo-well p-3">
+                          <div className="grid grid-cols-5 gap-2.5">
+                            {PALETA_MARCA.map((c) => {
+                              const elegido = colorSeguro(colorPrimario) === c
+                              return (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  onClick={() => setColorPrimario(c)}
+                                  aria-label={`Usar el tono ${c}`}
+                                  aria-pressed={elegido}
+                                  className="aspect-square rounded-full transition-all duration-300"
+                                  style={{
+                                    background: c,
+                                    transform: elegido ? 'scale(1.08)' : 'scale(1)',
+                                    boxShadow: elegido
+                                      ? `0 0 0 3px var(--ns-surface), 0 0 0 5px ${c}, 6px 7px 14px rgba(153,0,17,0.28)`
+                                      : '4px 5px 11px rgba(153,0,17,0.18), -3px -3px 8px rgba(255,255,255,0.9)'
+                                  }}
+                                />
+                              )
+                            })}
+                            <label
+                              className="aspect-square rounded-full grid place-items-center cursor-pointer transition-all duration-300"
+                              style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-muted)' }}
+                              title="Elegir otro tono"
+                            >
+                              <input
+                                type="color"
+                                value={colorSeguro(colorPrimario)}
+                                onChange={(e) => setColorPrimario(e.target.value)}
+                                className="sr-only"
+                                aria-label="Elegir otro tono para tu app de reservas"
+                              />
+                              <span className="text-lg leading-none font-bold">+</span>
+                            </label>
+                          </div>
+                          <p className="neo-tip mt-3">Este tono sólo pinta la app que ven tus clientes. Tu panel siempre queda en la paleta de Noni.</p>
                         </div>
                       </div>
 
                       {/* Descripción */}
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Biografía</label>
-                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de tu negocio que verán tus clientes..." className="w-full p-3 md:p-4 bg-slate-50 border border-slate-100 rounded-xl outline-none text-[11px] md:text-xs font-medium focus:bg-white focus:border-slate-900 transition-all h-20 md:h-28 resize-none leading-relaxed" />
+                        <label className="neo-eyebrow mb-2">Biografía</label>
+                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de tu negocio que verán tus clientes..." className="neo-field resize-none h-24 md:h-28" />
                       </div>
 
                       {/* Instagram */}
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Instagram</label>
-                        <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-slate-300 transition-all">
-                          <span className="px-3 text-slate-400 text-xs font-bold">@</span>
-                          <input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="tu_negocio" className="flex-1 p-3 bg-transparent outline-none text-xs font-bold text-slate-900" />
+                        <label className="neo-eyebrow mb-2">Instagram</label>
+                        <div className="neo-field-group">
+                          <span className="text-sm font-black" style={{ color: 'var(--ns-text-muted)' }}>@</span>
+                          <input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="tu_negocio" aria-label="Usuario de Instagram" className="flex-1 bg-transparent outline-none text-sm font-bold" style={{ color: 'var(--ns-text)' }} />
                         </div>
                       </div>
 
                       {/* Upload Logo y Portada */}
                       <div className="grid grid-cols-2 gap-3 md:gap-4">
                         <div className="space-y-2">
-                          <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                          <label className="neo-eyebrow flex justify-between items-center">
                             Logo
-                            {subiendoLogo && <div className="w-2.5 h-2.5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
+                            {subiendoLogo && <div className="neo-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
                           </label>
-                          <div className="relative aspect-square bg-slate-50 rounded-xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
-                            {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset)' }}>
+                            {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                          <label className="neo-eyebrow flex justify-between items-center">
                             Portada
-                            {subiendoPortada && <div className="w-2.5 h-2.5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>}
+                            {subiendoPortada && <div className="neo-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
                           </label>
-                          <div className="relative aspect-square bg-slate-50 rounded-xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden group hover:border-slate-400 transition-colors">
-                            {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset)' }}>
+                            {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'portada')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
                         </div>
@@ -1485,10 +1606,9 @@ export default function Dashboard({ session }) {
                       <button
                         onClick={actualizarBranding}
                         disabled={guardandoPerfil || subiendoLogo || subiendoPortada}
-                        className="w-full py-4 rounded-xl text-white font-bold text-[9px] md:text-[10px] uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                        style={{ backgroundColor: colorPrimario }}
+                        className="neo-btn neo-btn--primary neo-btn--block py-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em]"
                       >
-                        {guardandoPerfil ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Perfil'}
+                        {guardandoPerfil ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : 'Guardar Perfil'}
                       </button>
                     </div>
                   </div>
@@ -1496,27 +1616,27 @@ export default function Dashboard({ session }) {
                   {/* SECCIÓN: DATOS DE CONTACTO */}
                   <div className="ns-settings-card">
                     <div className="ns-settings-card-header">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <h4>Datos de Contacto</h4>
                     </div>
                     <div className="p-5 md:p-6 space-y-4">
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Teléfono / WhatsApp del Negocio</label>
-                        <input value={telefonoNegocio} onChange={(e) => setTelefonoNegocio(e.target.value)} placeholder="Ej: +5493515551234" className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
+                        <label className="neo-eyebrow mb-2">Teléfono / WhatsApp del Negocio</label>
+                        <input value={telefonoNegocio} onChange={(e) => setTelefonoNegocio(e.target.value)} placeholder="Ej: +5493515551234" className="neo-field" />
                       </div>
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Dirección</label>
-                        <input value={direccionNegocio} onChange={(e) => setDireccionNegocio(e.target.value)} placeholder="Ej: Av. Colón 1234, Córdoba" className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
+                        <label className="neo-eyebrow mb-2">Dirección</label>
+                        <input value={direccionNegocio} onChange={(e) => setDireccionNegocio(e.target.value)} placeholder="Ej: Av. Colón 1234, Córdoba" className="neo-field" />
                       </div>
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ubicación — Google Maps</label>
-                        <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-bold text-slate-900 focus:bg-white focus:border-slate-300 transition-all" />
-                        <p className="text-[9px] text-slate-400 mt-1.5 ml-1 font-medium">Abrí Google Maps, buscá tu negocio, tocá "Compartir" y pegá el link acá.</p>
+                        <label className="neo-eyebrow mb-2">Ubicación — Google Maps</label>
+                        <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="neo-field" />
+                        <p className="neo-tip">Abrí Google Maps, buscá tu negocio, tocá «Compartir» y pegá el link acá.</p>
                         {mapaUrl && !mapaEmbedUrl(mapaUrl, direccionNegocio) && (
-                          <p className="text-[10px] font-bold text-amber-600 mt-2 ml-1">Ese link no parece de Google Maps. Pegá el link que te da el botón "Compartir" de Google Maps.</p>
+                          <p className="neo-tip mt-2" style={{ color: 'var(--ns-primary)' }}>Ese link no parece de Google Maps. Pegá el que te da el botón «Compartir».</p>
                         )}
                         {mapaUrl && mapaEmbedUrl(mapaUrl, direccionNegocio) && (
-                          <div className="mt-3 rounded-xl overflow-hidden border border-slate-200 h-40">
+                          <div className="mt-3 rounded-[18px] overflow-hidden h-40" style={{ boxShadow: 'var(--neo-inset)' }}>
                             <iframe
                               title="Ubicación del negocio"
                               src={mapaEmbedUrl(mapaUrl, direccionNegocio)}
@@ -1526,15 +1646,15 @@ export default function Dashboard({ session }) {
                         )}
                       </div>
                       <div>
-                        <label className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Mensaje de Bienvenida</label>
-                        <textarea value={mensajeBienvenida} onChange={(e) => setMensajeBienvenida(e.target.value)} placeholder="Mensaje que verán tus clientes al abrir la app de reservas..." className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-[11px] font-medium focus:bg-white focus:border-slate-300 transition-all h-20 resize-none leading-relaxed" />
+                        <label className="neo-eyebrow mb-2">Mensaje de Bienvenida</label>
+                        <textarea value={mensajeBienvenida} onChange={(e) => setMensajeBienvenida(e.target.value)} placeholder="Mensaje que verán tus clientes al abrir la app de reservas..." className="neo-field resize-none h-20" />
                       </div>
                       <button
                         onClick={actualizarBranding}
                         disabled={guardandoPerfil}
-                        className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-[9px] uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="neo-btn neo-btn--primary neo-btn--block"
                       >
-                        {guardandoPerfil ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Guardar Contacto'}
+                        {guardandoPerfil ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : 'Guardar Contacto'}
                       </button>
                     </div>
                   </div>
@@ -1542,36 +1662,36 @@ export default function Dashboard({ session }) {
                   {/* SECCIÓN: LINK PÚBLICO */}
                   <div className="ns-settings-card" data-tour="link">
                     <div className="ns-settings-card-header">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <h4>Link Público</h4>
                     </div>
                     <div className="p-5 md:p-6">
-                      <p className="text-[11px] text-slate-500 font-medium mb-3">Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
-                      <button type="button" className="w-full text-left flex items-center bg-slate-50 border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-all group" onClick={showCopyToast}>
-                        <code className="text-[9px] md:text-[11px] text-blue-600 font-mono truncate flex-1">{publicLink}</code>
-                        <svg className="w-4 h-4 ml-2 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                      <p className="text-[12px] font-medium mb-3 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
+                      <button type="button" className="w-full text-left flex items-center gap-2 rounded-[18px] p-3.5 cursor-pointer transition-all" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }} onClick={showCopyToast}>
+                        <code className="text-[10px] md:text-[11px] font-mono truncate flex-1" style={{ color: 'var(--ns-primary)' }}>{publicLink}</code>
+                        <svg className="w-4 h-4 ml-auto shrink-0" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
                       </button>
 
                       {/* QR Code */}
-                      <div className="mt-4 p-4 bg-white border border-slate-200 rounded-xl text-center">
+                      <div className="mt-4 p-5 rounded-[22px] text-center" style={{ background: 'var(--ns-surface)', boxShadow: 'var(--neo-raised-sm)' }}>
                         <img
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicLink)}&bgcolor=FCF6F5&color=990011&margin=8`}
                           alt="QR de reservas"
                           className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-lg"
                           loading="lazy"
                         />
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">Escaneá para reservar</p>
+                        <p className="neo-eyebrow mt-3">Escaneá para reservar</p>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 mt-3">
-                        <button onClick={() => window.open(publicLink, '_blank')} className="py-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
-                          Vista Previa
+                        <button onClick={() => window.open(publicLink, '_blank')} className="neo-btn text-[10px] uppercase tracking-[0.14em] py-3">
+                          Vista previa
                         </button>
                         <button onClick={() => {
                           const waMje = encodeURIComponent(`${vocab.shareWA} ${negocio.nombre}: ${publicLink}`)
                           window.open(`https://wa.me/?text=${waMje}`, '_blank')
-                        }} className="py-3 rounded-xl bg-green-50 border border-green-200 text-[10px] font-bold uppercase tracking-widest text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all">
-                          Compartir WA
+                        }} className="neo-btn neo-btn--primary text-[10px] uppercase tracking-[0.14em] py-3">
+                          Compartir
                         </button>
                         <button onClick={() => {
                           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(publicLink)}&bgcolor=FCF6F5&color=990011&margin=16&format=png`
@@ -1580,8 +1700,8 @@ export default function Dashboard({ session }) {
                           a.download = `qr-${negocio?.nombre?.replace(/\s+/g, '-')?.toLowerCase() || 'reservas'}.png`
                           a.target = '_blank'
                           a.click()
-                        }} className="py-3 rounded-xl bg-purple-50 border border-purple-200 text-[10px] font-bold uppercase tracking-widest text-purple-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all">
-                          Descargar QR
+                        }} className="neo-btn text-[10px] uppercase tracking-[0.14em] py-3">
+                          Bajar QR
                         </button>
                       </div>
                     </div>
@@ -1590,32 +1710,34 @@ export default function Dashboard({ session }) {
                   {/* SECCIÓN: INFORMACIÓN DE CUENTA */}
                   <div className="ns-settings-card">
                     <div className="ns-settings-card-header">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <h4>Cuenta</h4>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</p>
-                        <p className="text-sm font-bold text-slate-900 mt-0.5">{session.user.email}</p>
+                        <p className="neo-eyebrow">Email</p>
+                        <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--ns-text)' }}>{session.user.email}</p>
                       </div>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rubro</p>
-                        <p className="text-sm font-bold text-slate-900 mt-0.5">{negocio.rubro}</p>
+                        <p className="neo-eyebrow">Rubro</p>
+                        <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--ns-text)' }}>{negocio.rubro}</p>
                       </div>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</p>
-                        <p className={`text-sm font-bold mt-0.5 ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'text-indigo-600' : 'text-green-600') : 'text-red-500'}`}>{etiquetaEstado(accesoSub.estado)}{accesoSub.diasRestantes != null ? ` · ${accesoSub.diasRestantes}d` : ''}</p>
+                        <p className="neo-eyebrow">Estado</p>
+                        <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--ns-text)' }}>{etiquetaEstado(accesoSub.estado)}{accesoSub.diasRestantes != null ? ` · ${accesoSub.diasRestantes}d` : ''}</p>
                       </div>
-                      <span className={`w-2.5 h-2.5 rounded-full ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'bg-indigo-500' : 'bg-green-500') : 'bg-red-500'}`}></span>
+                      <span className={`neo-chip ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'neo-chip--outline' : 'neo-chip--solid') : 'neo-chip--quiet'}`}>
+                        {accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'En prueba' : 'Al día') : 'Sin acceso'}
+                      </span>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID del Negocio</p>
-                        <p className="text-[10px] font-mono text-slate-500 mt-0.5 break-all">{negocio.id}</p>
+                        <p className="neo-eyebrow">ID del Negocio</p>
+                        <p className="text-[10px] font-mono mt-0.5 break-all" style={{ color: 'var(--ns-text-muted)' }}>{negocio.id}</p>
                       </div>
                     </div>
                   </div>
@@ -1623,41 +1745,41 @@ export default function Dashboard({ session }) {
                   {/* SECCIÓN: SUSCRIPCIÓN / PLAN */}
                   <div className="ns-settings-card" data-testid="subscription-card">
                     <div className="ns-settings-card-header">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <h4>Suscripción</h4>
                     </div>
                     <div className="p-4 md:p-5">
-                      <div className="rounded-2xl border border-slate-200 overflow-hidden">
-                        <div className="p-5 bg-gradient-to-br from-slate-50 to-white">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Plan {PLAN.nombre}</span>
-                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${accesoSub.estado === 'trial' ? 'text-indigo-600 bg-indigo-50' : accesoSub.acceso ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'}`}>{etiquetaEstado(accesoSub.estado)}</span>
+                      <div className="neo-well overflow-hidden p-0">
+                        <div className="p-5">
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <span className="neo-eyebrow">Plan {PLAN.nombre}</span>
+                            <span className={`neo-chip ${accesoSub.estado === 'trial' ? 'neo-chip--outline' : accesoSub.acceso ? 'neo-chip--solid' : 'neo-chip--quiet'}`}>{etiquetaEstado(accesoSub.estado)}</span>
                           </div>
                           <div className="flex items-end gap-1 mb-1">
-                            <span className="text-3xl font-black tracking-tighter text-slate-900">{formatearPrecio()}</span>
-                            <span className="text-xs text-slate-400 font-bold mb-1">/mes</span>
+                            <span className="font-display text-3xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>{formatearPrecio()}</span>
+                            <span className="text-xs font-bold mb-1" style={{ color: 'var(--ns-text-muted)' }}>/mes</span>
                           </div>
                           {accesoSub.diasRestantes != null ? (
-                            <p className="text-[12px] font-medium text-slate-500">
+                            <p className="text-[12px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>
                               {accesoSub.estado === 'trial' ? 'Prueba gratis · ' : 'Activo · '}
                               te {accesoSub.diasRestantes === 1 ? 'queda 1 día' : `quedan ${accesoSub.diasRestantes} días`}
                               {accesoSub.vence ? ` (hasta ${new Date(accesoSub.vence).toLocaleDateString('es-AR')})` : ''}
                             </p>
                           ) : (
-                            <p className="text-[12px] font-medium text-slate-500">Todo incluido: reservas, CRM, reportes e inventario.</p>
+                            <p className="text-[12px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Todo incluido: reservas, CRM, reportes e inventario.</p>
                           )}
                         </div>
-                        <div className="p-4 border-t border-slate-100">
+                        <div className="px-5 pb-5">
                           <a
                             href={whatsappActivacion(negocio, session.user.email)}
                             target="_blank" rel="noopener noreferrer"
                             data-testid="subscription-card-cta"
-                            className="w-full py-3 rounded-xl bg-emerald-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-sm flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95"
+                            className="neo-btn neo-btn--primary neo-btn--block py-3.5 text-[10px] uppercase tracking-[0.2em] gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             {accesoSub.estado === 'activo' ? 'Renovar suscripción' : 'Activar plan'}
                           </a>
-                          <p className="text-[10px] text-slate-400 text-center mt-2 font-medium">Activación manual · te respondemos al toque</p>
+                          <p className="neo-tip text-center mt-2.5">Activación manual · te respondemos al toque</p>
                         </div>
                       </div>
                     </div>
@@ -1666,22 +1788,22 @@ export default function Dashboard({ session }) {
                   {/* SECCIÓN: ZONA DE SEGURIDAD */}
                   <div className="ns-settings-card">
                     <div className="ns-settings-card-header">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <h4>Seguridad</h4>
                     </div>
-                    <button onClick={() => window.location.href = '/actualizar-clave'} className="ns-settings-row cursor-pointer w-full text-left hover:bg-slate-50">
+                    <button onClick={() => window.location.href = '/actualizar-clave'} className="ns-settings-row cursor-pointer w-full text-left">
                       <div className="flex items-center gap-3">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <span className="text-sm font-bold text-slate-900">Cambiar Contraseña</span>
+                        <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span className="text-sm font-bold" style={{ color: 'var(--ns-text)' }}>Cambiar contraseña</span>
                       </div>
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
-                    <button onClick={cerrarSesion} className="ns-settings-row cursor-pointer w-full text-left hover:bg-red-50 group">
+                    <button onClick={cerrarSesion} className="ns-settings-row cursor-pointer w-full text-left group">
                       <div className="flex items-center gap-3">
-                        <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <span className="text-sm font-bold text-red-500">Cerrar Sesión</span>
+                        <svg className="w-4 h-4" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span className="text-sm font-black" style={{ color: 'var(--ns-primary)' }}>Cerrar sesión</span>
                       </div>
-                      <svg className="w-4 h-4 text-red-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
                   </div>
 
@@ -1713,6 +1835,9 @@ export default function Dashboard({ session }) {
           ))}
         </nav>
       )}
+
+      {/* Ayuda de atajos con "?" */}
+      <Atajos />
 
       {/* ====== TOUR GUIADO INTERACTIVO ====== */}
       {negocio && !negocio.es_admin_plataforma && (

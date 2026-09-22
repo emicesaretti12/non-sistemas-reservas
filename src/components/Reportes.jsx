@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import Contador from './neo/Contador'
 import { getVocabulario } from '../utils/vocabulario'
 import { factura, precioTurno } from '../utils/reservas'
 
@@ -153,11 +154,15 @@ export default function Reportes({ negocioId, rubro }) {
   const variacionTurnos = calcVariacion(datos.turnosPeriodo, datos.comparacion.turnosAnterior)
 
   if (loading) return (
-    <div className="flex flex-col justify-center items-center h-56 gap-4">
-      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'var(--ns-primary-bg)', boxShadow: 'var(--ns-plastilina-card)' }}>
-        <div className="w-5 h-5 border-2 border-[#F2DDDE] border-t-[#AF3643] rounded-full animate-spin"></div>
+    <div className="flex flex-col gap-4" aria-busy="true">
+      <div className="ns-skeleton" style={{ height: 110 }} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="ns-skeleton" style={{ height: 150 }} />
+        <div className="ns-skeleton" style={{ height: 150 }} />
+        <div className="ns-skeleton" style={{ height: 150 }} />
       </div>
-      <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Cargando reportes...</p>
+      <div className="ns-skeleton" style={{ height: 280 }} />
+      <span className="ns-sr-only">Cargando reportes…</span>
     </div>
   )
 
@@ -201,20 +206,22 @@ export default function Reportes({ negocioId, rubro }) {
         {/* Ingresos */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-1">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-plastilina-btn)' }}>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </div>
-            <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[9px] font-black ${variacionIngresos >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
-              style={{ background: variacionIngresos >= 0 ? 'rgba(153,0,17,0.1)' : 'rgba(153,0,17,0.08)' }}>
+            <span className="neo-pod neo-pod--brand neo-pod--sm">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </span>
+            <span
+              className={`neo-chip ${variacionIngresos >= 0 ? 'neo-chip--solid' : 'neo-chip--outline'}`}
+              title={variacionIngresos >= 0 ? 'Subió respecto del período anterior' : 'Bajó respecto del período anterior'}
+            >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                 <path d={variacionIngresos >= 0 ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {Math.abs(variacionIngresos)}%
-            </div>
+            </span>
           </div>
           <p className="text-[9px] font-black uppercase tracking-[0.15em] mb-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ingresos</p>
-          <h3 className="text-3xl md:text-4xl font-black tracking-tighter relative z-10 ns-counter" style={{ color: 'var(--ns-text)' }}>
-            ${datos.ingresosPeriodo.toLocaleString()}
+          <h3 className="font-display text-3xl md:text-4xl font-black tracking-tighter relative z-10" style={{ color: 'var(--ns-text)' }}>
+            <Contador valor={datos.ingresosPeriodo} prefijo="$" />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             vs. ${datos.comparacion.ingresosAnterior.toLocaleString()} período anterior
@@ -225,20 +232,22 @@ export default function Reportes({ negocioId, rubro }) {
         {/* Turnos */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-2">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 4px 12px rgba(153,0,17,0.3)' }}>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </div>
-            <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[9px] font-black ${variacionTurnos >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
-              style={{ background: variacionTurnos >= 0 ? 'rgba(153,0,17,0.1)' : 'rgba(153,0,17,0.08)' }}>
+            <span className="neo-pod neo-pod--brand neo-pod--sm">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </span>
+            <span
+              className={`neo-chip ${variacionTurnos >= 0 ? 'neo-chip--solid' : 'neo-chip--outline'}`}
+              title={variacionTurnos >= 0 ? 'Subió respecto del período anterior' : 'Bajó respecto del período anterior'}
+            >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                 <path d={variacionTurnos >= 0 ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {Math.abs(variacionTurnos)}%
-            </div>
+            </span>
           </div>
           <p className="text-[9px] font-black uppercase tracking-[0.15em] mb-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>{vocab.turnos}</p>
-          <h3 className="text-3xl md:text-4xl font-black tracking-tighter relative z-10 ns-counter" style={{ color: 'var(--ns-text)' }}>
-            {datos.turnosPeriodo}
+          <h3 className="font-display text-3xl md:text-4xl font-black tracking-tighter relative z-10" style={{ color: 'var(--ns-text)' }}>
+            <Contador valor={datos.turnosPeriodo} />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             vs. {datos.comparacion.turnosAnterior} período anterior
@@ -249,16 +258,16 @@ export default function Reportes({ negocioId, rubro }) {
         {/* Ticket Promedio */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-3">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 4px 12px rgba(153,0,17,0.3)' }}>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </div>
+            <span className="neo-pod neo-pod--brand neo-pod--sm">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </span>
             <span className="text-[9px] font-black px-2.5 py-1 rounded-xl" style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}>
               Promedio
             </span>
           </div>
           <p className="text-[9px] font-black uppercase tracking-[0.15em] mb-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ticket Prom.</p>
-          <h3 className="text-3xl md:text-4xl font-black tracking-tighter relative z-10 ns-counter" style={{ color: 'var(--ns-text)' }}>
-            ${datos.ticketPromedio.toLocaleString()}
+          <h3 className="font-display text-3xl md:text-4xl font-black tracking-tighter relative z-10" style={{ color: 'var(--ns-text)' }}>
+            <Contador valor={datos.ticketPromedio} prefijo="$" />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             por {vocab.turno} confirmado
@@ -290,9 +299,8 @@ export default function Reportes({ negocioId, rubro }) {
               <div key={idx} className="flex-1 flex flex-col items-center gap-1 group min-w-0 h-full justify-end">
                 <div className="w-full relative h-full flex items-end">
                   {/* Tooltip */}
-                  <div className="absolute -top-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded-xl text-[9px] font-black whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100 z-20 pointer-events-none"
-                    style={{ background: 'var(--ns-text)', color: 'white', boxShadow: 'var(--ns-shadow-lg)' }}>
-                    ${d.valor.toLocaleString()}
+                  <div className="neo-tip absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    ${d.valor.toLocaleString('es-AR')}
                   </div>
                   {/* Barra */}
                   <div
@@ -325,9 +333,9 @@ export default function Reportes({ negocioId, rubro }) {
         <div className="ns-kpi-card ns-stagger-in ns-delay-5 p-0 overflow-hidden">
           <div className="p-5 md:p-6 border-b relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-primary-bg)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                <svg className="w-4 h-4" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
+              <span className="neo-pod neo-pod--sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
               <div>
                 <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.servicioPlural} más rentables</h4>
                 <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Por facturación</p>
@@ -335,8 +343,9 @@ export default function Reportes({ negocioId, rubro }) {
             </div>
           </div>
           {datos.topServicios.length === 0 ? (
-            <div className="p-10 text-center relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Sin datos disponibles</p>
+            <div className="neo-empty">
+              <p className="neo-empty__title">Todavía sin datos</p>
+              <p className="neo-empty__text">Cuando se confirmen turnos en este período, el ranking aparece acá.</p>
             </div>
           ) : (
             <div className="divide-y relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
@@ -350,8 +359,8 @@ export default function Reportes({ negocioId, rubro }) {
                     <span className="text-[10px] font-black w-5 shrink-0 group-hover/item:text-[#AF3643] transition-colors" style={{ color: 'var(--ns-text-muted)' }}>{idx + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-black truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{s.nombre}</p>
-                      <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)' }}>
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%`, background: 'var(--ns-gradient-1)' }} />
+                      <div className="neo-progress mt-2" style={{ height: 7 }}>
+                        <div className="neo-progress__fill" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                     <div className="text-right shrink-0">
@@ -369,9 +378,9 @@ export default function Reportes({ negocioId, rubro }) {
         <div className="ns-kpi-card ns-stagger-in ns-delay-6 p-0 overflow-hidden">
           <div className="p-5 md:p-6 border-b relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                <svg className="w-4 h-4" style={{ color: '#B3404C' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
+              <span className="neo-pod neo-pod--sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
               <div>
                 <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.empleadoPlural} por rendimiento</h4>
                 <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Por facturación generada</p>
@@ -379,8 +388,9 @@ export default function Reportes({ negocioId, rubro }) {
             </div>
           </div>
           {datos.topEmpleados.length === 0 ? (
-            <div className="p-10 text-center relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Sin datos disponibles</p>
+            <div className="neo-empty">
+              <p className="neo-empty__title">Todavía sin datos</p>
+              <p className="neo-empty__text">Cuando se confirmen turnos en este período, el ranking aparece acá.</p>
             </div>
           ) : (
             <div className="divide-y relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
@@ -390,14 +400,11 @@ export default function Reportes({ negocioId, rubro }) {
                   <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors"
                     onMouseEnter={ev => ev.currentTarget.style.background = 'var(--ns-accent-bg)'}
                     onMouseLeave={ev => ev.currentTarget.style.background = ''}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all"
-                      style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                      {e.nombre.charAt(0)}
-                    </div>
+                    <span className="neo-pod neo-pod--sm font-black text-sm">{e.nombre.charAt(0)}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-black truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{e.nombre}</p>
-                      <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)' }}>
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${(e.revenue / maxRev) * 100}%`, background: 'var(--ns-gradient-1)' }} />
+                      <div className="neo-progress mt-2" style={{ height: 7 }}>
+                        <div className="neo-progress__fill" style={{ width: `${(e.revenue / maxRev) * 100}%` }} />
                       </div>
                     </div>
                     <div className="text-right shrink-0">
@@ -418,9 +425,9 @@ export default function Reportes({ negocioId, rubro }) {
         {/* HORAS PICO */}
         <div className="ns-kpi-card ns-stagger-in ns-delay-7">
           <div className="flex items-center gap-3 mb-5 relative z-10">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
-              <svg className="w-4 h-4" style={{ color: '#CB7B83' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </div>
+            <span className="neo-pod neo-pod--sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </span>
             <div>
               <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>Horas con más demanda</h4>
               <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Distribución horaria</p>
@@ -428,8 +435,9 @@ export default function Reportes({ negocioId, rubro }) {
           </div>
 
           {Object.keys(datos.horasPico).length === 0 ? (
-            <div className="py-10 text-center relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Sin datos disponibles</p>
+            <div className="neo-empty">
+              <p className="neo-empty__title">Todavía sin datos</p>
+              <p className="neo-empty__text">Con los primeros turnos vas a ver en qué horas se te llena la agenda.</p>
             </div>
           ) : (
             <div className="space-y-3 relative z-10">
@@ -438,13 +446,9 @@ export default function Reportes({ negocioId, rubro }) {
                 .slice(0, 6)
                 .map(([hora, count], idx) => (
                   <div key={hora} className="flex items-center gap-3">
-                    <span className="text-[10px] font-black w-12 shrink-0" style={{ color: idx === 0 ? '#CB7B83' : 'var(--ns-text-muted)' }}>{hora}:00</span>
-                    <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
-                      <div className="h-full rounded-full transition-all duration-1000"
-                        style={{
-                          width: `${(count / maxHoraPico) * 100}%`,
-                          background: idx === 0 ? 'var(--ns-gradient-1)' : 'var(--ns-gradient-1)'
-                        }} />
+                    <span className="text-[11px] font-black w-12 shrink-0 tabular-nums" style={{ color: idx === 0 ? 'var(--ns-primary)' : 'var(--ns-text-muted)' }}>{hora}:00</span>
+                    <div className="neo-progress flex-1">
+                      <div className="neo-progress__fill" style={{ width: `${(count / maxHoraPico) * 100}%`, opacity: idx === 0 ? 1 : 0.65 }} />
                     </div>
                     <span className="text-[11px] font-black w-5 text-right" style={{ color: 'var(--ns-text)' }}>{count}</span>
                   </div>
@@ -457,9 +461,9 @@ export default function Reportes({ negocioId, rubro }) {
         <div className="ns-kpi-card ns-stagger-in ns-delay-8 p-0 overflow-hidden">
           <div className="p-5 md:p-6 border-b relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(153,0,17,0.1)', boxShadow: 'var(--ns-shadow-sm)' }}>
-                <svg className="w-4 h-4" style={{ color: '#C36771' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
+              <span className="neo-pod neo-pod--sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
               <div>
                 <h4 className="text-sm font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.clientePlural.replace('Base de ', '')} destacados</h4>
                 <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Mayor facturación</p>
@@ -467,8 +471,9 @@ export default function Reportes({ negocioId, rubro }) {
             </div>
           </div>
           {datos.topClientes.length === 0 ? (
-            <div className="p-10 text-center relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Sin datos disponibles</p>
+            <div className="neo-empty">
+              <p className="neo-empty__title">Todavía sin datos</p>
+              <p className="neo-empty__text">Cuando se confirmen turnos en este período, el ranking aparece acá.</p>
             </div>
           ) : (
             <div className="divide-y relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
@@ -476,17 +481,16 @@ export default function Reportes({ negocioId, rubro }) {
                 <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors"
                   onMouseEnter={ev => ev.currentTarget.style.background = 'var(--ns-accent-bg)'}
                   onMouseLeave={ev => ev.currentTarget.style.background = ''}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
-                    style={{ background: idx === 0 ? 'var(--ns-gradient-soft)' : 'var(--ns-primary-bg)', color: idx === 0 ? '#CB7B83' : 'var(--ns-primary)', boxShadow: 'var(--ns-shadow-sm)' }}>
+                  <span className={`neo-pod neo-pod--sm font-black text-sm ${idx === 0 ? 'neo-pod--brand' : ''}`}>
                     {c.nombre?.charAt(0)?.toUpperCase() || '?'}
-                  </div>
+                  </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-black truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{c.nombre}</p>
                     <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>{c.count} {vocab.turnos}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-[12px] font-black" style={{ color: 'var(--ns-text)' }}>${c.revenue.toLocaleString()}</p>
-                    {idx === 0 && <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: '#CB7B83' }}>Top</p>}
+                    {idx === 0 && <p className="neo-eyebrow" style={{ color: 'var(--ns-primary)' }}>Top</p>}
                   </div>
                 </div>
               ))}

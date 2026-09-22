@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 import { useToast } from './Toast'
+import { haptic } from '../utils/haptics'
 import { useConfirm } from '../contexts/ConfirmContext'
 import { IconRobot, IconCelebrate } from './NoniIcons'
 
@@ -207,255 +208,229 @@ export default function Empleados({ negocioId, rubro }) {
     })
   }
 
+  const ETIQUETA_ESTADO = {
+    activo: { texto: 'Activo', clase: 'neo-chip--solid' },
+    vacaciones: { texto: 'De licencia', clase: 'neo-chip--outline' },
+    inactivo: { texto: 'Inactivo', clase: 'neo-chip--cancelled' },
+  }
+
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+    <div className="flex flex-col gap-5 ns-tab-content-enter">
 
-      {/* --- HEADER COMPACTO --- */}
-
-      {/* Celebration toast */}
       {showCelebration && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-emerald-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <IconCelebrate size={24} className="text-emerald-500" />
+        <div className="ns-copy-toast" role="status" style={{ top: 'calc(80px + env(safe-area-inset-top, 0px))', bottom: 'auto' }}>
+          <span className="neo-pod neo-pod--brand neo-pod--sm"><IconCelebrate size={18} /></span>
           <div>
-            <p className="text-sm font-bold text-slate-900">¡{vocab.empleado} agregado!</p>
-            <p className="text-[10px] text-slate-500 font-medium">Ahora configurá tus horarios de atención</p>
+            <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡{vocab.empleado} agregado!</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Ahora configurá tus horarios</p>
           </div>
         </div>
       )}
 
-
-      <header className="flex items-center justify-between bg-[#FCF6F5] p-8 md:p-10 rounded-[2.5rem] border border-[#F6E7E7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-        </div>
-        <div className="relative z-10">
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#990011] leading-none">{vocab.empleadoPlural}</h2>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#AF3643] animate-pulse" />
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#D28F95]">
-              {especialistas.length} {vocab.empleados} en línea
+      <header className="neo-card p-5 md:p-7 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="neo-head__title text-3xl md:text-[42px]">{vocab.empleadoPlural}</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
+            <p className="neo-eyebrow">
+              {especialistas.filter(e => (e.estado || 'activo') === 'activo').length} de {especialistas.length} activos
             </p>
           </div>
         </div>
-        <button
-          onClick={abrirModalCrear}
-          className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-[#AF3643] text-white flex items-center justify-center shadow-2xl shadow-[#AF3643]/40 active:scale-95 transition-all gap-3 hover:bg-[#AF3643] border border-white/20 relative z-10"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
-          <span className="hidden md:inline text-[11px] font-black uppercase tracking-[0.3em]">{vocab.nuevoEmpleado}</span>
+        <button onClick={() => { haptic(); abrirModalCrear() }} className="neo-btn neo-btn--primary shrink-0">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+          <span className="hidden sm:inline">{vocab.nuevoEmpleado}</span>
         </button>
       </header>
 
-      {/* --- GRILLA DE ESPECIALISTAS --- */}
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-        {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-          </div>
-        ) : especialistas.length === 0 ? (
-          <div className="bg-white rounded-[2rem] border border-purple-100 p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-50 rounded-full blur-[40px]"></div>
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-50 rounded-full blur-[30px]"></div>
-
-            {/* Robot emoji */}
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm relative z-10">
-              <IconRobot size={28} className="text-purple-500" />
-            </div>
-
-            <h3 className="text-base font-bold text-slate-900 tracking-tight relative z-10">¡Agregá a tu equipo!</h3>
-            <p className="text-xs text-slate-500 mt-2 max-w-[320px] leading-relaxed font-medium relative z-10">
-              Acá cargás a las personas que atienden en tu negocio. Si <strong className="text-slate-700">trabajás solo</strong>, ponete a vos mismo. Los clientes van a elegir <strong className="text-slate-700">con quién reservar</strong>.
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true">
+          <div className="ns-skeleton" style={{ height: 120 }} />
+          <div className="ns-skeleton" style={{ height: 120 }} />
+          <div className="ns-skeleton" style={{ height: 120 }} />
+        </div>
+      ) : especialistas.length === 0 ? (
+        <section className="neo-card">
+          <div className="neo-empty">
+            <span className="neo-pod neo-pod--lg"><IconRobot size={26} /></span>
+            <p className="neo-empty__title text-base">Sumá a tu equipo</p>
+            <p className="neo-empty__text">
+              Cargá a quienes atienden. Si trabajás solo, ponete a vos: cada persona activa suma su propia
+              agenda, y tus clientes eligen con quién reservar.
             </p>
 
-            {/* Example card */}
-            <div className="mt-5 w-full max-w-[300px] space-y-2 relative z-10">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ejemplo:</p>
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">A</div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-slate-700">Ana García</p>
-                  <p className="text-[9px] text-slate-400 font-medium">{vocab.especialidad || 'Especialista'}</p>
+            <div className="neo-well w-full max-w-[320px] mt-2 text-left">
+              <p className="neo-eyebrow mb-2.5">Así se ve</p>
+              <div className="neo-tile !p-3.5 !flex-row items-center gap-3">
+                <span className="neo-pod neo-pod--sm">A</span>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-black" style={{ color: 'var(--ns-text)' }}>Ana García</p>
+                  <p className="text-[10px] font-semibold" style={{ color: 'var(--ns-text-muted)' }}>{vocab.especialidad || 'Especialista'}</p>
                 </div>
-                <div className="ml-auto w-3 h-3 rounded-full bg-emerald-400"></div>
+                <span className="neo-chip neo-chip--solid ml-auto">Activo</span>
               </div>
             </div>
 
-            {/* CTA */}
-            <button
-              onClick={abrirModalCrear}
-              className="mt-6 px-8 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold text-[11px] uppercase tracking-widest shadow-lg hover:from-purple-400 hover:to-indigo-400 transition-all active:scale-95 relative z-10 flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+            <button onClick={() => { haptic(); abrirModalCrear() }} className="neo-btn neo-btn--primary mt-3">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
               Agregar {vocab.empleado}
             </button>
-            <p className="text-[9px] text-slate-400 mt-2 font-medium relative z-10">Necesitás al menos uno para recibir reservas</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-faint)' }}>Necesitás al menos uno para recibir reservas</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {especialistas.map((esp) => (
-              <div key={esp.id} className="bg-[#FCF6F5] rounded-[2.5rem] p-6 border border-[#F6E7E7] flex items-center gap-5 group hover:bg-white transition-all relative overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                </div>
-                
-                <div className="relative w-20 h-20 rounded-[2rem] overflow-hidden shadow-2xl border-2 border-[#F6E7E7] bg-white shrink-0 z-10">
-                  {esp.foto_url ? (
-                    <img src={esp.foto_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={esp.nombre} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#D28F95] text-3xl font-black">{esp.nombre.charAt(0)}</div>
-                  )}
-                  {/* Estado badge */}
-                  <div className={`absolute bottom-2 right-2 w-4 h-4 rounded-full border-4 border-white ${esp.estado === 'vacaciones' ? 'bg-amber-400' : esp.estado === 'inactivo' ? 'bg-rose-500' : 'bg-emerald-400'
-                    }`}></div>
-                </div>
-
-                <div className="flex-1 overflow-hidden relative z-10">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-black text-lg text-[#990011] truncate leading-tight">{esp.nombre}</h4>
-                    {esp.comision_porcentaje > 0 && <span className="text-[8px] font-black text-[#AF3643] bg-[#AF3643]/10 px-2 py-0.5 rounded-full uppercase tracking-widest border border-[#AF3643]/20">{esp.comision_porcentaje}%</span>}
-                  </div>
-                  <p className="text-[10px] font-black text-[#D28F95] uppercase tracking-[0.2em] mt-1 truncate">
-                    {esp.especialidad || 'General'}
-                  </p>
-                  {(esp.email || esp.telefono) && (
-                    <div className="flex items-center gap-3 mt-2">
-                      {esp.telefono && <span className="text-[9px] text-[#D28F95] font-bold truncate">{esp.telefono}</span>}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2 relative z-10">
-                  <button onClick={() => abrirModalEditar(esp)} className="w-10 h-10 rounded-xl bg-white text-[#D28F95] flex items-center justify-center hover:bg-[#F2DDDE]/40 hover:text-[#AF3643] transition-all active:scale-90 border border-[#F6E7E7]">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </button>
-                  <button onClick={() => eliminarEspecialista(esp)} aria-label={`Dar de baja a ${esp.nombre}`} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90 border border-rose-500/20">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* --- MODAL: CREAR / EDITAR --- */}
-      {modalAbierto && (
-        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-[#990011]/80 backdrop-blur-2xl animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(153,0,17,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-[#F6E7E7] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#AF3643]/10 blur-[80px]" />
-            </div>
-
-            <div className="flex justify-between items-center mb-10 relative z-10">
-              <div>
-                <h2 className="text-3xl font-black tracking-tighter text-[#990011] leading-none">{modoEdicion ? vocab.editarEmpleado : vocab.nuevoEmpleado}</h2>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#AF3643] animate-pulse" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95]">Gestión de {vocab.empleados}</p>
-                </div>
-              </div>
-              <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-white hover:bg-[#F2DDDE]/40 rounded-2xl flex items-center justify-center text-[#D28F95] hover:text-[#AF3643] transition-all active:scale-90 border border-[#F6E7E7]">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
-              </button>
-            </div>
-
-            <form onSubmit={guardarEspecialista} className="space-y-5">
-
-              {/* UPLOAD FOTO PERFIL */}
-              <div className="flex flex-col items-center mb-2">
-                <div className="relative group">
-                  <div className="w-24 h-24 rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-100 shadow-inner flex items-center justify-center">
-                    {form.foto_url ? (
-                      <img src={form.foto_url} className="w-full h-full object-cover" />
-                    ) : (
-                      <svg className="w-10 h-10 text-slate-200" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    )}
-                    {subiendoFoto && (
-                      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                  </div>
-                  <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer active:scale-90 transition-transform">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    <input type="file" accept="image/*" className="hidden" onChange={manejarSubidaFoto} />
-                  </label>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nombre</label>
-                <input
-                  required
-                  className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300"
-                  placeholder={vocab.placeholderEmpleado}
-                  value={form.nombre}
-                  onChange={e => setForm({ ...form, nombre: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{vocab.especialidad}</label>
-                <input
-                  required
-                  className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300"
-                  placeholder={vocab.placeholderEspecialidad}
-                  value={form.especialidad}
-                  onChange={e => setForm({ ...form, especialidad: e.target.value })}
-                />
-              </div>
-
-              {/* CRM: Contacto */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Email</label>
-                  <input type="email" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" placeholder="email@ejemplo.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Teléfono</label>
-                  <input type="tel" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm placeholder:text-slate-300" placeholder="351..." value={form.telefono} onChange={e => setForm({ ...form, telefono: e.target.value })} />
-                </div>
-              </div>
-
-              {/* CRM: Comisión y Estado */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Comisión %</label>
-                  <input type="number" min="0" max="100" step="0.5" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm" value={form.comision_porcentaje} onChange={e => setForm({ ...form, comision_porcentaje: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Estado</label>
-                  <select className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 appearance-none text-sm cursor-pointer" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
-                    <option value="vacaciones">Vacaciones</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* CRM: Notas internas */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Notas Internas</label>
-                <textarea className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-slate-900 border border-transparent focus:bg-white focus:border-slate-300 transition-all text-sm resize-none h-20 placeholder:text-slate-300" placeholder="Notas privadas sobre este recurso..." value={form.notas} onChange={e => setForm({ ...form, notas: e.target.value })} />
-              </div>
-
-              <button
-                disabled={guardando || subiendoFoto}
-                type="submit"
-                className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-[11px] tracking-widest uppercase shadow-xl active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 disabled:opacity-50 hover:bg-slate-800"
+        </section>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ns-stagger">
+          {especialistas.map((esp) => {
+            const estado = ETIQUETA_ESTADO[esp.estado] || ETIQUETA_ESTADO.activo
+            const inactivo = esp.estado === 'inactivo'
+            return (
+              <article
+                key={esp.id}
+                className="neo-tile !flex-row items-center gap-4"
+                style={inactivo ? { background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' } : undefined}
               >
-                {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? `Actualizar ${vocab.empleado}` : `Confirmar ${vocab.empleado}`)}
-              </button>
-            </form>
-          </div>
+                <span className="neo-pod neo-pod--lg overflow-hidden p-0">
+                  {esp.foto_url
+                    ? <img src={esp.foto_url} className="w-full h-full object-cover" alt="" />
+                    : <span className="font-display text-2xl font-black">{esp.nombre.charAt(0)}</span>}
+                </span>
+
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-black text-base truncate leading-tight" style={{ color: inactivo ? 'var(--ns-text-muted)' : 'var(--ns-text)' }}>
+                    {esp.nombre}
+                  </h4>
+                  <p className="text-[11px] font-semibold truncate mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>
+                    {esp.especialidad || 'General'}
+                    {esp.telefono ? ` · ${esp.telefono}` : ''}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    <span className={`neo-chip ${estado.clase}`}>{estado.texto}</span>
+                    {esp.comision_porcentaje > 0 && (
+                      <span className="neo-chip neo-chip--quiet">{esp.comision_porcentaje}% comisión</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 shrink-0">
+                  <button onClick={() => { haptic(); abrirModalEditar(esp) }} className="neo-icon-btn w-9 h-9" aria-label={`Editar ${esp.nombre}`}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.3" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  <button onClick={() => eliminarEspecialista(esp)} className="neo-icon-btn w-9 h-9" aria-label={`Dar de baja a ${esp.nombre}`}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
 
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+      {/* Hoja de alta / edición */}
+      {modalAbierto && (
+        <div
+          className="neo-scrim flex items-end sm:items-center justify-center"
+          onClick={() => setModalAbierto(false)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+            style={{
+              background: 'var(--ns-surface)',
+              boxShadow: 'var(--neo-float)',
+              borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+            }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={modoEdicion ? vocab.editarEmpleado : vocab.nuevoEmpleado}
+          >
+            <div className="neo-sheet__handle sm:hidden" />
+
+            <div className="px-5 sm:px-8 pt-3 sm:pt-7">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="neo-head__title text-2xl md:text-3xl">{modoEdicion ? vocab.editarEmpleado : vocab.nuevoEmpleado}</h2>
+                  <p className="neo-eyebrow mt-1.5">Gestión de {vocab.empleados}</p>
+                </div>
+                <button onClick={() => setModalAbierto(false)} className="neo-icon-btn" aria-label="Cerrar">
+                  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
+                </button>
+              </div>
+
+              <form onSubmit={guardarEspecialista} className="flex flex-col gap-4">
+                {/* Foto */}
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-[26px] overflow-hidden flex items-center justify-center" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset)' }}>
+                      {form.foto_url
+                        ? <img src={form.foto_url} className="w-full h-full object-cover" alt="" />
+                        : <svg className="w-9 h-9" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                      {subiendoFoto && (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(252,246,245,0.7)' }}>
+                          <span className="neo-spinner neo-spinner--sm" />
+                        </div>
+                      )}
+                    </div>
+                    <label className="absolute -bottom-1.5 -right-1.5 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer" style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)' }}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <input type="file" accept="image/*" className="hidden" onChange={manejarSubidaFoto} />
+                      <span className="ns-sr-only">Subir foto</span>
+                    </label>
+                  </div>
+                </div>
+
+                <label className="flex flex-col gap-2">
+                  <span className="neo-eyebrow">Nombre</span>
+                  <input required className="neo-field" placeholder={vocab.placeholderEmpleado} value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} />
+                </label>
+
+                <label className="flex flex-col gap-2">
+                  <span className="neo-eyebrow">{vocab.especialidad}</span>
+                  <input required className="neo-field" placeholder={vocab.placeholderEspecialidad} value={form.especialidad} onChange={e => setForm({ ...form, especialidad: e.target.value })} />
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex flex-col gap-2">
+                    <span className="neo-eyebrow">Email</span>
+                    <input type="email" className="neo-field" placeholder="email@ejemplo.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="neo-eyebrow">Teléfono</span>
+                    <input type="tel" inputMode="tel" className="neo-field" placeholder="351..." value={form.telefono} onChange={e => setForm({ ...form, telefono: e.target.value })} />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex flex-col gap-2">
+                    <span className="neo-eyebrow">Comisión %</span>
+                    <input type="number" min="0" max="100" step="0.5" inputMode="decimal" className="neo-field" value={form.comision_porcentaje} onChange={e => setForm({ ...form, comision_porcentaje: e.target.value })} />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="neo-eyebrow">Estado</span>
+                    <select className="neo-field cursor-pointer" value={form.estado} onChange={e => setForm({ ...form, estado: e.target.value })}>
+                      <option value="activo">Activo</option>
+                      <option value="inactivo">Inactivo</option>
+                      <option value="vacaciones">De licencia</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label className="flex flex-col gap-2">
+                  <span className="neo-eyebrow">Notas internas</span>
+                  <textarea className="neo-field" style={{ minHeight: 84 }} placeholder="Sólo las ves vos." value={form.notas} onChange={e => setForm({ ...form, notas: e.target.value })} />
+                </label>
+
+                <button disabled={guardando || subiendoFoto} type="submit" className="neo-btn neo-btn--primary neo-btn--block mt-1">
+                  {guardando
+                    ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} />
+                    : (modoEdicion ? `Actualizar ${vocab.empleado}` : `Guardar ${vocab.empleado}`)}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -235,15 +235,11 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
                   key={size.id}
                   onClick={() => setSelectedSize(size)}
                   whileHover={{ x: 4 }}
-                  className={`w-full px-4 py-3 rounded-xl font-bold text-sm transition-all text-left ${
-                    selectedSize.id === size.id
-                      ? 'text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
+                  className="w-full px-4 py-3 rounded-[16px] font-bold text-sm transition-all text-left"
                   style={
                     selectedSize.id === size.id
-                      ? { background: 'var(--ns-primary)' }
-                      : { background: 'var(--ns-surface)' }
+                      ? { background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)' }
+                      : { background: 'var(--ns-surface)', color: 'var(--ns-text-secondary)', boxShadow: 'var(--neo-raised-sm)' }
                   }
                 >
                   {size.label}

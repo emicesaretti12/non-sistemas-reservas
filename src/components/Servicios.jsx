@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 import { useToast } from './Toast'
+import { haptic } from '../utils/haptics'
 import { useConfirm } from '../contexts/ConfirmContext'
 import { IconRobot, IconCelebrate } from './NoniIcons'
 
@@ -150,201 +151,200 @@ export default function Servicios({ negocioId, rubro }) {
   }
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+    <div className="flex flex-col gap-5 ns-tab-content-enter">
 
-      {/* Celebration toast */}
+      {/* Aviso del primer servicio creado */}
       {showCelebration && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-emerald-100 px-6 py-4 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-500 max-w-sm">
-          <IconCelebrate size={24} className="text-emerald-500" />
+        <div className="ns-copy-toast" role="status" style={{ top: 'calc(80px + env(safe-area-inset-top, 0px))', bottom: 'auto' }}>
+          <span className="neo-pod neo-pod--brand neo-pod--sm">
+            <IconCelebrate size={18} />
+          </span>
           <div>
-            <p className="text-sm font-bold text-slate-900">¡Primer {vocab.servicio} creado!</p>
-            <p className="text-[10px] text-slate-500 font-medium">Ahora agregá a tu equipo para recibir reservas</p>
+            <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Primer {vocab.servicio} creado!</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Ahora sumá a tu equipo para recibir reservas</p>
           </div>
         </div>
       )}
 
-
-      <header className="flex items-center justify-between bg-white p-8 md:p-10 rounded-[2.5rem] border border-[#F6E7E7] mb-6 md:mb-8 shrink-0 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" /></svg>
-        </div>
-        <div className="relative z-10">
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#990011] leading-none">{vocab.servicioPlural}</h2>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#AF3643] animate-pulse" />
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#D28F95]">
-              {servicios.length} {vocab.servicios} activos
-            </p>
+      {/* Encabezado */}
+      <header className="neo-card p-5 md:p-7 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="neo-head__title text-3xl md:text-[42px]">{vocab.servicioPlural}</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
+            <p className="neo-eyebrow">{servicios.length} {vocab.servicios} activos</p>
           </div>
         </div>
-        <button
-          onClick={abrirModalCrear}
-          className="w-14 h-14 md:w-auto md:px-8 md:py-4 rounded-2xl md:rounded-3xl bg-[#AF3643] text-white flex items-center justify-center shadow-2xl shadow-[#AF3643]/40 active:scale-95 transition-all gap-3 hover:bg-[#AF3643] border border-white/20 relative z-10"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
-          <span className="hidden md:inline text-[11px] font-black uppercase tracking-[0.3em]">{vocab.nuevoServicio}</span>
+        <button onClick={() => { haptic(); abrirModalCrear() }} className="neo-btn neo-btn--primary shrink-0">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+          <span className="hidden sm:inline">{vocab.nuevoServicio}</span>
         </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-        {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-          </div>
-        ) : servicios.length === 0 ? (
-          <div className="bg-white rounded-[2rem] border border-purple-100 p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-50 rounded-full blur-[40px]"></div>
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-50 rounded-full blur-[30px]"></div>
-
-            {/* Robot emoji */}
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm relative z-10">
-              <IconRobot size={28} className="text-purple-500" />
-            </div>
-
-            <h3 className="text-base font-bold text-slate-900 tracking-tight relative z-10">¡Empezá creando tu primer {vocab.servicio}!</h3>
-            <p className="text-xs text-slate-500 mt-2 max-w-[320px] leading-relaxed font-medium relative z-10">
-              Un {vocab.servicio} es lo que ofrecés a tus clientes. Cada uno tiene un <strong className="text-slate-700">nombre</strong>, un <strong className="text-slate-700">precio</strong> y <strong className="text-slate-700">cuánto dura</strong>. Tus clientes lo ven cuando abren tu link de reservas.
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" aria-busy="true">
+          <div className="ns-skeleton" style={{ height: 168 }} />
+          <div className="ns-skeleton" style={{ height: 168 }} />
+          <div className="ns-skeleton" style={{ height: 168 }} />
+        </div>
+      ) : servicios.length === 0 ? (
+        <section className="neo-card">
+          <div className="neo-empty">
+            <span className="neo-pod neo-pod--lg">
+              <IconRobot size={26} />
+            </span>
+            <p className="neo-empty__title text-base">Creá tu primer {vocab.servicio}</p>
+            <p className="neo-empty__text">
+              Un {vocab.servicio} es lo que ofrecés: tiene un nombre, un precio y cuánto dura.
+              Es lo primero que ve tu cliente cuando abre tu link.
             </p>
 
-            {/* Example cards */}
-            <div className="mt-5 w-full max-w-[300px] space-y-2 relative z-10">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ejemplo:</p>
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center justify-between">
+            <div className="neo-well w-full max-w-[320px] mt-2 text-left">
+              <p className="neo-eyebrow mb-2.5">Así se ve</p>
+              <div className="neo-tile !p-3.5 !flex-row items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-slate-700">Consulta General</p>
-                  <p className="text-[9px] text-slate-400 font-medium">30 min</p>
+                  <p className="text-[13px] font-black" style={{ color: 'var(--ns-text)' }}>Consulta general</p>
+                  <p className="text-[10px] font-semibold mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>30 min</p>
                 </div>
-                <span className="text-sm font-black text-slate-900">$3500</span>
+                <span className="font-display text-lg font-black tabular-nums" style={{ color: 'var(--ns-text)' }}>$3.500</span>
               </div>
             </div>
 
-            {/* CTA */}
-            <button
-              onClick={abrirModalCrear}
-              className="mt-6 px-8 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold text-[11px] uppercase tracking-widest shadow-lg hover:from-purple-400 hover:to-indigo-400 transition-all active:scale-95 relative z-10 flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+            <button onClick={() => { haptic(); abrirModalCrear() }} className="neo-btn neo-btn--primary mt-3">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
               Crear {vocab.servicio}
             </button>
-            <p className="text-[9px] text-slate-400 mt-2 font-medium relative z-10">Necesitás al menos uno para recibir reservas</p>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-faint)' }}>
+              Necesitás al menos uno para recibir reservas
+            </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-            {servicios.map((srv) => (
-              <div key={srv.id} className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-[#F6E7E7] flex flex-col justify-between gap-6 group hover:bg-[#FCF6F5] transition-all relative overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" /></svg>
+        </section>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 ns-stagger">
+          {servicios.map((srv) => (
+            <article key={srv.id} className="neo-tile !gap-0 justify-between">
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-display text-xl md:text-2xl font-black leading-tight truncate" style={{ color: 'var(--ns-text)' }}>
+                    {srv.nombre}
+                  </h4>
+                  <span className="neo-chip neo-chip--quiet mt-2.5">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {srv.duracion_minutos} min
+                  </span>
                 </div>
-                
-                <div className="flex justify-between items-start relative z-10">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-black text-xl md:text-2xl text-[#990011] leading-tight mb-3 truncate">{srv.nombre}</h4>
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FCF6F5] text-[10px] font-black text-[#AF3643] tracking-[0.2em] uppercase border border-[#F6E7E7]">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        {srv.duracion_minutos} min
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <span className="text-2xl md:text-3xl font-black text-[#990011] tracking-tighter leading-none">${srv.precio}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 pt-6 border-t border-[#F6E7E7] relative z-10">
-                  <button onClick={() => abrirModalEditar(srv)} className="flex-1 py-3.5 rounded-2xl bg-[#FCF6F5] text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95] hover:bg-[#F2DDDE]/40 hover:text-[#AF3643] transition-all active:scale-95 border border-[#F6E7E7]">
-                    Editar
-                  </button>
-                  <button onClick={() => eliminarServicio(srv)} aria-label={`Eliminar ${srv.nombre}`}
-                    className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/20 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {modalAbierto && (
-        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-2xl animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(153,0,17,0.8)] p-8 md:p-10 animate-in slide-in-from-bottom-full duration-500 border border-[#F6E7E7] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#AF3643]/10 blur-[80px]" />
-            </div>
-
-            <div className="flex justify-between items-center mb-10 relative z-10">
-              <div>
-                <h2 className="text-3xl font-black tracking-tighter text-[#990011] leading-none">{modoEdicion ? vocab.editarServicio : vocab.nuevoServicio}</h2>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#AF3643] animate-pulse" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D28F95]">Catálogo de servicios</p>
-                </div>
-              </div>
-              <button onClick={() => setModalAbierto(false)} className="w-12 h-12 bg-[#FCF6F5] hover:bg-[#F2DDDE]/40 rounded-2xl flex items-center justify-center text-[#D28F95] hover:text-[#AF3643] transition-all active:scale-90 border border-[#F6E7E7]">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
-              </button>
-            </div>
-
-            <form onSubmit={guardarServicio} className="space-y-6 relative z-10">
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#D28F95] ml-2">Nombre del {vocab.servicio}</label>
-                <input
-                  required
-                  className="w-full p-5 bg-[#FCF6F5] rounded-2xl outline-none font-bold text-[#990011] border border-[#F6E7E7] focus:border-[#AF3643] focus:bg-white transition-all text-base placeholder:text-[#D28F95]"
-                  placeholder={vocab.placeholderServicio}
-                  value={form.nombre}
-                  onChange={e => setForm({ ...form, nombre: e.target.value })}
-                />
+                <span className="font-display text-2xl md:text-3xl font-black tracking-tighter leading-none tabular-nums shrink-0" style={{ color: 'var(--ns-text)' }}>
+                  ${Number(srv.precio || 0).toLocaleString('es-AR')}
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#D28F95] ml-2">Duración (Mins)</label>
-                  <input
-                    required
-                    type="number"
-                    min="1"
-                    className="w-full p-5 bg-[#FCF6F5] rounded-2xl outline-none font-bold text-[#990011] border border-[#F6E7E7] focus:border-[#AF3643] focus:bg-white transition-all text-base placeholder:text-[#D28F95]"
-                    placeholder="Ej: 30"
-                    value={form.duracion}
-                    onChange={e => setForm({ ...form, duracion: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.3em] text-[#D28F95] ml-2">Precio Total ($)</label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="w-full p-5 bg-[#FCF6F5] rounded-2xl outline-none font-bold text-[#990011] border border-[#F6E7E7] focus:border-[#AF3643] focus:bg-white transition-all text-base placeholder:text-[#D28F95]"
-                    placeholder="Ej: 5000"
-                    value={form.precio}
-                    onChange={e => setForm({ ...form, precio: e.target.value })}
-                  />
-                </div>
+              <div className="flex items-center gap-2.5 mt-5">
+                <button onClick={() => { haptic(); abrirModalEditar(srv) }} className="neo-btn flex-1">Editar</button>
+                <button
+                  onClick={() => eliminarServicio(srv)}
+                  aria-label={`Eliminar ${srv.nombre}`}
+                  title="Eliminar"
+                  className="neo-icon-btn shrink-0"
+                >
+                  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
               </div>
-
-              <button
-                disabled={guardando}
-                type="submit"
-                className="w-full py-6 rounded-2xl bg-[#AF3643] text-white font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-[#AF3643]/40 active:scale-95 transition-all flex justify-center items-center gap-3 mt-4 hover:bg-[#AF3643] border border-white/20 disabled:opacity-30"
-              >
-                {guardando ? <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : (modoEdicion ? `Actualizar ${vocab.servicio}` : 'Confirmar y Guardar')}
-              </button>
-            </form>
-          </div>
+            </article>
+          ))}
         </div>
       )}
 
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+      {/* Hoja de alta / edición */}
+      {modalAbierto && (
+        <div
+          className="neo-scrim flex items-end sm:items-center justify-center"
+          onClick={() => setModalAbierto(false)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+            style={{
+              background: 'var(--ns-surface)',
+              boxShadow: 'var(--neo-float)',
+              borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+            }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={modoEdicion ? vocab.editarServicio : vocab.nuevoServicio}
+          >
+            <div className="neo-sheet__handle sm:hidden" />
+
+            <div className="px-5 sm:px-8 pt-3 sm:pt-7">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="neo-head__title text-2xl md:text-3xl">
+                    {modoEdicion ? vocab.editarServicio : vocab.nuevoServicio}
+                  </h2>
+                  <p className="neo-eyebrow mt-1.5">Catálogo de {vocab.servicios}</p>
+                </div>
+                <button onClick={() => setModalAbierto(false)} className="neo-icon-btn" aria-label="Cerrar">
+                  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
+                </button>
+              </div>
+
+              <form onSubmit={guardarServicio} className="flex flex-col gap-4">
+                <label className="flex flex-col gap-2">
+                  <span className="neo-eyebrow">Nombre del {vocab.servicio}</span>
+                  <input
+                    required
+                    className="neo-field"
+                    placeholder={vocab.placeholderServicio}
+                    value={form.nombre}
+                    onChange={e => setForm({ ...form, nombre: e.target.value })}
+                  />
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex flex-col gap-2">
+                    <span className="neo-eyebrow">Duración (min)</span>
+                    <input
+                      required
+                      type="number"
+                      min="1"
+                      inputMode="numeric"
+                      className="neo-field"
+                      placeholder="30"
+                      value={form.duracion}
+                      onChange={e => setForm({ ...form, duracion: e.target.value })}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="neo-eyebrow">Precio ($)</span>
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      className="neo-field"
+                      placeholder="5000"
+                      value={form.precio}
+                      onChange={e => setForm({ ...form, precio: e.target.value })}
+                    />
+                  </label>
+                </div>
+
+                <p className="text-[11px] font-medium leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
+                  La duración define los horarios que tus clientes van a ver disponibles, así que conviene que sea realista.
+                </p>
+
+                <button disabled={guardando} type="submit" className="neo-btn neo-btn--primary neo-btn--block mt-1">
+                  {guardando
+                    ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} />
+                    : (modoEdicion ? `Actualizar ${vocab.servicio}` : `Guardar ${vocab.servicio}`)}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -29,16 +29,16 @@ class ErrorBoundary extends React.Component {
       const detalle = this.state.error?.message;
 
       return (
-        <div className="animate-in fade-in bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-8 m-4 flex flex-col items-center justify-center text-center gap-4">
-          {/* Icono de advertencia */}
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
+        <div className="neo-card m-4 flex flex-col items-center justify-center text-center gap-4 p-8">
+          {/* Icono de advertencia, hundido en el papel */}
+          <div className="neo-pod neo-pod--lg">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-7 h-7 text-amber-500"
+              className="w-7 h-7"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth={1.5}
+              strokeWidth={1.8}
               strokeLinecap="round"
               strokeLinejoin="round"
             >
@@ -50,30 +50,24 @@ class ErrorBoundary extends React.Component {
 
           {/* Texto */}
           <div className="space-y-1.5">
-            <h3 className="text-base font-semibold text-slate-900">{message}</h3>
-            <p className="text-sm text-slate-500 max-w-sm">
-              Ocurrió un error inesperado. Podés intentar nuevamente o contactar soporte si el problema persiste.
+            <h3 className="neo-empty__title">{message}</h3>
+            <p className="neo-empty__text max-w-sm">
+              Ocurrió un error inesperado. Podés reintentar o escribirnos si vuelve a pasar.
             </p>
           </div>
 
           {/* Detalle técnico: ayuda muchísimo cuando el usuario reporta el error */}
           {detalle && (
-            <p className="text-[11px] font-mono text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 max-w-sm break-words">
+            <p className="neo-inset-sm text-[11px] font-mono px-3.5 py-2.5 max-w-sm break-words" style={{ color: 'var(--ns-text-muted)' }}>
               {detalle}
             </p>
           )}
 
-          <div className="flex flex-wrap gap-2 justify-center mt-2">
-            <button
-              onClick={this.handleReset}
-              className="px-5 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-xl shadow-sm hover:bg-slate-800 active:scale-[0.97] transition-all cursor-pointer"
-            >
+          <div className="flex flex-wrap gap-2.5 justify-center mt-1">
+            <button onClick={this.handleReset} className="neo-btn neo-btn--primary neo-btn--pill">
               Reintentar
             </button>
-            <button
-              onClick={this.handleReload}
-              className="px-5 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-200 active:scale-[0.97] transition-all cursor-pointer"
-            >
+            <button onClick={this.handleReload} className="neo-btn neo-btn--pill">
               Recargar la página
             </button>
           </div>

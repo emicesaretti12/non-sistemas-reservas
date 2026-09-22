@@ -389,12 +389,12 @@ export default function VistaPublica() {
   if (loading) return (
     <div className="min-h-dvh bg-[#FEFDFD] flex items-center justify-center" style={{ background: 'var(--ns-gradient-soft)' }}>
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'var(--ns-gradient-1)', animation: 'pulse 2s ease-in-out infinite' }}>
-          <span className="text-white font-black text-xl">N</span>
-        </div>
+        <span className="neo-pod neo-pod--brand neo-pod--lg ns-breathe">
+          <span className="font-display text-2xl font-black">N</span>
+        </span>
         <div className="flex gap-1.5">
           {[0, 1, 2].map(i => (
-            <div key={i} className="w-2 h-2 rounded-full" style={{ background: 'var(--ns-primary)', animation: `bounce 1.2s ease-in-out ${i * 0.15}s infinite` }} />
+            <span key={i} className="ns-typing-dot" style={{ animationDelay: `${i * 0.15}s` }} />
           ))}
         </div>
       </div>
@@ -408,27 +408,21 @@ export default function VistaPublica() {
     return (
       <div className="min-h-dvh flex items-center justify-center p-6 font-sans" style={{ background: 'var(--ns-gradient-soft)' }} data-testid="public-error">
         <div className="text-center max-w-sm">
-          <div className="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center shadow-xl" style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)' }}>
-            <svg className="w-9 h-9" style={{ color: '#AF3643', opacity: 0.55 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <span className="neo-pod neo-pod--lg mx-auto mb-5" style={{ width: 76, height: 76 }}>
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
               <path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </div>
-          <h2 className="text-xl font-black tracking-tighter mb-2" style={{ color: '#990011' }}>
+          </span>
+          <h2 className="neo-head__title text-xl mb-2 justify-center" style={{ color: 'var(--ns-text)' }}>
             {esNoEncontrado ? 'No encontramos este negocio' : 'No pudimos cargar la página'}
           </h2>
-          <p className="text-sm font-medium mb-6" style={{ color: '#B3404C' }}>
+          <p className="text-sm font-medium mb-6 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>
             {esNoEncontrado
               ? 'El link puede estar mal escrito o el negocio ya no está disponible. Pedile el link actualizado al negocio.'
               : 'Parece un problema de conexión. Probá de nuevo en unos segundos.'}
           </p>
           {!esNoEncontrado && (
-            <button
-              onClick={() => bootBrandedApp()}
-              className="px-6 py-3.5 rounded-xl text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95"
-              style={{ background: '#AF3643', boxShadow: '0 8px 24px rgba(153,0,17,0.35)' }}
-            >
-              Reintentar
-            </button>
+            <button onClick={() => bootBrandedApp()} className="neo-btn neo-btn--primary">Reintentar</button>
           )}
         </div>
       </div>
@@ -592,10 +586,10 @@ export default function VistaPublica() {
             {/* TOGGLE RESERVAS / CATÁLOGO */}
             {catalogo.length > 0 && paso < 5 && (
               <div className="mt-3 flex rounded-2xl p-1 gap-0.5" style={{ background: 'var(--ns-primary-bg)', boxShadow: 'inset 0 2px 4px rgba(153,0,17,0.04), 0 1px 0 rgba(255,255,255,0.6)' }}>
-                <button onClick={() => setVistaActiva('reservas')} className={`flex-1 py-2.5 rounded-xl text-[9px] font-extrabold uppercase tracking-widest transition-all ${vistaActiva === 'reservas' ? 'text-white' : 'text-zinc-400'}`} style={vistaActiva === 'reservas' ? { background: 'var(--ns-primary)', boxShadow: '0 3px 0 rgba(153,0,17,0.08), 0 6px 12px rgba(153,0,17,0.2), inset 0 1px 0 rgba(255,255,255,0.3)', textShadow: '0 1px 1px rgba(153,0,17,0.1)' } : {}}>
+                <button onClick={() => setVistaActiva('reservas')} className={`flex-1 py-2.5 rounded-xl text-[9px] font-extrabold uppercase tracking-widest transition-all ${vistaActiva === 'reservas' ? 'text-white' : ''}`} style={vistaActiva === 'reservas' ? { background: 'var(--ns-primary)', boxShadow: '0 3px 0 rgba(153,0,17,0.08), 0 6px 12px rgba(153,0,17,0.2), inset 0 1px 0 rgba(255,255,255,0.3)', textShadow: '0 1px 1px rgba(153,0,17,0.1)' } : {}}>
                   {vocab.paso1Titulo || 'Reservas'}
                 </button>
-                <button onClick={() => setVistaActiva('catalogo')} className={`flex-1 py-2.5 rounded-xl text-[9px] font-extrabold uppercase tracking-widest transition-all ${vistaActiva === 'catalogo' ? 'text-white' : 'text-zinc-400'}`} style={vistaActiva === 'catalogo' ? { background: 'var(--ns-primary)', boxShadow: '0 3px 0 rgba(153,0,17,0.08), 0 6px 12px rgba(153,0,17,0.2), inset 0 1px 0 rgba(255,255,255,0.3)', textShadow: '0 1px 1px rgba(153,0,17,0.1)' } : {}}>
+                <button onClick={() => setVistaActiva('catalogo')} className={`flex-1 py-2.5 rounded-xl text-[9px] font-extrabold uppercase tracking-widest transition-all ${vistaActiva === 'catalogo' ? 'text-white' : ''}`} style={vistaActiva === 'catalogo' ? { background: 'var(--ns-primary)', boxShadow: '0 3px 0 rgba(153,0,17,0.08), 0 6px 12px rgba(153,0,17,0.2), inset 0 1px 0 rgba(255,255,255,0.3)', textShadow: '0 1px 1px rgba(153,0,17,0.1)' } : {}}>
                   Catálogo
                 </button>
               </div>
@@ -663,25 +657,26 @@ export default function VistaPublica() {
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-2.5 md:space-y-3">
                 <h2 className="text-base md:text-lg font-black tracking-tight px-1" style={{ color: 'var(--ns-text)' }}>{vocab.paso1Titulo}</h2>
                 {servicios.length === 0 ? (
-                  <div className="nh-card p-8 text-center" data-testid="public-sin-servicios">
-                     <div className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--ns-primary-bg)' }}>
-                        <svg className="w-7 h-7" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div className="nh-card" data-testid="public-sin-servicios">
+                     <div className="neo-empty">
+                       <span className="neo-pod neo-pod--sunken neo-pod--lg">
+                         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                       </span>
+                       <p className="neo-empty__title">Todavía no hay {vocab.servicios} para reservar</p>
+                       <p className="neo-empty__text">
+                         {negocio.nombre} está terminando de configurar su agenda online.
+                         {negocio.telefono ? ' Mientras tanto podés escribirles directo.' : ' Probá de nuevo más tarde.'}
+                       </p>
+                       {negocio.telefono && (
+                         <a
+                           href={`https://wa.me/${negocio.telefono.replace(/[^0-9]/g, '')}`}
+                           target="_blank" rel="noopener noreferrer"
+                           className="neo-btn neo-btn--primary mt-1"
+                         >
+                           Escribir por WhatsApp
+                         </a>
+                       )}
                      </div>
-                     <p className="text-sm font-black" style={{ color: 'var(--ns-text)' }}>Todavía no hay {vocab.servicios} para reservar</p>
-                     <p className="text-[12px] font-medium mt-1.5 leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
-                        {negocio.nombre} está terminando de configurar su agenda online.
-                        {negocio.telefono ? ' Mientras tanto podés escribirles directo.' : ' Probá de nuevo más tarde.'}
-                     </p>
-                     {negocio.telefono && (
-                       <a
-                         href={`https://wa.me/${negocio.telefono.replace(/[^0-9]/g, '')}`}
-                         target="_blank" rel="noopener noreferrer"
-                         className="inline-flex items-center gap-2 mt-5 px-5 py-3 rounded-xl text-white font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all"
-                         style={{ background: '#DEACB1' }}
-                       >
-                         Escribir por WhatsApp
-                       </a>
-                     )}
                   </div>
                 ) : (
                 <div className="nh-card overflow-hidden">
@@ -720,7 +715,7 @@ export default function VistaPublica() {
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
                    <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.paso2Titulo}</h2>
-                   <button onClick={() => setPaso(1)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
+                   <button onClick={() => setPaso(1)} className="neo-btn neo-btn--quiet">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso2Volver}
                    </button>
                 </div>
@@ -731,9 +726,11 @@ export default function VistaPublica() {
                         onClick={() => { setReserva(prev => ({ ...prev, empleadoId: e.id, hora: '', horaNextDay: false })); setPaso(3) }} 
                         className="ns-public-employee-card"
                      >
-                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-[3px] border-white group-hover:scale-105 transition-transform duration-500" style={{ background: 'var(--ns-primary-bg)' }}>
-                           {e.foto_url ? <img src={e.foto_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl md:text-2xl font-bold" style={{ color: 'var(--ns-primary)' }}>{e.nombre.charAt(0)}</div>}
-                        </div>
+                        <span className="neo-pod neo-pod--lg rounded-full overflow-hidden p-0 w-16 h-16">
+                           {e.foto_url
+                             ? <img src={e.foto_url} alt="" className="w-full h-full object-cover" />
+                             : <span className="font-display text-2xl font-black">{e.nombre.charAt(0)}</span>}
+                        </span>
                         <div className="text-center w-full">
                           <span className="font-bold text-xs tracking-tight truncate block" style={{ color: 'var(--ns-text)' }}>{e.nombre}</span>
                           {e.especialidad && <span className="text-[9px] font-medium truncate block mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>{e.especialidad}</span>}
@@ -749,7 +746,7 @@ export default function VistaPublica() {
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
                    <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>Fecha y Horario</h2>
-                   <button onClick={() => setPaso(requiereStaff ? 2 : 1)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
+                   <button onClick={() => setPaso(requiereStaff ? 2 : 1)} className="neo-btn neo-btn--quiet">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {requiereStaff ? vocab.paso3Volver : vocab.paso2Volver}
                    </button>
                 </div>
@@ -763,7 +760,7 @@ export default function VistaPublica() {
                         aria-label="Ver fechas anteriores"
                         disabled={calendarWindowStart === 0}
                         onClick={() => setCalendarWindowStart((start) => Math.max(0, start - 7))}
-                        className="w-9 h-9 rounded-xl border flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed"
+                        className="neo-icon-btn w-10 h-10 disabled:opacity-35 disabled:cursor-not-allowed"
                         style={{ color: accent, borderColor: 'var(--ns-border)', background: 'var(--ns-surface)' }}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -776,7 +773,7 @@ export default function VistaPublica() {
                         aria-label="Ver fechas siguientes"
                         disabled={calendarWindowStart + 7 >= diasCalendario.length}
                         onClick={() => setCalendarWindowStart((start) => Math.min(Math.max(0, diasCalendario.length - 1), start + 7))}
-                        className="w-9 h-9 rounded-xl border flex items-center justify-center disabled:opacity-35 disabled:cursor-not-allowed"
+                        className="neo-icon-btn w-10 h-10 disabled:opacity-35 disabled:cursor-not-allowed"
                         style={{ color: accent, borderColor: 'var(--ns-border)', background: 'var(--ns-surface)' }}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -792,25 +789,25 @@ export default function VistaPublica() {
                             disabled={!d.available}
                             onClick={() => handleDateSelect(d)}
                             aria-pressed={isSelected}
-                             className={`relative w-full h-[4.35rem] md:h-[4.8rem] rounded-[1rem] md:rounded-[1.2rem] flex flex-col items-center justify-center transition-all duration-300 border active:scale-[0.95] brand-date-hover ${
-                              !d.available ? 'opacity-25 grayscale border-transparent cursor-not-allowed bg-zinc-50' :
-                              isSelected ? 'shadow-lg scale-[1.04] border-transparent text-white' : 'bg-[#FEFDFD] border-transparent text-zinc-600 shadow-sm'
-                            }`}
-                            style={{ backgroundColor: isSelected ? accent : '' }}
+                            className="relative w-full h-[4.35rem] md:h-[4.8rem] rounded-[20px] flex flex-col items-center justify-center transition-all duration-300 disabled:cursor-not-allowed"
+                            style={!d.available
+                              ? { background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-faint)', opacity: 0.55 }
+                              : isSelected
+                              ? { background: accent, color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)', transform: 'translateY(-2px)' }
+                              : { background: 'var(--ns-surface)', color: 'var(--ns-text)', boxShadow: d.isToday ? 'var(--neo-raised-sm), inset 0 0 0 2px ' + accent : 'var(--neo-raised-sm)' }}
                           >
-                            {d.isNewMonth && <span className={`absolute top-1.5 right-2 text-[7px] font-black tracking-wider ${isSelected ? 'text-white/70' : 'text-zinc-300'}`}>{d.month.slice(0, 3)}</span>}
-                            <span className={`text-[8px] md:text-[9px] font-bold uppercase mb-0.5 md:mb-1 ${isSelected ? 'text-white/90' : 'text-zinc-400'}`}>{d.weekday}</span>
-                            <span className="text-lg md:text-xl font-bold tracking-tighter">{d.number}</span>
-                            {d.isToday && !isSelected && <div className="w-1 h-1 rounded-full mt-0.5" style={{ backgroundColor: accent }}></div>}
+                            {d.isNewMonth && <span className="absolute top-1.5 right-2 text-[7px] font-black tracking-wider" style={{ opacity: 0.55 }}>{d.month.slice(0, 3)}</span>}
+                            <span className="text-[8px] md:text-[9px] font-bold uppercase mb-0.5 md:mb-1" style={{ opacity: 0.7 }}>{d.weekday}</span>
+                            <span className="font-display text-lg md:text-xl font-black tracking-tighter">{d.number}</span>
                           </button>
                         )
                       })}
                    </div>
 
                    {reserva.fecha && (
-                     <div className="pt-2.5 md:pt-3 animate-in fade-in duration-500 border-t border-zinc-100/80 mt-1">
+                     <div className="pt-4 mt-3 ns-fade-up" style={{ boxShadow: 'inset 0 1px 0 var(--ns-line)' }}>
                         {buscandoHoras ? (
-                          <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div></div>
+                          <div className="flex justify-center py-8"><span className="neo-spinner neo-spinner--sm" role="status" aria-label="Buscando horarios" /></div>
                         ) : (
                           <div className="space-y-4 md:space-y-5 mt-2 md:mt-4">
                              {['mañana', 'tarde', 'noche', 'madrugada'].map(periodo => (
@@ -826,8 +823,10 @@ export default function VistaPublica() {
                                          <button 
                                             key={slotTime + (slotNextDay ? '-nd' : '')} 
                                             onClick={() => setReserva(prev => ({ ...prev, hora: slotTime, horaNextDay: slotNextDay }))} 
-                                            className={`py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-[0.95] shadow-sm brand-date-hover ${isSelected ? 'text-white border-transparent shadow-md' : 'bg-[#FEFDFD] text-zinc-800 border border-transparent hover:shadow-md'}`} 
-                                            style={{ backgroundColor: isSelected ? accent : '', boxShadow: isSelected ? `0 4px 0 rgba(153,0,17,0.1), 0 8px 16px ${accentGlow}, inset 0 2px 0 rgba(255,255,255,0.25)` : undefined }}
+                                            className="py-3 rounded-[16px] text-[13px] font-black tabular-nums transition-all duration-200"
+                                            style={isSelected
+                                              ? { background: accent, color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)', transform: 'translateY(-2px)' }
+                                              : { background: 'var(--ns-surface)', color: 'var(--ns-text)', boxShadow: 'var(--neo-raised-sm)' }}
                                          >
                                             {slotTime}
                                          </button>
@@ -838,9 +837,9 @@ export default function VistaPublica() {
                                )
                              ))}
                              {horasDisponibles.mañana.length === 0 && horasDisponibles.tarde.length === 0 && horasDisponibles.noche.length === 0 && horasDisponibles.madrugada.length === 0 && (
-                               <div className="py-8 text-center bg-zinc-50 rounded-xl border border-dashed border-zinc-200">
-                                 <p className="text-[11px] font-bold text-zinc-500">No quedan horarios libres este día</p>
-                                 <p className="text-[10px] font-medium text-zinc-400 mt-1">Probá con otra fecha del calendario.</p>
+                               <div className="neo-well text-center py-7">
+                                 <p className="neo-empty__title">No quedan horarios este día</p>
+                                 <p className="neo-empty__text mx-auto mt-1">Probá con otra fecha del calendario de arriba.</p>
                                </div>
                              )}
                           </div>
@@ -856,7 +855,7 @@ export default function VistaPublica() {
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
                    <h2 className="text-base md:text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.paso4Titulo}</h2>
-                   <button onClick={() => setPaso(3)} className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full active:scale-90 transition-all flex items-center gap-1" style={{ color: 'var(--ns-primary)', background: 'var(--ns-primary-bg)' }}>
+                   <button onClick={() => setPaso(3)} className="neo-btn neo-btn--quiet">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {vocab.paso4Volver}
                    </button>
                 </div>
@@ -1035,9 +1034,9 @@ export default function VistaPublica() {
                  const cats = [...new Set(catalogo.map(p => p.categoria))]
                  return cats.length > 1 ? (
                    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
-                     <button onClick={() => setCatFiltro('todos')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === 'todos' ? { backgroundColor: 'var(--ns-primary)' } : {}}>Todos</button>
+                     <button onClick={() => setCatFiltro('todos')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === 'todos' ? 'text-white border-transparent shadow-md' : ' border-transparent  hover:'}`} style={catFiltro === 'todos' ? { backgroundColor: 'var(--ns-primary)' } : {}}>Todos</button>
                      {cats.map(c => (
-                       <button key={c} onClick={() => setCatFiltro(c)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : 'bg-zinc-50 border-transparent text-zinc-500 hover:bg-zinc-100'}`} style={catFiltro === c ? { backgroundColor: 'var(--ns-primary)' } : {}}>{c}</button>
+                       <button key={c} onClick={() => setCatFiltro(c)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shrink-0 transition-all active:scale-95 ${catFiltro === c ? 'text-white border-transparent shadow-md' : ' border-transparent  hover:'}`} style={catFiltro === c ? { backgroundColor: 'var(--ns-primary)' } : {}}>{c}</button>
                      ))}
                    </div>
                  ) : null
@@ -1052,11 +1051,11 @@ export default function VistaPublica() {
                
                    if (filtered.length === 0) return (
                  <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/40 shadow-sm p-12 text-center">
-                   <div className="w-16 h-16 rounded-2xl bg-zinc-50 flex items-center justify-center mx-auto mb-4">
-                     <svg className="w-8 h-8 text-zinc-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                   <div className="neo-pod neo-pod--sunken neo-pod--lg mx-auto mb-4">
+                     <svg className="w-8 h-8" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                    </div>
-                   <h3 className="text-lg font-bold text-zinc-900 mb-1">Sin resultados</h3>
-                   <p className="text-sm font-medium text-zinc-500">No encontramos productos con esos filtros.</p>
+                   <h3 className="font-display text-lg font-black mb-1" style={{ color: 'var(--ns-text)' }}>Sin resultados</h3>
+                   <p className="text-sm font-medium" style={{ color: 'var(--ns-text-muted)' }}>No encontramos productos con esos filtros.</p>
                  </div>
                )
 
@@ -1065,9 +1064,9 @@ export default function VistaPublica() {
                    {filtered.map(prod => {
                      const qty = carrito[prod.id] || 0
                      return (
-                       <div key={prod.id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-zinc-100 shadow-[0_4px_20px_rgba(153,0,17,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(153,0,17,0.08)] hover:-translate-y-1 flex flex-col group cursor-pointer" onClick={() => setProductoDetalle(prod)}>
+                       <div key={prod.id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] border  shadow-[0_4px_20px_rgba(153,0,17,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(153,0,17,0.08)] hover:-translate-y-1 flex flex-col group cursor-pointer" onClick={() => setProductoDetalle(prod)}>
                          {/* IMAGEN DEL PRODUCTO */}
-                         <div className="aspect-[4/4] w-full bg-zinc-50 relative overflow-hidden shrink-0">
+                         <div className="aspect-[4/4] w-full  relative overflow-hidden shrink-0">
                            {prod.imagen_url ? (
                              <img src={prod.imagen_url} alt={prod.nombre} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                            ) : (
@@ -1149,7 +1148,7 @@ export default function VistaPublica() {
                </button>
 
                {/* Imagen grande */}
-               <div className="w-full aspect-[4/3] bg-zinc-100 relative shrink-0">
+               <div className="w-full aspect-[4/3] relative shrink-0" style={{ background: 'var(--ns-sunken)' }}>
                  {productoDetalle.imagen_url ? (
                    <img src={productoDetalle.imagen_url} className="w-full h-full object-cover" alt={productoDetalle.nombre} />
                  ) : (
@@ -1165,29 +1164,29 @@ export default function VistaPublica() {
                  <div className="mb-2">
                    <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-md" style={{ backgroundColor: accentUltraSoft, color: accent }}>{productoDetalle.categoria}</span>
                  </div>
-                 <h2 className="text-2xl font-extrabold text-zinc-900 tracking-tight leading-tight mb-3">{productoDetalle.nombre}</h2>
-                 {productoDetalle.precio > 0 && <p className="text-2xl font-black text-zinc-900 mb-4">{precio(productoDetalle.precio)}</p>}
+                 <h2 className="text-2xl font-extrabold  tracking-tight leading-tight mb-3">{productoDetalle.nombre}</h2>
+                 {productoDetalle.precio > 0 && <p className="text-2xl font-black  mb-4">{precio(productoDetalle.precio)}</p>}
                  
                  <div className="space-y-4">
                    {productoDetalle.descripcion ? (
                      <div>
-                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Acerca de</h4>
-                       <p className="text-sm font-medium text-zinc-600 leading-relaxed whitespace-pre-wrap">{productoDetalle.descripcion}</p>
+                       <h4 className="text-[10px] font-bold uppercase tracking-widest  mb-1.5">Acerca de</h4>
+                       <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ns-text-secondary)' }}>{productoDetalle.descripcion}</p>
                      </div>
                    ) : (
-                     <p className="text-sm font-medium text-zinc-400 italic">Sin descripción detallada.</p>
+                     <p className="text-sm font-medium italic" style={{ color: 'var(--ns-text-faint)' }}>Sin descripción detallada.</p>
                    )}
                  </div>
                </div>
 
                {/* Acciones Sticky Modal */}
-               <div className="absolute bottom-0 inset-x-0 p-4 bg-white border-t border-zinc-100 flex items-center justify-between gap-4" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+               <div className="absolute bottom-0 inset-x-0 p-4 bg-white border-t  flex items-center justify-between gap-4" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
                  {(() => {
                    const qty = carrito[productoDetalle.id] || 0
                    return qty > 0 ? (
                      <div className="flex items-center justify-between w-full p-1 rounded-2xl border-2" style={{ borderColor: accent }}>
-                       <button onClick={() => removeFromCart(productoDetalle.id)} className="w-12 h-12 flex items-center justify-center hover:bg-zinc-50 rounded-xl transition-all font-bold text-2xl text-zinc-600">−</button>
-                       <span className="text-lg font-black text-zinc-900 px-4">{qty} en carrito</span>
+                       <button onClick={() => removeFromCart(productoDetalle.id)} className="neo-icon-btn w-11 h-11 text-xl">−</button>
+                       <span className="text-lg font-black  px-4">{qty} en carrito</span>
                        <button onClick={() => addToCart(productoDetalle.id)} className="w-12 h-12 flex items-center justify-center rounded-xl transition-all font-bold text-2xl text-white shadow-md" style={{ backgroundColor: accent }}>+</button>
                      </div>
                    ) : (
@@ -1209,16 +1208,16 @@ export default function VistaPublica() {
              <div className="relative w-full h-[85vh] md:h-auto md:max-h-[85vh] md:max-w-md bg-white rounded-t-[2rem] md:rounded-[2rem] shadow-2xl flex flex-col animate-in slide-in-from-bottom-full md:slide-in-from-bottom-12 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
                
                {/* Header Carrito */}
-               <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
+               <div className="px-5 py-4 border-b  flex items-center justify-between shrink-0">
                  <div className="flex items-center gap-3">
                    {checkoutActivo ? (
-                     <button onClick={() => setCheckoutActivo(false)} className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-full transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                     <button onClick={() => setCheckoutActivo(false)} className="neo-icon-btn w-9 h-9"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
                    ) : (
                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: accentUltraSoft, color: accent }}><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
                    )}
-                   <h3 className="text-lg font-extrabold text-zinc-900">{checkoutActivo ? 'Tus Datos' : 'Tu Pedido'}</h3>
+                   <h3 className="font-display text-lg font-black" style={{ color: 'var(--ns-text)' }}>{checkoutActivo ? 'Tus Datos' : 'Tu Pedido'}</h3>
                  </div>
-                 <button onClick={() => setCarritoAbierto(false)} className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-full transition-colors">
+                 <button onClick={() => setCarritoAbierto(false)} className="neo-icon-btn w-9 h-9">
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </button>
                </div>
@@ -1232,19 +1231,19 @@ export default function VistaPublica() {
                        if (!p) return null
                        return (
                          <div key={pid} className="flex gap-3 items-center">
-                           <div className="w-16 h-16 rounded-xl bg-zinc-50 shrink-0 overflow-hidden border border-zinc-100">
+                           <div className="w-16 h-16 rounded-[18px] shrink-0 overflow-hidden" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>
                              {p.imagen_url ? <img src={p.imagen_url} className="w-full h-full object-cover" /> : <div className="w-full h-full" style={{ backgroundColor: accentUltraSoft }}></div>}
                            </div>
                            <div className="flex-1 min-w-0">
-                             <h5 className="text-[13px] font-bold text-zinc-900 truncate">{p.nombre}</h5>
-                             <p className="text-[11px] font-medium text-zinc-400">{precio(p.precio)} c/u</p>
+                             <h5 className="text-[13px] font-bold  truncate">{p.nombre}</h5>
+                             <p className="text-[11px] font-medium ">{precio(p.precio)} c/u</p>
                              <div className="mt-1 flex items-center justify-between">
-                               <div className="flex items-center gap-2 border border-zinc-200 rounded-lg overflow-hidden h-7">
-                                 <button onClick={() => removeFromCart(pid)} className="w-7 h-full flex items-center justify-center text-zinc-500 hover:bg-zinc-50 font-bold">−</button>
+                               <div className="flex items-center gap-2 border  rounded-lg overflow-hidden h-7">
+                                 <button onClick={() => removeFromCart(pid)} className="w-8 h-full flex items-center justify-center font-bold" style={{ color: 'var(--ns-text-muted)' }}>−</button>
                                  <span className="w-6 text-center text-[11px] font-black">{qty}</span>
                                  <button onClick={() => addToCart(pid)} className="w-7 h-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: accent }}>+</button>
                                </div>
-                               <span className="text-sm font-black text-zinc-900">${(p.precio * qty).toLocaleString()}</span>
+                               <span className="text-sm font-black" style={{ color: 'var(--ns-text)' }}>${(p.precio * qty).toLocaleString()}</span>
                              </div>
                            </div>
                          </div>
@@ -1255,25 +1254,25 @@ export default function VistaPublica() {
                    <form id="checkoutForm" onSubmit={enviarPedidoWhatsApp} className="space-y-4">
                      <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Nombre Completo *</label>
-                        <input required className="w-full bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl py-3 px-4 font-bold outline-none focus:border-zinc-400 focus:bg-white transition-all text-sm placeholder:text-zinc-400" placeholder="¿Cómo te llamas?" value={clienteCheckout.nombre} onChange={(e) => setClienteCheckout({...clienteCheckout, nombre: e.target.value})} />
+                        <input required className="neo-field" placeholder="¿Cómo te llamas?" value={clienteCheckout.nombre} onChange={(e) => setClienteCheckout({...clienteCheckout, nombre: e.target.value})} />
                      </div>
                      <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Teléfono (Opcional)</label>
-                        <input type="tel" className="w-full bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl py-3 px-4 font-bold outline-none focus:border-zinc-400 focus:bg-white transition-all text-sm placeholder:text-zinc-400" placeholder="Para contactarte si es necesario" value={clienteCheckout.telefono} onChange={(e) => setClienteCheckout({...clienteCheckout, telefono: e.target.value})} />
+                        <input type="tel" className="neo-field" placeholder="Para contactarte si es necesario" value={clienteCheckout.telefono} onChange={(e) => setClienteCheckout({...clienteCheckout, telefono: e.target.value})} />
                      </div>
                      <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: accentGlow }}>Notas del pedido (Opcional)</label>
-                        <textarea rows="3" className="w-full bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl py-3 px-4 font-bold outline-none focus:border-zinc-400 focus:bg-white transition-all text-sm placeholder:text-zinc-400 resize-none" placeholder="Aclaraciones sobre tu pedido..." value={clienteCheckout.notas} onChange={(e) => setClienteCheckout({...clienteCheckout, notas: e.target.value})}></textarea>
+                        <textarea rows="3" className="neo-field resize-none" placeholder="Aclaraciones sobre tu pedido..." value={clienteCheckout.notas} onChange={(e) => setClienteCheckout({...clienteCheckout, notas: e.target.value})}></textarea>
                      </div>
                    </form>
                  )}
                </div>
 
                {/* Footer Carrito */}
-               <div className="p-5 border-t border-zinc-100 bg-zinc-50/50 shrink-0" style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
+               <div className="p-5 border-t  /50 shrink-0" style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
                  <div className="flex items-center justify-between mb-4">
-                   <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Total del pedido</span>
-                   <span className="text-2xl font-black text-zinc-900">{precio(totalCarrito)}</span>
+                   <span className="text-[11px] font-bold  uppercase tracking-widest">Total del pedido</span>
+                   <span className="text-2xl font-black ">{precio(totalCarrito)}</span>
                  </div>
                  
                  {!checkoutActivo ? (

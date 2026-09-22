@@ -545,3 +545,280 @@
     );
   }
 }
+
+/* ============================================================
+   NEUMORFISMO — PIEZAS PROFUNDAS
+   Cuatro alturas que se tienen que leer de un vistazo:
+   página → hueco → tarjeta → control.
+   ============================================================ */
+
+@layer components {
+
+  /* Hueco: agrupa contenido hundiéndolo en el papel. Es el contenedor
+     que hace que las tarjetas de adentro se vean realmente por encima. */
+  .neo-well {
+    background: var(--ns-sunken);
+    border-radius: var(--ns-radius-xl);
+    box-shadow: var(--neo-inset);
+    padding: 16px;
+  }
+
+  .neo-well--deep {
+    box-shadow: var(--neo-inset-deep);
+  }
+
+  @media (min-width: 768px) {
+    .neo-well {
+      padding: 22px;
+    }
+  }
+
+  /* Pastilla extruida para iconos y números. */
+  .neo-pod {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--ns-radius-sm);
+    background: var(--ns-surface);
+    color: var(--ns-primary);
+    box-shadow: var(--neo-raised-sm);
+  }
+
+  .neo-pod--sunken {
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  .neo-pod--brand {
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+    box-shadow: var(--neo-brand);
+  }
+
+  .neo-pod--lg {
+    width: 58px;
+    height: 58px;
+    border-radius: var(--ns-radius-md);
+  }
+
+  .neo-pod--sm {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--ns-radius-xs);
+  }
+
+  /* Baldosa: la unidad de contenido del panel. */
+  .neo-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised);
+    transition:
+      box-shadow var(--dur-3) var(--ease-out),
+      transform var(--dur-3) var(--ease-out);
+  }
+
+  button.neo-tile,
+  a.neo-tile,
+  .neo-tile--interactive {
+    cursor: pointer;
+    text-align: left;
+  }
+
+  button.neo-tile:hover,
+  a.neo-tile:hover,
+  .neo-tile--interactive:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--neo-raised-lg);
+  }
+
+  button.neo-tile:active,
+  a.neo-tile:active,
+  .neo-tile--interactive:active {
+    transform: translateY(0) scale(0.985);
+    box-shadow: var(--neo-pressed);
+  }
+
+  /* Métrica grande, tipografía de display. */
+  .neo-stat__label {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ns-text-muted);
+  }
+
+  .neo-stat__value {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ns-text);
+  }
+
+  .neo-stat__foot {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ns-text-muted);
+  }
+
+  /* Lista hundida con filas separadas por una ranura de luz. */
+  .neo-list {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised);
+    overflow: hidden;
+  }
+
+  .neo-list__row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 18px;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+
+  .neo-list__row + .neo-list__row {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 2px 0 rgba(153, 0, 17, 0.05);
+  }
+
+  .neo-list__row--interactive {
+    cursor: pointer;
+  }
+
+  .neo-list__row--interactive:hover {
+    background: var(--ns-primary-bg);
+  }
+
+  .neo-list__row--interactive:active {
+    background: var(--ns-sunken);
+  }
+
+  /* Onda al presionar: la respuesta física del material. */
+  .neo-ripple {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .neo-ripple > .neo-ripple__wave {
+    position: absolute;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.2;
+    transform: scale(0);
+    pointer-events: none;
+    animation: ns-ripple 0.55s var(--ease-out) forwards;
+  }
+
+  /* Ayuda flotante sobre un dato. */
+  .neo-tip {
+    position: absolute;
+    z-index: 20;
+    padding: 8px 12px;
+    border-radius: var(--ns-radius-xs);
+    background: var(--ns-primary);
+    color: var(--ns-paper);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px rgba(153, 0, 17, 0.32);
+    pointer-events: none;
+    animation: ns-pop-in var(--dur-2) var(--ease-spring) both;
+  }
+
+  .neo-tip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 9px;
+    height: 9px;
+    background: inherit;
+    transform: translateX(-50%) rotate(45deg);
+    border-radius: 2px;
+  }
+
+  /* Barra de datos moldeada, con la altura animada al entrar. */
+  .neo-bar {
+    position: relative;
+    width: 100%;
+    border-radius: 10px 10px 6px 6px;
+    background: var(--ns-gradient-1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 6px 14px rgba(153, 0, 17, 0.22);
+    transform-origin: bottom;
+    animation: ns-bar-grow var(--dur-5) var(--ease-out) both;
+    transition: filter var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .neo-bar--quiet {
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+  }
+
+  .neo-bar:hover {
+    filter: brightness(1.08);
+    transform: scaleX(1.06);
+  }
+
+  /* Encabezado de sección con eyebrow y acción. */
+  .neo-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .neo-head__title {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    color: var(--ns-text);
+  }
+
+  /* Estado vacío: nunca un cartel muerto, siempre con una salida. */
+  .neo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 36px 24px;
+  }
+
+  .neo-empty__title {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ns-text);
+  }
+
+  .neo-empty__text {
+    max-width: 30ch;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ns-text-muted);
+  }
+}
+
+@keyframes ns-bar-grow {
+  from { transform: scaleY(0.02); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
+}

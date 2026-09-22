@@ -181,12 +181,12 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
           return (
             <div
               key={dia.id}
-              className="rounded-2xl overflow-hidden transition-all duration-300 ns-stagger-in"
+              className="overflow-hidden transition-all duration-300 ns-stagger-in"
               style={{
                 animationDelay: `${index * 0.04}s`,
-                background: 'white',
-                border: `1px solid ${isOpen ? 'var(--ns-border-hover)' : 'var(--ns-border)'}`,
-                boxShadow: isOpen ? 'var(--ns-plastilina-card)' : 'var(--ns-shadow-sm)',
+                borderRadius: 'var(--ns-radius-lg)',
+                background: isOpen ? 'var(--ns-surface)' : 'var(--ns-sunken)',
+                boxShadow: isOpen ? 'var(--neo-raised)' : 'var(--neo-inset-sm)',
               }}
             >
               {/* Row principal: toggle + nombre + horas */}
@@ -196,31 +196,13 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                 <div className="flex items-center gap-4 min-w-[160px]">
                   {/* Toggle Plastilina */}
                   <button
+                    type="button"
                     onClick={() => toggleDia(dia.id)}
-                    className="relative shrink-0 transition-all duration-400 active:scale-90"
-                    style={{
-                      width: '52px',
-                      height: '28px',
-                      borderRadius: '999px',
-                      background: isOpen ? 'var(--ns-primary)' : 'var(--ns-border)',
-                      boxShadow: isOpen
-                        ? '0 0 0 3px rgba(153,0,17,0.15), 0 4px 12px rgba(153,0,17,0.25), inset 0 1px 0 rgba(255,255,255,0.2)'
-                        : 'var(--ns-shadow-inner)',
-                      border: 'none',
-                      cursor: 'pointer',
-                    }}
-                    aria-label={`${isOpen ? 'Desactivar' : 'Activar'} ${dia.full}`}
-                  >
-                    <div
-                      className="absolute top-[4px] bg-white rounded-full transition-all duration-400"
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        left: isOpen ? 'calc(100% - 24px)' : '4px',
-                        boxShadow: '0 2px 6px rgba(153,0,17,0.2)',
-                      }}
-                    />
-                  </button>
+                    className={`neo-switch ${isOpen ? 'is-on' : ''}`}
+                    role="switch"
+                    aria-checked={isOpen}
+                    aria-label={`${isOpen ? 'Cerrar' : 'Abrir'} ${dia.full}`}
+                  />
 
                   <div>
                     <p className="font-black text-base md:text-lg tracking-tight transition-colors"
@@ -344,19 +326,24 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       </div>
 
       {/* ── BOTÓN GUARDAR MOBILE ── */}
-      <div className="sticky bottom-4 mt-2">
+      {/* Barra pegada al fondo con velo propio: antes el botón flotaba
+          encima de las filas y tapaba el último día. */}
+      <div
+        className="sticky bottom-3 mt-3 z-20 rounded-[26px] p-2"
+        style={{
+          background: 'var(--ns-glass-bg-strong)',
+          backdropFilter: 'blur(18px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+          boxShadow: 'var(--neo-raised)',
+        }}
+      >
         <button
           onClick={guardarConfiguracion}
           disabled={guardando}
-          className="w-full py-4 rounded-2xl text-white font-black text-[11px] uppercase tracking-widest transition-all active:scale-97 disabled:opacity-40 flex items-center justify-center gap-2.5 relative overflow-hidden"
-          style={{
-            background: saved ? 'var(--ns-success)' : 'var(--ns-primary)',
-            boxShadow: saved ? '0 8px 24px rgba(153,0,17,0.35)' : 'var(--ns-plastilina-btn)',
-          }}
+          className="neo-btn neo-btn--primary neo-btn--block"
         >
-          <span className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.15) 0%,transparent 100%)' }} />
           {guardando ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} />
           ) : saved ? (
             <>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>

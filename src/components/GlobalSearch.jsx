@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
+import { normalizar } from '../utils/asistente'
 
 /**
  * GLOBAL SEARCH — Omnibar iOS-style con datos reales de Supabase.
@@ -123,17 +124,16 @@ export default function GlobalSearch({
   const results = useMemo(() => {
     if (!query.trim()) return ACCIONES.slice(0, 6)
 
-    const q = query.toLowerCase().trim()
+    // Sin tildes ni signos: buscar "jose" tiene que encontrar a "José", y
+    // "corte clasico" a "Corte Clásico".
+    const q = normalizar(query)
+    const coincide = (texto) => normalizar(texto).includes(q)
     const matched = []
 
     // Buscar en clientes reales
     if (localClientes.length > 0) {
       localClientes
-        .filter(c =>
-          c.nombre?.toLowerCase().includes(q) ||
-          c.telefono?.toLowerCase().includes(q) ||
-          c.email?.toLowerCase().includes(q)
-        )
+        .filter(c => coincide(c.nombre) || coincide(c.telefono) || coincide(c.email))
         .slice(0, 4)
         .forEach(c => matched.push({
           type: 'cliente',
@@ -148,10 +148,7 @@ export default function GlobalSearch({
     // Buscar en servicios reales
     if (localServicios.length > 0) {
       localServicios
-        .filter(s =>
-          s.nombre?.toLowerCase().includes(q) ||
-          s.descripcion?.toLowerCase().includes(q)
-        )
+        .filter(s => coincide(s.nombre) || coincide(s.descripcion))
         .slice(0, 3)
         .forEach(s => matched.push({
           type: 'servicio',
@@ -166,10 +163,7 @@ export default function GlobalSearch({
     // Buscar en empleados reales
     if (localEmpleados.length > 0) {
       localEmpleados
-        .filter(e =>
-          e.nombre?.toLowerCase().includes(q) ||
-          e.especialidad?.toLowerCase().includes(q)
-        )
+        .filter(e => coincide(e.nombre) || coincide(e.especialidad))
         .slice(0, 3)
         .forEach(e => matched.push({
           type: 'empleado',
@@ -183,7 +177,7 @@ export default function GlobalSearch({
 
     // Buscar en acciones
     ACCIONES
-      .filter(a => a.label.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q))
+      .filter(a => coincide(a.label) || coincide(a.desc))
       .slice(0, 4)
       .forEach(a => matched.push(a))
 
@@ -216,13 +210,6 @@ export default function GlobalSearch({
     accion: 'Acciones',
   }
 
-  const typeIconColors = {
-    cliente: { bg: 'bg-blue-50', fg: 'text-blue-500' },
-    servicio: { bg: 'bg-violet-50', fg: 'text-violet-500' },
-    empleado: { bg: 'bg-emerald-50', fg: 'text-emerald-500' },
-    accion: { bg: 'bg-slate-50', fg: 'text-slate-500' },
-  }
-
   let lastType = null
 
   return (
@@ -249,8 +236,8 @@ export default function GlobalSearch({
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest" style={{ background: 'var(--ns-accent-bg)', color: 'var(--ns-text-muted)' }}>
-            ESC
+          <kbd className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-muted)' }}>
+            Esc
           </kbd>
         </div>
 
@@ -258,21 +245,22 @@ export default function GlobalSearch({
         <div className="max-h-[50vh] overflow-y-auto py-1">
           {!dataLoaded ? (
             <div className="flex justify-center py-8">
-              <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--ns-border)', borderTopColor: 'var(--ns-primary)' }} />
+              <span className="neo-spinner neo-spinner--sm" role="status" aria-label="Buscando" />
             </div>
           ) : results.length === 0 ? (
-            <div className="px-5 py-8 text-center">
-              <svg className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--ns-border)' }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <p className="text-sm font-bold" style={{ color: 'var(--ns-text-muted)' }}>Sin resultados para "{query}"</p>
-              <p className="text-[10px] font-medium mt-1" style={{ color: 'var(--ns-text-muted)', opacity: 0.6 }}>Probá con otro término</p>
+            <div className="neo-empty">
+              <span className="neo-pod neo-pod--sunken">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <p className="neo-empty__title">Sin resultados</p>
+              <p className="neo-empty__text">Nada coincide con “{query}”. Probá con un nombre, un teléfono o el nombre de un servicio.</p>
             </div>
           ) : (
             results.map((item, idx) => {
               const showSeparator = item.type !== lastType
               lastType = item.type
-              const colors = typeIconColors[item.type] || typeIconColors.accion
               return (
                 <div key={idx}>
                   {showSeparator && query.trim() && (
@@ -289,12 +277,11 @@ export default function GlobalSearch({
                     onMouseEnter={() => setSelectedIdx(idx)}
                     data-testid={`search-item-${idx}`}
                   >
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all ${colors.bg} ${colors.fg}`}
-                      style={idx === selectedIdx ? { boxShadow: 'var(--ns-shadow-sm)' } : {}}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <span className={`neo-pod neo-pod--sm ${idx === selectedIdx ? 'neo-pod--brand' : ''}`}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                         <path d={item.icon} strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                    </div>
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold truncate" style={{ color: 'var(--ns-text)' }}>{item.label}</p>
                       <p className="text-[10px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>{item.desc}</p>
@@ -312,13 +299,13 @@ export default function GlobalSearch({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 flex items-center justify-between" style={{ borderTop: '1px solid var(--ns-border)' }}>
+        <div className="px-5 py-3 flex items-center justify-between" style={{ boxShadow: 'inset 0 1px 0 var(--ns-line)' }}>
           <div className="flex items-center gap-3">
             <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
-              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-accent-bg)' }}>↑↓</kbd> Navegar
+              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>↑↓</kbd> Navegar
             </span>
             <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
-              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-accent-bg)' }}>↵</kbd> Seleccionar
+              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>↵</kbd> Seleccionar
             </span>
           </div>
           <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>

@@ -3,74 +3,78 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '../hooks/useNotifications'
 import { IconCheckCircle, IconBolt, IconCalendar } from './NoniIcons'
 
+// Íconos por tipo de aviso. Sin colores extra: el relieve y el fondo de marca
+// alcanzan para distinguir "nueva reserva" de "cambio" y del resto.
+function iconoDe(tipo) {
+  switch (tipo) {
+    case 'new_reservation':
+      return <IconCalendar className="w-5 h-5" />
+    case 'reservation_update':
+      return <IconCheckCircle className="w-5 h-5" />
+    default:
+      return <IconBolt className="w-5 h-5" />
+  }
+}
+
+function formatearHora(timestamp) {
+  const fecha = new Date(timestamp)
+  const ahora = new Date()
+  const mins = Math.floor((ahora - fecha) / 60000)
+  const horas = Math.floor((ahora - fecha) / 3600000)
+  const dias = Math.floor((ahora - fecha) / 86400000)
+
+  if (mins < 1) return 'Ahora'
+  if (mins < 60) return `Hace ${mins} min`
+  if (horas < 24) return `Hace ${horas} h`
+  if (dias < 7) return `Hace ${dias} d`
+  return fecha.toLocaleDateString('es-AR')
+}
+
 export default function NotificationCenterV2({ negocioId }) {
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
+  const botonRef = useRef(null)
   const { notifications, unreadCount, markAsRead, markAllAsRead, clear, pedirPermiso } = useNotifications(negocioId)
 
-  // Estado del permiso de notificaciones del navegador. Ahora se pide desde un
-  // click del usuario: al pedirlo automáticamente al entrar, Chrome lo
-  // descartaba de plano y las alertas nunca llegaban.
+  // Estado del permiso de notificaciones del navegador. Se pide desde un click
+  // del usuario: al pedirlo automáticamente al entrar, Chrome lo descartaba de
+  // plano y las alertas nunca llegaban.
   const [permiso, setPermiso] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
   )
 
-  // Close on outside click
+  // Cierre por click afuera y por Escape.
   useEffect(() => {
     if (!open) return
-    const handler = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false)
+    const afuera = (e) => {
+      if (panelRef.current?.contains(e.target)) return
+      if (botonRef.current?.contains(e.target)) return
+      setOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    const tecla = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        botonRef.current?.focus()
+      }
+    }
+    document.addEventListener('mousedown', afuera)
+    document.addEventListener('keydown', tecla)
+    return () => {
+      document.removeEventListener('mousedown', afuera)
+      document.removeEventListener('keydown', tecla)
+    }
   }, [open])
-
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'new_reservation':
-        return <IconCalendar className="w-5 h-5" style={{ color: 'var(--ns-primary)' }} />
-      case 'reservation_update':
-        return <IconCheckCircle className="w-5 h-5" style={{ color: 'var(--ns-primary)' }} />
-      default:
-        return <IconBolt className="w-5 h-5" style={{ color: 'var(--ns-text-muted)' }} />
-    }
-  }
-
-  const getNotificationColor = (type) => {
-    switch (type) {
-      case 'new_reservation':
-        return 'bg-violet-50 border-violet-200'
-      case 'reservation_update':
-        return 'bg-emerald-50 border-emerald-200'
-      default:
-        return 'bg-slate-50 border-slate-200'
-    }
-  }
-
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffMs = now - date
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return 'Ahora'
-    if (diffMins < 60) return `Hace ${diffMins}m`
-    if (diffHours < 24) return `Hace ${diffHours}h`
-    if (diffDays < 7) return `Hace ${diffDays}d`
-    return date.toLocaleDateString('es-AR')
-  }
 
   return (
     <>
-      {/* Button */}
       <motion.button
-        onClick={() => setOpen(!open)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        ref={botonRef}
+        onClick={() => setOpen((v) => !v)}
+        whileTap={{ scale: 0.92 }}
         className="ns-notif-bell relative"
         title="Notificaciones"
+        aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'}
+        aria-expanded={open}
       >
         <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -81,130 +85,134 @@ export default function NotificationCenterV2({ negocioId }) {
           />
         </svg>
 
-        {/* Unread badge */}
         {unreadCount > 0 && (
-          <motion.div
+          <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 520, damping: 18 }}
             className="absolute -top-1 -right-1 w-5 h-5 text-[10px] font-black rounded-full flex items-center justify-center"
-            style={{ background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: '0 2px 8px rgba(153,0,17,0.4)' }}
+            style={{
+              background: 'var(--ns-gradient-1)',
+              color: 'var(--ns-paper)',
+              boxShadow: '0 3px 10px rgba(153,0,17,0.45)'
+            }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
-          </motion.div>
+          </motion.span>
         )}
       </motion.button>
 
-      {/* Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
             ref={panelRef}
-            initial={{ opacity: 0, scale: 0.9, y: -10 }}
+            role="dialog"
+            aria-label="Centro de notificaciones"
+            initial={{ opacity: 0, scale: 0.94, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="neo-card absolute top-full right-0 mt-3 w-96 max-w-[calc(100vw-32px)] overflow-hidden z-50"
+            exit={{ opacity: 0, scale: 0.94, y: -8 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className="ns-notif-panel"
           >
-            {/* Header */}
-            <div className="p-4 flex items-center justify-between" style={{ background: 'var(--ns-gradient-1)' }}>
-              <h3 className="font-black text-white">Notificaciones</h3>
+            <div className="ns-notif-panel__head">
+              <div>
+                <p className="ns-notif-panel__title">Notificaciones</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-70">
+                  {unreadCount > 0 ? `${unreadCount} sin leer` : 'Todo al día'}
+                </p>
+              </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
-                  <motion.button
-                    onClick={markAllAsRead}
-                    whileHover={{ scale: 1.05 }}
-                    className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold rounded-lg transition-all"
-                  >
+                  <button onClick={markAllAsRead} className="neo-onbrand-btn neo-onbrand-btn--ghost text-xs px-3 py-1.5">
                     Marcar todo
-                  </motion.button>
+                  </button>
                 )}
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all"
+                  className="neo-onbrand-btn neo-onbrand-btn--ghost w-9 h-9 p-0"
+                  aria-label="Cerrar notificaciones"
                 >
                   ✕
                 </button>
               </div>
             </div>
 
-            {/* Activar avisos del navegador */}
             {permiso === 'default' && (
               <button
                 onClick={async () => setPermiso((await pedirPermiso()) ? 'granted' : 'denied')}
-                className="w-full px-4 py-3 text-left border-b border-slate-100 bg-violet-50/60 hover:bg-violet-50 transition-all flex items-center gap-3"
+                className="ns-notif-ask"
               >
-                <span className="text-lg">🔔</span>
-                <span className="flex-1">
-                  <span className="block text-[13px] font-bold text-slate-900">Activar avisos en este dispositivo</span>
-                  <span className="block text-[11px] text-slate-500">Te avisamos apenas entra una reserva nueva</span>
+                <span className="ns-notif-ask__bell">
+                  <IconBolt className="w-4 h-4" />
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-violet-600">Activar</span>
+                <span className="flex-1">
+                  <span className="ns-notif-ask__title">Activá los avisos en este dispositivo</span>
+                  <span className="ns-notif-ask__text">Te avisamos apenas entra una reserva nueva</span>
+                </span>
+                <span className="neo-chip neo-chip--solid text-[10px]">Activar</span>
               </button>
             )}
+
             {permiso === 'denied' && (
-              <p className="px-4 py-2.5 text-[11px] text-slate-500 border-b border-slate-100 bg-slate-50">
+              <p className="ns-notif-denied">
                 Bloqueaste los avisos para este sitio. Podés reactivarlos desde el candado de la barra de direcciones.
               </p>
             )}
 
-            {/* Notifications list */}
-            <div className="max-h-96 overflow-y-auto">
+            <div className="ns-notif-panel__body">
               {notifications.length === 0 ? (
-                <div className="p-8 text-center text-slate-500">
-                  <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  <p className="font-medium">No hay notificaciones</p>
-                  <p className="text-xs mt-1">Aquí aparecerán tus nuevas reservas y actualizaciones</p>
+                <div className="neo-empty">
+                  <div className="neo-pod neo-pod--lg mx-auto mb-4">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                      />
+                    </svg>
+                  </div>
+                  <p className="neo-empty__title">Todavía no hay avisos</p>
+                  <p className="neo-empty__text">Acá van a aparecer tus reservas nuevas y los cambios de la agenda.</p>
                 </div>
               ) : (
-                <AnimatePresence>
-                  {notifications.map((notification, idx) => (
-                    <motion.div
-                      key={notification.id}
-                      initial={{ opacity: 0, x: -20 }}
+                <AnimatePresence initial={false}>
+                  {notifications.map((n, idx) => (
+                    <motion.button
+                      key={n.id}
+                      type="button"
+                      layout
+                      initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => markAsRead(notification.id)}
-                      className={`p-4 border-b border-slate-100 cursor-pointer transition-all hover:bg-slate-50 ${
-                        notification.read ? 'opacity-60' : ''
-                      }`}
+                      exit={{ opacity: 0, x: 24, height: 0, marginBottom: 0 }}
+                      transition={{ delay: Math.min(idx * 0.04, 0.24), type: 'spring', damping: 24, stiffness: 320 }}
+                      onClick={() => markAsRead(n.id)}
+                      className={`ns-notif-item${n.read ? ' is-read' : ''}`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2.5 rounded-lg ${getNotificationColor(notification.type)}`}>
-                          {getNotificationIcon(notification.type)}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-bold text-slate-900 text-sm">{notification.title}</h4>
-                            {!notification.read && (
-                              <div className="w-2 h-2 rounded-full bg-violet-500" />
-                            )}
-                          </div>
-                          <p className="text-sm text-slate-600 line-clamp-2">{notification.message}</p>
-                          <p className="text-xs text-slate-400 mt-2">{formatTime(notification.timestamp)}</p>
-                        </div>
-                      </div>
-                    </motion.div>
+                      <span
+                        className={`ns-notif-item__icon${
+                          !n.read && n.type === 'new_reservation' ? ' ns-notif-item__icon--brand' : ''
+                        }`}
+                      >
+                        {iconoDe(n.type)}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="flex items-center gap-2">
+                          <span className="ns-notif-item__title flex-1 min-w-0 truncate">{n.title}</span>
+                          {!n.read && <span className="ns-notif-dot" />}
+                        </span>
+                        <span className="ns-notif-item__text">{n.message}</span>
+                        <span className="ns-notif-item__time">{formatearHora(n.timestamp)}</span>
+                      </span>
+                    </motion.button>
                   ))}
                 </AnimatePresence>
               )}
             </div>
 
-            {/* Footer */}
             {notifications.length > 0 && (
-              <div className="p-3 border-t border-slate-100 flex justify-center">
-                <button
-                  onClick={clear}
-                  className="text-xs font-bold text-slate-500 hover:text-slate-700 transition-all"
-                >
+              <div className="ns-notif-panel__foot">
+                <button onClick={clear} className="neo-btn neo-btn--quiet neo-btn--pill text-xs">
                   Limpiar todo
                 </button>
               </div>

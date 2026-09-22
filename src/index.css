@@ -301,11 +301,11 @@
      neutro y pasan a moldearse igual que el resto del sistema. */
   --shadow-2xs: 0 1px 2px rgba(153,0,17,0.06);
   --shadow-xs: 0 1px 3px rgba(153,0,17,0.07);
-  --shadow-sm: 3px 3px 9px rgba(153,0,17,0.1), -2px -2px 7px rgba(255,255,255,0.9);
-  --shadow-md: 5px 5px 13px rgba(153,0,17,0.12), -4px -4px 10px rgba(255,255,255,0.95);
-  --shadow-lg: 9px 9px 22px rgba(153,0,17,0.14), -7px -7px 16px #FFFFFF;
-  --shadow-xl: 15px 15px 34px rgba(153,0,17,0.18), -10px -10px 24px #FFFFFF;
-  --shadow-2xl: 24px 26px 62px rgba(153,0,17,0.24), -14px -14px 36px #FFFFFF;
+  --shadow-sm: 5px 5px 12px rgba(153,0,17,0.12), -4px -4px 10px rgba(255,255,255,0.95);
+  --shadow-md: 8px 8px 18px rgba(153,0,17,0.14), -6px -6px 14px #FFFFFF;
+  --shadow-lg: 12px 12px 26px rgba(153,0,17,0.15), -9px -9px 20px #FFFFFF;
+  --shadow-xl: 20px 20px 44px rgba(153,0,17,0.2), -13px -13px 30px #FFFFFF;
+  --shadow-2xl: 30px 32px 74px rgba(153,0,17,0.26), -16px -16px 42px #FFFFFF;
 
   /* Tipografías */
   --font-sans: 'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -326,10 +326,15 @@
      cuánta marca lleva encima del papel. */
   --ns-mix-02: #FAF1F0;
   --ns-mix-03: #F9EFEE;
+  --ns-mix-05: #F7EAEA;
   --ns-mix-06: #F6E7E7;
+  --ns-mix-08: #F4E2E3;
   --ns-mix-10: #F2DDDE;
+  --ns-mix-12: #F0D8DA;
   --ns-mix-14: #EED4D5;
+  --ns-mix-16: #ECCFD1;
   --ns-mix-20: #E8C5C7;
+  --ns-mix-24: #E4BBBE;
   --ns-mix-28: #E0B1B5;
   --ns-mix-44: #D08A91;
   --ns-mix-56: #C56C75;
@@ -392,22 +397,28 @@
   /* ── Relieve neumórfico ──
      Luz desde arriba-izquierda: sombra clara arriba-izq,
      sombra de marca abajo-der. */
-  --neo-shadow: rgba(153, 0, 17, 0.2);
-  --neo-shadow-soft: rgba(153, 0, 17, 0.13);
+  --neo-shadow: rgba(153, 0, 17, 0.22);
+  --neo-shadow-soft: rgba(153, 0, 17, 0.15);
   --neo-light: rgba(255, 255, 255, 1);
 
+  /* Cuatro niveles de altura. Que se note de cuál se trata a simple vista es
+     lo que separa el neumorfismo de una tarjeta con sombrita. */
   --neo-raised-sm:
-    5px 5px 12px var(--neo-shadow-soft),
-    -4px -4px 10px var(--neo-light);
+    6px 6px 14px var(--neo-shadow-soft),
+    -5px -5px 12px var(--neo-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
   --neo-raised:
-    9px 9px 22px var(--neo-shadow-soft),
-    -7px -7px 16px var(--neo-light);
+    12px 12px 26px var(--neo-shadow-soft),
+    -9px -9px 20px var(--neo-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   --neo-raised-lg:
-    15px 15px 34px var(--neo-shadow),
-    -10px -10px 24px var(--neo-light);
+    20px 20px 44px var(--neo-shadow),
+    -13px -13px 30px var(--neo-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
   --neo-float:
-    24px 26px 62px rgba(153, 0, 17, 0.24),
-    -14px -14px 36px var(--neo-light);
+    30px 32px 74px rgba(153, 0, 17, 0.26),
+    -16px -16px 42px var(--neo-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   --neo-sheet:
     0 -14px 44px rgba(153, 0, 17, 0.16),
     0 -2px 0 var(--neo-light) inset;
@@ -420,14 +431,17 @@
     14px 0 34px rgba(153, 0, 17, 0.045);
 
   --neo-inset-sm:
-    inset 4px 4px 9px var(--neo-shadow-soft),
-    inset -3px -3px 7px var(--neo-light);
+    inset 5px 5px 11px var(--neo-shadow-soft),
+    inset -4px -4px 9px var(--neo-light);
   --neo-inset:
-    inset 7px 7px 15px var(--neo-shadow-soft),
-    inset -6px -6px 13px var(--neo-light);
+    inset 10px 10px 20px var(--neo-shadow-soft),
+    inset -8px -8px 17px var(--neo-light);
+  --neo-inset-deep:
+    inset 14px 14px 28px var(--neo-shadow),
+    inset -10px -10px 22px var(--neo-light);
   --neo-pressed:
-    inset 5px 5px 11px var(--neo-shadow),
-    inset -4px -4px 8px var(--neo-light);
+    inset 7px 7px 14px var(--neo-shadow),
+    inset -5px -5px 10px var(--neo-light);
   --neo-flat:
     0 0 0 1px var(--ns-line);
   --neo-knob:
@@ -468,13 +482,13 @@
   --ns-plastilina-active: var(--neo-pressed);
 
   /* ── Radios ── */
-  --ns-radius-xs: 12px;
-  --ns-radius-sm: 16px;
-  --ns-radius-md: 20px;
-  --ns-radius-lg: 24px;
-  --ns-radius-xl: 30px;
-  --ns-radius-2xl: 36px;
-  --ns-radius-3xl: 44px;
+  --ns-radius-xs: 14px;
+  --ns-radius-sm: 18px;
+  --ns-radius-md: 24px;
+  --ns-radius-lg: 30px;
+  --ns-radius-xl: 38px;
+  --ns-radius-2xl: 46px;
+  --ns-radius-3xl: 56px;
 
   /* ── Tipografía ── */
   --font-ui: 'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;

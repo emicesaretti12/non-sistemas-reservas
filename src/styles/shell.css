@@ -703,3 +703,208 @@
     color: rgba(252, 246, 245, 0.45);
   }
 }
+
+@layer components {
+  /* El botón flotante sube por encima del dock en móvil; en escritorio,
+     donde no hay dock, se apoya en el borde inferior. */
+  @media (min-width: 1024px) {
+    .noni-shell [data-testid='agenda-nueva-cita'] {
+      bottom: 28px !important;
+    }
+  }
+}
+
+/* ── Centro de notificaciones ─────────────────────────────────────────────
+   Popover anclado a la campana del topbar. En mobile se despliega como hoja
+   pegada al borde para no quedar cortado por el viewport.                  */
+@layer components {
+  .ns-notif-panel {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 380px;
+    max-width: calc(100vw - 28px);
+    z-index: 60;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-float);
+    overflow: hidden;
+  }
+
+  .ns-notif-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--ns-gradient-1);
+    color: var(--ns-paper);
+  }
+
+  .ns-notif-panel__title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .ns-notif-panel__body {
+    max-height: min(64vh, 420px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px;
+    background: var(--ns-bg);
+  }
+
+  .ns-notif-panel__foot {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    background: var(--ns-surface);
+    box-shadow: 0 -1px 0 var(--ns-mix-08);
+  }
+
+  /* Aviso para habilitar las notificaciones del navegador */
+  .ns-notif-ask {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 0;
+    text-align: left;
+    background: var(--ns-mix-05);
+    color: var(--ns-text);
+    cursor: pointer;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+
+  .ns-notif-ask:hover { background: var(--ns-mix-08); }
+
+  .ns-notif-ask__bell {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    color: var(--ns-primary);
+  }
+
+  .ns-notif-ask__title { display: block; font-size: 0.8125rem; font-weight: 700; }
+  .ns-notif-ask__text { display: block; font-size: 0.6875rem; color: var(--ns-text-muted); margin-top: 2px; }
+
+  .ns-notif-denied {
+    padding: 12px 16px;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    color: var(--ns-text-muted);
+    background: var(--ns-mix-03);
+  }
+
+  /* Cada aviso: tarjeta elevada mientras no se leyó, hundida al leerla */
+  .ns-notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    border: 0;
+    text-align: left;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    cursor: pointer;
+    transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  .ns-notif-item:last-child { margin-bottom: 0; }
+  .ns-notif-item:hover { box-shadow: var(--neo-raised); transform: translateY(-1px); }
+  .ns-notif-item:active { box-shadow: var(--neo-pressed); transform: scale(0.99); }
+
+  .ns-notif-item.is-read {
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+    color: var(--ns-text-muted);
+  }
+
+  .ns-notif-item.is-read:hover { transform: none; box-shadow: var(--neo-inset); }
+
+  .ns-notif-item__icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ns-radius-sm);
+    background: var(--ns-surface);
+    box-shadow: var(--neo-raised-sm);
+    color: var(--ns-primary);
+  }
+
+  .ns-notif-item.is-read .ns-notif-item__icon {
+    background: var(--ns-sunken);
+    box-shadow: var(--neo-inset-sm);
+    color: var(--ns-text-muted);
+  }
+
+  .ns-notif-item__icon--brand {
+    background: var(--ns-gradient-1);
+    box-shadow: var(--neo-brand-sm, var(--neo-raised-sm));
+    color: var(--ns-paper);
+  }
+
+  .ns-notif-item__title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: inherit;
+    line-height: 1.35;
+  }
+
+  .ns-notif-item__text {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--ns-text-secondary);
+    margin-top: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ns-notif-item.is-read .ns-notif-item__text { color: var(--ns-text-muted); }
+
+  .ns-notif-item__time {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ns-text-muted);
+    margin-top: 7px;
+  }
+
+  .ns-notif-dot {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    box-shadow: 0 0 0 3px var(--ns-mix-08);
+  }
+
+  @media (max-width: 520px) {
+    .ns-notif-panel {
+      position: fixed;
+      top: auto;
+      right: 12px;
+      left: 12px;
+      width: auto;
+      max-width: none;
+      top: calc(var(--sat, 0px) + 68px);
+    }
+  }
+}

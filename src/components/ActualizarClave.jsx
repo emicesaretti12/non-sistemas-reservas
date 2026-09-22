@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
 import { useNavigate } from 'react-router-dom'
-import { ThemeToggle } from '../contexts/ThemeContext'
 
 export default function ActualizarClave() {
   const [password, setPassword] = useState('')
@@ -90,23 +89,19 @@ export default function ActualizarClave() {
         style={{ background: 'var(--ns-bg)', color: 'var(--ns-text)', fontFamily: '"Inter Tight", "Inter", sans-serif' }}
         data-testid="reset-link-invalido"
       >
-        <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
-            <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+        <div className="neo-card max-w-sm w-full text-center p-9">
+          <div className="neo-pod neo-pod--lg mx-auto mb-5">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
               <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h1 className="text-xl font-black tracking-tight mb-2">Este enlace ya no sirve</h1>
-          <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
+          <h1 className="neo-empty__title mb-2">Este enlace ya no sirve</h1>
+          <p className="text-sm mb-7 leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
             Los enlaces para cambiar la contraseña vencen al rato y sólo funcionan
             en el navegador donde los pediste. Pedí uno nuevo y abrilo desde el
             mismo dispositivo.
           </p>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-3.5 rounded-xl text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95"
-            style={{ background: 'var(--ns-primary)' }}
-          >
+          <button onClick={() => navigate('/login')} className="neo-btn neo-btn--primary neo-btn--pill">
             Ir al login
           </button>
         </div>
@@ -124,11 +119,6 @@ export default function ActualizarClave() {
       }}
       data-testid="actualizar-clave-screen"
     >
-      {/* Theme toggle */}
-      <div className="absolute top-6 right-6 z-10">
-        <ThemeToggle />
-      </div>
-
       <div className="w-full max-w-[460px]">
         {/* Brand strip */}
         <div className="flex items-center justify-between mb-10">

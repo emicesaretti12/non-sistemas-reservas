@@ -6,10 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { IconCelebrate, IconCheckCircle } from './NoniIcons'
 import { useToast } from './Toast'
 import OnboardingComplete from './OnboardingComplete'
+import { PALETA_MARCA, COLOR_MARCA, colorSeguro } from '../utils/paleta'
 
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo']
 const DIAS_LABEL = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }
-const COLORES = ['#AF3643','#990011','#9B0516','#B3404C','#BB545F','#B94F5A','#C56C75','#CC8088','#C9767E','#C56C75']
+const COLORES = PALETA_MARCA
 
 // Sugerencias inteligentes por rubro
 const SUGERENCIAS = {
@@ -105,64 +106,89 @@ const SUGERENCIAS = {
   },
 }
 
-// ── Live Preview (right panel) ─────────────────────────────────────────────
+// ── Vista previa en vivo (panel derecho) ───────────────────────────────────
 function LivePreview({ data }) {
-  const color = data.color || '#AF3643'
+  const color = colorSeguro(data.color)
   return (
-    <div className="flex-1 overflow-y-auto bg-white" style={{ fontFamily: 'system-ui, sans-serif' }}>
-      <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, #990011 0%, ${color} 150%)` }}>
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
-        <motion.div layout className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-[2rem] border-[5px] border-white flex items-center justify-center shadow-xl overflow-hidden bg-white">
+    <div className="flex-1 overflow-y-auto" style={{ background: 'var(--ns-bg)', fontFamily: '"Inter Tight", system-ui, sans-serif' }}>
+      {/* Portada con el acento elegido */}
+      <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, ${COLOR_MARCA} 0%, ${color} 150%)` }}>
+        <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(circle, #FCF6F5 1px, transparent 1px)', backgroundSize: '11px 11px' }} />
+        <motion.div
+          layout
+          className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-[2rem] flex items-center justify-center overflow-hidden"
+          style={{ background: 'var(--ns-paper)', boxShadow: '12px 14px 30px rgba(70,0,8,0.32), -6px -6px 16px rgba(255,255,255,0.8)' }}
+        >
           {data.logo_url
-            ? <img src={data.logo_url} className="w-full h-full object-cover" alt="logo" />
+            ? <img src={data.logo_url} className="w-full h-full object-cover" alt="Logo del negocio" />
             : <span className="font-black text-[2rem]" style={{ color }}>{data.nombre ? data.nombre[0].toUpperCase() : 'N'}</span>
           }
         </motion.div>
       </motion.div>
-      <div className="pt-16 pb-8 px-6 text-center">
+
+      <div className="pt-16 pb-7 px-6 text-center">
         <AnimatePresence mode="wait">
-          <motion.h1 key={data.nombre} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} className="font-black text-2xl text-slate-900 tracking-tight">
-            {data.nombre || 'Tu Marca'}
+          <motion.h1
+            key={data.nombre}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="font-black text-2xl tracking-tight"
+            style={{ color: 'var(--ns-text)', fontFamily: 'var(--font-display)' }}
+          >
+            {data.nombre || 'Tu marca'}
           </motion.h1>
         </AnimatePresence>
-        <p className="text-[11px] font-black text-slate-400 mt-1 uppercase tracking-widest">{data.rubro || 'Tu Rubro'}</p>
-        {data.descripcion && <p className="text-sm text-slate-500 mt-3 leading-relaxed">"{data.descripcion}"</p>}
+        <p className="neo-eyebrow mt-1.5">{data.rubro || 'Tu rubro'}</p>
+        {data.descripcion && (
+          <p className="text-sm mt-3 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>«{data.descripcion}»</p>
+        )}
         {data.instagram && (
           <div className="mt-4 flex justify-center">
-            <span className="px-4 py-2 bg-slate-50 text-slate-600 text-xs font-bold rounded-full border border-slate-200">@{data.instagram}</span>
+            <span className="neo-chip">@{data.instagram}</span>
           </div>
         )}
       </div>
-      <div className="px-6 space-y-3">
-        <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Servicios</h3>
+
+      <div className="px-5 space-y-3">
+        <h3 className="neo-eyebrow">Servicios</h3>
         {data.svcNombre ? (
-          <motion.div layout className="p-4 rounded-2xl border border-slate-100 shadow-sm bg-white">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold text-slate-800">{data.svcNombre}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{data.svcDuracion} min</p>
+          <motion.div layout className="neo-card p-4">
+            <div className="flex justify-between items-center gap-3">
+              <div className="min-w-0">
+                <p className="font-bold truncate" style={{ color: 'var(--ns-text)' }}>{data.svcNombre}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>{data.svcDuracion} min</p>
               </div>
-              <p className="font-black text-lg" style={{ color }}>${data.svcPrecio || 0}</p>
+              <p className="font-black text-lg shrink-0" style={{ color }}>${data.svcPrecio || 0}</p>
             </div>
-            <div className="w-full mt-3 py-3 rounded-xl text-white text-sm font-bold text-center" style={{ background: color }} aria-label="Vista previa del botón de reserva">Reservar</div>
+            <div
+              className="w-full mt-3.5 py-3 rounded-[16px] text-sm font-black text-center uppercase tracking-[0.12em]"
+              style={{ background: color, color: 'var(--ns-paper)', boxShadow: '0 8px 20px rgba(153,0,17,0.26)' }}
+              aria-label="Vista previa del botón de reserva"
+            >
+              Reservar
+            </div>
           </motion.div>
         ) : (
-          <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 opacity-40">
-            <div className="w-32 h-4 bg-slate-200 rounded-full mb-2" />
-            <div className="w-16 h-3 bg-slate-200 rounded-full" />
+          <div className="neo-well p-4 opacity-60">
+            <div className="w-32 h-4 rounded-full mb-2.5" style={{ background: 'var(--ns-mix-14)' }} />
+            <div className="w-16 h-3 rounded-full" style={{ background: 'var(--ns-mix-10)' }} />
           </div>
         )}
       </div>
+
       {data.staffNombre && (
-        <div className="px-6 mt-6 space-y-3">
-          <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Equipo</h3>
-          <motion.div layout className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 shadow-sm bg-white">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center font-black text-white shadow" style={{ background: color }}>
+        <div className="px-5 mt-6 space-y-3">
+          <h3 className="neo-eyebrow">Equipo</h3>
+          <motion.div layout className="neo-card flex items-center gap-4 p-4">
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center font-black shrink-0"
+              style={{ background: color, color: 'var(--ns-paper)', boxShadow: '5px 6px 14px rgba(153,0,17,0.26)' }}
+            >
               {data.staffNombre[0].toUpperCase()}
             </div>
-            <div>
-              <p className="font-bold text-slate-800">{data.staffNombre}</p>
-              <p className="text-xs text-slate-400">{data.staffEspecialidad || 'Profesional'}</p>
+            <div className="min-w-0">
+              <p className="font-bold truncate" style={{ color: 'var(--ns-text)' }}>{data.staffNombre}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--ns-text-muted)' }}>{data.staffEspecialidad || 'Profesional'}</p>
             </div>
           </motion.div>
         </div>
@@ -172,26 +198,35 @@ function LivePreview({ data }) {
   )
 }
 
-// ── Phone shell ────────────────────────────────────────────────────────────
+// ── Carcasa del celular ────────────────────────────────────────────────────
 function PhoneShell({ data }) {
   return (
     <div className="hidden lg:flex flex-col w-[360px] h-[720px] shrink-0 relative">
-      {/* Frame */}
-      <div className="absolute inset-0 rounded-[3rem] bg-slate-900 shadow-[0_30px_80px_rgba(153,0,17,0.35)]" />
-      <div className="absolute inset-[3px] rounded-[2.8rem] bg-white overflow-hidden flex flex-col">
-        {/* Notch */}
+      {/* Marco de papel extruido sobre el fondo bordó del alta */}
+      <div
+        className="absolute inset-0 rounded-[3rem]"
+        style={{ background: 'var(--ns-paper)', boxShadow: '26px 30px 70px rgba(52,0,6,0.45), -14px -14px 36px rgba(255,255,255,0.12)' }}
+      />
+      <div
+        className="absolute inset-[9px] rounded-[2.6rem] overflow-hidden flex flex-col"
+        style={{ background: 'var(--ns-bg)', boxShadow: 'var(--neo-inset-deep)' }}
+      >
+        {/* Muesca */}
         <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-10 pointer-events-none">
-          <div className="w-28 h-7 bg-slate-900 rounded-b-2xl flex items-center justify-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-            <div className="w-8 h-1.5 rounded-full bg-slate-800" />
+          <div
+            className="w-28 h-6 rounded-b-[18px] flex items-center justify-center gap-2"
+            style={{ background: 'var(--ns-mix-20)' }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--ns-mix-44)' }} />
+            <span className="w-8 h-1.5 rounded-full" style={{ background: 'var(--ns-mix-28)' }} />
           </div>
         </div>
         <div className="flex-1 overflow-hidden mt-7">
           <LivePreview data={data} />
         </div>
-        {/* Home bar */}
-        <div className="h-8 flex items-center justify-center bg-white">
-          <div className="w-28 h-1.5 bg-slate-300 rounded-full" />
+        {/* Barra de inicio */}
+        <div className="h-8 flex items-center justify-center" style={{ background: 'var(--ns-bg)' }}>
+          <div className="w-28 h-1.5 rounded-full" style={{ background: 'var(--ns-mix-20)' }} />
         </div>
       </div>
     </div>
@@ -353,10 +388,10 @@ export default function OnboardingWizard({ session, onComplete }) {
       <div className="min-h-screen bg-[#990011] flex items-center justify-center">
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center space-y-6">
           <motion.div animate={{rotate:360}} transition={{repeat:Infinity,duration:1,ease:'linear'}}
-            className="w-14 h-14 border-4 border-white/10 border-t-violet-300 rounded-full mx-auto" />
+            className="w-14 h-14 rounded-full mx-auto" style={{ border: '4px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--ns-paper)' }} />
           <div>
             <p className="text-white font-bold text-lg">Creando tu plataforma...</p>
-            <p className="text-slate-500 text-sm mt-1">Esto toma unos segundos</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(252,246,245,0.6)' }}>Esto toma unos segundos</p>
           </div>
         </motion.div>
       </div>
@@ -365,13 +400,13 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Input renderers ──────────────────────────────────────────────────────
   const renderInput = () => {
-    const base = "w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/30 outline-none focus:border-violet-300 focus:bg-white/15 transition-all font-medium"
+    const base = "neo-onbrand-field"
     switch (step.type) {
       case 'text':
         return (
           <form onSubmit={e => { e.preventDefault(); if(input.trim()) next({ [step.id]: input.trim() }) }} className="space-y-3">
             <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} className={base} />
-            <button type="submit" disabled={!input.trim()} className="w-full py-4 bg-violet-500 hover:bg-violet-300 disabled:opacity-40 text-white font-black rounded-2xl transition-all">Continuar →</button>
+            <button type="submit" disabled={!input.trim()} className="neo-onbrand-btn">Continuar →</button>
           </form>
         )
       case 'textarea': {
@@ -380,14 +415,14 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="space-y-3">
             {sug?.descripcion && (
               <button onClick={() => setInput(sug.descripcion)}
-                className="w-full text-left px-4 py-3 bg-violet-500/10 border border-violet-500/30 rounded-xl text-violet-300 text-sm font-medium hover:bg-violet-500/20 transition-all">
+                className="neo-onbrand-field w-full text-left !py-3 text-sm hover:opacity-90">
                 Sugerencia: "{sug.descripcion}"
               </button>
             )}
             <textarea ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} rows={3} className={base + " resize-none"} />
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ [step.id]: '' })} className="py-4 bg-white/10 hover:bg-white/20 text-white/70 font-bold rounded-2xl transition-all">Omitir</button>
-              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="py-4 bg-violet-500 hover:bg-violet-300 text-white font-black rounded-2xl transition-all">Continuar →</button>
+              <button onClick={() => next({ [step.id]: '' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
+              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="neo-onbrand-btn">Continuar →</button>
             </div>
           </div>
         )
@@ -395,13 +430,13 @@ export default function OnboardingWizard({ session, onComplete }) {
       case 'instagram':
         return (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-2xl px-4 focus-within:border-violet-300 transition-all">
-              <span className="text-violet-300 font-black text-lg">@</span>
+            <div className="neo-onbrand-field flex items-center gap-2 !py-0">
+              <span className="font-black text-lg" style={{ color: 'var(--ns-paper)', opacity: 0.7 }}>@</span>
               <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder="tu_cuenta" className="flex-1 py-4 bg-transparent text-white placeholder:text-white/30 outline-none font-medium" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ instagram: '' })} className="py-4 bg-white/10 text-white/70 font-bold rounded-2xl">Omitir</button>
-              <button onClick={() => next({ instagram: input })} className="py-4 bg-violet-500 text-white font-black rounded-2xl">Continuar →</button>
+              <button onClick={() => next({ instagram: '' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
+              <button onClick={() => next({ instagram: input })} className="neo-onbrand-btn">Continuar →</button>
             </div>
           </div>
         )
@@ -411,7 +446,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             {RUBROS_DISPONIBLES.map(opt => (
               <motion.button key={opt} whileTap={{scale:.95}}
                 onClick={() => next({ rubro: opt })}
-                className="px-4 py-2.5 bg-white/10 hover:bg-violet-500 border border-white/20 hover:border-violet-300 text-white text-sm font-semibold rounded-full transition-all">
+                className="neo-onbrand-chip">
                 {opt}
               </motion.button>
             ))}
@@ -431,7 +466,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 <span className="text-white/50 text-lg">+</span>
               </label>
             </div>
-            <button onClick={() => next()} className="w-full py-4 bg-violet-500 text-white font-black rounded-2xl">Confirmar Color →</button>
+            <button onClick={() => next()} className="neo-onbrand-btn">Confirmar color →</button>
           </div>
         )
       case 'logo':
@@ -439,19 +474,19 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="space-y-3">
             {uploading ? (
               <div className="py-10 flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-4 border-violet-300/30 border-t-violet-300 rounded-full animate-spin" />
+                <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '4px solid rgba(255,255,255,0.15)', borderTopColor: 'var(--ns-paper)' }} />
                 <p className="text-white/50 text-sm">Subiendo imagen...</p>
               </div>
             ) : (
               <>
-                <label className="w-full py-10 bg-white/5 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-3 cursor-pointer hover:border-violet-300 hover:bg-white/10 transition-all">
+                <label className="neo-onbrand-field w-full !py-10 flex flex-col items-center gap-3 cursor-pointer">
                   <input type="file" accept="image/*" className="hidden" onChange={uploadLogo} />
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg className="w-6 h-6" style={{ color: 'var(--ns-paper)', opacity: 0.8 }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   </div>
                   <p className="text-white/60 text-sm font-medium">Tocar para subir logo</p>
                 </label>
-                <button onClick={() => next({ logo_url: '' })} className="w-full py-3 bg-white/10 text-white/60 font-bold rounded-2xl hover:bg-white/15">Omitir por ahora</button>
+                <button onClick={() => next({ logo_url: '' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir por ahora</button>
               </>
             )}
           </div>
@@ -465,7 +500,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 {sug.servicios.map((s, i) => (
                   <button key={s} onClick={() => setData(d => ({ ...d, svcNombre: s, svcPrecio: String(sug.precios[i] || 0), svcDuracion: String(sug.duraciones[i] || 30) }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
-                      data.svcNombre === s ? 'bg-violet-500 border-violet-300 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                      data.svcNombre === s ? 'neo-onbrand-chip is-active' : 'neo-onbrand-chip'
                     }`}>
                     {s}
                   </button>
@@ -475,13 +510,13 @@ export default function OnboardingWizard({ session, onComplete }) {
             <input value={data.svcNombre} onChange={e=>setData(d=>({...d,svcNombre:e.target.value}))} placeholder={vocab.placeholderServicio || 'Nombre del servicio'} className={base} ref={inputRef} />
             <div className="grid grid-cols-2 gap-3">
               <input type="number" value={data.svcPrecio} onChange={e=>setData(d=>({...d,svcPrecio:e.target.value}))} placeholder="Precio $" className={base} />
-              <select value={data.svcDuracion} onChange={e=>setData(d=>({...d,svcDuracion:e.target.value}))} className={base + " bg-slate-800"}>
+              <select value={data.svcDuracion} onChange={e=>setData(d=>({...d,svcDuracion:e.target.value}))} className={base}>
                 {[15,30,45,60,90,120].map(m=><option key={m} value={m}>{m} min</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ svcNombre:'' })} className="py-4 bg-white/10 text-white/70 font-bold rounded-2xl">Omitir</button>
-              <button disabled={!data.svcNombre} onClick={() => next()} className="py-4 bg-violet-500 disabled:opacity-40 text-white font-black rounded-2xl">Continuar →</button>
+              <button onClick={() => next({ svcNombre:'' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
+              <button disabled={!data.svcNombre} onClick={() => next()} className="neo-onbrand-btn">Continuar →</button>
             </div>
           </div>
         )
@@ -495,7 +530,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 {sug.staff.map(s => (
                   <button key={s} onClick={() => setData(d => ({ ...d, staffNombre: s, staffEspecialidad: d.staffEspecialidad || sug.especialidad }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
-                      data.staffNombre === s ? 'bg-violet-500 border-violet-300 text-white' : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                      data.staffNombre === s ? 'neo-onbrand-chip is-active' : 'neo-onbrand-chip'
                     }`}>
                     {s}
                   </button>
@@ -505,8 +540,8 @@ export default function OnboardingWizard({ session, onComplete }) {
             <input ref={inputRef} value={data.staffNombre} onChange={e=>setData(d=>({...d,staffNombre:e.target.value}))} placeholder="Nombre del profesional" className={base} />
             <input value={data.staffEspecialidad} onChange={e=>setData(d=>({...d,staffEspecialidad:e.target.value}))} placeholder={vocab.placeholderEspecialidad || 'Especialidad'} className={base} />
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ staffNombre:'' })} className="py-4 bg-white/10 text-white/70 font-bold rounded-2xl">Omitir</button>
-              <button disabled={!data.staffNombre} onClick={() => next()} className="py-4 bg-violet-500 disabled:opacity-40 text-white font-black rounded-2xl">Finalizar ✓</button>
+              <button onClick={() => next({ staffNombre:'' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
+              <button disabled={!data.staffNombre} onClick={() => next()} className="neo-onbrand-btn">Finalizar ✓</button>
             </div>
           </div>
         )
@@ -517,17 +552,17 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Main layout ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#990011] flex">
+    <div className="min-h-dvh flex" style={{ background: 'var(--ns-gradient-1)' }}>
       {/* Left: Chat / Form panel */}
       <div className="flex-1 flex flex-col max-w-2xl mx-auto lg:mx-0 p-6 lg:p-12">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-300 to-blue-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-black text-sm italic">NS</span>
+          <div className="w-11 h-11 rounded-[16px] flex items-center justify-center" style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)', boxShadow: '5px 5px 14px rgba(70,0,8,0.4)' }}>
+            <span className="font-black text-sm italic">NS</span>
           </div>
           <div>
-            <p className="text-white font-bold text-sm leading-none">Non Sistemas</p>
-            <p className="text-slate-500 text-xs mt-0.5">Configuración guiada</p>
+            <p className="font-bold text-sm leading-none" style={{ color: 'var(--ns-paper)' }}>Non Sistemas</p>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(252,246,245,0.6)' }}>Configuración guiada</p>
           </div>
         </div>
 
@@ -540,7 +575,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                   className="h-2 rounded-full transition-all" />
               ))}
             </div>
-            <span className="text-slate-500 text-xs">{stepIdx + 1} / {steps.length}</span>
+            <span className="text-xs font-bold tabular-nums" style={{ color: 'rgba(252,246,245,0.6)' }}>{stepIdx + 1} / {steps.length}</span>
           </div>
         </div>
 
@@ -548,22 +583,22 @@ export default function OnboardingWizard({ session, onComplete }) {
         <AnimatePresence mode="wait">
           <motion.div key={step.id} initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{duration:.25}} className="flex-1">
             <div className="mb-8">
-              <h2 className="text-3xl font-black text-white tracking-tight leading-tight">{step.q}</h2>
+              <h2 className="text-3xl font-black tracking-tight leading-tight" style={{ color: 'var(--ns-paper)', fontFamily: 'var(--font-display)' }}>{step.q}</h2>
             </div>
             {renderInput()}
           </motion.div>
         </AnimatePresence>
 
         {/* Footer */}
-        <p className="text-slate-600 text-xs mt-8 text-center">Non Sistemas · Salsipuedes, CBA</p>
+        <p className="text-xs mt-8 text-center" style={{ color: 'rgba(252,246,245,0.4)' }}>Non Sistemas · Salsipuedes, Córdoba</p>
       </div>
 
       {/* Right: Live Preview Phone */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-12 bg-[#990011] border-l border-white/5">
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12" style={{ background: 'var(--ns-primary)', boxShadow: 'inset 1px 0 0 rgba(252,246,245,0.08)' }}>
         <div className="text-center space-y-6">
           <div>
-            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Vista en tiempo real</p>
-            <p className="text-slate-400 text-sm mt-1">Así verán tu app tus clientes</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: 'rgba(252,246,245,0.5)' }}>Vista en tiempo real</p>
+            <p className="text-sm mt-1.5" style={{ color: 'rgba(252,246,245,0.72)' }}>Así van a ver tu app tus clientes</p>
           </div>
           <PhoneShell data={data} />
         </div>

@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../supabaseClient'
 import { useToast } from './Toast'
+import Contador from './neo/Contador'
 import { useConfirm } from '../contexts/ConfirmContext'
 
+// Con una sola tinta el nivel no puede depender del color: lleno = urgente,
+// contorno = atención, hundido = en orden.
 const STOCK_LEVELS = {
-  critical: { color: '#C36771', bg: 'rgba(153,0,17,0.1)', label: 'Crítico' },
-  low: { color: '#DAA2A7', bg: 'rgba(153,0,17,0.1)', label: 'Bajo' },
-  ok: { color: '#D28F95', bg: 'rgba(153,0,17,0.1)', label: 'OK' },
+  critical: { chip: 'neo-chip--solid', label: 'Sin stock' },
+  low: { chip: 'neo-chip--outline', label: 'Stock bajo' },
+  ok: { chip: 'neo-chip--quiet', label: 'En orden' },
 }
 
 export default function InventarioPro({ negocioId }) {
@@ -234,8 +237,14 @@ export default function InventarioPro({ negocioId }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-48">
-        <div className="w-8 h-8 border-3 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <div className="ns-skeleton" style={{ height: 96 }} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="ns-skeleton" style={{ height: 96 }} />
+          <div className="ns-skeleton" style={{ height: 96 }} />
+          <div className="ns-skeleton" style={{ height: 96 }} />
+        </div>
+        <div className="ns-skeleton" style={{ height: 220 }} />
       </div>
     )
   }
@@ -243,75 +252,44 @@ export default function InventarioPro({ negocioId }) {
   return (
     <div className="space-y-6 md:space-y-8 pb-20">
       {/* Header */}
-      <div className="ns-stat-card">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2" style={{ color: 'var(--ns-text)' }}>
-              Inventario
-            </h2>
-            <p className="text-sm md:text-base font-medium" style={{ color: 'var(--ns-text-muted)' }}>
-              Gestiona tu stock y productos con precisión
-            </p>
+      <header className="neo-card p-5 md:p-7 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="neo-head__title text-3xl md:text-[42px]">Inventario</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
+            <p className="neo-eyebrow">{items.length} productos cargados</p>
           </div>
-          <motion.button
-            onClick={() => setModalAbierto(true)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 text-white"
-            style={{ background: 'var(--ns-primary)' }}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </motion.button>
         </div>
-      </div>
+        <button onClick={() => setModalAbierto(true)} className="neo-btn neo-btn--primary shrink-0">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.8" viewBox="0 0 24 24">
+            <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="hidden sm:inline">Nuevo producto</span>
+        </button>
+      </header>
 
       {/* Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="ns-stat-card"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ns-text-muted)' }}>
-            Valor Total
-          </p>
-          <p className="text-2xl md:text-3xl font-black" style={{ color: 'var(--ns-primary)' }}>
-            ${totalValor.toLocaleString()}
-          </p>
-        </motion.div>
+        <div className="neo-tile">
+          <span className="neo-stat__label">Valor del stock</span>
+          <span className="neo-stat__value"><Contador valor={totalValor} prefijo="$" /></span>
+          <span className="neo-stat__foot">A precio de venta</span>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="ns-stat-card"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ns-text-muted)' }}>
-            Productos
-          </p>
-          <p className="text-2xl md:text-3xl font-black" style={{ color: 'var(--ns-primary)' }}>
-            {items.length}
-          </p>
-        </motion.div>
+        <div className="neo-tile">
+          <span className="neo-stat__label">Productos</span>
+          <span className="neo-stat__value"><Contador valor={items.length} /></span>
+          <span className="neo-stat__foot">{categorias.length} categorías</span>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="ns-stat-card"
-          style={{
-            background: stockBajo > 0 ? 'rgba(153,0,17,0.05)' : 'var(--ns-surface)'
-          }}
+        <div
+          className="neo-tile"
+          style={stockBajo > 0 ? { boxShadow: 'var(--neo-raised), inset 0 0 0 2px var(--ns-primary)' } : undefined}
         >
-          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--ns-text-muted)' }}>
-            Stock Bajo
-          </p>
-          <p className="text-2xl md:text-3xl font-black" style={{ color: stockBajo > 0 ? '#C36771' : '#D28F95' }}>
-            {stockBajo}
-          </p>
-        </motion.div>
+          <span className="neo-stat__label">Para reponer</span>
+          <span className="neo-stat__value"><Contador valor={stockBajo} /></span>
+          <span className="neo-stat__foot">{stockBajo > 0 ? 'Revisalos antes de quedarte sin nada' : 'Todo en orden'}</span>
+        </div>
       </div>
 
       {/* Búsqueda y Filtros */}
@@ -322,32 +300,25 @@ export default function InventarioPro({ negocioId }) {
             placeholder="Buscar producto..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="ns-input pl-10"
+            className="neo-field pl-11"
           />
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 sm:pb-0">
-          {['todos', ...categorias].map((cat) => (
-            <motion.button
-              key={cat}
-              onClick={() => setFiltro(cat)}
-              whileHover={{ y: -2 }}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all ${
-                filtro === cat
-                  ? 'text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-              style={
-                filtro === cat
-                  ? { background: 'var(--ns-primary)' }
-                  : { background: 'var(--ns-surface)' }
-              }
-            >
-              {cat}
-            </motion.button>
-          ))}
+        <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
+          <div className="neo-segment w-max">
+            {['todos', ...categorias].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setFiltro(cat)}
+                className={filtro === cat ? 'is-active' : ''}
+                aria-pressed={filtro === cat}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -359,9 +330,20 @@ export default function InventarioPro({ negocioId }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="ns-stat-card text-center py-12"
+              className="neo-card"
             >
-              <p style={{ color: 'var(--ns-text-muted)' }}>No hay productos que coincidan con tu búsqueda</p>
+              <div className="neo-empty">
+                <span className="neo-pod neo-pod--sunken neo-pod--lg">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </span>
+                <p className="neo-empty__title">{busqueda || filtro !== 'todos' ? 'Nada con ese filtro' : 'Inventario vacío'}</p>
+                <p className="neo-empty__text">
+                  {busqueda || filtro !== 'todos'
+                    ? 'Probá con otro nombre o volvé a "todos".'
+                    : 'Cargá tus productos para llevar el stock desde acá.'}
+                </p>
+                <button onClick={() => setModalAbierto(true)} className="neo-btn neo-btn--primary mt-1">Nuevo producto</button>
+              </div>
             </motion.div>
           ) : (
             itemsFiltrados.map((item, idx) => {
@@ -373,7 +355,7 @@ export default function InventarioPro({ negocioId }) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="ns-stat-card hover:shadow-lg transition-all"
+                  className="neo-tile"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -386,55 +368,34 @@ export default function InventarioPro({ negocioId }) {
                         </p>
                       )}
                       <div className="flex flex-wrap gap-2">
-                        <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}>
-                          {item.categoria}
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded-lg font-bold" style={{ background: nivel.bg, color: nivel.color }}>
-                          {nivel.label}
-                        </span>
+                        <span className="neo-chip neo-chip--soft">{item.categoria}</span>
+                        <span className={`neo-chip ${nivel.chip}`}>{nivel.label}</span>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <p className="text-lg md:text-xl font-black" style={{ color: 'var(--ns-primary)' }}>
+                      <p className="font-display text-2xl font-black tabular-nums leading-none" style={{ color: 'var(--ns-text)' }}>
                         {item.cantidad}
                       </p>
-                      <p className="text-xs mb-2" style={{ color: 'var(--ns-text-muted)' }}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--ns-text-muted)' }}>
                         {item.unidad}
                       </p>
-                      <p className="text-sm font-bold mb-3" style={{ color: 'var(--ns-text)' }}>
-                        ${(item.cantidad * item.precio_venta).toLocaleString()}
+                      <p className="text-[13px] font-black mt-2 tabular-nums" style={{ color: 'var(--ns-text-secondary)' }}>
+                        ${(item.cantidad * item.precio_venta).toLocaleString('es-AR')}
                       </p>
-
-                      <div className="flex gap-2">
-                        <motion.button
-                          onClick={() => setModalMovimiento(item.id)}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-white transition-all"
-                          style={{ background: 'var(--ns-primary)' }}
-                        >
-                          Movimiento
-                        </motion.button>
-                        <motion.button
-                          onClick={() => abrirEdicion(item)}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all"
-                          style={{ background: 'var(--ns-surface)', color: 'var(--ns-primary)' }}
-                        >
-                          Editar
-                        </motion.button>
-                        <motion.button
-                          onClick={() => eliminar(item.id)}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-3 py-2 rounded-lg text-xs font-bold text-white transition-all bg-red-500 hover:bg-red-600"
-                        >
-                          ✕
-                        </motion.button>
-                      </div>
                     </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={() => setModalMovimiento(item.id)} className="neo-btn neo-btn--primary neo-btn--quiet flex-1">
+                      Movimiento
+                    </button>
+                    <button onClick={() => abrirEdicion(item)} className="neo-btn neo-btn--quiet flex-1">
+                      Editar
+                    </button>
+                    <button onClick={() => eliminar(item.id)} className="neo-icon-btn w-9 h-9 shrink-0" aria-label={`Desactivar ${item.nombre}`}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </button>
                   </div>
                 </motion.div>
               )
@@ -451,19 +412,23 @@ export default function InventarioPro({ negocioId }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={cerrarModal}
-            className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4"
+            className="neo-scrim flex items-end md:items-center justify-center p-0 md:p-4"
           >
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl md:rounded-2xl w-full md:max-w-md md:max-h-96 overflow-y-auto"
+              className="w-full md:max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+              style={{
+                background: 'var(--ns-surface)',
+                boxShadow: 'var(--neo-float)',
+                borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
+                paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))',
+              }}
             >
               <div className="p-6 md:p-8 space-y-4">
-                <h3 className="text-xl font-black" style={{ color: 'var(--ns-text)' }}>
-                  {modoEdicion ? 'Editar Producto' : 'Nuevo Producto'}
-                </h3>
+                <h3 className="neo-head__title text-2xl">{modoEdicion ? 'Editar producto' : 'Nuevo producto'}</h3>
 
                 <form onSubmit={guardar} className="space-y-4">
                   <input
@@ -471,7 +436,7 @@ export default function InventarioPro({ negocioId }) {
                     placeholder="Nombre"
                     value={form.nombre}
                     onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                    className="ns-input"
+                    className="neo-field"
                     required
                   />
 
@@ -479,13 +444,13 @@ export default function InventarioPro({ negocioId }) {
                     placeholder="Descripción"
                     value={form.descripcion}
                     onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                    className="ns-input resize-none h-20"
+                    className="neo-field resize-none h-20"
                   />
 
                   <select
                     value={form.categoria}
                     onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                    className="ns-input"
+                    className="neo-field"
                   >
                     {categorias.map((cat) => (
                       <option key={cat} value={cat}>
@@ -500,14 +465,14 @@ export default function InventarioPro({ negocioId }) {
                       placeholder="Cantidad"
                       value={form.cantidad}
                       onChange={(e) => setForm({ ...form, cantidad: parseInt(e.target.value) || 0 })}
-                      className="ns-input"
+                      className="neo-field"
                     />
                     <input
                       type="number"
                       placeholder="Stock Mín."
                       value={form.stock_minimo}
                       onChange={(e) => setForm({ ...form, stock_minimo: parseInt(e.target.value) || 0 })}
-                      className="ns-input"
+                      className="neo-field"
                     />
                   </div>
 
@@ -517,18 +482,18 @@ export default function InventarioPro({ negocioId }) {
                       placeholder="Precio Costo"
                       value={form.precio_costo}
                       onChange={(e) => setForm({ ...form, precio_costo: parseFloat(e.target.value) || 0 })}
-                      className="ns-input"
+                      className="neo-field"
                     />
                     <input
                       type="number"
                       placeholder="Precio Venta"
                       value={form.precio_venta}
                       onChange={(e) => setForm({ ...form, precio_venta: parseFloat(e.target.value) || 0 })}
-                      className="ns-input"
+                      className="neo-field"
                     />
                   </div>
 
-                  <button type="submit" disabled={guardando} className="ns-btn-primary">
+                  <button type="submit" disabled={guardando} className="neo-btn neo-btn--primary neo-btn--block">
                     {guardando ? 'Guardando...' : 'Guardar Producto'}
                   </button>
                 </form>
@@ -546,25 +511,29 @@ export default function InventarioPro({ negocioId }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setModalMovimiento(null)}
-            className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4"
+            className="neo-scrim flex items-end md:items-center justify-center p-0 md:p-4"
           >
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl md:rounded-2xl w-full md:max-w-md overflow-y-auto"
+              className="w-full md:max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+              style={{
+                background: 'var(--ns-surface)',
+                boxShadow: 'var(--neo-float)',
+                borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
+                paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))',
+              }}
             >
               <div className="p-6 md:p-8 space-y-4">
-                <h3 className="text-xl font-black" style={{ color: 'var(--ns-text)' }}>
-                  Registrar Movimiento
-                </h3>
+                <h3 className="neo-head__title text-2xl">Registrar movimiento</h3>
 
                 <form onSubmit={registrarMovimiento} className="space-y-4">
                   <select
                     value={movForm.tipo}
                     onChange={(e) => setMovForm({ ...movForm, tipo: e.target.value })}
-                    className="ns-input"
+                    className="neo-field"
                   >
                     <option value="entrada">Entrada</option>
                     <option value="salida">Salida</option>
@@ -576,7 +545,7 @@ export default function InventarioPro({ negocioId }) {
                     placeholder="Cantidad"
                     value={movForm.cantidad}
                     onChange={(e) => setMovForm({ ...movForm, cantidad: e.target.value })}
-                    className="ns-input"
+                    className="neo-field"
                     required
                   />
 
@@ -585,10 +554,10 @@ export default function InventarioPro({ negocioId }) {
                     placeholder="Motivo"
                     value={movForm.motivo}
                     onChange={(e) => setMovForm({ ...movForm, motivo: e.target.value })}
-                    className="ns-input"
+                    className="neo-field"
                   />
 
-                  <button type="submit" disabled={guardando} className="ns-btn-primary">
+                  <button type="submit" disabled={guardando} className="neo-btn neo-btn--primary neo-btn--block">
                     {guardando ? 'Registrando...' : 'Registrar Movimiento'}
                   </button>
                 </form>

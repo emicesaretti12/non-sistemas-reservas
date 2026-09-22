@@ -2,9 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { supabase, supabaseConfigurado } from './supabaseClient'
 import { ToastProvider } from './components/Toast'
-import { ThemeProvider, useTheme } from './contexts/ThemeContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { ConfirmProvider } from './contexts/ConfirmContext'
 import ErrorBoundary from './components/ErrorBoundary'
+import { useRippleGlobal } from './hooks/useRippleGlobal'
 
 // Code splitting: el panel, la app pública y el login son tres bundles
 // distintos. Antes todo viajaba en un único archivo de ~1,1 MB que el cliente
@@ -16,13 +17,11 @@ const VistaPublica = lazy(() => import('./components/VistaPublica'))
 const ActualizarClave = lazy(() => import('./components/ActualizarClave'))
 
 function Splash() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
   return (
     <div
       className="min-h-dvh flex items-center justify-center"
       style={{
-        background: isDark ? 'var(--ns-bg)' : 'var(--ns-bg)',
+        background: 'var(--ns-bg)',
         color: 'var(--ns-text)',
         fontFamily: '"Inter Tight", "Inter", sans-serif',
       }}
@@ -85,9 +84,15 @@ function FaltaConfiguracion() {
       style={{ background: '#FAF1F0', fontFamily: '"Inter Tight", system-ui, sans-serif' }}
       data-testid="config-missing"
     >
-      <div className="max-w-md w-full bg-white rounded-3xl border border-[#F0D8DA] p-8 text-center shadow-xl">
-        <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
-          <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+      <div
+        className="max-w-md w-full rounded-[38px] p-8 text-center"
+        style={{ background: '#FCF6F5', boxShadow: '20px 20px 44px rgba(153,0,17,0.13), -13px -13px 30px rgba(255,255,255,0.95)' }}
+      >
+        <div
+          className="w-16 h-16 mx-auto mb-6 rounded-[22px] flex items-center justify-center"
+          style={{ background: '#F6E7E7', boxShadow: 'inset 7px 7px 15px rgba(153,0,17,0.11), inset -6px -6px 13px rgba(255,255,255,0.95)', color: '#990011' }}
+        >
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
@@ -97,7 +102,10 @@ function FaltaConfiguracion() {
           en el entorno de despliegue (o en un archivo <code className="font-mono text-[12px]">.env</code> local)
           y volvé a publicar.
         </p>
-        <pre className="text-left text-[11px] font-mono bg-[#FAF1F0] border border-[#F0D8DA] rounded-xl p-4 text-[#9D0A1A] overflow-x-auto">
+        <pre
+          className="text-left text-[11px] font-mono rounded-[18px] p-4 overflow-x-auto"
+          style={{ background: '#F6E7E7', color: '#9D0A1A', boxShadow: 'inset 7px 7px 15px rgba(153,0,17,0.11), inset -6px -6px 13px rgba(255,255,255,0.95)' }}
+        >
 VITE_SUPABASE_URL=...{'\n'}VITE_SUPABASE_ANON_KEY=...
         </pre>
       </div>
@@ -108,6 +116,9 @@ VITE_SUPABASE_URL=...{'\n'}VITE_SUPABASE_ANON_KEY=...
 function AppShell() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  // Respuesta física al toque en toda la app.
+  useRippleGlobal()
 
   useEffect(() => {
     let activo = true

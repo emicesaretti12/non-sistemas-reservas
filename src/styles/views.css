@@ -458,3 +458,118 @@
     box-shadow: var(--neo-inset-sm), 0 0 0 2px var(--ns-primary);
   }
 }
+
+/* ============================================================
+   ALTA DE NEGOCIO — panel sobre la marca
+   El fondo acá es el rojo lleno, así que el relieve se invierte:
+   la luz viene de adentro y las piezas se hunden en el color.
+   ============================================================ */
+
+@layer components {
+  .neo-onbrand-field {
+    width: 100%;
+    padding: 15px 18px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ns-paper);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow:
+      inset 4px 4px 10px rgba(80, 0, 9, 0.5),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.07);
+    outline: none;
+    transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+  }
+
+  .neo-onbrand-field::placeholder {
+    color: rgba(252, 246, 245, 0.42);
+  }
+
+  .neo-onbrand-field:focus {
+    background: rgba(255, 255, 255, 0.13);
+    box-shadow:
+      inset 4px 4px 10px rgba(80, 0, 9, 0.5),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.08),
+      0 0 0 3px rgba(252, 246, 245, 0.28);
+  }
+
+  .neo-onbrand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 15px 22px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-paper);
+    color: var(--ns-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow:
+      6px 6px 16px rgba(70, 0, 8, 0.45),
+      -3px -3px 10px rgba(255, 255, 255, 0.08),
+      inset 0 -2px 0 rgba(153, 0, 17, 0.14);
+    transition: transform var(--dur-2) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out);
+  }
+
+  .neo-onbrand-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow:
+      9px 10px 22px rgba(70, 0, 8, 0.5),
+      -4px -4px 12px rgba(255, 255, 255, 0.1),
+      inset 0 -2px 0 rgba(153, 0, 17, 0.16);
+  }
+
+  .neo-onbrand-btn:active:not(:disabled) {
+    transform: scale(0.98);
+    box-shadow: inset 3px 3px 8px rgba(153, 0, 17, 0.25);
+  }
+
+  .neo-onbrand-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Variante secundaria: hundida en el color, sin relleno claro. */
+  .neo-onbrand-btn--ghost {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(252, 246, 245, 0.85);
+    box-shadow:
+      inset 3px 3px 8px rgba(80, 0, 9, 0.45),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.06);
+  }
+
+  .neo-onbrand-btn--ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.14);
+    transform: none;
+    box-shadow:
+      inset 3px 3px 8px rgba(80, 0, 9, 0.45),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.08);
+  }
+
+  .neo-onbrand-chip {
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(252, 246, 245, 0.85);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: inset 2px 2px 6px rgba(80, 0, 9, 0.35), inset -1px -1px 4px rgba(255, 255, 255, 0.05);
+    transition: all var(--dur-2) var(--ease-out);
+  }
+
+  .neo-onbrand-chip:hover,
+  .neo-onbrand-chip.is-active {
+    background: var(--ns-paper);
+    color: var(--ns-primary);
+    box-shadow: 4px 4px 12px rgba(70, 0, 8, 0.4);
+  }
+}
