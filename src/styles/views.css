@@ -41,7 +41,7 @@
     height: 46vw;
     max-width: 420px;
     max-height: 420px;
-    background: rgba(153, 0, 17, 0.1);
+    background: rgba(0, 122, 255, 0.12);
   }
 
   .ns-login-orb-2 {
@@ -51,7 +51,7 @@
     height: 52vw;
     max-width: 460px;
     max-height: 460px;
-    background: rgba(153, 0, 17, 0.07);
+    background: rgba(0, 122, 255, 0.09);
     animation-delay: 3s;
   }
 
@@ -62,7 +62,7 @@
     height: 24vw;
     max-width: 240px;
     max-height: 240px;
-    background: rgba(153, 0, 17, 0.05);
+    background: rgba(139, 92, 246, 0.08);
     animation-delay: 6s;
   }
 
@@ -70,7 +70,7 @@
     padding: 28px 24px;
     border-radius: var(--ns-radius-2xl);
     background: var(--ns-surface);
-    box-shadow: var(--neo-float);
+    box-shadow: var(--ui-shadow-xl);
     animation: ns-pop-in var(--dur-5) var(--ease-spring) both;
   }
 
@@ -89,7 +89,7 @@
     border-radius: var(--ns-radius-sm);
     background: var(--ns-gradient-1);
     color: var(--ns-paper);
-    box-shadow: var(--neo-brand);
+    box-shadow: var(--ui-brand);
   }
 
   .ns-login-social-btn {
@@ -106,18 +106,18 @@
     color: var(--ns-text);
     font-size: 13px;
     font-weight: 700;
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
   .ns-login-social-btn:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-1px);
   }
 
   .ns-login-social-btn:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.97);
   }
 
@@ -143,19 +143,19 @@
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    box-shadow: var(--neo-brand);
+    box-shadow: var(--ui-brand);
     cursor: pointer;
     overflow: hidden;
     transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
   .ns-login-submit-btn:hover {
-    box-shadow: var(--neo-brand-lg);
+    box-shadow: var(--ui-brand-lg);
     transform: translateY(-2px);
   }
 
   .ns-login-submit-btn:active {
-    box-shadow: var(--neo-brand-pressed);
+    box-shadow: var(--ui-brand-pressed);
     transform: scale(0.98);
   }
 
@@ -186,7 +186,7 @@
     padding: 22px 20px;
     border-radius: var(--ns-radius-2xl);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
   }
 
   .ns-public-logo {
@@ -197,7 +197,7 @@
     padding: 5px;
     border-radius: var(--ns-radius-md);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transition: transform var(--dur-3) var(--ease-spring);
   }
 
@@ -223,12 +223,13 @@
     background: var(--ns-glass-bg-strong);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
   }
 
   .ns-public-service-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 13px;
     width: 100%;
     padding: 15px 16px;
@@ -237,6 +238,11 @@
     text-align: left;
     cursor: pointer;
     transition: background var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  }
+
+  /* Separador entre servicios: línea de un píxel del sistema. */
+  .ns-public-service-item + .ns-public-service-item {
+    box-shadow: inset 0 1px 0 var(--ns-line);
   }
 
   .ns-public-service-item:hover {
@@ -266,18 +272,18 @@
     border: 0;
     border-radius: var(--ns-radius-lg);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
   .ns-public-employee-card:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-3px);
   }
 
   .ns-public-employee-card:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.95);
   }
 
@@ -286,7 +292,7 @@
     padding: 20px;
     border-radius: var(--ns-radius-xl);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
   }
 
   /* Ticket de confirmación: papel troquelado. */
@@ -295,7 +301,7 @@
     padding: 24px 20px;
     border-radius: var(--ns-radius-xl);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-lg);
+    box-shadow: var(--ui-shadow-lg);
     overflow: hidden;
   }
 
@@ -308,7 +314,7 @@
     height: 26px;
     border-radius: 999px;
     background: var(--ns-bg);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
     transform: translateY(-50%);
   }
 
@@ -320,14 +326,14 @@
     flex-direction: column;
     border-radius: var(--ns-radius-lg);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     overflow: hidden;
     cursor: pointer;
     transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
   }
 
   .ns-public-product-card:hover {
-    box-shadow: var(--neo-raised-lg);
+    box-shadow: var(--ui-shadow-lg);
     transform: translateY(-3px);
   }
 
@@ -345,7 +351,7 @@
 
   /* Franja de horarios: pastillas moldeadas. */
   .brand-date-hover:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-2px);
   }
 
@@ -353,8 +359,8 @@
 
   .ns-hero-gradient {
     background:
-      radial-gradient(1000px 520px at 15% -10%, rgba(153, 0, 17, 0.1), transparent 62%),
-      radial-gradient(760px 460px at 92% 6%, rgba(153, 0, 17, 0.07), transparent 58%),
+      radial-gradient(1000px 520px at 15% -10%, rgba(0, 122, 255, 0.10), transparent 62%),
+      radial-gradient(760px 460px at 92% 6%, rgba(139, 92, 246, 0.07), transparent 58%),
       var(--ns-bg);
   }
 
@@ -391,7 +397,7 @@
   }
 
   .ns-pricing-glow {
-    box-shadow: var(--neo-raised-lg), 0 0 0 2px rgba(153, 0, 17, 0.14);
+    box-shadow: var(--ui-shadow-xl);
   }
 
   /* ═══════════════ TOGGLES DE HORARIOS ═══════════════ */
@@ -409,7 +415,7 @@
 
   .ns-day-toggle.off {
     background: var(--ns-sunken);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
   }
 
   .ns-day-toggle.on {
@@ -425,7 +431,7 @@
     height: 24px;
     border-radius: 999px;
     background: var(--ns-surface);
-    box-shadow: var(--neo-knob);
+    box-shadow: 0 3px 8px rgba(16, 24, 40, 0.18), 0 1px 1px rgba(16, 24, 40, 0.1);
     transition: transform var(--dur-3) var(--ease-spring);
   }
 
@@ -439,14 +445,14 @@
   .ns-template-card {
     border-radius: var(--ns-radius-lg);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     overflow: hidden;
     transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
   .ns-template-card:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-3px);
   }
 
@@ -455,121 +461,146 @@
   }
 
   .ns-template-card.selected {
-    box-shadow: var(--neo-inset-sm), 0 0 0 2px var(--ns-primary);
+    box-shadow: var(--ui-field-sm), 0 0 0 2px var(--ns-primary);
   }
 }
 
 /* ============================================================
-   ALTA DE NEGOCIO — panel sobre la marca
-   El fondo acá es el rojo lleno, así que el relieve se invierte:
-   la luz viene de adentro y las piezas se hunden en el color.
+   SOBRE FONDO OSCURO
+
+   El alta de negocio y el panel de super admin corren sobre el
+   azul pizarra. Ahí los controles claros no sirven, así que
+   estas variantes invierten el contraste: superficie translúcida
+   sobre el color, línea clara y texto en blanco.
    ============================================================ */
 
 @layer components {
-  .neo-onbrand-field {
+  .ui-onbrand-field {
     width: 100%;
-    padding: 15px 18px;
+    padding: 13px 16px;
     border: 0;
     border-radius: var(--ns-radius-md);
     background: rgba(255, 255, 255, 0.08);
-    color: var(--ns-paper);
+    color: #FFFFFF;
     font-family: inherit;
     font-size: 15px;
-    font-weight: 600;
-    box-shadow:
-      inset 4px 4px 10px rgba(80, 0, 9, 0.5),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.07);
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
     outline: none;
     transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
   }
 
-  .neo-onbrand-field::placeholder {
-    color: rgba(252, 246, 245, 0.42);
+  .ui-onbrand-field::placeholder {
+    color: rgba(255, 255, 255, 0.4);
   }
 
-  .neo-onbrand-field:focus {
-    background: rgba(255, 255, 255, 0.13);
+  .ui-onbrand-field:hover:not(:focus) {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  }
+
+  .ui-onbrand-field:focus {
+    background: rgba(255, 255, 255, 0.12);
     box-shadow:
-      inset 4px 4px 10px rgba(80, 0, 9, 0.5),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.08),
-      0 0 0 3px rgba(252, 246, 245, 0.28);
+      inset 0 0 0 1px var(--ns-primary-light),
+      0 0 0 4px rgba(0, 122, 255, 0.3);
   }
 
-  .neo-onbrand-btn {
+  /* Acción principal sobre oscuro: el mismo azul del sistema. */
+  .ui-onbrand-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     width: 100%;
-    min-height: 52px;
-    padding: 15px 22px;
+    min-height: 48px;
+    padding: 13px 22px;
     border: 0;
     border-radius: var(--ns-radius-md);
-    background: var(--ns-paper);
-    color: var(--ns-primary);
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
     font-family: inherit;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
     cursor: pointer;
-    box-shadow:
-      6px 6px 16px rgba(70, 0, 8, 0.45),
-      -3px -3px 10px rgba(255, 255, 255, 0.08),
-      inset 0 -2px 0 rgba(153, 0, 17, 0.14);
-    transition: transform var(--dur-2) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out);
+    box-shadow: var(--ui-brand);
+    transition: background var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
   }
 
-  .neo-onbrand-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow:
-      9px 10px 22px rgba(70, 0, 8, 0.5),
-      -4px -4px 12px rgba(255, 255, 255, 0.1),
-      inset 0 -2px 0 rgba(153, 0, 17, 0.16);
+  .ui-onbrand-btn:hover:not(:disabled) {
+    background: var(--ns-gradient-deep);
+    box-shadow: var(--ui-brand-lg);
   }
 
-  .neo-onbrand-btn:active:not(:disabled) {
+  .ui-onbrand-btn:active:not(:disabled) {
     transform: scale(0.98);
-    box-shadow: inset 3px 3px 8px rgba(153, 0, 17, 0.25);
+    background: var(--ns-primary-dark);
+    box-shadow: var(--ui-brand-pressed);
   }
 
-  .neo-onbrand-btn:disabled {
+  .ui-onbrand-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
 
-  /* Variante secundaria: hundida en el color, sin relleno claro. */
-  .neo-onbrand-btn--ghost {
+  /* Secundaria: sólo la línea. */
+  .ui-onbrand-btn--ghost {
     background: rgba(255, 255, 255, 0.08);
-    color: rgba(252, 246, 245, 0.85);
-    box-shadow:
-      inset 3px 3px 8px rgba(80, 0, 9, 0.45),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.88);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
   }
 
-  .neo-onbrand-btn--ghost:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.14);
-    transform: none;
-    box-shadow:
-      inset 3px 3px 8px rgba(80, 0, 9, 0.45),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.08);
+  .ui-onbrand-btn--ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
   }
 
-  .neo-onbrand-chip {
-    padding: 10px 18px;
+  .ui-onbrand-btn--ghost:active:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+  }
+
+  .ui-onbrand-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 15px;
     border: 0;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(252, 246, 245, 0.85);
+    background: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.82);
+    font-family: inherit;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: inset 2px 2px 6px rgba(80, 0, 9, 0.35), inset -1px -1px 4px rgba(255, 255, 255, 0.05);
-    transition: all var(--dur-2) var(--ease-out);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+    transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
   }
 
-  .neo-onbrand-chip:hover,
-  .neo-onbrand-chip.is-active {
-    background: var(--ns-paper);
-    color: var(--ns-primary);
-    box-shadow: 4px 4px 12px rgba(70, 0, 8, 0.4);
+  .ui-onbrand-chip:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #FFFFFF;
+  }
+
+  .ui-onbrand-chip.is-active {
+    background: var(--ns-primary);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand-sm);
+  }
+}
+
+/* ============================================================
+   CALENDARIO DE LA AGENDA
+   Una grilla, no cuarenta tarjetas: sólo el día elegido y el de
+   hoy se pintan. El resto son números sobre el papel.
+   ============================================================ */
+@layer components {
+  .ns-cal-day:hover {
+    background: var(--ns-sunken) !important;
+  }
+
+  .ns-cal-day:active {
+    transform: scale(0.94);
   }
 }

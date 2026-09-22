@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { getVocabulario } from '../utils/vocabulario'
+import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
 import { verificarDisponibilidad, parseFecha, normalizarHorarios } from '../utils/reservas'
 import { useToast } from './Toast'
 import { haptic } from '../utils/haptics'
@@ -212,7 +212,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
     const nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     const blanks = Array.from({ length: primerDia }).map((_, i) => (
-      <div key={`b-${i}`} className="aspect-square md:h-[68px]" aria-hidden="true" />
+      <div key={`b-${i}`} className="h-11 md:h-12" aria-hidden="true" />
     ))
 
     const days = Array.from({ length: diasEnMes }).map((_, i) => {
@@ -238,23 +238,18 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           aria-label={etiquetaDia}
           aria-current={isToday ? 'date' : undefined}
           title={etiquetaDia}
-          className="aspect-square md:h-[68px] flex flex-col items-center justify-center gap-1 rounded-[18px] transition-all duration-200"
+          className="ns-cal-day h-11 md:h-12 flex flex-col items-center justify-center gap-1 rounded-[12px] transition-colors duration-150"
           style={isSelected
             ? {
-                background: 'var(--ns-gradient-1)',
-                color: 'var(--ns-paper)',
-                boxShadow: 'var(--neo-brand)',
-                transform: 'translateY(-2px)',
+                background: 'var(--ns-primary)',
+                color: '#FFFFFF',
               }
             : {
-                background: 'var(--ns-surface)',
-                color: 'var(--ns-text)',
-                boxShadow: isToday
-                  ? 'var(--neo-raised-sm), inset 0 0 0 2px var(--ns-primary)'
-                  : 'var(--neo-raised-sm)',
+                background: 'transparent',
+                color: isToday ? 'var(--ns-primary)' : 'var(--ns-text)',
               }}
         >
-          <span className={`text-[13px] md:text-[15px] tabular-nums ${isSelected ? 'font-black' : 'font-bold'}`}>{dayNum}</span>
+          <span className={`text-[14px] tabular-nums ${isSelected || isToday ? 'font-bold' : 'font-medium'}`}>{dayNum}</span>
 
           {contador > 0 && (
             <span className="flex gap-[3px] items-center h-1.5">
@@ -267,7 +262,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                     />
                   ))
                 : (
-                  <span className="text-[9px] font-black leading-none" style={{ opacity: isSelected ? 0.9 : 0.75 }}>
+                  <span className="text-[9px] font-bold leading-none" style={{ opacity: isSelected ? 0.9 : 0.75 }}>
                     {contador}
                   </span>
                 )}
@@ -278,34 +273,34 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     })
 
     return (
-      <div className="neo-card p-4 md:p-6 w-full">
+      <div className="ui-card p-4 md:p-6 w-full">
         <div className="flex justify-between items-center mb-5">
           <button
             onClick={() => { haptic(); setFechaActual(new Date(year, month - 1, 1)) }}
-            className="neo-icon-btn"
+            className="ui-icon-btn"
             aria-label="Mes anterior"
           >
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <h3 className="font-display text-base md:text-lg font-black tracking-tight capitalize" style={{ color: 'var(--ns-text)' }}>
-            {new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+          <h3 className="font-display text-base md:text-lg font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>
+            {mayusculaInicial(new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }))}
           </h3>
           <button
             onClick={() => { haptic(); setFechaActual(new Date(year, month + 1, 1)) }}
-            className="neo-icon-btn"
+            className="ui-icon-btn"
             aria-label="Mes siguiente"
           >
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
 
-        <div className="neo-well !p-3 md:!p-4">
-          <div className="grid grid-cols-7 gap-1.5 md:gap-2.5 mb-2 text-center">
+        <div className="ui-well !p-3 md:!p-4">
+          <div className="grid grid-cols-7 gap-1 mb-1 text-center">
             {nombresDias.map(n => (
-              <div key={n} className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-faint)' }}>{n}</div>
+              <div key={n} className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-faint)' }}>{n}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1.5 md:gap-2.5">
+          <div className="grid grid-cols-7 gap-1">
             {blanks}
             {days}
           </div>
@@ -420,11 +415,11 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const tituloAccesible = `${t.cliente_nombre} · ${fechaAmigable} a las ${horaLocal}${esFuturo ? '' : ' (ya pasó)'}`
 
     const etiqueta = t.estado === 'completado'
-      ? { texto: 'Atendido', clase: 'neo-chip--solid' }
+      ? { texto: 'Atendido', clase: 'ui-chip--solid' }
       : t.estado === 'no_show'
-      ? { texto: 'No vino', clase: 'neo-chip--outline' }
+      ? { texto: 'No vino', clase: 'ui-chip--outline' }
       : t.estado === 'cancelado'
-      ? { texto: 'Cancelado', clase: 'neo-chip--cancelled' }
+      ? { texto: 'Cancelado', clase: 'ui-chip--cancelled' }
       : null
 
     return (
@@ -434,29 +429,29 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         data-testid={`turno-${t.id}`}
         className="rounded-[26px] p-4 md:p-5 flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-3 md:gap-5 transition-all"
         style={esResuelto
-          ? { background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }
-          : { background: 'var(--ns-surface)', boxShadow: 'var(--neo-raised)' }}
+          ? { background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }
+          : { background: 'var(--ns-surface)', boxShadow: 'var(--ui-shadow)' }}
       >
         {/* Hora */}
         <div className="flex md:flex-col items-center gap-2.5 md:gap-1 justify-between md:justify-center shrink-0 w-full md:w-24">
           <span
-            className="font-display text-2xl md:text-[32px] font-black tracking-tighter leading-none tabular-nums"
+            className="font-display text-2xl md:text-[32px] font-bold tracking-tight leading-none tabular-nums"
             style={{ color: esResuelto ? 'var(--ns-text-muted)' : 'var(--ns-text)' }}
           >
             {horaLocal}
           </span>
           <div className="flex items-center gap-1.5 flex-wrap md:justify-center">
-            <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-faint)' }}>
+            <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-faint)' }}>
               {t.servicios?.duracion_minutos || 30} min
             </span>
-            {etiqueta && <span className={`neo-chip ${etiqueta.clase}`}>{etiqueta.texto}</span>}
+            {etiqueta && <span className={`ui-chip ${etiqueta.clase}`}>{etiqueta.texto}</span>}
           </div>
         </div>
 
         {/* Datos del cliente */}
         <div className="flex-1 overflow-hidden w-full md:min-w-[200px]">
           <h4
-            className="text-base md:text-lg font-black truncate leading-tight mb-1"
+            className="text-base md:text-lg font-bold truncate leading-tight mb-1"
             style={{ color: esResuelto ? 'var(--ns-text-muted)' : 'var(--ns-text)' }}
           >
             {t.cliente_nombre}
@@ -482,21 +477,21 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {t.servicios?.nombre && <span className="neo-chip neo-chip--soft">{t.servicios.nombre}</span>}
-            <span className="neo-chip neo-chip--quiet">
+            {t.servicios?.nombre && <span className="ui-chip ui-chip--soft">{t.servicios.nombre}</span>}
+            <span className="ui-chip ui-chip--quiet">
               {t.empleados ? t.empleados.nombre.split(' ')[0] : vocab.fallbackStaff}
             </span>
             {t.servicios?.precio > 0 && (
-              <span className="neo-chip neo-chip--outline tabular-nums">${Number(t.servicios.precio).toLocaleString('es-AR')}</span>
+              <span className="ui-chip tabular-nums">${Number(t.servicios.precio).toLocaleString('es-AR')}</span>
             )}
-            {t.notas && <span className="neo-chip neo-chip--quiet truncate max-w-[220px]">{t.notas}</span>}
+            {t.notas && <span className="ui-chip ui-chip--quiet truncate max-w-[220px]">{t.notas}</span>}
           </div>
         </div>
 
         {/* Acciones */}
         <div className="flex flex-row flex-wrap gap-2 shrink-0 w-full md:w-auto md:ml-auto justify-end">
           {esResuelto ? (
-            <button onClick={() => marcarEstado(t.id, 'confirmado')} className="neo-btn neo-btn--quiet" title="Volver a dejarlo activo">
+            <button onClick={() => marcarEstado(t.id, 'confirmado')} className="ui-btn ui-btn--quiet" title="Volver a dejarlo activo">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a5 5 0 010 10H9m-6-10l4-4m-4 4l4 4" /></svg>
               Reabrir
             </button>
@@ -504,27 +499,27 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             <>
               <button
                 onClick={() => marcarEstado(t.id, 'completado')}
-                className="neo-btn neo-btn--primary neo-btn--quiet"
+                className="ui-btn ui-btn--primary ui-btn--quiet"
                 title="Marcar como atendido"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 Atendido
               </button>
-              <button onClick={() => marcarEstado(t.id, 'no_show')} className="neo-icon-btn" title="No se presentó" aria-label="Marcar que no se presentó">
+              <button onClick={() => marcarEstado(t.id, 'no_show')} className="ui-icon-btn" title="No se presentó" aria-label="Marcar que no se presentó">
                 <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
               <button
                 onClick={() => enviarRecordatorio(t)}
-                className={`neo-icon-btn ${t.recordatorio_enviado ? 'neo-icon-btn--active' : ''}`}
+                className={`ui-icon-btn ${t.recordatorio_enviado ? 'ui-icon-btn--active' : ''}`}
                 title={t.recordatorio_enviado ? 'Recordatorio ya enviado' : 'Recordar por WhatsApp'}
                 aria-label="Recordar por WhatsApp"
               >
                 <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
               </button>
-              <button onClick={() => dispararGoogleCalendar(t, t.servicios, t.empleados)} className="neo-icon-btn" title="Agendar en Google Calendar" aria-label="Agendar en Google Calendar">
+              <button onClick={() => dispararGoogleCalendar(t, t.servicios, t.empleados)} className="ui-icon-btn" title="Agendar en Google Calendar" aria-label="Agendar en Google Calendar">
                 <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z" /></svg>
               </button>
-              <button onClick={() => cancelarTurno(t.id)} className="neo-icon-btn" title="Cancelar turno" aria-label="Cancelar turno">
+              <button onClick={() => cancelarTurno(t.id)} className="ui-icon-btn" title="Cancelar turno" aria-label="Cancelar turno">
                 <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
             </>
@@ -539,7 +534,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
       {loading && (
         <div className="absolute top-2 right-2 z-50" aria-live="polite">
-          <span className="neo-spinner neo-spinner--sm" role="status" aria-label="Actualizando la agenda" />
+          <span className="ui-spinner ui-spinner--sm" role="status" aria-label="Actualizando la agenda" />
         </div>
       )}
 
@@ -549,19 +544,28 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         {/* Header */}
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="neo-head__title text-3xl md:text-[42px]">Agenda</h1>
+            <h1 className="ui-head__title text-[22px] md:text-[26px]">Agenda</h1>
             <div className="flex items-center gap-2 mt-2">
               <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
-              <p className="neo-eyebrow">{todosLosTurnos.length} {vocab.citasRegistradas}</p>
+              <p className="ui-eyebrow">{todosLosTurnos.length} {vocab.citasRegistradas.toLowerCase()}</p>
             </div>
           </div>
-          <button
-            onClick={() => { setFechaActual(new Date()); setModalDiaAbierto(true); }}
-            className="neo-btn neo-btn--quiet"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            Hoy
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setFechaActual(new Date()); setModalDiaAbierto(true); }}
+              className="ui-btn ui-btn--quiet"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Hoy
+            </button>
+            <button
+              onClick={() => { haptic('select'); setModalAbierto(true) }}
+              className="ui-btn ui-btn--primary hidden lg:inline-flex"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+              {vocab.nuevaCita}
+            </button>
+          </div>
         </div>
 
         {/* En escritorio: calendario a la izquierda, turnos y cupos a la
@@ -578,7 +582,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
         {/* Employee Filters */}
         <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
-          <div className="neo-segment w-max">
+          <div className="ui-segment w-max">
             <button
               onClick={() => { haptic(); setFiltroEmpleado('todos') }}
               className={filtroEmpleado === 'todos' ? 'is-active' : ''}
@@ -593,10 +597,10 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 className={`flex items-center gap-2 ${filtroEmpleado === e.id ? 'is-active' : ''}`}
                 aria-pressed={filtroEmpleado === e.id}
               >
-                <span className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ boxShadow: 'var(--neo-raised-sm)' }}>
+                <span className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ boxShadow: 'var(--ui-shadow-sm)' }}>
                   {e.foto_url
                     ? <img src={e.foto_url} alt="" className="object-cover h-full w-full" />
-                    : <span className="w-full h-full flex items-center justify-center text-[10px] font-black" style={{ background: 'var(--ns-sunken)', color: 'var(--ns-primary)' }}>{e.nombre[0]}</span>}
+                    : <span className="w-full h-full flex items-center justify-center text-[10px] font-bold" style={{ background: 'var(--ns-sunken)', color: 'var(--ns-primary)' }}>{e.nombre[0]}</span>}
                 </span>
                 {e.nombre.split(' ')[0]}
               </button>
@@ -619,7 +623,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             <div className="space-y-4">
               <div className="flex items-center gap-2.5">
                 <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
-                <h3 className="neo-eyebrow">Próximos {vocab.turnos}</h3>
+                <h3 className="ui-eyebrow">Próximos {vocab.turnos}</h3>
               </div>
               <div className="grid gap-3">
                 {proximos.map(t => {
@@ -628,13 +632,13 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                   const fechaStr = tDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
                   const esHoy = tDate.toDateString() === new Date().toDateString()
                   return (
-                    <div key={t.id} className="neo-tile !flex-row items-center gap-4 !py-3.5">
-                      <span className={`neo-pod neo-pod--lg flex-col leading-none ${esHoy ? 'neo-pod--brand' : 'neo-pod--sunken'}`}>
-                        <span className="text-sm font-black tabular-nums">{horaStr}</span>
+                    <div key={t.id} className="ui-tile !flex-row items-center gap-4 !py-3.5">
+                      <span className={`ui-pod ui-pod--lg flex-col leading-none ${esHoy ? 'ui-pod--brand' : 'ui-pod--sunken'}`}>
+                        <span className="text-sm font-bold tabular-nums">{horaStr}</span>
                         <span className="text-[8px] font-bold uppercase tracking-wider mt-0.5 opacity-80">{esHoy ? 'Hoy' : fechaStr}</span>
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black truncate mb-0.5" style={{ color: 'var(--ns-text)' }}>{t.cliente_nombre}</p>
+                        <p className="text-sm font-bold truncate mb-0.5" style={{ color: 'var(--ns-text)' }}>{t.cliente_nombre}</p>
                         <p className="text-[11px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>
                           {t.servicios?.nombre}
                           {t.empleados?.nombre ? ` · ${t.empleados.nombre.split(' ')[0]}` : ` · ${vocab.fallbackStaff}`}
@@ -673,12 +677,12 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           if (!config || !config.abierto) return (
             <div className="pt-2">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-[#D28F95] rounded-full" />
-                <h3 className="neo-eyebrow">Lugares libres hoy</h3>
+                <div className="w-2 h-2 bg-[#BFDBFE] rounded-full" />
+                <h3 className="ui-eyebrow">Lugares libres hoy</h3>
               </div>
-              <div className="neo-well text-center py-6">
-                <p className="neo-empty__title">Hoy no atendés</p>
-                <p className="neo-empty__text mx-auto mt-1">No hay horario configurado para este día.</p>
+              <div className="ui-well text-center py-6">
+                <p className="ui-empty__title">Hoy no atendés</p>
+                <p className="ui-empty__text mx-auto mt-1">No hay horario configurado para este día.</p>
               </div>
             </div>
           )
@@ -753,11 +757,11 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             <div className="pt-2">
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--ns-primary)' }} />
-                <h3 className="neo-eyebrow">Lugares libres hoy</h3>
+                <h3 className="ui-eyebrow">Lugares libres hoy</h3>
               </div>
-              <div className="neo-well text-center py-6">
-                <p className="neo-empty__title">Sin cupos por hoy</p>
-                <p className="neo-empty__text mx-auto mt-1">No quedan horarios libres por el resto del día.</p>
+              <div className="ui-well text-center py-6">
+                <p className="ui-empty__title">Sin cupos por hoy</p>
+                <p className="ui-empty__text mx-auto mt-1">No quedan horarios libres por el resto del día.</p>
               </div>
             </div>
           )
@@ -767,7 +771,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
-                  <h3 className="neo-eyebrow">Cupos disponibles</h3>
+                  <h3 className="ui-eyebrow">Cupos disponibles</h3>
                 </div>
                 <span className="nh-count-badge">
                   {timeKeys.length} {timeKeys.length === 1 ? 'horario' : 'horarios'}
@@ -782,28 +786,28 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                       setNuevoTurno(prev => ({ ...prev, hora: time, empleado_id: byTime[time][0]?.id || '' }))
                       setModalAbierto(true)
                     }}
-                    className="neo-tile !gap-2"
+                    className="ui-tile !gap-2"
                     title={`Agendar a las ${time}`}
                   >
-                    <p className="font-display text-2xl font-black tracking-tighter tabular-nums" style={{ color: 'var(--ns-text)' }}>{time}</p>
+                    <p className="font-display text-2xl font-bold tracking-tight tabular-nums" style={{ color: 'var(--ns-text)' }}>{time}</p>
                     <div className="flex items-center gap-1.5">
                       <div className="flex -space-x-2">
                         {byTime[time].slice(0, 3).map(emp => (
-                          <span key={emp.id} className="w-6 h-6 rounded-full overflow-hidden" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-raised-sm)' }} title={emp.nombre}>
+                          <span key={emp.id} className="w-6 h-6 rounded-full overflow-hidden" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-shadow-sm)' }} title={emp.nombre}>
                             {emp.foto_url
                               ? <img src={emp.foto_url} alt="" className="w-full h-full object-cover" />
-                              : <span className="w-full h-full flex items-center justify-center text-[9px] font-black" style={{ color: 'var(--ns-primary)' }}>{emp.nombre[0]}</span>}
+                              : <span className="w-full h-full flex items-center justify-center text-[9px] font-bold" style={{ color: 'var(--ns-primary)' }}>{emp.nombre[0]}</span>}
                           </span>
                         ))}
                       </div>
                       {byTime[time].length > 3 && <span className="text-[10px] font-bold" style={{ color: 'var(--ns-text-muted)' }}>+{byTime[time].length - 3}</span>}
                     </div>
-                    <p className="neo-eyebrow">{byTime[time].length} {byTime[time].length === 1 ? 'libre' : 'libres'}</p>
+                    <p className="ui-eyebrow">{byTime[time].length} {byTime[time].length === 1 ? 'libre' : 'libres'}</p>
                   </button>
                 ))}
               </div>
               {timeKeys.length > 12 && (
-                <p className="neo-eyebrow text-center mt-2">Y {timeKeys.length - 12} horarios más disponibles</p>
+                <p className="ui-eyebrow text-center mt-2">Y {timeKeys.length - 12} horarios más disponibles</p>
               )}
             </div>
           )
@@ -821,7 +825,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           cortado por detrás. */}
       <button
         onClick={() => { haptic('select'); setModalAbierto(true) }}
-        className="neo-btn neo-btn--primary neo-btn--pill fixed right-4 lg:right-8 z-40"
+        className="ui-btn ui-btn--primary ui-btn--pill fixed right-4 z-40 lg:hidden"
         style={{ bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}
         data-testid="agenda-nueva-cita"
       >
@@ -832,7 +836,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       {/* MODAL BOTTOM-SHEET PARA VER TURNOS DEL DIA SELECCIONADO */}
       {modalDiaAbierto && (
         <div
-          className="neo-scrim flex items-end sm:items-center justify-center"
+          className="ui-scrim flex items-end sm:items-center justify-center"
           onClick={() => setModalDiaAbierto(false)}
           role="presentation"
         >
@@ -840,7 +844,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl h-[86dvh] sm:h-[80dvh] flex flex-col overflow-hidden sm:m-4"
             style={{
               background: 'var(--ns-surface)',
-              boxShadow: 'var(--neo-float)',
+              boxShadow: 'var(--ui-shadow-xl)',
               borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             }}
@@ -849,41 +853,41 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             aria-modal="true"
             aria-label={`Turnos del ${fechaActual.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`}
           >
-            <div className="neo-sheet__handle sm:hidden" />
+            <div className="ui-sheet__handle sm:hidden" />
 
             <div className="px-5 sm:px-6 pt-3 sm:pt-6 pb-4 flex justify-between items-center shrink-0">
               <div>
-                <h2 className="neo-head__title text-2xl sm:text-3xl capitalize">
-                  {fechaActual.getDate()} {fechaActual.toLocaleDateString('es-ES', { month: 'long' })}
+                <h2 className="ui-head__title text-2xl sm:text-3xl">
+                  {fechaActual.getDate()} de {fechaActual.toLocaleDateString('es-ES', { month: 'long' })}
                 </h2>
-                <p className="neo-eyebrow mt-1.5">{turnosVigentes.length} {vocab.citasAsignadas}</p>
+                <p className="ui-eyebrow mt-1.5">{turnosVigentes.length} {vocab.citasAsignadas}</p>
               </div>
-              <button onClick={() => setModalDiaAbierto(false)} className="neo-icon-btn" aria-label="Cerrar">
+              <button onClick={() => setModalDiaAbierto(false)} className="ui-icon-btn" aria-label="Cerrar">
                 <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 no-scrollbar" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>
+            <div className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 no-scrollbar" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}>
               {turnosVigentes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-20 pb-40">
                   {servicios.length === 0 ? (
                     <>
-                      <span className="neo-pod neo-pod--lg mb-4">
+                      <span className="ui-pod ui-pod--lg mb-4">
                         <IconRobot size={26} />
                       </span>
-                      <p className="neo-empty__title">Todavía no podés recibir turnos</p>
-                      <p className="neo-empty__text mt-2">
+                      <p className="ui-empty__title">Todavía no podés recibir turnos</p>
+                      <p className="ui-empty__text mt-2">
                         Creá al menos un {vocab.servicio} para que tus clientes puedan reservar desde tu link.
                       </p>
                     </>
                   ) : (
                     <>
-                      <span className="neo-pod neo-pod--sunken neo-pod--lg mb-4">
+                      <span className="ui-pod ui-pod--sunken ui-pod--lg mb-4">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </span>
-                      <p className="neo-empty__title">Día libre</p>
-                      <p className="neo-empty__text mt-2">No hay turnos para este día. Podés cargar uno a mano con el botón de abajo.</p>
-                      <button onClick={() => { setModalDiaAbierto(false); setModalAbierto(true) }} className="neo-btn neo-btn--primary mt-4">
+                      <p className="ui-empty__title">Día libre</p>
+                      <p className="ui-empty__text mt-2">No hay turnos para este día. Podés cargar uno a mano con el botón de abajo.</p>
+                      <button onClick={() => { setModalDiaAbierto(false); setModalAbierto(true) }} className="ui-btn ui-btn--primary mt-4">
                         {vocab.nuevaCita}
                       </button>
                     </>
@@ -895,8 +899,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 px-1">
                         <svg className="w-4 h-4" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                        <h3 className="neo-eyebrow">Mañana</h3>
-                        <div className="flex-1 neo-divider" />
+                        <h3 className="ui-eyebrow">Mañana</h3>
+                        <div className="flex-1 ui-divider" />
                       </div>
                       <div className="space-y-2.5">{turnosMañana.map(t => renderTurnoCard(t))}</div>
                     </div>
@@ -905,8 +909,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 px-1">
                         <svg className="w-4 h-4" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
-                        <h3 className="neo-eyebrow">Tarde</h3>
-                        <div className="flex-1 neo-divider" />
+                        <h3 className="ui-eyebrow">Tarde</h3>
+                        <div className="flex-1 ui-divider" />
                       </div>
                       <div className="space-y-2.5">{turnosTarde.map(t => renderTurnoCard(t))}</div>
                     </div>
@@ -915,8 +919,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 px-1">
                         <svg className="w-4 h-4" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                        <h3 className="neo-eyebrow">Noche</h3>
-                        <div className="flex-1 neo-divider" />
+                        <h3 className="ui-eyebrow">Noche</h3>
+                        <div className="flex-1 ui-divider" />
                       </div>
                       <div className="space-y-2.5">{turnosNoche.map(t => renderTurnoCard(t))}</div>
                     </div>
@@ -931,7 +935,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       {/* HOJA PARA AGREGAR UN TURNO A MANO */}
       {modalAbierto && (
         <div
-          className="neo-scrim flex items-end sm:items-center justify-center"
+          className="ui-scrim flex items-end sm:items-center justify-center"
           onClick={() => setModalAbierto(false)}
           role="presentation"
         >
@@ -939,7 +943,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             className="w-full max-w-lg max-h-[92dvh] overflow-y-auto overscroll-contain"
             style={{
               background: 'var(--ns-surface)',
-              boxShadow: 'var(--neo-float)',
+              boxShadow: 'var(--ui-shadow-xl)',
               borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
               paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
             }}
@@ -948,27 +952,27 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             aria-modal="true"
             aria-label={vocab.nuevaCita}
           >
-            <div className="neo-sheet__handle sm:hidden" />
+            <div className="ui-sheet__handle sm:hidden" />
 
             <div className="px-5 sm:px-8 pt-3 sm:pt-7">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="neo-head__title text-2xl md:text-3xl">{vocab.nuevaCita}</h2>
-                  <p className="neo-eyebrow mt-1.5">
+                  <h2 className="ui-head__title text-2xl md:text-3xl">{vocab.nuevaCita}</h2>
+                  <p className="ui-eyebrow mt-1.5">
                     {fechaActual.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </p>
                 </div>
-                <button onClick={() => setModalAbierto(false)} className="neo-icon-btn" aria-label="Cerrar">
+                <button onClick={() => setModalAbierto(false)} className="ui-icon-btn" aria-label="Cerrar">
                   <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
                 </button>
               </div>
 
               <form onSubmit={handleGuardarTurno} className="flex flex-col gap-4">
                 <label className="flex flex-col gap-2">
-                  <span className="neo-eyebrow">Nombre del cliente</span>
+                  <span className="ui-eyebrow">Nombre del cliente</span>
                   <input
                     required
-                    className="neo-field"
+                    className="ui-field"
                     placeholder="Ej: Juan Pérez"
                     value={nuevoTurno.cliente_nombre}
                     onChange={e => setNuevoTurno({ ...nuevoTurno, cliente_nombre: e.target.value })}
@@ -977,23 +981,23 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <label className="flex flex-col gap-2">
-                    <span className="neo-eyebrow">WhatsApp</span>
+                    <span className="ui-eyebrow">WhatsApp</span>
                     <input
                       required
                       type="tel"
                       inputMode="tel"
-                      className="neo-field"
+                      className="ui-field"
                       placeholder="351..."
                       value={nuevoTurno.cliente_telefono}
                       onChange={e => setNuevoTurno({ ...nuevoTurno, cliente_telefono: e.target.value })}
                     />
                   </label>
                   <label className="flex flex-col gap-2">
-                    <span className="neo-eyebrow">Hora</span>
+                    <span className="ui-eyebrow">Hora</span>
                     <input
                       required
                       type="time"
-                      className="neo-field"
+                      className="ui-field"
                       value={nuevoTurno.hora}
                       onChange={e => setNuevoTurno({ ...nuevoTurno, hora: e.target.value })}
                     />
@@ -1001,10 +1005,10 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 </div>
 
                 <label className="flex flex-col gap-2">
-                  <span className="neo-eyebrow">{vocab.labelServicioRequerido}</span>
+                  <span className="ui-eyebrow">{vocab.labelServicioRequerido}</span>
                   <select
                     required
-                    className="neo-field cursor-pointer"
+                    className="ui-field cursor-pointer"
                     value={nuevoTurno.servicio_id}
                     onChange={e => setNuevoTurno({ ...nuevoTurno, servicio_id: e.target.value })}
                   >
@@ -1025,9 +1029,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 {/* Sin `required`: con el negocio recién creado no hay nadie en
                     el equipo y el formulario no dejaba guardar ni un turno. */}
                 <label className="flex flex-col gap-2">
-                  <span className="neo-eyebrow">{vocab.labelEmpleado}</span>
+                  <span className="ui-eyebrow">{vocab.labelEmpleado}</span>
                   <select
-                    className="neo-field cursor-pointer"
+                    className="ui-field cursor-pointer"
                     value={nuevoTurno.empleado_id}
                     onChange={e => setNuevoTurno({ ...nuevoTurno, empleado_id: e.target.value })}
                   >
@@ -1039,9 +1043,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 <button
                   disabled={guardando || servicios.length === 0}
                   type="submit"
-                  className="neo-btn neo-btn--primary neo-btn--block mt-2"
+                  className="ui-btn ui-btn--primary ui-btn--block mt-2"
                 >
-                  {guardando ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : vocab.confirmarCita}
+                  {guardando ? <span className="ui-spinner ui-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : vocab.confirmarCita}
                 </button>
               </form>
             </div>
@@ -1052,27 +1056,27 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       {/* CONFIRMAR CANCELACIÓN */}
       {confirmDialog.show && (
         <div
-          className="neo-scrim flex items-center justify-center p-4"
+          className="ui-scrim flex items-center justify-center p-4"
           onClick={() => setConfirmDialog({ show: false, id: null })}
           role="presentation"
         >
           <div
-            className="neo-modal"
+            className="ui-modal"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="ns-cancel-title"
           >
-            <span className="neo-pod neo-pod--brand mb-4">
+            <span className="ui-pod ui-pod--brand mb-4">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </span>
-            <h3 id="ns-cancel-title" className="neo-head__title text-xl mb-2">¿Cancelar el turno?</h3>
+            <h3 id="ns-cancel-title" className="ui-head__title text-xl mb-2">¿Cancelar el turno?</h3>
             <p className="text-[13.5px] font-medium leading-relaxed mb-6" style={{ color: 'var(--ns-text-secondary)' }}>
               El horario queda libre al instante y vuelve a aparecer en tu link. El turno se guarda como cancelado, así no perdés el historial del cliente.
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDialog({ show: false, id: null })} className="neo-btn flex-1">Volver</button>
-              <button onClick={() => confirmarYCancelarTurno()} className="neo-btn neo-btn--primary flex-1">Sí, cancelar</button>
+              <button onClick={() => setConfirmDialog({ show: false, id: null })} className="ui-btn flex-1">Volver</button>
+              <button onClick={() => confirmarYCancelarTurno()} className="ui-btn ui-btn--primary flex-1">Sí, cancelar</button>
             </div>
           </div>
         </div>

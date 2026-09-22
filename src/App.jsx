@@ -35,7 +35,7 @@ function Splash() {
             style={{ background: 'var(--ns-gradient-deep)' }}
           >
             <span
-              className="text-white font-black text-2xl tracking-tighter"
+              className="text-white font-bold text-2xl tracking-tight"
               style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
             >
               N
@@ -81,22 +81,22 @@ function FaltaConfiguracion() {
   return (
     <div
       className="min-h-dvh flex items-center justify-center p-6"
-      style={{ background: '#FAF1F0', fontFamily: '"Inter Tight", system-ui, sans-serif' }}
+      style={{ background: '#F8FAFC', fontFamily: '"Inter Tight", system-ui, sans-serif' }}
       data-testid="config-missing"
     >
       <div
         className="max-w-md w-full rounded-[38px] p-8 text-center"
-        style={{ background: '#FCF6F5', boxShadow: '20px 20px 44px rgba(153,0,17,0.13), -13px -13px 30px rgba(255,255,255,0.95)' }}
+        style={{ background: '#FFFFFF', boxShadow: '20px 20px 44px rgba(16,24,40,0.13), -13px -13px 30px rgba(255,255,255,0.95)' }}
       >
         <div
           className="w-16 h-16 mx-auto mb-6 rounded-[22px] flex items-center justify-center"
-          style={{ background: '#F6E7E7', boxShadow: 'inset 7px 7px 15px rgba(153,0,17,0.11), inset -6px -6px 13px rgba(255,255,255,0.95)', color: '#990011' }}
+          style={{ background: '#F1F4F9', boxShadow: 'inset 7px 7px 15px rgba(16,24,40,0.11), inset -6px -6px 13px rgba(255,255,255,0.95)', color: '#007AFF' }}
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h1 className="text-xl font-black tracking-tight text-[#990011] mb-2">Falta configurar la app</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[#1D212A] mb-2">Falta configurar la app</h1>
         <p className="text-sm text-[#A92735] leading-relaxed mb-5">
           No están definidas las variables de conexión a la base de datos. Agregalas
           en el entorno de despliegue (o en un archivo <code className="font-mono text-[12px]">.env</code> local)
@@ -104,7 +104,7 @@ function FaltaConfiguracion() {
         </p>
         <pre
           className="text-left text-[11px] font-mono rounded-[18px] p-4 overflow-x-auto"
-          style={{ background: '#F6E7E7', color: '#9D0A1A', boxShadow: 'inset 7px 7px 15px rgba(153,0,17,0.11), inset -6px -6px 13px rgba(255,255,255,0.95)' }}
+          style={{ background: '#F1F4F9', color: '#0062D6', boxShadow: 'inset 7px 7px 15px rgba(16,24,40,0.11), inset -6px -6px 13px rgba(255,255,255,0.95)' }}
         >
 VITE_SUPABASE_URL=...{'\n'}VITE_SUPABASE_ANON_KEY=...
         </pre>

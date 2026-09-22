@@ -74,7 +74,7 @@ function ToastItem({ toast, onDismiss }) {
         style={solido ? {
           background: 'var(--ns-primary)',
           color: 'var(--ns-paper)',
-          boxShadow: 'var(--neo-brand)',
+          boxShadow: 'var(--ui-brand)',
         } : undefined}
       >
         {ICONS[toast.type] || ICONS.info}

@@ -4,7 +4,7 @@
  * El bug que cubren: la búsqueda era por coincidencia EXACTA de string, así
  * que un rubro guardado como "Barberia / Peluqueria" (sin tildes) hacía que
  * toda la app cayera al vocabulario genérico y el cliente final leyera
- * "Seleccione un recurso" en vez de "Seleccione un especialista".
+ * "Elegí un recurso" en vez de "Elegí un especialista".
  */
 
 import { test, describe } from 'node:test'

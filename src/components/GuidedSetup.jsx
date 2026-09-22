@@ -154,7 +154,7 @@ export default function GuidedSetup({
     >
       {copyToast && (
         <div className="ns-copy-toast" role="status">
-          <span className="neo-avatar w-9 h-9"><IconCheckCircle size={18} /></span>
+          <span className="ui-avatar w-9 h-9"><IconCheckCircle size={18} /></span>
           <div>
             <p className="text-xs font-bold" style={{ color: 'var(--ns-text)' }}>¡Link copiado!</p>
             <p className="text-[10px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Compartilo por WhatsApp o redes</p>
@@ -162,7 +162,7 @@ export default function GuidedSetup({
         </div>
       )}
 
-      <div className="neo-card overflow-hidden">
+      <div className="ui-card overflow-hidden">
         {/* Header */}
         <button
           onClick={() => setExpanded(!expanded)}
@@ -171,8 +171,8 @@ export default function GuidedSetup({
         >
           {/* Avatar Noni */}
           <div className="relative shrink-0">
-            <div className="neo-avatar neo-avatar--brand w-12 h-12">
-              <span className="font-display font-black text-xl italic tracking-tighter">N</span>
+            <div className="ui-avatar ui-avatar--brand w-12 h-12">
+              <span className="font-display font-bold text-xl italic tracking-tight">N</span>
             </div>
             <span className="ns-live-dot absolute -top-1 -right-1" />
           </div>
@@ -180,13 +180,13 @@ export default function GuidedSetup({
           {/* Text */}
           <div className="flex-1 min-w-0">
             <p
-              className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
-              style={{ fontFamily: 'var(--font-mono-ui)', color: 'var(--ns-text-muted)' }}
+              className="text-[10px] font-bold uppercase tracking-[0.08em] mb-1"
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--ns-text-muted)' }}
             >
               {allDone ? 'Asistente · Listo' : 'Noni · Tu asistente'}
             </p>
             <h3
-              className="font-display text-[15px] md:text-lg font-black tracking-tight leading-snug"
+              className="font-display text-[15px] md:text-lg font-bold tracking-tight leading-snug"
               style={{ color: 'var(--ns-text)' }}
             >
               {allDone
@@ -224,7 +224,7 @@ export default function GuidedSetup({
                 />
               </svg>
               <span
-                className="absolute inset-0 flex items-center justify-center text-[12px] font-black"
+                className="absolute inset-0 flex items-center justify-center text-[12px] font-bold"
                 style={{ color: 'var(--ns-text)' }}
               >
                 {allDone ? '✓' : `${completedSteps.length}/${totalSteps}`}
@@ -245,8 +245,8 @@ export default function GuidedSetup({
 
         {/* Progress bar */}
         <div className="px-4 md:px-7">
-          <div className="neo-progress" style={{ height: 8 }}>
-            <div className="neo-progress__fill" style={{ width: `${progress}%` }} />
+          <div className="ui-progress" style={{ height: 8 }}>
+            <div className="ui-progress__fill" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
@@ -270,10 +270,10 @@ export default function GuidedSetup({
                     style={{
                       background: done ? 'var(--ns-sunken)' : 'var(--ns-surface)',
                       boxShadow: done
-                        ? 'var(--neo-inset-sm)'
+                        ? 'var(--ui-field-sm)'
                         : isNext
-                        ? 'var(--neo-raised), 0 0 0 2px var(--ns-primary)'
-                        : 'var(--neo-raised-sm)',
+                        ? 'var(--ui-shadow), 0 0 0 2px var(--ns-primary)'
+                        : 'var(--ui-shadow-sm)',
                       cursor: done ? 'default' : 'pointer',
                     }}
                     onClick={() => {
@@ -285,10 +285,10 @@ export default function GuidedSetup({
                   >
                     {/* Check / Number */}
                     <div
-                      className="neo-avatar w-9 h-9 font-black transition-all duration-500"
+                      className="ui-avatar w-9 h-9 font-bold transition-all duration-500"
                       style={done || isNext
-                        ? { background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)' }
-                        : { background: 'var(--ns-sunken)', color: 'var(--ns-text-muted)', boxShadow: 'var(--neo-inset-sm)' }}
+                        ? { background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: 'var(--ui-brand)' }
+                        : { background: 'var(--ns-sunken)', color: 'var(--ns-text-muted)', boxShadow: 'var(--ui-field-sm)' }}
                     >
                       {done ? (
                         <svg
@@ -343,7 +343,7 @@ export default function GuidedSetup({
                                 handleCopyLink()
                               }}
                               data-testid="guided-share-copy"
-                              className="neo-btn neo-btn--quiet"
+                              className="ui-btn ui-btn--quiet"
                             >
                               Copiar
                             </button>
@@ -353,7 +353,7 @@ export default function GuidedSetup({
                                 handleShare()
                               }}
                               data-testid="guided-share-wa"
-                              className="neo-btn neo-btn--primary neo-btn--quiet"
+                              className="ui-btn ui-btn--primary ui-btn--quiet"
                             >
                               WhatsApp
                             </button>
@@ -365,7 +365,7 @@ export default function GuidedSetup({
                                 e.stopPropagation()
                                 setExpandedStep(isExpanded ? null : step.id)
                               }}
-                              className="neo-icon-btn w-9 h-9"
+                              className="ui-icon-btn w-9 h-9"
                               title="Más info"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
@@ -383,7 +383,7 @@ export default function GuidedSetup({
                                   if (step.tab) onNavigate?.(step.tab)
                                 }}
                                 data-testid={`guided-step-go-${step.id}`}
-                                className="neo-btn neo-btn--primary neo-btn--quiet"
+                                className="ui-btn ui-btn--primary ui-btn--quiet"
                               >
                                 Ir
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24">
@@ -412,7 +412,7 @@ export default function GuidedSetup({
                   {isExpanded && !done && (
                     <div
                       className="ml-12 mt-2 mb-1 p-3.5 rounded-[16px] ns-fade-down"
-                      style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}
+                      style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}
                     >
                       <p
                         className="text-[12px] font-medium leading-relaxed"
@@ -423,7 +423,7 @@ export default function GuidedSetup({
                       {step.tab && (
                         <button
                           onClick={() => onNavigate?.(step.tab)}
-                          className="mt-2 text-[10px] font-bold uppercase tracking-widest transition-colors"
+                          className="mt-2 text-[10px] font-bold uppercase tracking-[0.06em] transition-colors"
                           style={{ color: 'var(--ns-primary)' }}
                         >
                           Ir a {step.title.toLowerCase()} →
@@ -448,7 +448,7 @@ export default function GuidedSetup({
             </span>
             <button
               onClick={cerrarPanel}
-              className="text-[10px] font-bold uppercase tracking-widest transition-colors"
+              className="text-[10px] font-bold uppercase tracking-[0.06em] transition-colors"
               style={{ color: 'var(--ns-text-faint)' }}
               data-testid="guided-setup-dismiss"
             >

@@ -7,7 +7,7 @@ import { useCallback, useRef, useState } from 'react'
  * layout de flex/grid de las pantallas ya armadas sería peor que el beneficio).
  *
  *   const { ondas, alPresionar } = useRipple()
- *   <button className="neo-ripple" onPointerDown={alPresionar}>… {ondas}</button>
+ *   <button className="ui-ripple" onPointerDown={alPresionar}>… {ondas}</button>
  */
 export function useRipple() {
   const [ondas, setOndas] = useState([])
@@ -34,7 +34,7 @@ export function useRipple() {
   }, [])
 
   const nodos = ondas.map((o) => (
-    <span key={o.id} className="neo-ripple__wave" style={o.style} aria-hidden="true" />
+    <span key={o.id} className="ui-ripple__wave" style={o.style} aria-hidden="true" />
   ))
 
   return { ondas: nodos, alPresionar }

@@ -21,7 +21,7 @@ const SUGERENCIAS = {
     staff: ['Sofía', 'Lucía'],
     especialidad: 'Manicura',
     descripcion: 'Uñas prolijas y duraderas, con la mejor atención.',
-    color: '#BB545F',
+    color: '#C2456B',
   },
   'Tatuajes / Piercings': {
     servicios: ['Tattoo chico', 'Tattoo mediano', 'Retoque', 'Piercing'],
@@ -30,7 +30,7 @@ const SUGERENCIAS = {
     staff: ['Juan', 'Mica'],
     especialidad: 'Tatuador/a',
     descripcion: 'Diseños únicos, materiales de primera y todo esterilizado.',
-    color: '#990011',
+    color: '#1D212A',
   },
   'Bar / Cervecería': {
     servicios: ['Mesa para 2', 'Mesa para 4', 'Mesa para 6', 'Barra'],
@@ -39,7 +39,7 @@ const SUGERENCIAS = {
     staff: ['Salón', 'Patio'],
     especialidad: 'Sector',
     descripcion: 'Birra fría, buena música y mejor gente.',
-    color: '#CC8088',
+    color: '#E09112',
   },
   'Gimnasio / Entrenamiento': {
     servicios: ['Funcional', 'Musculación', 'Entrenamiento personalizado'],
@@ -48,7 +48,7 @@ const SUGERENCIAS = {
     staff: ['Profe Nico', 'Profe Ana'],
     especialidad: 'Profesor/a',
     descripcion: 'Entrenamiento acompañado, para todos los niveles.',
-    color: '#C9767E',
+    color: '#E06C2A',
   },
   'Taller / Servicio Técnico': {
     servicios: ['Diagnóstico', 'Cambio de aceite', 'Service completo'],
@@ -57,7 +57,7 @@ const SUGERENCIAS = {
     staff: ['Box 1', 'Box 2'],
     especialidad: 'Puesto de trabajo',
     descripcion: 'Trabajo prolijo, presupuesto claro y entrega a tiempo.',
-    color: '#9B0516',
+    color: '#0A66C2',
   },
   'Barbería / Peluquería': {
     servicios: ['Corte Clásico', 'Corte + Barba', 'Afeitado Premium', 'Degradé', 'Coloración'],
@@ -66,7 +66,7 @@ const SUGERENCIAS = {
     staff: ['Carlos', 'Martín', 'Diego'],
     especialidad: 'Barbero',
     descripcion: 'Los mejores cortes de la ciudad. Estilo y tradición.',
-    color: '#990011',
+    color: '#007AFF',
   },
   'Restaurante / Gastronomía': {
     servicios: ['Mesa para 2', 'Mesa para 4', 'Mesa Privada VIP', 'Brunch Especial'],
@@ -75,7 +75,7 @@ const SUGERENCIAS = {
     staff: ['Salón Principal', 'Terraza'],
     especialidad: 'Interior',
     descripcion: 'Sabores únicos en un ambiente inigualable.',
-    color: '#A72231',
+    color: '#5E8C2A',
   },
   'Centro de Estética': {
     servicios: ['Limpieza Facial', 'Masaje Relajante', 'Depilación Laser', 'Manicura Premium'],
@@ -84,7 +84,7 @@ const SUGERENCIAS = {
     staff: ['Valentina', 'Lucía', 'María'],
     especialidad: 'Esteticista',
     descripcion: 'Tu bienestar y belleza son nuestra prioridad.',
-    color: '#BB545F',
+    color: '#8B5CF6',
   },
   'Veterinaria': {
     servicios: ['Consulta General', 'Vacunación', 'Baño y Peluquería', 'Cirugía'],
@@ -93,7 +93,7 @@ const SUGERENCIAS = {
     staff: ['Dr. García', 'Dra. López'],
     especialidad: 'Veterinario/a',
     descripcion: 'Cuidamos a tu mascota como si fuera la nuestra.',
-    color: '#C56C75',
+    color: '#0E9C9C',
   },
   'Salud / Clínica': {
     servicios: ['Consulta General', 'Revisión', 'Consulta Especializada'],
@@ -102,7 +102,7 @@ const SUGERENCIAS = {
     staff: ['Dr. Martínez', 'Dra. Pérez'],
     especialidad: 'Médico/a',
     descripcion: 'Tu salud, nuestra misión.',
-    color: '#AF3643',
+    color: '#259C5B',
   },
 }
 
@@ -113,15 +113,15 @@ function LivePreview({ data }) {
     <div className="flex-1 overflow-y-auto" style={{ background: 'var(--ns-bg)', fontFamily: '"Inter Tight", system-ui, sans-serif' }}>
       {/* Portada con el acento elegido */}
       <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, ${COLOR_MARCA} 0%, ${color} 150%)` }}>
-        <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(circle, #FCF6F5 1px, transparent 1px)', backgroundSize: '11px 11px' }} />
+        <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(circle, #FFFFFF 1px, transparent 1px)', backgroundSize: '11px 11px' }} />
         <motion.div
           layout
           className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-[2rem] flex items-center justify-center overflow-hidden"
-          style={{ background: 'var(--ns-paper)', boxShadow: '12px 14px 30px rgba(70,0,8,0.32), -6px -6px 16px rgba(255,255,255,0.8)' }}
+          style={{ background: 'var(--ns-paper)', boxShadow: '12px 14px 30px rgba(16,24,40,0.32), -6px -6px 16px rgba(255,255,255,0.8)' }}
         >
           {data.logo_url
             ? <img src={data.logo_url} className="w-full h-full object-cover" alt="Logo del negocio" />
-            : <span className="font-black text-[2rem]" style={{ color }}>{data.nombre ? data.nombre[0].toUpperCase() : 'N'}</span>
+            : <span className="font-bold text-[2rem]" style={{ color }}>{data.nombre ? data.nombre[0].toUpperCase() : 'N'}</span>
           }
         </motion.div>
       </motion.div>
@@ -132,44 +132,44 @@ function LivePreview({ data }) {
             key={data.nombre}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="font-black text-2xl tracking-tight"
+            className="font-bold text-2xl tracking-tight"
             style={{ color: 'var(--ns-text)', fontFamily: 'var(--font-display)' }}
           >
             {data.nombre || 'Tu marca'}
           </motion.h1>
         </AnimatePresence>
-        <p className="neo-eyebrow mt-1.5">{data.rubro || 'Tu rubro'}</p>
+        <p className="ui-eyebrow mt-1.5">{data.rubro || 'Tu rubro'}</p>
         {data.descripcion && (
           <p className="text-sm mt-3 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>«{data.descripcion}»</p>
         )}
         {data.instagram && (
           <div className="mt-4 flex justify-center">
-            <span className="neo-chip">@{data.instagram}</span>
+            <span className="ui-chip">@{data.instagram}</span>
           </div>
         )}
       </div>
 
       <div className="px-5 space-y-3">
-        <h3 className="neo-eyebrow">Servicios</h3>
+        <h3 className="ui-eyebrow">Servicios</h3>
         {data.svcNombre ? (
-          <motion.div layout className="neo-card p-4">
+          <motion.div layout className="ui-card p-4">
             <div className="flex justify-between items-center gap-3">
               <div className="min-w-0">
                 <p className="font-bold truncate" style={{ color: 'var(--ns-text)' }}>{data.svcNombre}</p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>{data.svcDuracion} min</p>
               </div>
-              <p className="font-black text-lg shrink-0" style={{ color }}>${data.svcPrecio || 0}</p>
+              <p className="font-bold text-lg shrink-0" style={{ color }}>${data.svcPrecio || 0}</p>
             </div>
             <div
-              className="w-full mt-3.5 py-3 rounded-[16px] text-sm font-black text-center uppercase tracking-[0.12em]"
-              style={{ background: color, color: 'var(--ns-paper)', boxShadow: '0 8px 20px rgba(153,0,17,0.26)' }}
+              className="w-full mt-3.5 py-3 rounded-[16px] text-sm font-bold text-center uppercase tracking-[0.12em]"
+              style={{ background: color, color: 'var(--ns-paper)', boxShadow: '0 8px 20px rgba(16,24,40,0.26)' }}
               aria-label="Vista previa del botón de reserva"
             >
               Reservar
             </div>
           </motion.div>
         ) : (
-          <div className="neo-well p-4 opacity-60">
+          <div className="ui-well p-4 opacity-60">
             <div className="w-32 h-4 rounded-full mb-2.5" style={{ background: 'var(--ns-mix-14)' }} />
             <div className="w-16 h-3 rounded-full" style={{ background: 'var(--ns-mix-10)' }} />
           </div>
@@ -178,11 +178,11 @@ function LivePreview({ data }) {
 
       {data.staffNombre && (
         <div className="px-5 mt-6 space-y-3">
-          <h3 className="neo-eyebrow">Equipo</h3>
-          <motion.div layout className="neo-card flex items-center gap-4 p-4">
+          <h3 className="ui-eyebrow">Equipo</h3>
+          <motion.div layout className="ui-card flex items-center gap-4 p-4">
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center font-black shrink-0"
-              style={{ background: color, color: 'var(--ns-paper)', boxShadow: '5px 6px 14px rgba(153,0,17,0.26)' }}
+              className="w-12 h-12 rounded-full flex items-center justify-center font-bold shrink-0"
+              style={{ background: color, color: 'var(--ns-paper)', boxShadow: '5px 6px 14px rgba(16,24,40,0.26)' }}
             >
               {data.staffNombre[0].toUpperCase()}
             </div>
@@ -205,11 +205,11 @@ function PhoneShell({ data }) {
       {/* Marco de papel extruido sobre el fondo bordó del alta */}
       <div
         className="absolute inset-0 rounded-[3rem]"
-        style={{ background: 'var(--ns-paper)', boxShadow: '26px 30px 70px rgba(52,0,6,0.45), -14px -14px 36px rgba(255,255,255,0.12)' }}
+        style={{ background: 'var(--ns-paper)', boxShadow: '26px 30px 70px rgba(16,24,40,0.45), -14px -14px 36px rgba(255,255,255,0.12)' }}
       />
       <div
         className="absolute inset-[9px] rounded-[2.6rem] overflow-hidden flex flex-col"
-        style={{ background: 'var(--ns-bg)', boxShadow: 'var(--neo-inset-deep)' }}
+        style={{ background: 'var(--ns-bg)', boxShadow: 'var(--ui-field-deep)' }}
       >
         {/* Muesca */}
         <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-10 pointer-events-none">
@@ -251,7 +251,7 @@ export default function OnboardingWizard({ session, onComplete }) {
   const steps = buildSteps()
   const [stepIdx, setStepIdx] = useState(0)
   const [data, setData] = useState({
-    nombre:'', rubro:'', color:'#AF3643', logo_url:'', descripcion:'', instagram:'',
+    nombre:'', rubro:'', color:'#4A9CFF', logo_url:'', descripcion:'', instagram:'',
     svcNombre:'', svcPrecio:'', svcDuracion:'30', staffNombre:'', staffEspecialidad:''
   })
   const [input, setInput] = useState('')
@@ -385,13 +385,13 @@ export default function OnboardingWizard({ session, onComplete }) {
   // ── Saving screen ────────────────────────────────────────────────────────
   if (saving) {
     return (
-      <div className="min-h-screen bg-[#990011] flex items-center justify-center">
+      <div className="min-h-screen bg-[#007AFF] flex items-center justify-center">
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center space-y-6">
           <motion.div animate={{rotate:360}} transition={{repeat:Infinity,duration:1,ease:'linear'}}
             className="w-14 h-14 rounded-full mx-auto" style={{ border: '4px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--ns-paper)' }} />
           <div>
             <p className="text-white font-bold text-lg">Creando tu plataforma...</p>
-            <p className="text-sm mt-1" style={{ color: 'rgba(252,246,245,0.6)' }}>Esto toma unos segundos</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>Esto toma unos segundos</p>
           </div>
         </motion.div>
       </div>
@@ -400,13 +400,13 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Input renderers ──────────────────────────────────────────────────────
   const renderInput = () => {
-    const base = "neo-onbrand-field"
+    const base = "ui-onbrand-field"
     switch (step.type) {
       case 'text':
         return (
           <form onSubmit={e => { e.preventDefault(); if(input.trim()) next({ [step.id]: input.trim() }) }} className="space-y-3">
             <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} className={base} />
-            <button type="submit" disabled={!input.trim()} className="neo-onbrand-btn">Continuar →</button>
+            <button type="submit" disabled={!input.trim()} className="ui-onbrand-btn">Continuar →</button>
           </form>
         )
       case 'textarea': {
@@ -415,14 +415,14 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="space-y-3">
             {sug?.descripcion && (
               <button onClick={() => setInput(sug.descripcion)}
-                className="neo-onbrand-field w-full text-left !py-3 text-sm hover:opacity-90">
+                className="ui-onbrand-field w-full text-left !py-3 text-sm hover:opacity-90">
                 Sugerencia: "{sug.descripcion}"
               </button>
             )}
             <textarea ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder={step.placeholder} rows={3} className={base + " resize-none"} />
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ [step.id]: '' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
-              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="neo-onbrand-btn">Continuar →</button>
+              <button onClick={() => next({ [step.id]: '' })} className="ui-onbrand-btn ui-onbrand-btn--ghost">Omitir</button>
+              <button onClick={() => next({ [step.id]: input || sug?.descripcion || '' })} className="ui-onbrand-btn">Continuar →</button>
             </div>
           </div>
         )
@@ -430,13 +430,13 @@ export default function OnboardingWizard({ session, onComplete }) {
       case 'instagram':
         return (
           <div className="space-y-3">
-            <div className="neo-onbrand-field flex items-center gap-2 !py-0">
-              <span className="font-black text-lg" style={{ color: 'var(--ns-paper)', opacity: 0.7 }}>@</span>
+            <div className="ui-onbrand-field flex items-center gap-2 !py-0">
+              <span className="font-bold text-lg" style={{ color: 'var(--ns-paper)', opacity: 0.7 }}>@</span>
               <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} placeholder="tu_cuenta" className="flex-1 py-4 bg-transparent text-white placeholder:text-white/30 outline-none font-medium" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ instagram: '' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
-              <button onClick={() => next({ instagram: input })} className="neo-onbrand-btn">Continuar →</button>
+              <button onClick={() => next({ instagram: '' })} className="ui-onbrand-btn ui-onbrand-btn--ghost">Omitir</button>
+              <button onClick={() => next({ instagram: input })} className="ui-onbrand-btn">Continuar →</button>
             </div>
           </div>
         )
@@ -446,7 +446,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             {RUBROS_DISPONIBLES.map(opt => (
               <motion.button key={opt} whileTap={{scale:.95}}
                 onClick={() => next({ rubro: opt })}
-                className="neo-onbrand-chip">
+                className="ui-onbrand-chip">
                 {opt}
               </motion.button>
             ))}
@@ -466,7 +466,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 <span className="text-white/50 text-lg">+</span>
               </label>
             </div>
-            <button onClick={() => next()} className="neo-onbrand-btn">Confirmar color →</button>
+            <button onClick={() => next()} className="ui-onbrand-btn">Confirmar color →</button>
           </div>
         )
       case 'logo':
@@ -479,14 +479,14 @@ export default function OnboardingWizard({ session, onComplete }) {
               </div>
             ) : (
               <>
-                <label className="neo-onbrand-field w-full !py-10 flex flex-col items-center gap-3 cursor-pointer">
+                <label className="ui-onbrand-field w-full !py-10 flex flex-col items-center gap-3 cursor-pointer">
                   <input type="file" accept="image/*" className="hidden" onChange={uploadLogo} />
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
                     <svg className="w-6 h-6" style={{ color: 'var(--ns-paper)', opacity: 0.8 }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   </div>
                   <p className="text-white/60 text-sm font-medium">Tocar para subir logo</p>
                 </label>
-                <button onClick={() => next({ logo_url: '' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir por ahora</button>
+                <button onClick={() => next({ logo_url: '' })} className="ui-onbrand-btn ui-onbrand-btn--ghost">Omitir por ahora</button>
               </>
             )}
           </div>
@@ -500,7 +500,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 {sug.servicios.map((s, i) => (
                   <button key={s} onClick={() => setData(d => ({ ...d, svcNombre: s, svcPrecio: String(sug.precios[i] || 0), svcDuracion: String(sug.duraciones[i] || 30) }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
-                      data.svcNombre === s ? 'neo-onbrand-chip is-active' : 'neo-onbrand-chip'
+                      data.svcNombre === s ? 'ui-onbrand-chip is-active' : 'ui-onbrand-chip'
                     }`}>
                     {s}
                   </button>
@@ -515,8 +515,8 @@ export default function OnboardingWizard({ session, onComplete }) {
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ svcNombre:'' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
-              <button disabled={!data.svcNombre} onClick={() => next()} className="neo-onbrand-btn">Continuar →</button>
+              <button onClick={() => next({ svcNombre:'' })} className="ui-onbrand-btn ui-onbrand-btn--ghost">Omitir</button>
+              <button disabled={!data.svcNombre} onClick={() => next()} className="ui-onbrand-btn">Continuar →</button>
             </div>
           </div>
         )
@@ -530,7 +530,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                 {sug.staff.map(s => (
                   <button key={s} onClick={() => setData(d => ({ ...d, staffNombre: s, staffEspecialidad: d.staffEspecialidad || sug.especialidad }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded-full border transition-all ${
-                      data.staffNombre === s ? 'neo-onbrand-chip is-active' : 'neo-onbrand-chip'
+                      data.staffNombre === s ? 'ui-onbrand-chip is-active' : 'ui-onbrand-chip'
                     }`}>
                     {s}
                   </button>
@@ -540,8 +540,8 @@ export default function OnboardingWizard({ session, onComplete }) {
             <input ref={inputRef} value={data.staffNombre} onChange={e=>setData(d=>({...d,staffNombre:e.target.value}))} placeholder="Nombre del profesional" className={base} />
             <input value={data.staffEspecialidad} onChange={e=>setData(d=>({...d,staffEspecialidad:e.target.value}))} placeholder={vocab.placeholderEspecialidad || 'Especialidad'} className={base} />
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => next({ staffNombre:'' })} className="neo-onbrand-btn neo-onbrand-btn--ghost">Omitir</button>
-              <button disabled={!data.staffNombre} onClick={() => next()} className="neo-onbrand-btn">Finalizar ✓</button>
+              <button onClick={() => next({ staffNombre:'' })} className="ui-onbrand-btn ui-onbrand-btn--ghost">Omitir</button>
+              <button disabled={!data.staffNombre} onClick={() => next()} className="ui-onbrand-btn">Finalizar ✓</button>
             </div>
           </div>
         )
@@ -557,12 +557,12 @@ export default function OnboardingWizard({ session, onComplete }) {
       <div className="flex-1 flex flex-col max-w-2xl mx-auto lg:mx-0 p-6 lg:p-12">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-11 h-11 rounded-[16px] flex items-center justify-center" style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)', boxShadow: '5px 5px 14px rgba(70,0,8,0.4)' }}>
-            <span className="font-black text-sm italic">NS</span>
+          <div className="w-11 h-11 rounded-[16px] flex items-center justify-center" style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)', boxShadow: '5px 5px 14px rgba(16,24,40,0.4)' }}>
+            <span className="font-bold text-sm italic">NS</span>
           </div>
           <div>
-            <p className="font-bold text-sm leading-none" style={{ color: 'var(--ns-paper)' }}>Non Sistemas</p>
-            <p className="text-xs mt-0.5" style={{ color: 'rgba(252,246,245,0.6)' }}>Configuración guiada</p>
+            <p className="font-bold text-sm leading-none" style={{ color: 'var(--ns-paper)' }}>Non sistemas</p>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Configuración guiada</p>
           </div>
         </div>
 
@@ -571,11 +571,11 @@ export default function OnboardingWizard({ session, onComplete }) {
           <div className="flex justify-between items-center mb-2">
             <div className="flex gap-1.5">
               {steps.map((s, i) => (
-                <motion.div key={s.id} animate={{ width: i === stepIdx ? 24 : 8, backgroundColor: i < stepIdx ? '#AF3643' : i === stepIdx ? '#FCF6F5' : 'rgba(255,255,255,0.15)' }}
+                <motion.div key={s.id} animate={{ width: i === stepIdx ? 24 : 8, backgroundColor: i < stepIdx ? '#4A9CFF' : i === stepIdx ? '#FFFFFF' : 'rgba(255,255,255,0.15)' }}
                   className="h-2 rounded-full transition-all" />
               ))}
             </div>
-            <span className="text-xs font-bold tabular-nums" style={{ color: 'rgba(252,246,245,0.6)' }}>{stepIdx + 1} / {steps.length}</span>
+            <span className="text-xs font-bold tabular-nums" style={{ color: 'rgba(255,255,255,0.6)' }}>{stepIdx + 1} / {steps.length}</span>
           </div>
         </div>
 
@@ -583,22 +583,22 @@ export default function OnboardingWizard({ session, onComplete }) {
         <AnimatePresence mode="wait">
           <motion.div key={step.id} initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{duration:.25}} className="flex-1">
             <div className="mb-8">
-              <h2 className="text-3xl font-black tracking-tight leading-tight" style={{ color: 'var(--ns-paper)', fontFamily: 'var(--font-display)' }}>{step.q}</h2>
+              <h2 className="text-3xl font-bold tracking-tight leading-tight" style={{ color: 'var(--ns-paper)', fontFamily: 'var(--font-display)' }}>{step.q}</h2>
             </div>
             {renderInput()}
           </motion.div>
         </AnimatePresence>
 
         {/* Footer */}
-        <p className="text-xs mt-8 text-center" style={{ color: 'rgba(252,246,245,0.4)' }}>Non Sistemas · Salsipuedes, Córdoba</p>
+        <p className="text-xs mt-8 text-center" style={{ color: 'rgba(255,255,255,0.4)' }}>Non Sistemas · Salsipuedes, Córdoba</p>
       </div>
 
       {/* Right: Live Preview Phone */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-12" style={{ background: 'var(--ns-primary)', boxShadow: 'inset 1px 0 0 rgba(252,246,245,0.08)' }}>
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12" style={{ background: 'var(--ns-primary)', boxShadow: 'inset 1px 0 0 rgba(255,255,255,0.08)' }}>
         <div className="text-center space-y-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: 'rgba(252,246,245,0.5)' }}>Vista en tiempo real</p>
-            <p className="text-sm mt-1.5" style={{ color: 'rgba(252,246,245,0.72)' }}>Así van a ver tu app tus clientes</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: 'rgba(255,255,255,0.5)' }}>Vista en tiempo real</p>
+            <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.72)' }}>Así van a ver tu app tus clientes</p>
           </div>
           <PhoneShell data={data} />
         </div>

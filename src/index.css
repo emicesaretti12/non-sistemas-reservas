@@ -2,519 +2,255 @@
 
 @import "./styles/base.css";
 @import "./styles/animations.css";
-@import "./styles/neumorphism.css";
+@import "./styles/components.css";
 @import "./styles/shell.css";
 @import "./styles/screens.css";
 @import "./styles/views.css";
 
 /* ============================================================
-   NONI — SISTEMA DE DISEÑO "NEOMORFISMO PROFUNDO"
-   Dos colores y nada más:
-     · #FCF6F5  papel — todas las superficies
-     · #990011  marca — acento, tinta y estados
-   Todo el resto de la escala son mezclas entre esos dos.
+   NONI — SISTEMA DE DISEÑO
 
-   El relieve reemplaza al color: lo importante sobresale del
-   papel, lo secundario se hunde. La luz entra siempre desde
-   arriba a la izquierda.
+   Paleta tomada de la referencia, píxel por píxel:
+     · #E9EEF4  lienzo        gris azulado del área de contenido
+     · #FFFFFF  superficie    tarjetas y paneles
+     · #252C35  barra lateral azul pizarra profundo
+     · #1D212A  tinta         texto principal
+     · #007AFF  acción        el azul del botón y del avatar
+     · #259C5B  confirmado    verde del ícono de estado
+     · #E09112  pendiente     ámbar del ícono de estado
+     · #8B5CF6  destacado     violeta del borde de tarjeta
+
+   Criterio: superficies planas, líneas de un píxel, sombras
+   apenas perceptibles y radios generosos. La jerarquía la dan
+   el contraste y el espacio, no el relieve. El color se reserva
+   para el estado y para la acción principal; todo lo demás vive
+   en la escala de grises azulados.
    ============================================================ */
 
 /* ------------------------------------------------------------
    Paleta de Tailwind reasignada.
-   La app arrastraba cientos de clases `slate-*`, `violet-*`,
+   La app arrastra cientos de clases `slate-*`, `blue-*`,
    `emerald-*`, `amber-*`… Redefinir los tokens de Tailwind hace
-   que todas caigan sobre la escala de marca, sin perseguir
-   clase por clase y sin que se escape ningún color ajeno.
+   que todas caigan sobre esta escala sin perseguir clase por
+   clase, y deja fuera cualquier color ajeno al sistema.
    ------------------------------------------------------------ */
 @theme {
-  --color-white: #FCF6F5;
-  --color-black: #990011;
+  --color-white: #FFFFFF;
+  --color-black: #1D212A;
 
-  /* slate */
-  --color-slate-50: #FEFBFB;
-  --color-slate-100: #F9EFEE;
-  --color-slate-200: #F2DDDE;
-  --color-slate-300: #E8C5C7;
-  --color-slate-400: #D08A91;
-  --color-slate-500: #B94F5A;
-  --color-slate-600: #AD313F;
-  --color-slate-700: #A31928;
-  --color-slate-800: #9D0A1A;
-  --color-slate-900: #990011;
-  --color-slate-950: #990011;
-  /* gray */
-  --color-gray-50: #FEFBFB;
-  --color-gray-100: #F9EFEE;
-  --color-gray-200: #F2DDDE;
-  --color-gray-300: #E8C5C7;
-  --color-gray-400: #D08A91;
-  --color-gray-500: #B94F5A;
-  --color-gray-600: #AD313F;
-  --color-gray-700: #A31928;
-  --color-gray-800: #9D0A1A;
-  --color-gray-900: #990011;
-  --color-gray-950: #990011;
-  /* zinc */
-  --color-zinc-50: #FEFBFB;
-  --color-zinc-100: #F9EFEE;
-  --color-zinc-200: #F2DDDE;
-  --color-zinc-300: #E8C5C7;
-  --color-zinc-400: #D08A91;
-  --color-zinc-500: #B94F5A;
-  --color-zinc-600: #AD313F;
-  --color-zinc-700: #A31928;
-  --color-zinc-800: #9D0A1A;
-  --color-zinc-900: #990011;
-  --color-zinc-950: #990011;
-  /* neutral */
-  --color-neutral-50: #FEFBFB;
-  --color-neutral-100: #F9EFEE;
-  --color-neutral-200: #F2DDDE;
-  --color-neutral-300: #E8C5C7;
-  --color-neutral-400: #D08A91;
-  --color-neutral-500: #B94F5A;
-  --color-neutral-600: #AD313F;
-  --color-neutral-700: #A31928;
-  --color-neutral-800: #9D0A1A;
-  --color-neutral-900: #990011;
-  --color-neutral-950: #990011;
-  /* stone */
-  --color-stone-50: #FEFBFB;
-  --color-stone-100: #F9EFEE;
-  --color-stone-200: #F2DDDE;
-  --color-stone-300: #E8C5C7;
-  --color-stone-400: #D08A91;
-  --color-stone-500: #B94F5A;
-  --color-stone-600: #AD313F;
-  --color-stone-700: #A31928;
-  --color-stone-800: #9D0A1A;
-  --color-stone-900: #990011;
-  --color-stone-950: #990011;
-  /* red */
-  --color-red-50: #FEFBFB;
-  --color-red-100: #F9EFEE;
-  --color-red-200: #F2DDDE;
-  --color-red-300: #E8C5C7;
-  --color-red-400: #D08A91;
-  --color-red-500: #B94F5A;
-  --color-red-600: #AD313F;
-  --color-red-700: #A31928;
-  --color-red-800: #9D0A1A;
-  --color-red-900: #990011;
-  --color-red-950: #990011;
-  /* orange */
-  --color-orange-50: #FEFBFB;
-  --color-orange-100: #F9EFEE;
-  --color-orange-200: #F2DDDE;
-  --color-orange-300: #E8C5C7;
-  --color-orange-400: #D08A91;
-  --color-orange-500: #B94F5A;
-  --color-orange-600: #AD313F;
-  --color-orange-700: #A31928;
-  --color-orange-800: #9D0A1A;
-  --color-orange-900: #990011;
-  --color-orange-950: #990011;
-  /* amber */
-  --color-amber-50: #FEFBFB;
-  --color-amber-100: #F9EFEE;
-  --color-amber-200: #F2DDDE;
-  --color-amber-300: #E8C5C7;
-  --color-amber-400: #D08A91;
-  --color-amber-500: #B94F5A;
-  --color-amber-600: #AD313F;
-  --color-amber-700: #A31928;
-  --color-amber-800: #9D0A1A;
-  --color-amber-900: #990011;
-  --color-amber-950: #990011;
-  /* yellow */
-  --color-yellow-50: #FEFBFB;
-  --color-yellow-100: #F9EFEE;
-  --color-yellow-200: #F2DDDE;
-  --color-yellow-300: #E8C5C7;
-  --color-yellow-400: #D08A91;
-  --color-yellow-500: #B94F5A;
-  --color-yellow-600: #AD313F;
-  --color-yellow-700: #A31928;
-  --color-yellow-800: #9D0A1A;
-  --color-yellow-900: #990011;
-  --color-yellow-950: #990011;
-  /* lime */
-  --color-lime-50: #FEFBFB;
-  --color-lime-100: #F9EFEE;
-  --color-lime-200: #F2DDDE;
-  --color-lime-300: #E8C5C7;
-  --color-lime-400: #D08A91;
-  --color-lime-500: #B94F5A;
-  --color-lime-600: #AD313F;
-  --color-lime-700: #A31928;
-  --color-lime-800: #9D0A1A;
-  --color-lime-900: #990011;
-  --color-lime-950: #990011;
-  /* green */
-  --color-green-50: #FEFBFB;
-  --color-green-100: #F9EFEE;
-  --color-green-200: #F2DDDE;
-  --color-green-300: #E8C5C7;
-  --color-green-400: #D08A91;
-  --color-green-500: #B94F5A;
-  --color-green-600: #AD313F;
-  --color-green-700: #A31928;
-  --color-green-800: #9D0A1A;
-  --color-green-900: #990011;
-  --color-green-950: #990011;
-  /* emerald */
-  --color-emerald-50: #FEFBFB;
-  --color-emerald-100: #F9EFEE;
-  --color-emerald-200: #F2DDDE;
-  --color-emerald-300: #E8C5C7;
-  --color-emerald-400: #D08A91;
-  --color-emerald-500: #B94F5A;
-  --color-emerald-600: #AD313F;
-  --color-emerald-700: #A31928;
-  --color-emerald-800: #9D0A1A;
-  --color-emerald-900: #990011;
-  --color-emerald-950: #990011;
-  /* teal */
-  --color-teal-50: #FEFBFB;
-  --color-teal-100: #F9EFEE;
-  --color-teal-200: #F2DDDE;
-  --color-teal-300: #E8C5C7;
-  --color-teal-400: #D08A91;
-  --color-teal-500: #B94F5A;
-  --color-teal-600: #AD313F;
-  --color-teal-700: #A31928;
-  --color-teal-800: #9D0A1A;
-  --color-teal-900: #990011;
-  --color-teal-950: #990011;
-  /* cyan */
-  --color-cyan-50: #FEFBFB;
-  --color-cyan-100: #F9EFEE;
-  --color-cyan-200: #F2DDDE;
-  --color-cyan-300: #E8C5C7;
-  --color-cyan-400: #D08A91;
-  --color-cyan-500: #B94F5A;
-  --color-cyan-600: #AD313F;
-  --color-cyan-700: #A31928;
-  --color-cyan-800: #9D0A1A;
-  --color-cyan-900: #990011;
-  --color-cyan-950: #990011;
-  /* sky */
-  --color-sky-50: #FEFBFB;
-  --color-sky-100: #F9EFEE;
-  --color-sky-200: #F2DDDE;
-  --color-sky-300: #E8C5C7;
-  --color-sky-400: #D08A91;
-  --color-sky-500: #B94F5A;
-  --color-sky-600: #AD313F;
-  --color-sky-700: #A31928;
-  --color-sky-800: #9D0A1A;
-  --color-sky-900: #990011;
-  --color-sky-950: #990011;
-  /* blue */
-  --color-blue-50: #FEFBFB;
-  --color-blue-100: #F9EFEE;
-  --color-blue-200: #F2DDDE;
-  --color-blue-300: #E8C5C7;
-  --color-blue-400: #D08A91;
-  --color-blue-500: #B94F5A;
-  --color-blue-600: #AD313F;
-  --color-blue-700: #A31928;
-  --color-blue-800: #9D0A1A;
-  --color-blue-900: #990011;
-  --color-blue-950: #990011;
-  /* indigo */
-  --color-indigo-50: #FEFBFB;
-  --color-indigo-100: #F9EFEE;
-  --color-indigo-200: #F2DDDE;
-  --color-indigo-300: #E8C5C7;
-  --color-indigo-400: #D08A91;
-  --color-indigo-500: #B94F5A;
-  --color-indigo-600: #AD313F;
-  --color-indigo-700: #A31928;
-  --color-indigo-800: #9D0A1A;
-  --color-indigo-900: #990011;
-  --color-indigo-950: #990011;
-  /* violet */
-  --color-violet-50: #FEFBFB;
-  --color-violet-100: #F9EFEE;
-  --color-violet-200: #F2DDDE;
-  --color-violet-300: #E8C5C7;
-  --color-violet-400: #D08A91;
-  --color-violet-500: #B94F5A;
-  --color-violet-600: #AD313F;
-  --color-violet-700: #A31928;
-  --color-violet-800: #9D0A1A;
-  --color-violet-900: #990011;
-  --color-violet-950: #990011;
-  /* purple */
-  --color-purple-50: #FEFBFB;
-  --color-purple-100: #F9EFEE;
-  --color-purple-200: #F2DDDE;
-  --color-purple-300: #E8C5C7;
-  --color-purple-400: #D08A91;
-  --color-purple-500: #B94F5A;
-  --color-purple-600: #AD313F;
-  --color-purple-700: #A31928;
-  --color-purple-800: #9D0A1A;
-  --color-purple-900: #990011;
-  --color-purple-950: #990011;
-  /* fuchsia */
-  --color-fuchsia-50: #FEFBFB;
-  --color-fuchsia-100: #F9EFEE;
-  --color-fuchsia-200: #F2DDDE;
-  --color-fuchsia-300: #E8C5C7;
-  --color-fuchsia-400: #D08A91;
-  --color-fuchsia-500: #B94F5A;
-  --color-fuchsia-600: #AD313F;
-  --color-fuchsia-700: #A31928;
-  --color-fuchsia-800: #9D0A1A;
-  --color-fuchsia-900: #990011;
-  --color-fuchsia-950: #990011;
-  /* pink */
-  --color-pink-50: #FEFBFB;
-  --color-pink-100: #F9EFEE;
-  --color-pink-200: #F2DDDE;
-  --color-pink-300: #E8C5C7;
-  --color-pink-400: #D08A91;
-  --color-pink-500: #B94F5A;
-  --color-pink-600: #AD313F;
-  --color-pink-700: #A31928;
-  --color-pink-800: #9D0A1A;
-  --color-pink-900: #990011;
-  --color-pink-950: #990011;
-  /* rose */
-  --color-rose-50: #FEFBFB;
-  --color-rose-100: #F9EFEE;
-  --color-rose-200: #F2DDDE;
-  --color-rose-300: #E8C5C7;
-  --color-rose-400: #D08A91;
-  --color-rose-500: #B94F5A;
-  --color-rose-600: #AD313F;
-  --color-rose-700: #A31928;
-  --color-rose-800: #9D0A1A;
-  --color-rose-900: #990011;
-  --color-rose-950: #990011;
+  /* neutros — el gris azulado de la captura */
+  --color-slate-50: #F8FAFC; --color-slate-100: #F1F5F9; --color-slate-200: #E4EAF2; --color-slate-300: #CBD4E1; --color-slate-400: #94A1B2; --color-slate-500: #68748A; --color-slate-600: #4A5462; --color-slate-700: #374151; --color-slate-800: #252C35; --color-slate-900: #1D212A; --color-slate-950: #12161C;
+  --color-gray-50: #F8FAFC; --color-gray-100: #F1F5F9; --color-gray-200: #E4EAF2; --color-gray-300: #CBD4E1; --color-gray-400: #94A1B2; --color-gray-500: #68748A; --color-gray-600: #4A5462; --color-gray-700: #374151; --color-gray-800: #252C35; --color-gray-900: #1D212A; --color-gray-950: #12161C;
+  --color-zinc-50: #F8FAFC; --color-zinc-100: #F1F5F9; --color-zinc-200: #E4EAF2; --color-zinc-300: #CBD4E1; --color-zinc-400: #94A1B2; --color-zinc-500: #68748A; --color-zinc-600: #4A5462; --color-zinc-700: #374151; --color-zinc-800: #252C35; --color-zinc-900: #1D212A; --color-zinc-950: #12161C;
+  --color-neutral-50: #F8FAFC; --color-neutral-100: #F1F5F9; --color-neutral-200: #E4EAF2; --color-neutral-300: #CBD4E1; --color-neutral-400: #94A1B2; --color-neutral-500: #68748A; --color-neutral-600: #4A5462; --color-neutral-700: #374151; --color-neutral-800: #252C35; --color-neutral-900: #1D212A; --color-neutral-950: #12161C;
+  --color-stone-50: #F8FAFC; --color-stone-100: #F1F5F9; --color-stone-200: #E4EAF2; --color-stone-300: #CBD4E1; --color-stone-400: #94A1B2; --color-stone-500: #68748A; --color-stone-600: #4A5462; --color-stone-700: #374151; --color-stone-800: #252C35; --color-stone-900: #1D212A; --color-stone-950: #12161C;
 
+  /* azul de acción */
+  --color-blue-50: #EFF6FF; --color-blue-100: #DBEAFE; --color-blue-200: #BFDBFE; --color-blue-300: #93C5FD; --color-blue-400: #60A5FA; --color-blue-500: #007AFF; --color-blue-600: #0062D6; --color-blue-700: #0050AF; --color-blue-800: #003F8C; --color-blue-900: #00336F; --color-blue-950: #00224A;
+  --color-sky-50: #EFF6FF; --color-sky-100: #DBEAFE; --color-sky-200: #BFDBFE; --color-sky-300: #93C5FD; --color-sky-400: #60A5FA; --color-sky-500: #007AFF; --color-sky-600: #0062D6; --color-sky-700: #0050AF; --color-sky-800: #003F8C; --color-sky-900: #00336F; --color-sky-950: #00224A;
+  --color-indigo-50: #EFF6FF; --color-indigo-100: #DBEAFE; --color-indigo-200: #BFDBFE; --color-indigo-300: #93C5FD; --color-indigo-400: #60A5FA; --color-indigo-500: #007AFF; --color-indigo-600: #0062D6; --color-indigo-700: #0050AF; --color-indigo-800: #003F8C; --color-indigo-900: #00336F; --color-indigo-950: #00224A;
+  --color-cyan-50: #EFF6FF; --color-cyan-100: #DBEAFE; --color-cyan-200: #BFDBFE; --color-cyan-300: #93C5FD; --color-cyan-400: #60A5FA; --color-cyan-500: #007AFF; --color-cyan-600: #0062D6; --color-cyan-700: #0050AF; --color-cyan-800: #003F8C; --color-cyan-900: #00336F; --color-cyan-950: #00224A;
 
-  /* Sombras de Tailwind con el relieve de la marca: así `shadow-sm`,
-     `shadow-lg` y compañía —usadas por toda la app— dejan de tirar gris
-     neutro y pasan a moldearse igual que el resto del sistema. */
-  --shadow-2xs: 0 1px 2px rgba(153,0,17,0.06);
-  --shadow-xs: 0 1px 3px rgba(153,0,17,0.07);
-  --shadow-sm: 5px 5px 12px rgba(153,0,17,0.12), -4px -4px 10px rgba(255,255,255,0.95);
-  --shadow-md: 8px 8px 18px rgba(153,0,17,0.14), -6px -6px 14px #FFFFFF;
-  --shadow-lg: 12px 12px 26px rgba(153,0,17,0.15), -9px -9px 20px #FFFFFF;
-  --shadow-xl: 20px 20px 44px rgba(153,0,17,0.2), -13px -13px 30px #FFFFFF;
-  --shadow-2xl: 30px 32px 74px rgba(153,0,17,0.26), -16px -16px 42px #FFFFFF;
+  /* verde de confirmado */
+  --color-green-50: #ECFDF3; --color-green-100: #D3F8E0; --color-green-200: #A9EEC4; --color-green-300: #6FDDA0; --color-green-400: #3BC57E; --color-green-500: #259C5B; --color-green-600: #1E8049; --color-green-700: #19663C; --color-green-800: #145231; --color-green-900: #10432A; --color-green-950: #072616;
+  --color-emerald-50: #ECFDF3; --color-emerald-100: #D3F8E0; --color-emerald-200: #A9EEC4; --color-emerald-300: #6FDDA0; --color-emerald-400: #3BC57E; --color-emerald-500: #259C5B; --color-emerald-600: #1E8049; --color-emerald-700: #19663C; --color-emerald-800: #145231; --color-emerald-900: #10432A; --color-emerald-950: #072616;
+  --color-teal-50: #ECFDF3; --color-teal-100: #D3F8E0; --color-teal-200: #A9EEC4; --color-teal-300: #6FDDA0; --color-teal-400: #3BC57E; --color-teal-500: #259C5B; --color-teal-600: #1E8049; --color-teal-700: #19663C; --color-teal-800: #145231; --color-teal-900: #10432A; --color-teal-950: #072616;
+  --color-lime-50: #ECFDF3; --color-lime-100: #D3F8E0; --color-lime-200: #A9EEC4; --color-lime-300: #6FDDA0; --color-lime-400: #3BC57E; --color-lime-500: #259C5B; --color-lime-600: #1E8049; --color-lime-700: #19663C; --color-lime-800: #145231; --color-lime-900: #10432A; --color-lime-950: #072616;
 
-  /* Tipografías */
-  --font-sans: 'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-serif: 'Fraunces', Georgia, serif;
+  /* ámbar de pendiente */
+  --color-amber-50: #FFF8EB; --color-amber-100: #FDEFC8; --color-amber-200: #FBDF92; --color-amber-300: #F8C955; --color-amber-400: #F3AE2A; --color-amber-500: #E09112; --color-amber-600: #BA700D; --color-amber-700: #94540F; --color-amber-800: #7A4513; --color-amber-900: #683A13; --color-amber-950: #3C1F06;
+  --color-yellow-50: #FFF8EB; --color-yellow-100: #FDEFC8; --color-yellow-200: #FBDF92; --color-yellow-300: #F8C955; --color-yellow-400: #F3AE2A; --color-yellow-500: #E09112; --color-yellow-600: #BA700D; --color-yellow-700: #94540F; --color-yellow-800: #7A4513; --color-yellow-900: #683A13; --color-yellow-950: #3C1F06;
+  --color-orange-50: #FFF8EB; --color-orange-100: #FDEFC8; --color-orange-200: #FBDF92; --color-orange-300: #F8C955; --color-orange-400: #F3AE2A; --color-orange-500: #E09112; --color-orange-600: #BA700D; --color-orange-700: #94540F; --color-orange-800: #7A4513; --color-orange-900: #683A13; --color-orange-950: #3C1F06;
+
+  /* violeta de destacado */
+  --color-violet-50: #F5F2FF; --color-violet-100: #EBE5FF; --color-violet-200: #D9CEFF; --color-violet-300: #BFA9FF; --color-violet-400: #A480FC; --color-violet-500: #8B5CF6; --color-violet-600: #7440E0; --color-violet-700: #6132BC; --color-violet-800: #512A9A; --color-violet-900: #44257E; --color-violet-950: #2A0F5C;
+  --color-purple-50: #F5F2FF; --color-purple-100: #EBE5FF; --color-purple-200: #D9CEFF; --color-purple-300: #BFA9FF; --color-purple-400: #A480FC; --color-purple-500: #8B5CF6; --color-purple-600: #7440E0; --color-purple-700: #6132BC; --color-purple-800: #512A9A; --color-purple-900: #44257E; --color-purple-950: #2A0F5C;
+  --color-fuchsia-50: #F5F2FF; --color-fuchsia-100: #EBE5FF; --color-fuchsia-200: #D9CEFF; --color-fuchsia-300: #BFA9FF; --color-fuchsia-400: #A480FC; --color-fuchsia-500: #8B5CF6; --color-fuchsia-600: #7440E0; --color-fuchsia-700: #6132BC; --color-fuchsia-800: #512A9A; --color-fuchsia-900: #44257E; --color-fuchsia-950: #2A0F5C;
+
+  /* rojo de cancelado / destructivo */
+  --color-red-50: #FFF1F1; --color-red-100: #FFE0DF; --color-red-200: #FFC6C3; --color-red-300: #FF9D98; --color-red-400: #FF6B63; --color-red-500: #FF3B30; --color-red-600: #DE2B22; --color-red-700: #B8231C; --color-red-800: #96201A; --color-red-900: #7C1F1B; --color-red-950: #430B08;
+  --color-rose-50: #FFF1F1; --color-rose-100: #FFE0DF; --color-rose-200: #FFC6C3; --color-rose-300: #FF9D98; --color-rose-400: #FF6B63; --color-rose-500: #FF3B30; --color-rose-600: #DE2B22; --color-rose-700: #B8231C; --color-rose-800: #96201A; --color-rose-900: #7C1F1B; --color-rose-950: #430B08;
+  --color-pink-50: #FFF1F1; --color-pink-100: #FFE0DF; --color-pink-200: #FFC6C3; --color-pink-300: #FF9D98; --color-pink-400: #FF6B63; --color-pink-500: #FF3B30; --color-pink-600: #DE2B22; --color-pink-700: #B8231C; --color-pink-800: #96201A; --color-pink-900: #7C1F1B; --color-pink-950: #430B08;
+
+  /* Tipografía — la pila nativa de Apple primero, así el panel
+     usa San Francisco en Mac y iPhone sin descargar nada. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter Tight", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* Sombras: en este sistema casi no se ven. Sirven para separar
+     una capa de la siguiente, no para dar volumen. */
+  --shadow-2xs: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 4px 10px rgba(16, 24, 40, 0.07), 0 2px 4px rgba(16, 24, 40, 0.04);
+  --shadow-lg: 0 12px 24px rgba(16, 24, 40, 0.09), 0 4px 8px rgba(16, 24, 40, 0.04);
+  --shadow-xl: 0 24px 48px rgba(16, 24, 40, 0.13), 0 8px 16px rgba(16, 24, 40, 0.05);
+  --shadow-2xl: 0 32px 64px rgba(16, 24, 40, 0.18);
 }
 
-/* ------------------------------------------------------------
-   Tokens del sistema
-   ------------------------------------------------------------ */
 :root {
-  /* ── Los dos colores ── */
-  --ns-paper: #FCF6F5;
-  --ns-brand: #990011;
+  /* ── Colores de la referencia ─────────────────────────────── */
+  --ns-canvas: #E9EEF4;
+  --ns-paper: #FFFFFF;
+  --ns-ink: #1D212A;
+  --ns-sidebar: #252C35;
+  --ns-brand: #007AFF;
 
-  /* ── Escala papel → marca ──
-     Cada paso es una mezcla de los dos colores. El número indica
-     cuánta marca lleva encima del papel. */
-  --ns-mix-02: #FAF1F0;
-  --ns-mix-03: #F9EFEE;
-  --ns-mix-05: #F7EAEA;
-  --ns-mix-06: #F6E7E7;
-  --ns-mix-08: #F4E2E3;
-  --ns-mix-10: #F2DDDE;
-  --ns-mix-12: #F0D8DA;
-  --ns-mix-14: #EED4D5;
-  --ns-mix-16: #ECCFD1;
-  --ns-mix-20: #E8C5C7;
-  --ns-mix-24: #E4BBBE;
-  --ns-mix-28: #E0B1B5;
-  --ns-mix-44: #D08A91;
-  --ns-mix-56: #C56C75;
-  --ns-mix-68: #B94F5A;
-  --ns-mix-80: #AD313F;
-  --ns-mix-90: #A31928;
+  /* ── Superficies ──────────────────────────────────────────── */
+  --ns-bg: var(--ns-canvas);
+  --ns-surface: #FFFFFF;
+  --ns-surface-elevated: #FFFFFF;
+  --ns-surface-hover: #F6F9FC;
+  --ns-sunken: #F1F4F9;
+  --ns-accent: #E4EAF2;
+  --ns-accent-bg: #F1F5F9;
 
-  /* ── Superficies ──
-     El papel (#FCF6F5) es la superficie de todas las piezas; el fondo de
-     página lleva un velo mínimo de marca para que las tarjetas se despeguen
-     sin necesidad de bordes. */
-  --ns-bg: var(--ns-mix-03);
-  --ns-surface: var(--ns-paper);
-  --ns-surface-hover: var(--ns-mix-02);
-  --ns-surface-elevated: var(--ns-paper);
-  --ns-sunken: var(--ns-mix-06);
-  --ns-accent: var(--ns-mix-10);
-  --ns-accent-bg: var(--ns-mix-03);
-  --ns-primary-bg: var(--ns-mix-06);
-  --ns-primary-bg-hover: var(--ns-mix-10);
+  /* Barra lateral oscura, como en la referencia */
+  --ns-sidebar-hover: rgba(255, 255, 255, 0.07);
+  --ns-sidebar-active: rgba(255, 255, 255, 0.11);
+  --ns-sidebar-line: rgba(255, 255, 255, 0.09);
+  --ns-sidebar-text: rgba(255, 255, 255, 0.72);
+  --ns-sidebar-muted: rgba(255, 255, 255, 0.42);
 
-  /* ── Líneas ── */
-  --ns-line: var(--ns-mix-10);
-  --ns-line-strong: var(--ns-mix-20);
-  --ns-border: var(--ns-mix-10);
-  --ns-border-hover: var(--ns-mix-28);
-  --ns-border-strong: var(--ns-mix-28);
+  /* ── Tinta ────────────────────────────────────────────────── */
+  --ns-text: #1D212A;
+  --ns-text-secondary: #4A5462;
+  --ns-text-muted: #68748A;
+  --ns-text-faint: #94A1B2;
+  --ns-ink-faint: #CBD4E1;
 
-  /* ── Tinta ──
-     Contraste contra el papel: 8.3 / 6.0 / 4.6 — todos AA. */
-  --ns-text: var(--ns-brand);
-  --ns-text-secondary: var(--ns-mix-80);
-  --ns-text-muted: var(--ns-mix-68);
-  --ns-text-faint: var(--ns-mix-44);
-  --ns-ink-faint: var(--ns-mix-44);
+  /* ── Líneas de un píxel ───────────────────────────────────── */
+  --ns-line: #E4EAF2;
+  --ns-line-strong: #D6DEE9;
+  --ns-border: #E0E6EF;
+  --ns-border-hover: #CBD4E1;
+  --ns-border-strong: #B8C2D2;
+  --ns-hairline: rgba(16, 24, 40, 0.08);
 
-  /* ── Marca ── */
-  --ns-primary: var(--ns-brand);
-  --ns-primary-light: #A81322;
-  --ns-primary-dark: #7A000E;
-  --ns-focus: rgba(153, 0, 17, 0.28);
+  /* ── Acción ───────────────────────────────────────────────── */
+  --ns-primary: #007AFF;
+  --ns-primary-dark: #0062D6;
+  --ns-primary-light: #4A9CFF;
+  --ns-primary-bg: #EFF6FF;
+  --ns-primary-bg-hover: #DBEAFE;
+  --ns-primary-line: #BFDBFE;
 
-  /* ── Estados ──
-     Con una sola tinta, el estado se comunica por forma y peso.
-     Estos alias existen para que el código heredado siga andando. */
-  --ns-success: var(--ns-brand);
-  --ns-success-bg: rgba(153, 0, 17, 0.08);
-  --ns-danger: var(--ns-brand);
-  --ns-danger-bg: rgba(153, 0, 17, 0.08);
-  --ns-warning: var(--ns-mix-80);
-  --ns-warning-bg: rgba(153, 0, 17, 0.06);
+  /* ── Estados ──────────────────────────────────────────────── */
+  --ns-success: #259C5B;
+  --ns-success-bg: #ECFDF3;
+  --ns-success-line: #A9EEC4;
+  --ns-warning: #E09112;
+  --ns-warning-bg: #FFF8EB;
+  --ns-warning-line: #FBDF92;
+  --ns-danger: #E5484D;
+  --ns-danger-bg: #FFF1F1;
+  --ns-danger-line: #FFC6C3;
+  --ns-highlight: #8B5CF6;
+  --ns-highlight-bg: #F5F2FF;
+  --ns-highlight-line: #D9CEFF;
 
-  /* ── Degradados ── */
-  --ns-gradient-1: linear-gradient(145deg, #A81322 0%, #990011 55%, #8A000F 100%);
-  --ns-gradient-deep: linear-gradient(145deg, #990011 0%, #7A000E 100%);
-  --ns-gradient-hero: linear-gradient(160deg, #FCF6F5 0%, #F6E7E7 55%, #EED4D5 100%);
-  --ns-gradient-card: linear-gradient(160deg, #FFFFFF 0%, #FCF6F5 100%);
-  --ns-gradient-soft: linear-gradient(145deg, #FAF1F0 0%, #F2DDDE 100%);
+  /* ── Degradados (muy contenidos) ──────────────────────────── */
+  --ns-gradient-1: linear-gradient(180deg, #1A88FF 0%, #007AFF 100%);
+  --ns-gradient-deep: linear-gradient(180deg, #0A7CFF 0%, #0062D6 100%);
+  --ns-gradient-soft: linear-gradient(180deg, #FFFFFF 0%, #F6F9FC 100%);
+  --ns-gradient-card: linear-gradient(180deg, #FFFFFF 0%, #FBFCFE 100%);
+  --ns-gradient-hero: linear-gradient(180deg, #F4F7FB 0%, #E9EEF4 100%);
+  --ns-gradient-dark: linear-gradient(180deg, #2B333E 0%, #252C35 100%);
 
-  /* ── Relieve neumórfico ──
-     Luz desde arriba-izquierda: sombra clara arriba-izq,
-     sombra de marca abajo-der. */
-  --neo-shadow: rgba(153, 0, 17, 0.22);
-  --neo-shadow-soft: rgba(153, 0, 17, 0.15);
-  --neo-light: rgba(255, 255, 255, 1);
+  /* ── Elevación ────────────────────────────────────────────────
+     Cuatro niveles y basta. El primero es casi sólo la línea; el
+     último es para lo que flota sobre un velo. */
+  --ui-hairline: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
+  --ui-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05), inset 0 0 0 1px rgba(16, 24, 40, 0.07);
+  --ui-shadow: 0 1px 3px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.05), inset 0 0 0 1px rgba(16, 24, 40, 0.06);
+  --ui-shadow-lg: 0 4px 10px rgba(16, 24, 40, 0.06), 0 14px 32px rgba(16, 24, 40, 0.09), inset 0 0 0 1px rgba(16, 24, 40, 0.05);
+  --ui-shadow-xl: 0 8px 20px rgba(16, 24, 40, 0.08), 0 28px 60px rgba(16, 24, 40, 0.16);
 
-  /* Cuatro niveles de altura. Que se note de cuál se trata a simple vista es
-     lo que separa el neumorfismo de una tarjeta con sombrita. */
-  --neo-raised-sm:
-    6px 6px 14px var(--neo-shadow-soft),
-    -5px -5px 12px var(--neo-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  --neo-raised:
-    12px 12px 26px var(--neo-shadow-soft),
-    -9px -9px 20px var(--neo-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  --neo-raised-lg:
-    20px 20px 44px var(--neo-shadow),
-    -13px -13px 30px var(--neo-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --neo-float:
-    30px 32px 74px rgba(153, 0, 17, 0.26),
-    -16px -16px 42px var(--neo-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --neo-sheet:
-    0 -14px 44px rgba(153, 0, 17, 0.16),
-    0 -2px 0 var(--neo-light) inset;
-  --neo-dock:
-    0 14px 38px rgba(153, 0, 17, 0.16),
-    0 2px 8px rgba(153, 0, 17, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --neo-rail:
-    1px 0 0 rgba(153, 0, 17, 0.05),
-    14px 0 34px rgba(153, 0, 17, 0.045);
+  /* Campos y superficies hundidas: en este idioma no se hunden,
+     se llenan de gris y se marcan con una línea. */
+  --ui-field: inset 0 0 0 1px rgba(16, 24, 40, 0.10);
+  --ui-field-sm: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
+  --ui-field-deep: inset 0 0 0 1px rgba(16, 24, 40, 0.12);
+  --ui-field-focus: inset 0 0 0 1px var(--ns-primary), 0 0 0 4px rgba(0, 122, 255, 0.16);
+  --ui-pressed: inset 0 1px 3px rgba(16, 24, 40, 0.12), inset 0 0 0 1px rgba(16, 24, 40, 0.10);
 
-  --neo-inset-sm:
-    inset 5px 5px 11px var(--neo-shadow-soft),
-    inset -4px -4px 9px var(--neo-light);
-  --neo-inset:
-    inset 10px 10px 20px var(--neo-shadow-soft),
-    inset -8px -8px 17px var(--neo-light);
-  --neo-inset-deep:
-    inset 14px 14px 28px var(--neo-shadow),
-    inset -10px -10px 22px var(--neo-light);
-  --neo-pressed:
-    inset 7px 7px 14px var(--neo-shadow),
-    inset -5px -5px 10px var(--neo-light);
-  --neo-flat:
-    0 0 0 1px var(--ns-line);
-  --neo-knob:
-    2px 2px 5px rgba(153, 0, 17, 0.16),
-    -2px -2px 5px rgba(255, 255, 255, 0.9);
+  /* Acento azul con sombra propia, para el botón principal */
+  --ui-brand-sm: 0 1px 2px rgba(0, 86, 179, 0.24);
+  --ui-brand: 0 1px 2px rgba(0, 86, 179, 0.22), 0 6px 16px rgba(0, 122, 255, 0.28);
+  --ui-brand-lg: 0 2px 4px rgba(0, 86, 179, 0.22), 0 12px 28px rgba(0, 122, 255, 0.32);
+  --ui-brand-pressed: inset 0 2px 5px rgba(0, 60, 130, 0.35);
 
-  /* Relieve del acento: el rojo también se moldea. */
-  --neo-brand:
-    5px 5px 14px rgba(153, 0, 17, 0.3),
-    -4px -4px 10px var(--neo-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -2px 0 rgba(90, 0, 10, 0.25);
-  --neo-brand-lg:
-    9px 10px 26px rgba(153, 0, 17, 0.36),
-    -5px -5px 12px var(--neo-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    inset 0 -2px 0 rgba(90, 0, 10, 0.28);
-  --neo-brand-pressed:
-    2px 2px 6px rgba(153, 0, 17, 0.26),
-    inset 0 2px 5px rgba(90, 0, 10, 0.4),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  /* Compatibilidad con los llamados que quedan en el código */
+  --ui-surface: var(--ns-surface);
+  --ui-light: rgba(255, 255, 255, 0.9);
+  --ui-shadow-soft: rgba(16, 24, 40, 0.06);
+  --ui-flat: none;
 
-  /* ── Cristal (barras traslúcidas) ── */
-  --ns-glass-bg: rgba(252, 246, 245, 0.78);
-  --ns-glass-bg-strong: rgba(252, 246, 245, 0.92);
-  --ns-glass-border: rgba(255, 255, 255, 0.9);
-  --ns-glass-blur: blur(22px) saturate(180%);
+  /* ── Vidrio ───────────────────────────────────────────────── */
+  --ns-glass-bg: rgba(255, 255, 255, 0.78);
+  --ns-glass-bg-strong: rgba(255, 255, 255, 0.92);
+  --ns-glass-border: rgba(16, 24, 40, 0.07);
+  --ns-glass-blur: blur(20px) saturate(180%);
+  --ns-glass-dark: rgba(37, 44, 53, 0.82);
 
-  /* ── Sombras heredadas (mapeadas al relieve nuevo) ── */
-  --ns-shadow-sm: var(--neo-raised-sm);
-  --ns-shadow-md: var(--neo-raised);
-  --ns-shadow-lg: var(--neo-raised-lg);
-  --ns-shadow-xl: var(--neo-float);
-  --ns-shadow-glow: 0 0 34px rgba(153, 0, 17, 0.22);
-  --ns-shadow-inner: var(--neo-inset-sm);
-  --ns-plastilina-card: var(--neo-raised);
-  --ns-plastilina-btn: var(--neo-brand);
-  --ns-plastilina-active: var(--neo-pressed);
+  --ns-focus: rgba(0, 122, 255, 0.35);
+  --ns-shadow-glow: 0 0 0 4px rgba(0, 122, 255, 0.16);
 
-  /* ── Radios ── */
-  --ns-radius-xs: 14px;
-  --ns-radius-sm: 18px;
-  --ns-radius-md: 24px;
-  --ns-radius-lg: 30px;
-  --ns-radius-xl: 38px;
-  --ns-radius-2xl: 46px;
-  --ns-radius-3xl: 56px;
+  /* Sombras semánticas heredadas */
+  --ns-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --ns-shadow-md: 0 4px 10px rgba(16, 24, 40, 0.07);
+  --ns-shadow-lg: 0 12px 24px rgba(16, 24, 40, 0.09);
+  --ns-shadow-xl: 0 24px 48px rgba(16, 24, 40, 0.13);
+  --ns-shadow-inner: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
 
-  /* ── Tipografía ── */
-  --font-ui: 'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Fraunces', 'Inter Tight', Georgia, serif;
-  --font-mono-ui: 'JetBrains Mono', ui-monospace, monospace;
+  /* ── Radios ─────────────────────────────────────────────────
+     La curva de iOS: chica en controles, amplia en tarjetas. */
+  --ns-radius-xs: 7px;
+  --ns-radius-sm: 9px;
+  --ns-radius-md: 11px;
+  --ns-radius-lg: 14px;
+  --ns-radius-xl: 18px;
+  --ns-radius-2xl: 22px;
+  --ns-radius-3xl: 28px;
 
-  /* ── Movimiento ── */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Escala de mezcla ───────────────────────────────────────
+     Mezclas del lienzo con la tinta. Sustituye a la vieja escala
+     de bordó sobre papel; los nombres se mantienen para no
+     romper los llamados que ya existen. */
+  --ns-mix-02: #FAFBFD;
+  --ns-mix-03: #F8FAFC;
+  --ns-mix-05: #F5F8FB;
+  --ns-mix-06: #F3F6FA;
+  --ns-mix-08: #F0F4F9;
+  --ns-mix-10: #EDF1F7;
+  --ns-mix-12: #E9EEF4;
+  --ns-mix-14: #E4EAF2;
+  --ns-mix-16: #DFE6EF;
+  --ns-mix-20: #D6DEE9;
+  --ns-mix-24: #CBD4E1;
+  --ns-mix-28: #BFC9D8;
+  --ns-mix-44: #94A1B2;
+  --ns-mix-56: #68748A;
+  --ns-mix-68: #4A5462;
+  --ns-mix-80: #374151;
+  --ns-mix-90: #252C35;
+
+  /* ── Tiempos ────────────────────────────────────────────────
+     Cortos y con una curva suave: el movimiento acompaña, no se
+     hace notar. */
+  --dur-1: 90ms;
+  --dur-2: 140ms;
+  --dur-3: 220ms;
+  --dur-4: 320ms;
+  --dur-5: 480ms;
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.48, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-1: 120ms;
-  --dur-2: 190ms;
-  --dur-3: 280ms;
-  --dur-4: 400ms;
-  --dur-5: 620ms;
 
-  /* ── Zona segura del dispositivo ── */
-  --sab: env(safe-area-inset-bottom, 0px);
+  /* Márgenes seguros del dispositivo */
   --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
-}
-
-/* Titulares con la serif variable: sólo donde suma carácter. */
-.font-display,
-.neo-display {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
 }

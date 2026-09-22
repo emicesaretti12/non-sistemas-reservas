@@ -236,7 +236,7 @@ export default function GlobalSearch({
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <kbd className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-muted)' }}>
+          <kbd className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.06em]" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)', color: 'var(--ns-text-muted)' }}>
             Esc
           </kbd>
         </div>
@@ -245,17 +245,17 @@ export default function GlobalSearch({
         <div className="max-h-[50vh] overflow-y-auto py-1">
           {!dataLoaded ? (
             <div className="flex justify-center py-8">
-              <span className="neo-spinner neo-spinner--sm" role="status" aria-label="Buscando" />
+              <span className="ui-spinner ui-spinner--sm" role="status" aria-label="Buscando" />
             </div>
           ) : results.length === 0 ? (
-            <div className="neo-empty">
-              <span className="neo-pod neo-pod--sunken">
+            <div className="ui-empty">
+              <span className="ui-pod ui-pod--sunken">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                   <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <p className="neo-empty__title">Sin resultados</p>
-              <p className="neo-empty__text">Nada coincide con “{query}”. Probá con un nombre, un teléfono o el nombre de un servicio.</p>
+              <p className="ui-empty__title">Sin resultados</p>
+              <p className="ui-empty__text">Nada coincide con “{query}”. Probá con un nombre, un teléfono o el nombre de un servicio.</p>
             </div>
           ) : (
             results.map((item, idx) => {
@@ -265,7 +265,7 @@ export default function GlobalSearch({
                 <div key={idx}>
                   {showSeparator && query.trim() && (
                     <div className="px-5 pt-3 pb-1">
-                      <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-primary)' }}>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-primary)' }}>
                         {typeLabels[item.type] || item.type}
                       </span>
                     </div>
@@ -277,7 +277,7 @@ export default function GlobalSearch({
                     onMouseEnter={() => setSelectedIdx(idx)}
                     data-testid={`search-item-${idx}`}
                   >
-                    <span className={`neo-pod neo-pod--sm ${idx === selectedIdx ? 'neo-pod--brand' : ''}`}>
+                    <span className={`ui-pod ui-pod--sm ${idx === selectedIdx ? 'ui-pod--brand' : ''}`}>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                         <path d={item.icon} strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -301,14 +301,14 @@ export default function GlobalSearch({
         {/* Footer */}
         <div className="px-5 py-3 flex items-center justify-between" style={{ boxShadow: 'inset 0 1px 0 var(--ns-line)' }}>
           <div className="flex items-center gap-3">
-            <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
-              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>↑↓</kbd> Navegar
+            <span className="text-[9px] font-bold uppercase tracking-[0.06em] flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
+              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}>↑↓</kbd> Navegar
             </span>
-            <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
-              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>↵</kbd> Seleccionar
+            <span className="text-[9px] font-bold uppercase tracking-[0.06em] flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
+              <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}>↵</kbd> Seleccionar
             </span>
           </div>
-          <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>
+          <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-muted)' }}>
             {results.length} resultado{results.length !== 1 ? 's' : ''}
           </span>
         </div>

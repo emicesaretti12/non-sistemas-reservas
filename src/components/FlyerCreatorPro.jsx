@@ -15,56 +15,56 @@ const PROFESSIONAL_TEMPLATES = [
   {
     id: 'marca-solida',
     name: 'Marca sólida',
-    bgColors: ['#990011', '#8A000F'],
-    accentColors: ['#FCF6F5', '#F2DDDE'],
-    textColor: '#FCF6F5',
+    bgColors: ['#007AFF', '#0062D6'],
+    accentColors: ['#FFFFFF', '#E4EAF2'],
+    textColor: '#FFFFFF',
     secondaryText: '#EACACC',
   },
   {
     id: 'degrade-profundo',
     name: 'Degradé profundo',
-    bgColors: ['#A81322', '#990011', '#7A000E'],
-    accentColors: ['#FCF6F5'],
-    textColor: '#FCF6F5',
-    secondaryText: '#E8C5C7',
+    bgColors: ['#1A88FF', '#007AFF', '#0050AF'],
+    accentColors: ['#FFFFFF'],
+    textColor: '#FFFFFF',
+    secondaryText: '#D6DEE9',
   },
   {
     id: 'papel-claro',
     name: 'Papel claro',
-    bgColors: ['#FCF6F5', '#F2DDDE'],
-    accentColors: ['#990011', '#A81322'],
-    textColor: '#990011',
-    secondaryText: '#AD313F',
+    bgColors: ['#FFFFFF', '#E4EAF2'],
+    accentColors: ['#007AFF', '#1A88FF'],
+    textColor: '#007AFF',
+    secondaryText: '#1A88FF',
   },
   {
     id: 'papel-tinta',
     name: 'Papel y tinta',
-    bgColors: ['#F6E7E7', '#E8C5C7'],
-    accentColors: ['#990011'],
-    textColor: '#990011',
-    secondaryText: '#A31928',
+    bgColors: ['#F1F4F9', '#D6DEE9'],
+    accentColors: ['#007AFF'],
+    textColor: '#007AFF',
+    secondaryText: '#0062D6',
   },
   {
     id: 'contraste',
     name: 'Alto contraste',
-    bgColors: ['#990011'],
-    accentColors: ['#FCF6F5'],
-    textColor: '#FCF6F5',
-    secondaryText: '#F2DDDE',
+    bgColors: ['#007AFF'],
+    accentColors: ['#FFFFFF'],
+    textColor: '#FFFFFF',
+    secondaryText: '#E4EAF2',
   },
   {
     id: 'humo',
     name: 'Humo',
-    bgColors: ['#C56C75', '#990011'],
-    accentColors: ['#FCF6F5', '#EED4D5'],
-    textColor: '#FCF6F5',
-    secondaryText: '#F2DDDE',
+    bgColors: ['#93C5FD', '#007AFF'],
+    accentColors: ['#FFFFFF', '#E0E6EF'],
+    textColor: '#FFFFFF',
+    secondaryText: '#E4EAF2',
   },
 ]
 
 /** Degradado CSS a partir de la lista de colores de la plantilla. */
 function degradadoCss(colores) {
-  const lista = colores?.length ? colores : ['#990011']
+  const lista = colores?.length ? colores : ['#007AFF']
   return lista.length === 1
     ? lista[0]
     : `linear-gradient(135deg, ${lista.join(', ')})`
@@ -72,7 +72,7 @@ function degradadoCss(colores) {
 
 /** Pinta una lista de colores como degradado, tolerando un solo color. */
 function degradado(ctx, colores, x0, y0, x1, y1) {
-  const lista = colores?.length ? colores : ['#990011']
+  const lista = colores?.length ? colores : ['#007AFF']
   const grad = ctx.createLinearGradient(x0, y0, x1, y1)
   if (lista.length === 1) {
     grad.addColorStop(0, lista[0])
@@ -155,7 +155,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
       ctx.fill()
 
       // Texto del botón: contrasta contra el acento de la plantilla.
-      ctx.fillStyle = selectedTemplate.accentColors[0] === '#FCF6F5' ? '#990011' : '#FCF6F5'
+      ctx.fillStyle = selectedTemplate.accentColors[0] === '#FFFFFF' ? '#007AFF' : '#FFFFFF'
       ctx.font = `bold ${Math.floor(canvas.width * 0.07)}px "Inter", sans-serif`
       ctx.fillText(cta, canvas.width / 2, ctaY + ctaHeight / 2 - canvas.width * 0.025)
 
@@ -166,13 +166,13 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
         const qrY = canvas.height - qrSize - canvas.height * 0.05
 
         // Fondo blanco para QR
-        ctx.fillStyle = '#FCF6F5'
+        ctx.fillStyle = '#FFFFFF'
         ctx.beginPath()
         ctx.roundRect(qrX - canvas.width * 0.02, qrY - canvas.width * 0.02, qrSize + canvas.width * 0.04, qrSize + canvas.width * 0.04, canvas.width * 0.02)
         ctx.fill()
 
         // Placeholder QR (en producción usar librería qrcode.js)
-        ctx.fillStyle = '#990011'
+        ctx.fillStyle = '#007AFF'
         ctx.fillRect(qrX, qrY, qrSize, qrSize)
       }
 
@@ -206,7 +206,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
       <div className="ns-stat-card">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2" style={{ color: 'var(--ns-text)' }}>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2" style={{ color: 'var(--ns-text)' }}>
               Creador de Flyers Pro
             </h2>
             <p className="text-sm md:text-base font-medium" style={{ color: 'var(--ns-text-muted)' }}>
@@ -226,7 +226,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
         <div className="lg:col-span-1 space-y-6">
           {/* Tamaño */}
           <div className="ns-stat-card">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-3" style={{ color: 'var(--ns-primary)' }}>
+            <h3 className="text-sm font-bold uppercase tracking-[0.06em] mb-3" style={{ color: 'var(--ns-primary)' }}>
               Tamaño
             </h3>
             <div className="space-y-2">
@@ -238,8 +238,8 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
                   className="w-full px-4 py-3 rounded-[16px] font-bold text-sm transition-all text-left"
                   style={
                     selectedSize.id === size.id
-                      ? { background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)' }
-                      : { background: 'var(--ns-surface)', color: 'var(--ns-text-secondary)', boxShadow: 'var(--neo-raised-sm)' }
+                      ? { background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: 'var(--ui-brand)' }
+                      : { background: 'var(--ns-surface)', color: 'var(--ns-text-secondary)', boxShadow: 'var(--ui-shadow-sm)' }
                   }
                 >
                   {size.label}
@@ -250,7 +250,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
 
           {/* Plantilla */}
           <div className="ns-stat-card">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-3" style={{ color: 'var(--ns-primary)' }}>
+            <h3 className="text-sm font-bold uppercase tracking-[0.06em] mb-3" style={{ color: 'var(--ns-primary)' }}>
               Plantilla
             </h3>
             <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -281,12 +281,12 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
         {/* Inputs de Contenido */}
         <div className="lg:col-span-1 space-y-6">
           <div className="ns-stat-card">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: 'var(--ns-primary)' }}>
+            <h3 className="text-sm font-bold uppercase tracking-[0.06em] mb-4" style={{ color: 'var(--ns-primary)' }}>
               Contenido
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest mb-2 block" style={{ color: 'var(--ns-text-muted)' }}>
+                <label className="text-xs font-bold uppercase tracking-[0.06em] mb-2 block" style={{ color: 'var(--ns-text-muted)' }}>
                   Título
                 </label>
                 <input
@@ -300,7 +300,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest mb-2 block" style={{ color: 'var(--ns-text-muted)' }}>
+                <label className="text-xs font-bold uppercase tracking-[0.06em] mb-2 block" style={{ color: 'var(--ns-text-muted)' }}>
                   Subtítulo
                 </label>
                 <input
@@ -314,7 +314,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest mb-2 block" style={{ color: 'var(--ns-text-muted)' }}>
+                <label className="text-xs font-bold uppercase tracking-[0.06em] mb-2 block" style={{ color: 'var(--ns-text-muted)' }}>
                   Botón CTA
                 </label>
                 <input
@@ -345,7 +345,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
         {/* Preview */}
         <div className="lg:col-span-1">
           <div className="ns-stat-card sticky top-4">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: 'var(--ns-primary)' }}>
+            <h3 className="text-sm font-bold uppercase tracking-[0.06em] mb-4" style={{ color: 'var(--ns-primary)' }}>
               Vista Previa
             </h3>
             <div
@@ -371,7 +371,7 @@ export default function FlyerCreatorPro({ negocio, publicLink }) {
                 <div
                   style={{
                     background: degradadoCss(selectedTemplate.accentColors),
-                    color: selectedTemplate.accentColors[0] === '#FCF6F5' ? '#990011' : '#FCF6F5',
+                    color: selectedTemplate.accentColors[0] === '#FFFFFF' ? '#007AFF' : '#FFFFFF',
                     padding: '8px 16px',
                     borderRadius: '6px',
                     marginBottom: '12px',

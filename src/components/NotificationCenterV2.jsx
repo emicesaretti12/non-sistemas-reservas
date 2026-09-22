@@ -89,12 +89,12 @@ export default function NotificationCenterV2({ negocioId }) {
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 520, damping: 18 }}
-            className="absolute -top-1 -right-1 w-5 h-5 text-[10px] font-black rounded-full flex items-center justify-center"
+            transition={{ type: 'spring', stiffness: 560, damping: 30, mass: 0.7 }}
+            className="absolute -top-1 -right-1 w-5 h-5 text-[10px] font-bold rounded-full flex items-center justify-center"
             style={{
               background: 'var(--ns-gradient-1)',
               color: 'var(--ns-paper)',
-              boxShadow: '0 3px 10px rgba(153,0,17,0.45)'
+              boxShadow: '0 3px 10px rgba(16,24,40,0.45)'
             }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -111,25 +111,25 @@ export default function NotificationCenterV2({ negocioId }) {
             initial={{ opacity: 0, scale: 0.94, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: -8 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 36, mass: 0.9 }}
             className="ns-notif-panel"
           >
             <div className="ns-notif-panel__head">
               <div>
                 <p className="ns-notif-panel__title">Notificaciones</p>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-70">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] opacity-70">
                   {unreadCount > 0 ? `${unreadCount} sin leer` : 'Todo al día'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
-                  <button onClick={markAllAsRead} className="neo-onbrand-btn neo-onbrand-btn--ghost text-xs px-3 py-1.5">
+                  <button onClick={markAllAsRead} className="ui-onbrand-btn ui-onbrand-btn--ghost text-xs px-3 py-1.5">
                     Marcar todo
                   </button>
                 )}
                 <button
                   onClick={() => setOpen(false)}
-                  className="neo-onbrand-btn neo-onbrand-btn--ghost w-9 h-9 p-0"
+                  className="ui-onbrand-btn ui-onbrand-btn--ghost w-9 h-9 p-0"
                   aria-label="Cerrar notificaciones"
                 >
                   ✕
@@ -149,7 +149,7 @@ export default function NotificationCenterV2({ negocioId }) {
                   <span className="ns-notif-ask__title">Activá los avisos en este dispositivo</span>
                   <span className="ns-notif-ask__text">Te avisamos apenas entra una reserva nueva</span>
                 </span>
-                <span className="neo-chip neo-chip--solid text-[10px]">Activar</span>
+                <span className="ui-chip ui-chip--soft text-[10px]">Activar</span>
               </button>
             )}
 
@@ -161,8 +161,8 @@ export default function NotificationCenterV2({ negocioId }) {
 
             <div className="ns-notif-panel__body">
               {notifications.length === 0 ? (
-                <div className="neo-empty">
-                  <div className="neo-pod neo-pod--lg mx-auto mb-4">
+                <div className="ui-empty">
+                  <div className="ui-pod ui-pod--lg mx-auto mb-4">
                     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
@@ -172,8 +172,8 @@ export default function NotificationCenterV2({ negocioId }) {
                       />
                     </svg>
                   </div>
-                  <p className="neo-empty__title">Todavía no hay avisos</p>
-                  <p className="neo-empty__text">Acá van a aparecer tus reservas nuevas y los cambios de la agenda.</p>
+                  <p className="ui-empty__title">Todavía no hay avisos</p>
+                  <p className="ui-empty__text">Acá van a aparecer tus reservas nuevas y los cambios de la agenda.</p>
                 </div>
               ) : (
                 <AnimatePresence initial={false}>
@@ -185,7 +185,7 @@ export default function NotificationCenterV2({ negocioId }) {
                       initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 24, height: 0, marginBottom: 0 }}
-                      transition={{ delay: Math.min(idx * 0.04, 0.24), type: 'spring', damping: 24, stiffness: 320 }}
+                      transition={{ delay: Math.min(idx * 0.04, 0.24), type: 'spring', stiffness: 420, damping: 34, mass: 0.85 }}
                       onClick={() => markAsRead(n.id)}
                       className={`ns-notif-item${n.read ? ' is-read' : ''}`}
                     >
@@ -212,7 +212,7 @@ export default function NotificationCenterV2({ negocioId }) {
 
             {notifications.length > 0 && (
               <div className="ns-notif-panel__foot">
-                <button onClick={clear} className="neo-btn neo-btn--quiet neo-btn--pill text-xs">
+                <button onClick={clear} className="ui-btn ui-btn--quiet ui-btn--pill text-xs">
                   Limpiar todo
                 </button>
               </div>

@@ -2,10 +2,11 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { supabase } from '../supabaseClient'
 import { ocupaHorario, precioTurno, normalizarHorarios } from '../utils/reservas'
 import { haptic } from '../utils/haptics'
-import Contador from './neo/Contador'
+import { mayusculaInicial } from '../utils/vocabulario'
+import Contador from './ui/Contador'
 
 /**
- * DashboardHome — Centro de mando oscuro y mobile-first.
+ * DashboardHome — el resumen del día: lo que viene, lo que falta y cómo va la semana.
  * Muestra de un vistazo: citas de hoy, turnos próximos y lugares disponibles.
  * Pensado para usarse con el dedo (targets grandes, scroll vertical).
  */
@@ -210,15 +211,15 @@ export default function DashboardHome({
 
   if (falloCarga) {
     return (
-      <section className="neo-card p-7 text-center" data-testid="home-error">
-        <span className="neo-avatar w-14 h-14 mx-auto mb-4">
+      <section className="ui-card p-7 text-center" data-testid="home-error">
+        <span className="ui-avatar w-14 h-14 mx-auto mb-4">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </span>
-        <h2 className="font-display text-lg font-black tracking-tight" style={{ color: 'var(--ns-text)' }}>No pudimos traer tu día</h2>
+        <h2 className="font-display text-lg font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>No pudimos traer tu día</h2>
         <p className="text-[13px] mt-2 mb-5 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>
           Puede ser la conexión. Tus datos están a salvo: probá de nuevo en un momento.
         </p>
-        <button onClick={cargar} className="neo-btn neo-btn--primary">Reintentar</button>
+        <button onClick={cargar} className="ui-btn ui-btn--primary">Reintentar</button>
       </section>
     )
   }
@@ -227,90 +228,90 @@ export default function DashboardHome({
     <div className="flex flex-col gap-4 md:gap-5" data-testid="dashboard-home">
 
       {/* ═══════════ SALUDO ═══════════ */}
-      <header className="neo-card p-5 md:p-8 overflow-hidden relative" data-testid="home-hero">
+      <header className="ui-card p-5 md:p-8 overflow-hidden relative" data-testid="home-hero">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-5">
           <div className="flex items-center gap-4 min-w-0">
-            <span className="neo-pod neo-pod--lg overflow-hidden p-0">
+            <span className="ui-pod ui-pod--lg overflow-hidden p-0">
               {negocio?.logo_url
                 ? <img src={negocio.logo_url} alt="" className="w-full h-full object-cover" />
-                : <span className="font-display text-2xl font-black">{negocio?.nombre?.charAt(0) || 'N'}</span>}
+                : <span className="font-display text-2xl font-bold">{negocio?.nombre?.charAt(0) || 'N'}</span>}
             </span>
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
-                <span className="neo-eyebrow">{saludo()}</span>
+                <span className="ui-eyebrow">{saludo()}</span>
               </div>
-              <h1 className="font-display text-2xl md:text-4xl font-black tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
+              <h1 className="font-display text-2xl md:text-4xl font-bold tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
                 {negocio?.nombre || 'Tu negocio'}
               </h1>
-              <p className="text-[11px] font-semibold mt-1.5 capitalize" style={{ color: 'var(--ns-text-muted)' }}>{fechaLarga}</p>
+              <p className="text-[11px] font-semibold mt-1.5" style={{ color: 'var(--ns-text-muted)' }}>{mayusculaInicial(fechaLarga)}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 md:ml-auto shrink-0">
             <button
               onClick={() => { haptic(); window.open(publicLink, '_blank') }}
-              className="neo-icon-btn"
+              className="ui-icon-btn"
               title="Ver mi app pública"
               data-testid="home-view-app"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-[18px] h-[18px]"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
-            <button onClick={() => { haptic(); onNavigate?.('ajustes') }} className="neo-icon-btn" title="Ajustes">
+            <button onClick={() => { haptic(); onNavigate?.('ajustes') }} className="ui-icon-btn" title="Ajustes">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-[18px] h-[18px]"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" /></svg>
             </button>
           </div>
         </div>
 
         {showInstallBtn && (
-          <div className="neo-well mt-5 flex items-center justify-between gap-4 !py-3.5">
+          <div className="ui-well mt-5 flex items-center justify-between gap-4 !py-3.5">
             <div className="flex items-center gap-3 min-w-0">
-              <span className="neo-pod neo-pod--sm">
+              <span className="ui-pod ui-pod--sm">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-4 h-4"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </span>
               <div className="min-w-0">
-                <p className="text-[13px] font-black leading-tight" style={{ color: 'var(--ns-text)' }}>Instalar Noni</p>
+                <p className="text-[13px] font-bold leading-tight" style={{ color: 'var(--ns-text)' }}>Instalar Noni</p>
                 <p className="text-[11px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>Queda en tu pantalla de inicio, como cualquier app.</p>
               </div>
             </div>
-            <button onClick={handleInstallClick} className="neo-btn neo-btn--primary neo-btn--quiet shrink-0">Instalar</button>
+            <button onClick={handleInstallClick} className="ui-btn ui-btn--primary ui-btn--quiet shrink-0">Instalar</button>
           </div>
         )}
       </header>
 
       {/* ═══════════ MÉTRICAS DEL DÍA ═══════════ */}
       <div className="grid grid-cols-3 gap-3 md:gap-4" data-testid="home-today-stats">
-        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="neo-tile" data-testid="metric-citas">
-          <span className="neo-stat__label">{vocab?.turnos || 'Citas'} hoy</span>
-          <span className="neo-stat__value"><Contador valor={turnosHoy.length} /></span>
-          <span className="neo-stat__foot">{proximos.length} por venir</span>
+        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="ui-tile" data-testid="metric-citas">
+          <span className="ui-stat__label">{mayusculaInicial(vocab?.turnos || 'Citas')} hoy</span>
+          <span className="ui-stat__value"><Contador valor={turnosHoy.length} /></span>
+          <span className="ui-stat__foot">{proximos.length} por venir</span>
         </button>
-        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="neo-tile" data-testid="metric-lugares">
-          <span className="neo-stat__label">Libres hoy</span>
-          <span className="neo-stat__value"><Contador valor={lugaresCount} /></span>
-          <span className="neo-stat__foot">{lugaresCount === 1 ? 'Cupo disponible' : 'Cupos disponibles'}</span>
+        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="ui-tile" data-testid="metric-lugares">
+          <span className="ui-stat__label">Libres hoy</span>
+          <span className="ui-stat__value"><Contador valor={lugaresCount} /></span>
+          <span className="ui-stat__foot">{lugaresCount === 1 ? 'Cupo disponible' : 'Cupos disponibles'}</span>
         </button>
-        <div className="neo-tile" data-testid="metric-ingresos">
-          <span className="neo-stat__label">Ingresos</span>
-          <span className="neo-stat__value" style={{ fontSize: 'clamp(20px, 4.4vw, 32px)' }}>
+        <div className="ui-tile" data-testid="metric-ingresos">
+          <span className="ui-stat__label">Ingresos</span>
+          <span className="ui-stat__value" style={{ fontSize: 'clamp(20px, 4.4vw, 32px)' }}>
             <Contador valor={ingresosHoy} prefijo="$" />
           </span>
-          <span className="neo-stat__foot">{atendidos} {atendidos === 1 ? 'atendido' : 'atendidos'}</span>
+          <span className="ui-stat__foot">{atendidos} {atendidos === 1 ? 'atendido' : 'atendidos'}</span>
         </div>
       </div>
 
       {/* ═══════════ PRÓXIMA CITA ═══════════ */}
       {proximaCita && (
-        <section className="neo-card p-5 md:p-6" data-testid="home-next-appointment">
+        <section className="ui-card p-5 md:p-6" data-testid="home-next-appointment">
           <div className="flex items-center gap-4">
-            <span className="neo-pod neo-pod--brand neo-pod--lg flex-col leading-none">
-              <span className="font-display text-xl font-black">{fmtHora(proximaCita.fecha_hora).split(':')[0]}</span>
+            <span className="ui-pod ui-pod--brand ui-pod--lg flex-col leading-none">
+              <span className="font-display text-xl font-bold">{fmtHora(proximaCita.fecha_hora).split(':')[0]}</span>
               <span className="text-[10px] font-bold opacity-80">:{fmtHora(proximaCita.fecha_hora).split(':')[1]}</span>
             </span>
 
             <div className="flex-1 min-w-0">
-              <span className="neo-chip neo-chip--soft mb-1.5">Próxima · {countdown}</span>
-              <p className="text-base md:text-xl font-black truncate leading-tight" style={{ color: 'var(--ns-text)' }}>
+              <span className="ui-chip ui-chip--soft mb-1.5">Próxima · {countdown}</span>
+              <p className="text-base md:text-xl font-bold truncate leading-tight" style={{ color: 'var(--ns-text)' }}>
                 {proximaCita.cliente_nombre || 'Cliente'}
               </p>
               <p className="text-[11px] font-medium truncate mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>
@@ -332,10 +333,10 @@ export default function DashboardHome({
       )}
 
       {/* ═══════════ PRÓXIMOS TURNOS ═══════════ */}
-      <section className="neo-list" data-testid="home-upcoming">
-        <div className="neo-head p-5 pb-3 mb-0">
+      <section className="ui-list" data-testid="home-upcoming">
+        <div className="ui-head p-5 pb-3 mb-0">
           <div>
-            <h2 className="neo-head__title text-lg md:text-xl">Próximos turnos</h2>
+            <h2 className="ui-head__title text-lg md:text-xl">Próximos turnos</h2>
             <p className="text-[11px] font-semibold mt-1" style={{ color: 'var(--ns-text-muted)' }}>
               {proximos.length} {proximos.length === 1 ? 'pendiente' : 'pendientes'} hoy
             </p>
@@ -347,15 +348,15 @@ export default function DashboardHome({
         </div>
 
         {proximos.length === 0 ? (
-          <div className="neo-empty">
-            <span className="neo-pod neo-pod--sunken neo-pod--lg">
+          <div className="ui-empty">
+            <span className="ui-pod ui-pod--sunken ui-pod--lg">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
-            <p className="neo-empty__title">Agenda despejada</p>
-            <p className="neo-empty__text">No quedan turnos por atender hoy. Es buen momento para mover tu link.</p>
+            <p className="ui-empty__title">Agenda despejada</p>
+            <p className="ui-empty__text">No quedan turnos por atender hoy. Es buen momento para mover tu link.</p>
             <button
               onClick={() => { haptic('success'); navigator.clipboard?.writeText(publicLink); showToast?.('¡Link copiado!', 'copy') }}
-              className="neo-btn neo-btn--primary mt-1"
+              className="ui-btn ui-btn--primary mt-1"
             >
               Compartir mi link
             </button>
@@ -366,10 +367,10 @@ export default function DashboardHome({
               const diff = Math.round((new Date(t.fecha_hora) - ahora) / 60000)
               const pronto = diff <= 60
               return (
-                <div key={t.id} className="neo-list__row" data-testid={`home-turno-${t.id}`}>
+                <div key={t.id} className="ui-list__row" data-testid={`home-turno-${t.id}`}>
                   <div className="flex flex-col items-center w-14 shrink-0">
-                    <span className="text-[15px] font-black tabular-nums leading-none" style={{ color: 'var(--ns-text)' }}>{fmtHora(t.fecha_hora)}</span>
-                    <span className={`text-[9px] font-black uppercase tracking-widest mt-1 ${pronto ? 'ns-breathe' : ''}`} style={{ color: pronto ? 'var(--ns-primary)' : 'var(--ns-text-faint)' }}>
+                    <span className="text-[15px] font-bold tabular-nums leading-none" style={{ color: 'var(--ns-text)' }}>{fmtHora(t.fecha_hora)}</span>
+                    <span className={`text-[9px] font-bold uppercase tracking-[0.06em] mt-1 ${pronto ? 'ns-breathe' : ''}`} style={{ color: pronto ? 'var(--ns-primary)' : 'var(--ns-text-faint)' }}>
                       {diff < 60 ? `${diff}m` : `${Math.floor(diff / 60)}h`}
                     </span>
                   </div>
@@ -392,7 +393,7 @@ export default function DashboardHome({
               )
             })}
             {proximos.length > 6 && (
-              <button onClick={() => onNavigate?.('agenda')} className="neo-list__row neo-list__row--interactive justify-center text-[10px] font-black uppercase tracking-[0.15em]" style={{ color: 'var(--ns-text-muted)' }}>
+              <button onClick={() => onNavigate?.('agenda')} className="ui-list__row ui-list__row--interactive justify-center text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: 'var(--ns-text-muted)' }}>
                 +{proximos.length - 6} turnos más
               </button>
             )}
@@ -401,14 +402,14 @@ export default function DashboardHome({
       </section>
 
       {/* ═══════════ DISPONIBILIDAD ═══════════ */}
-      <section className="neo-card p-5 md:p-6" data-testid="home-available">
-        <div className="neo-head">
+      <section className="ui-card p-5 md:p-6" data-testid="home-available">
+        <div className="ui-head">
           <div className="flex items-center gap-3">
-            <span className="neo-pod neo-pod--sunken">
+            <span className="ui-pod ui-pod--sunken">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" className="w-[18px] h-[18px]"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </span>
             <div>
-              <h2 className="neo-head__title text-lg">Disponibilidad</h2>
+              <h2 className="ui-head__title text-lg">Disponibilidad</h2>
               <p className="text-[11px] font-semibold" style={{ color: 'var(--ns-text-muted)' }}>Cupos libres para hoy</p>
             </div>
           </div>
@@ -416,26 +417,26 @@ export default function DashboardHome({
         </div>
 
         {lugares.estado === 'sin-config' && (
-          <button onClick={() => { haptic(); onNavigate?.('horarios') }} className="neo-well w-full text-center py-7">
-            <p className="neo-empty__title mb-1">Todavía no cargaste tus horarios</p>
-            <p className="neo-empty__text mx-auto">Sin horarios, tu link muestra todos los días cerrados.</p>
-            <span className="neo-btn neo-btn--primary neo-btn--quiet mt-3">Configurarlos ahora</span>
+          <button onClick={() => { haptic(); onNavigate?.('horarios') }} className="ui-well w-full text-center py-7">
+            <p className="ui-empty__title mb-1">Todavía no cargaste tus horarios</p>
+            <p className="ui-empty__text mx-auto">Sin horarios, tu link muestra todos los días cerrados.</p>
+            <span className="ui-btn ui-btn--primary ui-btn--quiet mt-3">Configurarlos ahora</span>
           </button>
         )}
         {lugares.estado === 'cerrado' && (
-          <div className="neo-well text-center py-7">
-            <p className="neo-empty__title">Hoy está cerrado</p>
-            <p className="neo-empty__text mx-auto mt-1">Según tus horarios, hoy no atendés.</p>
+          <div className="ui-well text-center py-7">
+            <p className="ui-empty__title">Hoy está cerrado</p>
+            <p className="ui-empty__text mx-auto mt-1">Según tus horarios, hoy no atendés.</p>
           </div>
         )}
         {lugares.estado === 'lleno' && (
-          <div className="neo-well text-center py-7">
-            <p className="neo-empty__title">Día completo</p>
-            <p className="neo-empty__text mx-auto mt-1">No quedan cupos libres por el resto del día.</p>
+          <div className="ui-well text-center py-7">
+            <p className="ui-empty__title">Día completo</p>
+            <p className="ui-empty__text mx-auto mt-1">No quedan cupos libres por el resto del día.</p>
           </div>
         )}
         {lugares.estado === 'ok' && (
-          <div className="neo-well">
+          <div className="ui-well">
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 ns-stagger">
               {lugares.slots.slice(0, 11).map(({ time, emps }) => (
                 <button
@@ -478,23 +479,23 @@ export default function DashboardHome({
       </div>
 
       {/* ═══════════ PULSO SEMANAL ═══════════ */}
-      <section className="neo-card p-5 md:p-7" data-testid="home-weekly-pulse">
-        <div className="neo-head">
+      <section className="ui-card p-5 md:p-7" data-testid="home-weekly-pulse">
+        <div className="ui-head">
           <div>
-            <h2 className="neo-head__title text-lg md:text-xl">Pulso semanal</h2>
+            <h2 className="ui-head__title text-lg md:text-xl">Pulso semanal</h2>
             <p className="text-[11px] font-semibold mt-1" style={{ color: 'var(--ns-text-muted)' }}>
               {stats.semana || 0} {vocab?.turnos || 'turnos'} · {clientesCount} clientes
             </p>
           </div>
           <div className="text-right shrink-0">
-            <p className="font-display text-2xl md:text-3xl font-black tabular-nums leading-none" style={{ color: 'var(--ns-text)' }}>
+            <p className="font-display text-2xl md:text-3xl font-bold tabular-nums leading-none" style={{ color: 'var(--ns-text)' }}>
               <Contador valor={stats.tasaOcupacion || 0} sufijo="%" />
             </p>
-            <p className="neo-eyebrow mt-1.5">Ocupación</p>
+            <p className="ui-eyebrow mt-1.5">Ocupación</p>
           </div>
         </div>
 
-        <div className="neo-well">
+        <div className="ui-well">
           <div className="flex items-end justify-between h-32 md:h-40 gap-2 md:gap-4">
             {distribucionSemanal.map((val, idx) => {
               const esHoy = idx === hoyIdx
@@ -508,17 +509,17 @@ export default function DashboardHome({
                     onTouchStart={() => setBarraActiva(idx)}
                   >
                     {barraActiva === idx && (
-                      <span className="neo-tip" style={{ bottom: `calc(${alto}% + 12px)`, left: '50%', transform: 'translateX(-50%)' }}>
+                      <span className="ui-tip" style={{ bottom: `calc(${alto}% + 12px)`, left: '50%', transform: 'translateX(-50%)' }}>
                         {val} {val === 1 ? (vocab?.turno || 'turno') : (vocab?.turnos || 'turnos')}
                       </span>
                     )}
                     <div
-                      className={`neo-bar ${esHoy ? '' : 'neo-bar--quiet'}`}
+                      className={`ui-bar ${esHoy ? '' : 'ui-bar--quiet'}`}
                       style={{ height: `${alto}%`, animationDelay: `${idx * 60}ms` }}
                       aria-label={`${DIAS_LABEL[idx]}: ${val}`}
                     />
                   </div>
-                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: esHoy ? 'var(--ns-primary)' : 'var(--ns-text-faint)' }}>
+                  <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.06em]" style={{ color: esHoy ? 'var(--ns-primary)' : 'var(--ns-text-faint)' }}>
                     {DIAS_LABEL[idx]}
                   </span>
                 </div>

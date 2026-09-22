@@ -89,19 +89,19 @@ export default function ActualizarClave() {
         style={{ background: 'var(--ns-bg)', color: 'var(--ns-text)', fontFamily: '"Inter Tight", "Inter", sans-serif' }}
         data-testid="reset-link-invalido"
       >
-        <div className="neo-card max-w-sm w-full text-center p-9">
-          <div className="neo-pod neo-pod--lg mx-auto mb-5">
+        <div className="ui-card max-w-sm w-full text-center p-9">
+          <div className="ui-pod ui-pod--lg mx-auto mb-5">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
               <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h1 className="neo-empty__title mb-2">Este enlace ya no sirve</h1>
+          <h1 className="ui-empty__title mb-2">Este enlace ya no sirve</h1>
           <p className="text-sm mb-7 leading-relaxed" style={{ color: 'var(--ns-text-muted)' }}>
             Los enlaces para cambiar la contraseña vencen al rato y sólo funcionan
             en el navegador donde los pediste. Pedí uno nuevo y abrilo desde el
             mismo dispositivo.
           </p>
-          <button onClick={() => navigate('/login')} className="neo-btn neo-btn--primary neo-btn--pill">
+          <button onClick={() => navigate('/login')} className="ui-btn ui-btn--primary ui-btn--pill">
             Ir al login
           </button>
         </div>
@@ -129,7 +129,7 @@ export default function ActualizarClave() {
                 style={{ background: 'var(--ns-gradient-deep)' }}
               >
                 <span
-                  className="text-white font-black text-[17px] tracking-tighter"
+                  className="text-white font-bold text-[17px] tracking-tight"
                   style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
                 >
                   N
@@ -145,7 +145,7 @@ export default function ActualizarClave() {
                 Noni<span style={{ color: 'var(--ns-primary)' }}>.</span>
               </p>
               <p
-                className="text-[9px] font-semibold uppercase tracking-[0.25em] mt-1"
+                className="text-[9px] font-semibold uppercase tracking-[0.08em] mt-1"
                 style={{
                   color: 'var(--ns-text-muted)',
                   fontFamily: '"JetBrains Mono", monospace',
@@ -161,7 +161,7 @@ export default function ActualizarClave() {
         <div className="mb-9">
           <div className="flex items-center gap-3 mb-5">
             <span
-              className="text-[10px] font-bold uppercase tracking-[0.3em]"
+              className="text-[10px] font-bold uppercase tracking-[0.09em]"
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
                 color: 'var(--ns-primary)',
@@ -220,7 +220,7 @@ export default function ActualizarClave() {
           <div>
             <label
               htmlFor="new-password"
-              className="block text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
+              className="block text-[11px] font-bold uppercase tracking-[0.08em] mb-2"
               style={{ fontFamily: '"JetBrains Mono", monospace', color: 'var(--ns-text-secondary)' }}
             >
               Nueva contraseña
@@ -298,7 +298,7 @@ export default function ActualizarClave() {
           <div>
             <label
               htmlFor="confirm-password"
-              className="block text-[11px] font-bold uppercase tracking-[0.2em] mb-2"
+              className="block text-[11px] font-bold uppercase tracking-[0.08em] mb-2"
               style={{ fontFamily: '"JetBrains Mono", monospace', color: 'var(--ns-text-secondary)' }}
             >
               Confirmar contraseña
@@ -340,7 +340,7 @@ export default function ActualizarClave() {
         </form>
 
         <div
-          className="mt-10 pt-5 border-t flex items-center justify-between text-[10px] uppercase tracking-[0.25em]"
+          className="mt-10 pt-5 border-t border-[var(--ns-line)] flex items-center justify-between text-[10px] uppercase tracking-[0.08em]"
           style={{
             borderColor: 'var(--ns-border)',
             color: 'var(--ns-text-muted)',

@@ -32,18 +32,18 @@ export default function Atajos() {
 
   return (
     <div
-      className="neo-scrim flex items-center justify-center p-4"
+      className="ui-scrim flex items-center justify-center p-4"
       onClick={() => setAbierto(false)}
       role="presentation"
     >
       <div
-        className="neo-modal"
+        className="ui-modal"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label="Atajos de teclado"
       >
-        <h3 className="neo-head__title text-xl mb-1">Atajos</h3>
+        <h3 className="ui-head__title text-xl mb-1">Atajos</h3>
         <p className="text-[12px] font-medium mb-5" style={{ color: 'var(--ns-text-muted)' }}>
           Para moverte sin soltar el teclado.
         </p>
@@ -56,8 +56,8 @@ export default function Atajos() {
                 {a.teclas.map((t) => (
                   <kbd
                     key={t}
-                    className="min-w-[30px] text-center text-[11px] font-black px-2 py-1.5 rounded-lg"
-                    style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text)' }}
+                    className="min-w-[30px] text-center text-[11px] font-bold px-2 py-1.5 rounded-lg"
+                    style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)', color: 'var(--ns-text)' }}
                   >
                     {t}
                   </kbd>
@@ -67,7 +67,7 @@ export default function Atajos() {
           ))}
         </div>
 
-        <button onClick={() => setAbierto(false)} className="neo-btn neo-btn--block mt-6">Cerrar</button>
+        <button onClick={() => setAbierto(false)} className="ui-btn ui-btn--block mt-6">Cerrar</button>
       </div>
     </div>
   )

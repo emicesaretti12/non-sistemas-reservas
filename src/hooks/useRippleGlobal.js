@@ -4,13 +4,13 @@ import { useEffect } from 'react'
  * Onda al presionar, delegada a todo el documento.
  *
  * Se monta una sola vez en lugar de envolver cada botón: cualquier elemento
- * con `.neo-btn`, `.neo-icon-btn`, `.neo-tile`, `.nh-action` o `data-ripple`
+ * con `.ui-btn`, `.ui-icon-btn`, `.ui-tile`, `.nh-action` o `data-ripple`
  * responde al toque con una onda que sale del punto exacto donde apoyaste el
  * dedo. Es la diferencia entre un botón que "se apaga y prende" y uno que se
  * siente material.
  */
 
-const SELECTOR = '.neo-btn, .neo-icon-btn, .neo-tile, .nh-action, .nh-slot, .ns-bottom-nav-item, [data-ripple]'
+const SELECTOR = '.ui-btn, .ui-icon-btn, .ui-tile, .nh-action, .nh-slot, .ns-bottom-nav-item, [data-ripple]'
 
 export function useRippleGlobal() {
   useEffect(() => {
@@ -26,7 +26,7 @@ export function useRippleGlobal() {
 
       const size = Math.max(r.width, r.height) * 1.1
       const onda = document.createElement('span')
-      onda.className = 'neo-ripple__wave'
+      onda.className = 'ui-ripple__wave'
       onda.style.width = `${size}px`
       onda.style.height = `${size}px`
       onda.style.left = `${(e.clientX ?? r.left + r.width / 2) - r.left - size / 2}px`

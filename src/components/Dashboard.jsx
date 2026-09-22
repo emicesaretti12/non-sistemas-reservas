@@ -43,7 +43,7 @@ import DashboardHome from './DashboardHome'
 import NotificationCenter from './NotificationCenterV2'
 import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
-import Atajos from './neo/Atajos'
+import Atajos from './ui/Atajos'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
@@ -67,7 +67,7 @@ export default function Dashboard({ session }) {
   const [subiendoPortada, setSubiendoPortada] = useState(false)
 
   // --- ESTADOS: BRANDING & UI ---
-  const [colorPrimario, setColorPrimario] = useState('#990011')
+  const [colorPrimario, setColorPrimario] = useState('#007AFF')
   const [descripcion, setDescripcion] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
   const [portadaUrl, setPortadaUrl] = useState('')
@@ -145,12 +145,12 @@ export default function Dashboard({ session }) {
     ))
     // Generate a printable HTML report and trigger print dialog
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)} - ${esc(negocioNombre)}</title>
-    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#990011}
-    h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#B94F5A;border-bottom:1px solid #F4E2E3;padding-bottom:8px}
-    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#FDF8F8;border:1px solid #F4E2E3;border-radius:12px;padding:16px;flex:1;text-align:center}
-    .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#D28F95;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
-    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#FAF1F0;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#B94F5A}
-    td{padding:8px 12px;border-bottom:1px solid #FAF1F0}.meta{font-size:11px;color:#D28F95;margin-top:4px}</style></head><body>
+    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#007AFF}
+    h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#60A5FA;border-bottom:1px solid #EDF1F7;padding-bottom:8px}
+    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#FDF8F8;border:1px solid #EDF1F7;border-radius:12px;padding:16px;flex:1;text-align:center}
+    .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#BFDBFE;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#F8FAFC;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#60A5FA}
+    td{padding:8px 12px;border-bottom:1px solid #F8FAFC}.meta{font-size:11px;color:#BFDBFE;margin-top:4px}</style></head><body>
     <h1>${esc(title)}</h1><p class="meta">${esc(negocioNombre)} — ${new Date().toLocaleDateString('es-ES', { day:'numeric',month:'long',year:'numeric' })}</p>`
     + sections.map(s => {
       let content = `<h2>${esc(s.title)}</h2>`
@@ -250,7 +250,7 @@ export default function Dashboard({ session }) {
 
       if (data && data.id) {
         setNegocio(data)
-        setColorPrimario(data?.color_primario || '#990011')
+        setColorPrimario(data?.color_primario || '#007AFF')
         setDescripcion(data.descripcion || '')
         setLogoUrl(data.logo_url || '')
         setPortadaUrl(data.portada_url || '')
@@ -773,8 +773,8 @@ export default function Dashboard({ session }) {
   })
 
   if (loading) return (
-    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#990011]' : 'bg-white'}`}>
-      <span className="neo-spinner" role="status" aria-label="Cargando" />
+    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#007AFF]' : 'bg-white'}`}>
+      <span className="ui-spinner" role="status" aria-label="Cargando" />
     </div>
   )
 
@@ -786,17 +786,17 @@ export default function Dashboard({ session }) {
       <div className="noni-shell font-sans antialiased" style={{ colorScheme: 'light' }}>
         <header className="noni-topbar">
           <div className="flex items-center gap-3">
-            <span className="neo-avatar neo-avatar--brand w-9 h-9 text-xs">N</span>
-            <p className="neo-eyebrow">{esVencido ? 'Suscripción vencida' : 'Cuenta suspendida'}</p>
+            <span className="ui-avatar ui-avatar--brand w-9 h-9 text-xs">N</span>
+            <p className="ui-eyebrow">{esVencido ? 'Suscripción vencida' : 'Cuenta suspendida'}</p>
           </div>
-          <button onClick={cerrarSesion} className="neo-btn neo-btn--ghost neo-btn--quiet" data-testid="blocked-logout">Salir</button>
+          <button onClick={cerrarSesion} className="ui-btn ui-btn--ghost ui-btn--quiet" data-testid="blocked-logout">Salir</button>
         </header>
 
         {/* Contenido de bloqueo */}
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="max-w-md w-full text-center animate-in zoom-in-95 duration-700" data-testid="subscription-blocked">
             {/* Icono */}
-            <span className="neo-pod neo-pod--brand mx-auto mb-6" style={{ width: 76, height: 76, borderRadius: 'var(--ns-radius-lg)' }}>
+            <span className="ui-pod ui-pod--brand mx-auto mb-6" style={{ width: 76, height: 76, borderRadius: 'var(--ns-radius-lg)' }}>
               {esVencido ? (
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               ) : (
@@ -805,7 +805,7 @@ export default function Dashboard({ session }) {
             </span>
 
             {/* Mensaje principal */}
-            <h2 className="neo-head__title text-2xl md:text-3xl mb-2 justify-center">
+            <h2 className="ui-head__title text-2xl md:text-3xl mb-2 justify-center">
               {esVencido ? (accesoSub.enTrial ? 'Tu prueba gratis terminó' : 'Tu suscripción venció') : 'Cuenta Suspendida'}
             </h2>
             <p className="text-sm font-medium leading-relaxed mb-8 max-w-sm mx-auto" style={{ color: 'var(--ns-text-secondary)' }}>
@@ -818,13 +818,13 @@ export default function Dashboard({ session }) {
 
             {/* Plan card (solo vencido) */}
             {esVencido && (
-              <div className="neo-card p-5 mb-4 text-left">
+              <div className="ui-card p-5 mb-4 text-left">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="neo-eyebrow">Plan {PLAN.nombre}</span>
-                  <span className="neo-chip neo-chip--outline text-[10px]">{accesoSub.enTrial ? 'Prueba finalizada' : 'Vencido'}</span>
+                  <span className="ui-eyebrow">Plan {PLAN.nombre}</span>
+                  <span className="ui-chip ui-chip--outline text-[10px]">{accesoSub.enTrial ? 'Prueba finalizada' : 'Vencido'}</span>
                 </div>
                 <div className="flex items-end gap-1">
-                  <span className="font-display text-3xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>{formatearPrecio()}</span>
+                  <span className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>{formatearPrecio()}</span>
                   <span className="text-xs font-bold mb-1" style={{ color: 'var(--ns-text-muted)' }}>/mes</span>
                 </div>
                 <ul className="mt-3 space-y-1.5">
@@ -839,14 +839,14 @@ export default function Dashboard({ session }) {
             )}
 
             {/* Info card */}
-            <div className="neo-card p-5 mb-4 text-left space-y-3">
+            <div className="ui-card p-5 mb-4 text-left space-y-3">
               <div className="flex items-center justify-between">
-                <span className="neo-eyebrow">Negocio</span>
+                <span className="ui-eyebrow">Negocio</span>
                 <span className="text-sm font-bold" style={{ color: 'var(--ns-text)' }}>{negocio.nombre}</span>
               </div>
-              <div className="neo-divider" />
+              <div className="ui-divider" />
               <div className="flex items-center justify-between">
-                <span className="neo-eyebrow">Titular</span>
+                <span className="ui-eyebrow">Titular</span>
                 <span className="text-xs font-medium" style={{ color: 'var(--ns-text-secondary)' }}>{session.user.email}</span>
               </div>
             </div>
@@ -857,20 +857,20 @@ export default function Dashboard({ session }) {
                 href={whatsappActivacion(negocio, session.user.email)}
                 target="_blank" rel="noopener noreferrer"
                 data-testid="blocked-activate-cta"
-                className="neo-btn neo-btn--primary neo-btn--block py-4 text-[10px] uppercase tracking-[0.2em] gap-2"
+                className="ui-btn ui-btn--primary ui-btn--block py-4 text-[10px] uppercase tracking-[0.08em] gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 {esVencido ? 'Activar mi plan' : 'Contactar al administrador'}
               </a>
               <button
                 onClick={() => window.location.reload()}
-                className="neo-btn neo-btn--block"
+                className="ui-btn ui-btn--block"
               >
                 Ya pagué · Actualizar
               </button>
               <button
                 onClick={cerrarSesion}
-                className="neo-btn neo-btn--ghost neo-btn--block"
+                className="ui-btn ui-btn--ghost ui-btn--block"
               >
                 Cerrar sesión
               </button>
@@ -930,7 +930,7 @@ export default function Dashboard({ session }) {
       {/* Copy-link toast */}
       {copyToast && (
         <div className="ns-copy-toast" role="status">
-          <span className="neo-avatar w-9 h-9">
+          <span className="ui-avatar w-9 h-9">
             <IconCheckCircle size={18} />
           </span>
           <div>
@@ -945,19 +945,21 @@ export default function Dashboard({ session }) {
         {esPanelNegocio && (
           <aside className="noni-rail" data-tour="nav" aria-label="Navegación del panel">
             <div className="noni-rail__brand">
-              <span className="neo-avatar neo-avatar--brand w-11 h-11 text-base">N</span>
+              <span className="ui-avatar ui-avatar--brand w-11 h-11 text-base">N</span>
               <div className="min-w-0">
-                <p className="text-[13px] font-black tracking-tight truncate" style={{ color: 'var(--ns-text)' }}>
+                <p className="text-[13px] font-semibold tracking-tight truncate" style={{ color: '#FFFFFF' }}>
                   {negocio?.nombre || 'Panel'}
                 </p>
-                <p className="neo-eyebrow truncate">{negocio?.rubro || 'Reservas'}</p>
+                <p className="text-[11px] font-medium truncate" style={{ color: 'var(--ns-sidebar-muted)' }}>
+                  {negocio?.rubro || 'Reservas'}
+                </p>
               </div>
             </div>
 
             <button onClick={() => setSearchOpen(true)} className="noni-rail__item" aria-keyshortcuts="Control+K">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               Buscar
-              <kbd className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded-md" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-faint)' }}>⌘K</kbd>
+              <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--ns-sidebar-muted)' }}>⌘K</kbd>
             </button>
 
             <p className="noni-rail__label">Gestión</p>
@@ -995,14 +997,14 @@ export default function Dashboard({ session }) {
         {/* ══════════ BARRA SUPERIOR ══════════ */}
         <header className={`noni-topbar ${scrolleado ? 'is-stuck' : ''}`}>
           <div className="flex items-center gap-3 min-w-0">
-            <span className={`neo-avatar neo-avatar--brand w-10 h-10 text-sm ${esPanelNegocio ? 'lg:hidden' : ''}`}>N</span>
+            <span className={`ui-avatar ui-avatar--brand w-10 h-10 text-sm ${esPanelNegocio ? 'lg:hidden' : ''}`}>N</span>
             <div className="noni-topbar__title">
-              <p className="text-[14px] md:text-[15px] font-black tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
+              <p className="text-[14px] md:text-[15px] font-bold tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
                 {negocio?.es_admin_plataforma ? 'Nucleus Master' : (esPanelNegocio ? tituloSeccion : (negocio?.nombre || 'Panel'))}
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="ns-live-dot" style={{ width: 6, height: 6 }} />
-                <p className="text-[9px] font-bold tracking-[0.16em] uppercase truncate" style={{ color: 'var(--ns-text-muted)' }}>
+                <p className="text-[9px] font-bold tracking-[0.06em] uppercase truncate" style={{ color: 'var(--ns-text-muted)' }}>
                   {esPanelNegocio ? (negocio?.nombre || '') : (negocio?.rubro || 'Gestión de Reservas')}
                 </p>
               </div>
@@ -1012,13 +1014,13 @@ export default function Dashboard({ session }) {
           <div className="relative flex items-center gap-2">
             {esPanelNegocio && (
               <>
-                <button onClick={() => { haptic(); setSearchOpen(true) }} aria-label="Buscar (Ctrl+K)" className="neo-icon-btn lg:hidden">
+                <button onClick={() => { haptic(); setSearchOpen(true) }} aria-label="Buscar (Ctrl+K)" className="ui-icon-btn lg:hidden">
                   <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </button>
                 <NotificationCenter negocioId={negocio.id} rubro={negocio.rubro} />
               </>
             )}
-            <button onClick={cerrarSesion} className="neo-icon-btn lg:hidden" aria-label="Cerrar sesión" title="Cerrar sesión">
+            <button onClick={cerrarSesion} className="ui-icon-btn lg:hidden" aria-label="Cerrar sesión" title="Cerrar sesión">
               <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
           </div>
@@ -1046,12 +1048,12 @@ export default function Dashboard({ session }) {
           <div className="space-y-5 md:space-y-7 animate-in fade-in duration-700">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6">
               <div>
-                <h2 className="text-3xl md:text-6xl font-bold tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>Nucleus Control</h2>
-                <p className="font-medium mt-1 md:mt-2 text-sm md:text-lg tracking-tight" style={{ color: 'rgba(252,246,245,0.6)' }}>
+                <h2 className="text-3xl md:text-6xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>Nucleus control</h2>
+                <p className="font-medium mt-1 md:mt-2 text-sm md:text-lg tracking-tight" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   Arquitectura centralizada de Non Sistemas.
                 </p>
               </div>
-              <div className="neo-onbrand-chip is-active flex items-center gap-2.5">
+              <div className="ui-onbrand-chip is-active flex items-center gap-2.5">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute h-full w-full rounded-full opacity-60" style={{ background: 'var(--ns-paper)' }} />
                   <span className="relative rounded-full h-2 w-2" style={{ background: 'var(--ns-paper)' }} />
@@ -1063,7 +1065,7 @@ export default function Dashboard({ session }) {
             {cobroSinConfigurar && (
               <div
                 className="rounded-[26px] p-5 flex items-start gap-3.5"
-                style={{ background: 'rgba(52,0,6,0.32)', boxShadow: 'inset 6px 6px 14px rgba(40,0,5,0.45), inset -5px -5px 12px rgba(255,255,255,0.07)' }}
+                style={{ background: 'rgba(16,24,40,0.32)', boxShadow: 'inset 6px 6px 14px rgba(16,24,40,0.45), inset -5px -5px 12px rgba(255,255,255,0.07)' }}
                 data-testid="aviso-cobro"
               >
                 <svg className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--ns-paper)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -1071,7 +1073,7 @@ export default function Dashboard({ session }) {
                 </svg>
                 <div>
                   <p className="text-sm font-bold">Falta configurar el canal de cobro</p>
-                  <p className="text-[12px] font-medium mt-1 leading-relaxed" style={{ color: 'rgba(252,246,245,0.66)' }}>
+                  <p className="text-[12px] font-medium mt-1 leading-relaxed" style={{ color: 'rgba(255,255,255,0.66)' }}>
                     Los botones «Activar plan» están cayendo al email de soporte. Definí <code className="font-mono">VITE_CONTACTO_WHATSAPP</code> (tu número internacional sin «+») en las variables de entorno de Vercel y volvé a desplegar.
                   </p>
                 </div>
@@ -1089,13 +1091,13 @@ export default function Dashboard({ session }) {
                 <div
                   key={st.label}
                   className="p-5 md:p-7 rounded-[26px] md:rounded-[32px] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1"
-                  style={{ background: 'rgba(252,246,245,0.09)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 10px 12px 28px rgba(45,0,5,0.3)' }}
+                  style={{ background: 'rgba(255,255,255,0.09)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 10px 12px 28px rgba(16,24,40,0.3)' }}
                 >
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] truncate" style={{ color: 'rgba(252,246,245,0.55)' }}>{st.label}</p>
-                  <h3 className={`font-bold mt-4 md:mt-6 tracking-tighter ${st.truncate ? 'truncate text-2xl md:text-4xl' : 'text-3xl md:text-5xl'}`} style={{ fontFamily: 'var(--font-display)' }}>
+                  <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.07em] truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>{st.label}</p>
+                  <h3 className={`font-bold mt-4 md:mt-6 tracking-tight ${st.truncate ? 'truncate text-2xl md:text-4xl' : 'text-3xl md:text-5xl'}`} style={{ fontFamily: 'var(--font-display)' }}>
                     {st.val}
                   </h3>
-                  <p className="text-[8px] md:text-[10px] font-black mt-3 md:mt-4 uppercase tracking-[0.18em]" style={{ color: 'rgba(252,246,245,0.32)' }}>{st.trend}</p>
+                  <p className="text-[8px] md:text-[10px] font-bold mt-3 md:mt-4 uppercase tracking-[0.07em]" style={{ color: 'rgba(255,255,255,0.32)' }}>{st.trend}</p>
                 </div>
               ))}
             </div>
@@ -1103,21 +1105,21 @@ export default function Dashboard({ session }) {
             {/* Directorio */}
             <div
               className="rounded-[32px] md:rounded-[40px] p-5 md:p-9"
-              style={{ background: 'rgba(252,246,245,0.07)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.16), 16px 18px 42px rgba(45,0,5,0.28)' }}
+              style={{ background: 'rgba(255,255,255,0.07)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.16), 16px 18px 42px rgba(16,24,40,0.28)' }}
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-8 mb-6 md:mb-8">
                 <div>
                   <h4 className="text-lg md:text-xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>Directorio global</h4>
-                  <p className="text-xs md:text-sm mt-1" style={{ color: 'rgba(252,246,245,0.55)' }}>Gestión de licencias y accesos.</p>
+                  <p className="text-xs md:text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Gestión de licencias y accesos.</p>
                 </div>
                 <div className="relative w-full md:w-80">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(252,246,245,0.5)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.5)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                     <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   <input
                     type="search"
                     placeholder="Buscar por ID o nombre…"
-                    className="neo-onbrand-field w-full pl-11"
+                    className="ui-onbrand-field w-full pl-11"
                     value={filtroBusqueda}
                     onChange={(e) => setFiltroBusqueda(e.target.value)}
                     aria-label="Buscar negocios"
@@ -1128,7 +1130,7 @@ export default function Dashboard({ session }) {
               {negociosFiltrados.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-sm font-bold">No encontramos negocios</p>
-                  <p className="text-xs mt-1" style={{ color: 'rgba(252,246,245,0.55)' }}>
+                  <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                     {filtroBusqueda ? 'Probá con otro nombre o ID.' : 'Todavía no hay ninguno dado de alta.'}
                   </p>
                 </div>
@@ -1145,25 +1147,25 @@ export default function Dashboard({ session }) {
                       <div
                         key={n.id}
                         className="p-4 md:p-5 rounded-[24px] md:rounded-[30px] flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 group"
-                        style={{ background: 'rgba(252,246,245,0.08)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 8px 10px 22px rgba(45,0,5,0.24)' }}
+                        style={{ background: 'rgba(255,255,255,0.08)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 8px 10px 22px rgba(16,24,40,0.24)' }}
                       >
                         <div className="flex items-center gap-4 w-full min-w-0">
                           <div
-                            className="w-12 h-12 md:w-14 md:h-14 rounded-[18px] flex items-center justify-center font-black text-lg md:text-xl shrink-0 transition-transform duration-300 group-hover:rotate-6"
-                            style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)', boxShadow: '6px 7px 16px rgba(45,0,5,0.35)' }}
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-[18px] flex items-center justify-center font-bold text-lg md:text-xl shrink-0 transition-transform duration-300 group-hover:rotate-6"
+                            style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)', boxShadow: '6px 7px 16px rgba(16,24,40,0.35)' }}
                           >
                             {(n.nombre || '?').charAt(0)}
                           </div>
                           <div className="overflow-hidden flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-bold text-base md:text-lg tracking-tight leading-none truncate">{n.nombre || 'Sin nombre'}</p>
-                              <span className={`neo-onbrand-chip text-[9px] ${badge.on ? 'is-active' : ''}`} style={badge.tachado ? { textDecoration: 'line-through' } : undefined}>
+                              <span className={`ui-onbrand-chip text-[9px] ${badge.on ? 'is-active' : ''}`} style={badge.tachado ? { textDecoration: 'line-through' } : undefined}>
                                 {badge.t}
                               </span>
                             </div>
                             <div className="flex items-center gap-2.5 mt-2">
-                              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.16em] truncate" style={{ color: 'rgba(252,246,245,0.55)' }}>{n.rubro}</span>
-                              <span className="text-[9px] font-mono uppercase hidden sm:inline" style={{ color: 'rgba(252,246,245,0.3)' }}>• {n.id.slice(0, 8)}</span>
+                              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.06em] truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>{n.rubro}</span>
+                              <span className="text-[9px] font-mono uppercase hidden sm:inline" style={{ color: 'rgba(255,255,255,0.3)' }}>• {n.id.slice(0, 8)}</span>
                             </div>
                           </div>
                         </div>
@@ -1171,7 +1173,7 @@ export default function Dashboard({ session }) {
                         <div className="flex items-center gap-2.5 w-full md:w-auto">
                           <button
                             onClick={() => { const slug = (n.nombre || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); window.open(`/app/${slug}/${n.id}`, '_blank') }}
-                            className="neo-onbrand-btn neo-onbrand-btn--ghost p-3.5"
+                            className="ui-onbrand-btn ui-onbrand-btn--ghost p-3.5"
                             title="Ver la app pública"
                             aria-label={`Ver la app pública de ${n.nombre || 'este negocio'}`}
                           >
@@ -1183,7 +1185,7 @@ export default function Dashboard({ session }) {
                             <>
                               <button
                                 onClick={() => registrarPago(n)}
-                                className="neo-onbrand-btn flex-1 md:flex-none text-[9px] md:text-[10px] uppercase tracking-[0.16em] px-5 py-3.5"
+                                className="ui-onbrand-btn flex-1 md:flex-none text-[9px] md:text-[10px] uppercase tracking-[0.06em] px-5 py-3.5"
                                 title="Registrar pago (+30 días)"
                               >
                                 +30 días
@@ -1191,7 +1193,7 @@ export default function Dashboard({ session }) {
                               {sn.acceso && (
                                 <button
                                   onClick={() => suspenderNegocio(n)}
-                                  className="neo-onbrand-btn neo-onbrand-btn--ghost flex-1 md:flex-none text-[9px] md:text-[10px] uppercase tracking-[0.16em] px-5 py-3.5"
+                                  className="ui-onbrand-btn ui-onbrand-btn--ghost flex-1 md:flex-none text-[9px] md:text-[10px] uppercase tracking-[0.06em] px-5 py-3.5"
                                 >
                                   Suspender
                                 </button>
@@ -1214,18 +1216,18 @@ export default function Dashboard({ session }) {
 
             {/* BANNER DE SUSCRIPCIÓN — Bento */}
             {(accesoSub.estado === 'trial' || (accesoSub.estado === 'activo' && accesoSub.diasRestantes != null && accesoSub.diasRestantes <= 5)) && (
-              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-[#F2DDDE] border-[#E0B1B5]' : 'bg-[#FAF1F0] border-[#ECCFD1]'}`} data-testid="subscription-banner">
+              <div className={`flex flex-col sm:flex-row sm:items-center gap-3 px-4 md:px-5 py-3 md:py-3.5 rounded-2xl border ${accesoSub.estado === 'trial' ? 'bg-[#E4EAF2] border-[#CBD4E1]' : 'bg-[#F8FAFC] border-[#DFE6EF]'}`} data-testid="subscription-banner">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-[#AF3643]' : 'bg-[#DAA2A7]'}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accesoSub.estado === 'trial' ? 'bg-[#4A9CFF]' : 'bg-[#DBEAFE]'}`}>
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-[#990011]' : 'text-[#A72231]'}`}>
+                    <p className={`text-[13px] font-bold ${accesoSub.estado === 'trial' ? 'text-[#1D212A]' : 'text-[#4A5462]'}`}>
                       {accesoSub.estado === 'trial'
                         ? `Prueba gratis · te ${accesoSub.diasRestantes === 1 ? 'queda 1 día' : `quedan ${accesoSub.diasRestantes} días`}`
                         : `Tu plan vence en ${accesoSub.diasRestantes === 1 ? '1 día' : `${accesoSub.diasRestantes} días`}`}
                     </p>
-                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-[#AF3643]' : 'text-[#CB7B83]'}`}>
+                    <p className={`text-[11px] font-medium ${accesoSub.estado === 'trial' ? 'text-[#4A5462]' : 'text-[#94A1B2]'}`}>
                       Plan {PLAN.nombre} · {formatearPrecio()}/mes · activá para no perder el acceso
                     </p>
                   </div>
@@ -1234,7 +1236,7 @@ export default function Dashboard({ session }) {
                   href={whatsappActivacion(negocio, session.user.email)}
                   target="_blank" rel="noopener noreferrer"
                   data-testid="subscription-banner-cta"
-                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-[#AF3643]' : 'bg-[#DAA2A7]'}`}
+                  className={`shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.06em] text-white text-center transition-all active:scale-95 ${accesoSub.estado === 'trial' ? 'bg-[#4A9CFF]' : 'bg-[#DBEAFE]'}`}
                 >
                   {accesoSub.estado === 'trial' ? 'Activar plan' : 'Renovar'}
                 </a>
@@ -1247,51 +1249,29 @@ export default function Dashboard({ session }) {
                 onClick={() => setTab('horarios')}
                 data-testid="aviso-sin-horarios"
                 className="w-full text-left flex items-center gap-3 px-4 md:px-5 py-3.5 rounded-2xl border transition-all active:scale-[0.99]"
-                style={{ background: '#FAF1F0', borderColor: '#ECCFD1' }}
+                style={{ background: '#F8FAFC', borderColor: '#DFE6EF' }}
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#DAA2A7' }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#DBEAFE' }}>
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-[#A72231]">Todavía no configuraste tus horarios</p>
-                  <p className="text-[11px] font-medium text-[#CB7B83]">Sin horarios, tu link de reservas muestra todos los días cerrados. Tocá acá para configurarlos.</p>
+                  <p className="text-[13px] font-bold text-[#4A5462]">Todavía no configuraste tus horarios</p>
+                  <p className="text-[11px] font-medium text-[#94A1B2]">Sin horarios, tu link de reservas muestra todos los días cerrados. Tocá acá para configurarlos.</p>
                 </div>
-                <svg className="w-4 h-4 text-[#CB7B83] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className="w-4 h-4 text-[#94A1B2] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
-            )}
-
-            {/* BRAND HERO — Bento Card Light (sólo en pestañas que no son el inicio) */}
-            {tab !== 'inicio' && (
-            <header className="relative overflow-hidden rounded-3xl p-6 md:p-10 bg-[#FCF6F5] border group animate-in fade-in slide-in-from-top-4 duration-700" style={{ borderColor: 'var(--ns-border)', boxShadow: 'var(--ns-shadow-sm)' }}>
-              <div className="relative z-10 flex items-center justify-between gap-6">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--ns-primary)' }} />
-                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-text-muted)' }}>{tabsConfig.find(t => t.id === tab)?.label || 'Panel'}</span>
-                  </div>
-                  <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-none mb-1 truncate" style={{ color: 'var(--ns-text)' }}>{negocio.nombre}</h2>
-                  <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--ns-primary)' }}>{negocio.rubro}</p>
-                </div>
-                {logoUrl && (
-                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-[#F2DDDE] p-1 shrink-0 transform group-hover:scale-105 transition-transform duration-500">
-                    <img src={logoUrl} className="w-full h-full object-cover rounded-[1rem] md:rounded-[1.5rem]" alt="Logo" />
-                  </div>
-                )}
-              </div>
-              <div className="absolute -bottom-16 -right-16 w-48 h-48 md:w-64 md:h-64 rounded-full blur-[80px] opacity-10 group-hover:opacity-15 transition-opacity duration-700 pointer-events-none" style={{ background: 'var(--ns-primary)' }}></div>
-            </header>
             )}
 
             {/* ══════════ PESTAÑAS — barra deslizable bajo 1024px ══════════ */}
             <div className="lg:hidden -mx-1 px-1 overflow-x-auto no-scrollbar" data-tour="tabs">
-              <div className="flex gap-1.5 w-max p-1.5 rounded-[22px]" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>
+              <div className="flex gap-1.5 w-max p-1.5 rounded-[22px]" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}>
                 {tabsConfig.map((i) => (
                   <button
                     key={i.id}
                     onClick={() => { haptic(); setTab(i.id) }}
                     aria-current={tab === i.id ? 'page' : undefined}
                     className={`ns-tab ${tab === i.id ? 'active' : ''}`}
-                    style={tab === i.id ? { background: 'var(--ns-surface)', boxShadow: 'var(--neo-raised-sm)' } : undefined}
+                    style={tab === i.id ? { background: 'var(--ns-surface)', boxShadow: 'var(--ui-shadow-sm)' } : undefined}
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                     {i.label}
@@ -1350,13 +1330,13 @@ export default function Dashboard({ session }) {
                     <div className="flex items-center justify-between relative z-10">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-plastilina-btn)' }}>
+                          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                           </div>
-                          <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-primary)' }}>Base de Datos</span>
+                          <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Base de Datos</span>
                         </div>
-                        <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-none" style={{ color: 'var(--ns-text)' }}>{vocab.clientePlural}</h2>
-                        <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--ns-text-muted)' }}>{clientes.length} registrados</p>
+                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>{vocab.clientePlural}</h2>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.06em] mt-1" style={{ color: 'var(--ns-text-muted)' }}>{clientes.length} registrados</p>
                       </div>
                       {/* EXPORT BUTTONS */}
                       {clientes.length > 0 && (
@@ -1410,17 +1390,17 @@ export default function Dashboard({ session }) {
 
                     {/* STATS RÁPIDOS DE CLIENTES — Plastilina Bento */}
                     <div className="grid grid-cols-3 gap-2.5 relative z-10">
-                      <div className="neo-tile !p-3.5 text-center items-center">
-                        <span className="neo-stat__value" style={{ fontSize: 'clamp(20px,4vw,28px)' }}>{clientes.length}</span>
-                        <span className="neo-stat__label">Total</span>
+                      <div className="ui-tile !p-3.5 text-center items-center">
+                        <span className="ui-stat__value" style={{ fontSize: 'clamp(20px,4vw,28px)' }}>{clientes.length}</span>
+                        <span className="ui-stat__label">Total</span>
                       </div>
-                      <div className="neo-tile !p-3.5 text-center items-center">
-                        <span className="neo-stat__value" style={{ fontSize: 'clamp(20px,4vw,28px)' }}>{clientesVIP + clientesFrecuentes}</span>
-                        <span className="neo-stat__label">Recurrentes</span>
+                      <div className="ui-tile !p-3.5 text-center items-center">
+                        <span className="ui-stat__value" style={{ fontSize: 'clamp(20px,4vw,28px)' }}>{clientesVIP + clientesFrecuentes}</span>
+                        <span className="ui-stat__label">Recurrentes</span>
                       </div>
-                      <div className="neo-tile !p-3.5 text-center items-center">
-                        <span className="neo-stat__value" style={{ fontSize: 'clamp(16px,3.2vw,22px)' }}>${totalIngresosClientes.toLocaleString('es-AR')}</span>
-                        <span className="neo-stat__label">Facturado</span>
+                      <div className="ui-tile !p-3.5 text-center items-center">
+                        <span className="ui-stat__value" style={{ fontSize: 'clamp(16px,3.2vw,22px)' }}>${totalIngresosClientes.toLocaleString('es-AR')}</span>
+                        <span className="ui-stat__label">Facturado</span>
                       </div>
                     </div>
 
@@ -1428,9 +1408,9 @@ export default function Dashboard({ session }) {
                     <div className="flex gap-2 relative z-10">
                       <div className="relative flex-1">
                         <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <input type="text" placeholder="Buscar cliente…" aria-label="Buscar cliente" className="neo-field pl-11" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
+                        <input type="text" placeholder="Buscar cliente…" aria-label="Buscar cliente" className="ui-field pl-11" value={busquedaCliente} onChange={(e) => setBusquedaCliente(e.target.value)} />
                       </div>
-                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} aria-label="Ordenar clientes" className="neo-field cursor-pointer w-auto shrink-0">
+                      <select value={ordenClientes} onChange={(e) => setOrdenClientes(e.target.value)} aria-label="Ordenar clientes" className="ui-field cursor-pointer w-auto shrink-0">
                         <option value="visitas">Visitas</option>
                         <option value="nombre">Nombre</option>
                         <option value="reciente">Reciente</option>
@@ -1446,19 +1426,19 @@ export default function Dashboard({ session }) {
                       <div className="ns-skeleton" style={{ height: 84 }} />
                     </div>
                   ) : clientesFiltrados.length === 0 ? (
-                    <div className="neo-card">
-                      <div className="neo-empty">
-                        <span className="neo-pod neo-pod--sunken neo-pod--lg">
+                    <div className="ui-card">
+                      <div className="ui-empty">
+                        <span className="ui-pod ui-pod--sunken ui-pod--lg">
                           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </span>
-                        <p className="neo-empty__title">{busquedaCliente ? 'Nadie con ese nombre' : 'Todavía sin clientes'}</p>
-                        <p className="neo-empty__text">
+                        <p className="ui-empty__title">{busquedaCliente ? 'Nadie con ese nombre' : 'Todavía sin clientes'}</p>
+                        <p className="ui-empty__text">
                           {busquedaCliente
                             ? 'Probá con otro nombre, teléfono o email.'
                             : 'Se cargan solos con cada reserva que entra por tu link: no hace falta anotarlos a mano.'}
                         </p>
                         {!busquedaCliente && (
-                          <button onClick={showCopyToast} className="neo-btn neo-btn--primary mt-1">Copiar mi link</button>
+                          <button onClick={showCopyToast} className="ui-btn ui-btn--primary mt-1">Copiar mi link</button>
                         )}
                       </div>
                     </div>
@@ -1467,23 +1447,23 @@ export default function Dashboard({ session }) {
                       {clientesFiltrados.map((c, idx) => (
                         <div key={idx} className="ns-cliente-card ns-stagger-in" style={{ animationDelay: `${idx * 0.04}s` }}>
                           {/* Avatar Plastilina */}
-                          <span className={`neo-pod neo-pod--lg font-display text-xl shrink-0 ${c.frecuencia === 'VIP' ? 'neo-pod--brand' : ''}`}>
+                          <span className={`ui-pod ui-pod--lg font-display text-xl shrink-0 ${c.frecuencia === 'VIP' ? 'ui-pod--brand' : ''}`}>
                             {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                           </span>
                           
                           <div className="flex-1 overflow-hidden min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-black text-base md:text-lg truncate leading-none" style={{ color: 'var(--ns-text)' }}>{c.nombre}</h4>
-                              <span className={`neo-chip shrink-0 ${
-                                c.frecuencia === 'VIP' ? 'neo-chip--solid'
-                                : c.frecuencia === 'Frecuente' ? 'neo-chip--outline'
-                                : 'neo-chip--quiet'
+                              <h4 className="font-bold text-base md:text-lg truncate leading-none" style={{ color: 'var(--ns-text)' }}>{c.nombre}</h4>
+                              <span className={`ui-chip shrink-0 ${
+                                c.frecuencia === 'VIP' ? 'ui-chip--solid'
+                                : c.frecuencia === 'Frecuente' ? 'ui-chip--outline'
+                                : 'ui-chip--quiet'
                               }`}>{c.frecuencia}</span>
                             </div>
                             <p className="text-[11px] font-semibold truncate" style={{ color: 'var(--ns-text-secondary)' }}>{c.telefono}{c.email ? ` · ${c.email}` : ''}</p>
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                              <span className="neo-chip neo-chip--soft">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
-                              <span className="neo-chip neo-chip--quiet tabular-nums">${c.ingresoTotal.toLocaleString('es-AR')}</span>
+                              <span className="ui-chip ui-chip--soft">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
+                              <span className="ui-chip ui-chip--quiet tabular-nums">${c.ingresoTotal.toLocaleString('es-AR')}</span>
                               <span className="text-[9px] font-semibold" style={{ color: 'var(--ns-text-muted)' }}>Última: {formatearFechaRelativa(c.ultimaVisita)}</span>
                             </div>
                           </div>
@@ -1498,7 +1478,7 @@ export default function Dashboard({ session }) {
                             <button onClick={() => {
                               const num = c.telefono?.replace(/[^0-9]/g, '') || ''
                               window.open(`tel:${num}`)
-                            }} className="neo-icon-btn shrink-0" title="Llamar" aria-label={`Llamar a ${c.nombre}`}>
+                            }} className="ui-icon-btn shrink-0" title="Llamar" aria-label={`Llamar a ${c.nombre}`}>
                               <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
                           </div>
@@ -1522,9 +1502,9 @@ export default function Dashboard({ session }) {
                     <div className="p-5 md:p-6 space-y-5">
                       {/* Acento de tu app de reservas */}
                       <div>
-                        <label className="neo-eyebrow mb-2">Acento de tu app de reservas</label>
-                        <div className="neo-well p-3">
-                          <div className="grid grid-cols-5 gap-2.5">
+                        <label className="ui-eyebrow mb-2">Acento de tu app de reservas</label>
+                        <div className="ui-well p-3">
+                          <div className="grid grid-cols-5 gap-2.5 max-w-[260px]">
                             {PALETA_MARCA.map((c) => {
                               const elegido = colorSeguro(colorPrimario) === c
                               return (
@@ -1539,15 +1519,15 @@ export default function Dashboard({ session }) {
                                     background: c,
                                     transform: elegido ? 'scale(1.08)' : 'scale(1)',
                                     boxShadow: elegido
-                                      ? `0 0 0 3px var(--ns-surface), 0 0 0 5px ${c}, 6px 7px 14px rgba(153,0,17,0.28)`
-                                      : '4px 5px 11px rgba(153,0,17,0.18), -3px -3px 8px rgba(255,255,255,0.9)'
+                                      ? `0 0 0 3px var(--ns-surface), 0 0 0 5px ${c}, 6px 7px 14px rgba(0,122,255,0.28)`
+                                      : '4px 5px 11px rgba(0,122,255,0.18), -3px -3px 8px rgba(255,255,255,0.9)'
                                   }}
                                 />
                               )
                             })}
                             <label
                               className="aspect-square rounded-full grid place-items-center cursor-pointer transition-all duration-300"
-                              style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)', color: 'var(--ns-text-muted)' }}
+                              style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)', color: 'var(--ns-text-muted)' }}
                               title="Elegir otro tono"
                             >
                               <input
@@ -1560,21 +1540,21 @@ export default function Dashboard({ session }) {
                               <span className="text-lg leading-none font-bold">+</span>
                             </label>
                           </div>
-                          <p className="neo-tip mt-3">Este tono sólo pinta la app que ven tus clientes. Tu panel siempre queda en la paleta de Noni.</p>
+                          <p className="ui-tip mt-3">Este tono sólo pinta la app que ven tus clientes. Tu panel siempre queda en la paleta de Noni.</p>
                         </div>
                       </div>
 
                       {/* Descripción */}
                       <div>
-                        <label className="neo-eyebrow mb-2">Biografía</label>
-                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de tu negocio que verán tus clientes..." className="neo-field resize-none h-24 md:h-28" />
+                        <label className="ui-eyebrow mb-2">Biografía</label>
+                        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Frase de tu negocio que verán tus clientes..." className="ui-field resize-none h-24 md:h-28" />
                       </div>
 
                       {/* Instagram */}
                       <div>
-                        <label className="neo-eyebrow mb-2">Instagram</label>
-                        <div className="neo-field-group">
-                          <span className="text-sm font-black" style={{ color: 'var(--ns-text-muted)' }}>@</span>
+                        <label className="ui-eyebrow mb-2">Instagram</label>
+                        <div className="ui-field-group">
+                          <span className="text-sm font-bold" style={{ color: 'var(--ns-text-muted)' }}>@</span>
                           <input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="tu_negocio" aria-label="Usuario de Instagram" className="flex-1 bg-transparent outline-none text-sm font-bold" style={{ color: 'var(--ns-text)' }} />
                         </div>
                       </div>
@@ -1582,21 +1562,21 @@ export default function Dashboard({ session }) {
                       {/* Upload Logo y Portada */}
                       <div className="grid grid-cols-2 gap-3 md:gap-4">
                         <div className="space-y-2">
-                          <label className="neo-eyebrow flex justify-between items-center">
+                          <label className="ui-eyebrow flex justify-between items-center">
                             Logo
-                            {subiendoLogo && <div className="neo-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
+                            {subiendoLogo && <div className="ui-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
                           </label>
-                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset)' }}>
+                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field)' }}>
                             {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="neo-eyebrow flex justify-between items-center">
+                          <label className="ui-eyebrow flex justify-between items-center">
                             Portada
-                            {subiendoPortada && <div className="neo-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
+                            {subiendoPortada && <div className="ui-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
                           </label>
-                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset)' }}>
+                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field)' }}>
                             {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'portada')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
@@ -1606,9 +1586,9 @@ export default function Dashboard({ session }) {
                       <button
                         onClick={actualizarBranding}
                         disabled={guardandoPerfil || subiendoLogo || subiendoPortada}
-                        className="neo-btn neo-btn--primary neo-btn--block py-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em]"
+                        className="ui-btn ui-btn--primary ui-btn--block py-4 text-[9px] md:text-[10px] uppercase tracking-[0.08em]"
                       >
-                        {guardandoPerfil ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : 'Guardar Perfil'}
+                        {guardandoPerfil ? <span className="ui-spinner ui-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : 'Guardar Perfil'}
                       </button>
                     </div>
                   </div>
@@ -1621,22 +1601,22 @@ export default function Dashboard({ session }) {
                     </div>
                     <div className="p-5 md:p-6 space-y-4">
                       <div>
-                        <label className="neo-eyebrow mb-2">Teléfono / WhatsApp del Negocio</label>
-                        <input value={telefonoNegocio} onChange={(e) => setTelefonoNegocio(e.target.value)} placeholder="Ej: +5493515551234" className="neo-field" />
+                        <label className="ui-eyebrow mb-2">Teléfono / WhatsApp del Negocio</label>
+                        <input value={telefonoNegocio} onChange={(e) => setTelefonoNegocio(e.target.value)} placeholder="Ej: +5493515551234" className="ui-field" />
                       </div>
                       <div>
-                        <label className="neo-eyebrow mb-2">Dirección</label>
-                        <input value={direccionNegocio} onChange={(e) => setDireccionNegocio(e.target.value)} placeholder="Ej: Av. Colón 1234, Córdoba" className="neo-field" />
+                        <label className="ui-eyebrow mb-2">Dirección</label>
+                        <input value={direccionNegocio} onChange={(e) => setDireccionNegocio(e.target.value)} placeholder="Ej: Av. Colón 1234, Córdoba" className="ui-field" />
                       </div>
                       <div>
-                        <label className="neo-eyebrow mb-2">Ubicación — Google Maps</label>
-                        <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="neo-field" />
-                        <p className="neo-tip">Abrí Google Maps, buscá tu negocio, tocá «Compartir» y pegá el link acá.</p>
+                        <label className="ui-eyebrow mb-2">Ubicación — Google Maps</label>
+                        <input value={mapaUrl} onChange={(e) => setMapaUrl(e.target.value)} placeholder='Pegá el link de Google Maps de tu negocio' className="ui-field" />
+                        <p className="ui-tip">Abrí Google Maps, buscá tu negocio, tocá «Compartir» y pegá el link acá.</p>
                         {mapaUrl && !mapaEmbedUrl(mapaUrl, direccionNegocio) && (
-                          <p className="neo-tip mt-2" style={{ color: 'var(--ns-primary)' }}>Ese link no parece de Google Maps. Pegá el que te da el botón «Compartir».</p>
+                          <p className="ui-tip mt-2" style={{ color: 'var(--ns-primary)' }}>Ese link no parece de Google Maps. Pegá el que te da el botón «Compartir».</p>
                         )}
                         {mapaUrl && mapaEmbedUrl(mapaUrl, direccionNegocio) && (
-                          <div className="mt-3 rounded-[18px] overflow-hidden h-40" style={{ boxShadow: 'var(--neo-inset)' }}>
+                          <div className="mt-3 rounded-[18px] overflow-hidden h-40" style={{ boxShadow: 'var(--ui-field)' }}>
                             <iframe
                               title="Ubicación del negocio"
                               src={mapaEmbedUrl(mapaUrl, direccionNegocio)}
@@ -1646,15 +1626,15 @@ export default function Dashboard({ session }) {
                         )}
                       </div>
                       <div>
-                        <label className="neo-eyebrow mb-2">Mensaje de Bienvenida</label>
-                        <textarea value={mensajeBienvenida} onChange={(e) => setMensajeBienvenida(e.target.value)} placeholder="Mensaje que verán tus clientes al abrir la app de reservas..." className="neo-field resize-none h-20" />
+                        <label className="ui-eyebrow mb-2">Mensaje de Bienvenida</label>
+                        <textarea value={mensajeBienvenida} onChange={(e) => setMensajeBienvenida(e.target.value)} placeholder="Mensaje que verán tus clientes al abrir la app de reservas..." className="ui-field resize-none h-20" />
                       </div>
                       <button
                         onClick={actualizarBranding}
                         disabled={guardandoPerfil}
-                        className="neo-btn neo-btn--primary neo-btn--block"
+                        className="ui-btn ui-btn--primary ui-btn--block"
                       >
-                        {guardandoPerfil ? <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : 'Guardar Contacto'}
+                        {guardandoPerfil ? <span className="ui-spinner ui-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} /> : 'Guardar Contacto'}
                       </button>
                     </div>
                   </div>
@@ -1663,44 +1643,44 @@ export default function Dashboard({ session }) {
                   <div className="ns-settings-card" data-tour="link">
                     <div className="ns-settings-card-header">
                       <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      <h4>Link Público</h4>
+                      <h4>Link público</h4>
                     </div>
                     <div className="p-5 md:p-6">
                       <p className="text-[12px] font-medium mb-3 leading-relaxed" style={{ color: 'var(--ns-text-secondary)' }}>Este es tu link de reservas. Compartilo con tus clientes por WhatsApp, redes o donde quieras.</p>
-                      <button type="button" className="w-full text-left flex items-center gap-2 rounded-[18px] p-3.5 cursor-pointer transition-all" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }} onClick={showCopyToast}>
+                      <button type="button" className="w-full text-left flex items-center gap-2 rounded-[18px] p-3.5 cursor-pointer transition-all" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }} onClick={showCopyToast}>
                         <code className="text-[10px] md:text-[11px] font-mono truncate flex-1" style={{ color: 'var(--ns-primary)' }}>{publicLink}</code>
                         <svg className="w-4 h-4 ml-auto shrink-0" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
                       </button>
 
                       {/* QR Code */}
-                      <div className="mt-4 p-5 rounded-[22px] text-center" style={{ background: 'var(--ns-surface)', boxShadow: 'var(--neo-raised-sm)' }}>
+                      <div className="mt-4 p-5 rounded-[22px] text-center" style={{ background: 'var(--ns-surface)', boxShadow: 'var(--ui-shadow-sm)' }}>
                         <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicLink)}&bgcolor=FCF6F5&color=990011&margin=8`}
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicLink)}&bgcolor=FFFFFF&color=1D212A&margin=8`}
                           alt="QR de reservas"
                           className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-lg"
                           loading="lazy"
                         />
-                        <p className="neo-eyebrow mt-3">Escaneá para reservar</p>
+                        <p className="ui-eyebrow mt-3">Escaneá para reservar</p>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 mt-3">
-                        <button onClick={() => window.open(publicLink, '_blank')} className="neo-btn text-[10px] uppercase tracking-[0.14em] py-3">
+                        <button onClick={() => window.open(publicLink, '_blank')} className="ui-btn text-[10px] uppercase tracking-[0.06em] py-3">
                           Vista previa
                         </button>
                         <button onClick={() => {
                           const waMje = encodeURIComponent(`${vocab.shareWA} ${negocio.nombre}: ${publicLink}`)
                           window.open(`https://wa.me/?text=${waMje}`, '_blank')
-                        }} className="neo-btn neo-btn--primary text-[10px] uppercase tracking-[0.14em] py-3">
+                        }} className="ui-btn ui-btn--primary text-[10px] uppercase tracking-[0.06em] py-3">
                           Compartir
                         </button>
                         <button onClick={() => {
-                          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(publicLink)}&bgcolor=FCF6F5&color=990011&margin=16&format=png`
+                          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(publicLink)}&bgcolor=FFFFFF&color=1D212A&margin=16&format=png`
                           const a = document.createElement('a')
                           a.href = qrUrl
                           a.download = `qr-${negocio?.nombre?.replace(/\s+/g, '-')?.toLowerCase() || 'reservas'}.png`
                           a.target = '_blank'
                           a.click()
-                        }} className="neo-btn text-[10px] uppercase tracking-[0.14em] py-3">
+                        }} className="ui-btn text-[10px] uppercase tracking-[0.06em] py-3">
                           Bajar QR
                         </button>
                       </div>
@@ -1715,28 +1695,28 @@ export default function Dashboard({ session }) {
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="neo-eyebrow">Email</p>
+                        <p className="ui-eyebrow">Email</p>
                         <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--ns-text)' }}>{session.user.email}</p>
                       </div>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="neo-eyebrow">Rubro</p>
+                        <p className="ui-eyebrow">Rubro</p>
                         <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--ns-text)' }}>{negocio.rubro}</p>
                       </div>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="neo-eyebrow">Estado</p>
+                        <p className="ui-eyebrow">Estado</p>
                         <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--ns-text)' }}>{etiquetaEstado(accesoSub.estado)}{accesoSub.diasRestantes != null ? ` · ${accesoSub.diasRestantes}d` : ''}</p>
                       </div>
-                      <span className={`neo-chip ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'neo-chip--outline' : 'neo-chip--solid') : 'neo-chip--quiet'}`}>
+                      <span className={`ui-chip ${accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'ui-chip--outline' : 'ui-chip--solid') : 'ui-chip--quiet'}`}>
                         {accesoSub.acceso ? (accesoSub.estado === 'trial' ? 'En prueba' : 'Al día') : 'Sin acceso'}
                       </span>
                     </div>
                     <div className="ns-settings-row">
                       <div>
-                        <p className="neo-eyebrow">ID del Negocio</p>
+                        <p className="ui-eyebrow">ID del Negocio</p>
                         <p className="text-[10px] font-mono mt-0.5 break-all" style={{ color: 'var(--ns-text-muted)' }}>{negocio.id}</p>
                       </div>
                     </div>
@@ -1749,14 +1729,14 @@ export default function Dashboard({ session }) {
                       <h4>Suscripción</h4>
                     </div>
                     <div className="p-4 md:p-5">
-                      <div className="neo-well overflow-hidden p-0">
+                      <div className="ui-well overflow-hidden p-0">
                         <div className="p-5">
                           <div className="flex items-center justify-between gap-2 mb-3">
-                            <span className="neo-eyebrow">Plan {PLAN.nombre}</span>
-                            <span className={`neo-chip ${accesoSub.estado === 'trial' ? 'neo-chip--outline' : accesoSub.acceso ? 'neo-chip--solid' : 'neo-chip--quiet'}`}>{etiquetaEstado(accesoSub.estado)}</span>
+                            <span className="ui-eyebrow">Plan {PLAN.nombre}</span>
+                            <span className={`ui-chip ${accesoSub.estado === 'trial' ? 'ui-chip--outline' : accesoSub.acceso ? 'ui-chip--solid' : 'ui-chip--quiet'}`}>{etiquetaEstado(accesoSub.estado)}</span>
                           </div>
                           <div className="flex items-end gap-1 mb-1">
-                            <span className="font-display text-3xl font-black tracking-tighter" style={{ color: 'var(--ns-text)' }}>{formatearPrecio()}</span>
+                            <span className="font-display text-3xl font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>{formatearPrecio()}</span>
                             <span className="text-xs font-bold mb-1" style={{ color: 'var(--ns-text-muted)' }}>/mes</span>
                           </div>
                           {accesoSub.diasRestantes != null ? (
@@ -1774,12 +1754,12 @@ export default function Dashboard({ session }) {
                             href={whatsappActivacion(negocio, session.user.email)}
                             target="_blank" rel="noopener noreferrer"
                             data-testid="subscription-card-cta"
-                            className="neo-btn neo-btn--primary neo-btn--block py-3.5 text-[10px] uppercase tracking-[0.2em] gap-2"
+                            className="ui-btn ui-btn--primary ui-btn--block py-3.5 text-[10px] uppercase tracking-[0.08em] gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             {accesoSub.estado === 'activo' ? 'Renovar suscripción' : 'Activar plan'}
                           </a>
-                          <p className="neo-tip text-center mt-2.5">Activación manual · te respondemos al toque</p>
+                          <p className="ui-tip text-center mt-2.5">Activación manual · te respondemos al toque</p>
                         </div>
                       </div>
                     </div>
@@ -1801,7 +1781,7 @@ export default function Dashboard({ session }) {
                     <button onClick={cerrarSesion} className="ns-settings-row cursor-pointer w-full text-left group">
                       <div className="flex items-center gap-3">
                         <svg className="w-4 h-4" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <span className="text-sm font-black" style={{ color: 'var(--ns-primary)' }}>Cerrar sesión</span>
+                        <span className="text-sm font-bold" style={{ color: 'var(--ns-primary)' }}>Cerrar sesión</span>
                       </div>
                       <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>

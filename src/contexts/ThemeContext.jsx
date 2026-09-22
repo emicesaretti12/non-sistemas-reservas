@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect } from 'react'
 
 /**
- * El sistema de diseño de Noni es de un solo tema: papel (#FCF6F5) y marca
- * (#990011). No hay variante oscura.
+ * El sistema de diseño de Noni es de un solo tema: papel (#FFFFFF) y marca
+ * (#007AFF). No hay variante oscura.
  *
  * Antes este contexto seguía la preferencia del sistema operativo y ponía
  * `color-scheme: dark` cuando el usuario tenía el modo oscuro activado. Como no
@@ -25,7 +25,7 @@ export function ThemeProvider({ children }) {
     // La barra del navegador toma siempre el color del papel para que el borde
     // superior no se corte contra el fondo de la app.
     const meta = document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute('content', '#FCF6F5')
+    if (meta) meta.setAttribute('content', '#FFFFFF')
     // Limpiamos la preferencia vieja: si alguien la tenía en 'dark', al volver
     // a instalarse la variante clara no quedaba pegada.
     try { localStorage.removeItem('noni_theme') } catch { /* noop */ }

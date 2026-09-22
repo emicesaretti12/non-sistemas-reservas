@@ -1,28 +1,29 @@
 /**
- * Paleta de marca de Noni.
+ * Acentos de marca.
  *
- * Toda la app se pinta con dos colores: el papel (#FCF6F5) y la marca
- * (#990011). Lo único que cada negocio puede mover es el acento de su app
- * pública, y para que nunca se salga del sistema sólo ofrecemos mezclas de
- * esos dos colores.
+ * El panel de Noni siempre se ve igual: gris azulado, blanco y el azul del
+ * sistema. Lo único que cada negocio elige es el acento de su app pública de
+ * reservas, y para que nunca se salga del sistema la oferta está acotada a
+ * nueve tonos del mismo registro: saturación media, luminosidad pareja y
+ * suficiente contraste contra el blanco para que el texto encima se lea.
  *
- * Son nueve tonos, del más profundo al más claro, más el selector libre: así
- * entran justo en dos filas de cinco.
+ * Nueve tonos más el selector libre entran justo en dos filas de cinco.
  */
 export const PALETA_MARCA = [
-  '#8A000F',
-  '#990011',
-  '#A31928',
-  '#AF3643',
-  '#B3404C',
-  '#B94F5A',
-  '#C56C75',
-  '#CC8088',
-  '#D08A91',
+  '#007AFF', // azul del sistema — el que viene por defecto
+  '#0A66C2', // azul profundo
+  '#0E9C9C', // verde azulado
+  '#259C5B', // verde
+  '#5E8C2A', // oliva
+  '#E09112', // ámbar
+  '#E06C2A', // naranja quemado
+  '#C2456B', // frambuesa
+  '#8B5CF6', // violeta
 ]
 
-export const COLOR_MARCA = '#990011'
-export const COLOR_PAPEL = '#FCF6F5'
+export const COLOR_MARCA = '#007AFF'
+export const COLOR_PAPEL = '#FFFFFF'
+export const COLOR_TINTA = '#1D212A'
 
 /** Normaliza lo que venga de la base a un hex de 6 dígitos usable. */
 export function colorSeguro(valor, porDefecto = COLOR_MARCA) {

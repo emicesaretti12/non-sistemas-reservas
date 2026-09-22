@@ -29,9 +29,9 @@ class ErrorBoundary extends React.Component {
       const detalle = this.state.error?.message;
 
       return (
-        <div className="neo-card m-4 flex flex-col items-center justify-center text-center gap-4 p-8">
+        <div className="ui-card m-4 flex flex-col items-center justify-center text-center gap-4 p-8">
           {/* Icono de advertencia, hundido en el papel */}
-          <div className="neo-pod neo-pod--lg">
+          <div className="ui-pod ui-pod--lg">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-7 h-7"
@@ -50,24 +50,24 @@ class ErrorBoundary extends React.Component {
 
           {/* Texto */}
           <div className="space-y-1.5">
-            <h3 className="neo-empty__title">{message}</h3>
-            <p className="neo-empty__text max-w-sm">
+            <h3 className="ui-empty__title">{message}</h3>
+            <p className="ui-empty__text max-w-sm">
               Ocurrió un error inesperado. Podés reintentar o escribirnos si vuelve a pasar.
             </p>
           </div>
 
           {/* Detalle técnico: ayuda muchísimo cuando el usuario reporta el error */}
           {detalle && (
-            <p className="neo-inset-sm text-[11px] font-mono px-3.5 py-2.5 max-w-sm break-words" style={{ color: 'var(--ns-text-muted)' }}>
+            <p className="ui-inset-sm text-[11px] font-mono px-3.5 py-2.5 max-w-sm break-words" style={{ color: 'var(--ns-text-muted)' }}>
               {detalle}
             </p>
           )}
 
           <div className="flex flex-wrap gap-2.5 justify-center mt-1">
-            <button onClick={this.handleReset} className="neo-btn neo-btn--primary neo-btn--pill">
+            <button onClick={this.handleReset} className="ui-btn ui-btn--primary ui-btn--pill">
               Reintentar
             </button>
-            <button onClick={this.handleReload} className="neo-btn neo-btn--pill">
+            <button onClick={this.handleReload} className="ui-btn ui-btn--pill">
               Recargar la página
             </button>
           </div>

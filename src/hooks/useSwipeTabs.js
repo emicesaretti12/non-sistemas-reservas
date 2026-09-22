@@ -18,7 +18,7 @@ export function useSwipeTabs({ tabs = [], actual, onCambiar, habilitado = true }
       if (e.touches.length !== 1) return
       const t = e.touches[0]
       const bloqueado = e.target?.closest?.(
-        'input, textarea, select, [data-no-swipe], .overflow-x-auto, .neo-segment, .ns-bottom-nav, [role="dialog"]'
+        'input, textarea, select, [data-no-swipe], .overflow-x-auto, .ui-segment, .ns-bottom-nav, [role="dialog"]'
       )
       ref.current = { x: t.clientX, y: t.clientY, valido: !bloqueado }
     }

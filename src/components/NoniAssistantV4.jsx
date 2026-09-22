@@ -26,32 +26,31 @@ function leerHistorial(key) {
 
 /** Carita de Noni, moldeada en los dos colores de la marca. */
 function NoniAvatar({ size = 44, mood = 'happy' }) {
-  const ry = mood === 'thinking' ? 0.9 : 2.6
-  const boca = mood === 'happy' ? 'M18.5 29.5 Q24 33 29.5 29.5' : 'M19 30 Q24 31.4 29 30'
+  // Un globo de diálogo, no un robot. Un muñeco con ojos y antena envejece
+  // mal y le baja el tono a un panel de trabajo; además acá el asistente
+  // responde sobre los datos del negocio, no es un personaje.
+  //
+  // Se dibuja en `currentColor` para que sirva igual sobre el azul del botón
+  // flotante que sobre el gris de la cabecera.
+  const pensando = mood === 'thinking'
 
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="noniShell" x1="10" y1="10" x2="40" y2="40">
-          <stop offset="0%" stopColor="#A81322" />
-          <stop offset="100%" stopColor="#8A000F" />
-        </linearGradient>
-      </defs>
-      {/* antena */}
-      <path d="M24 9V5" stroke="#990011" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="24" cy="4" r="2.6" fill="#990011" />
-      {/* cuerpo */}
-      <rect x="7" y="10" width="34" height="28" rx="11" fill="url(#noniShell)" />
-      <rect x="7" y="10" width="34" height="28" rx="11" fill="none" stroke="#FCF6F5" strokeOpacity="0.22" strokeWidth="1.2" />
-      {/* visor hundido */}
-      <rect x="12" y="16" width="24" height="16" rx="7" fill="#7A000E" />
-      {/* ojos + boca */}
-      <ellipse cx="19" cy="23.5" rx="2.4" ry={ry} fill="#FCF6F5" />
-      <ellipse cx="29" cy="23.5" rx="2.4" ry={ry} fill="#FCF6F5" />
-      <path d={boca} stroke="#FCF6F5" strokeWidth="1.7" strokeLinecap="round" fill="none" />
-      {/* orejas */}
-      <rect x="4" y="20" width="3" height="8" rx="1.5" fill="#990011" />
-      <rect x="41" y="20" width="3" height="8" rx="1.5" fill="#990011" />
+      <path
+        d="M24 8c9.4 0 17 6.2 17 13.9 0 7.7-7.6 13.9-17 13.9-1.6 0-3.2-.2-4.7-.5l-7.6 4a1 1 0 0 1-1.5-1l1.3-5.6C8.3 30.2 7 26.2 7 21.9 7 14.2 14.6 8 24 8Z"
+        fill="currentColor"
+      />
+      {[17, 24, 31].map((cx, i) => (
+        <circle
+          key={cx}
+          cx={cx}
+          cy="22"
+          r="2.6"
+          fill="var(--ns-surface)"
+          opacity={pensando ? undefined : 0.92}
+          style={pensando ? { animation: `ns-typing-dot 1.2s ${i * 0.16}s var(--ease-in-out) infinite` } : undefined}
+        />
+      ))}
     </svg>
   )
 }
@@ -201,13 +200,15 @@ export default function NoniAssistantV4({
             initial={{ opacity: 0, scale: 0.7, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.7, y: 18 }}
-            transition={{ type: 'spring', damping: 18, stiffness: 320 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.85 }}
             onClick={() => { haptic(); setOpen(true) }}
             className="ns-assistant-fab"
             aria-label="Abrir el asistente Noni"
             title="Hablar con Noni"
           >
-            <NoniAvatar size={38} mood={pensando ? 'thinking' : 'happy'} />
+            <span style={{ color: '#FFFFFF' }}>
+              <NoniAvatar size={30} mood={pensando ? 'thinking' : 'happy'} />
+            </span>
             {pendientesCount > 0 && (
               <span className="ns-assistant-badge" aria-hidden="true">{pendientesCount}</span>
             )}
@@ -225,7 +226,7 @@ export default function NoniAssistantV4({
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 36, mass: 0.9 }}
             className="ns-assistant-panel"
             drag="y"
             dragListener={false}
@@ -239,28 +240,28 @@ export default function NoniAssistantV4({
           >
             {/* Manija: sólo desde acá arranca el gesto de arrastre */}
             <div
-              className="neo-sheet__handle md:hidden"
+              className="ui-sheet__handle md:hidden"
               onPointerDown={(e) => dragControls.start(e)}
               role="presentation"
             />
 
             {/* Cabecera */}
             <div className="flex items-center gap-3 px-4 pb-3 pt-1 md:pt-4" style={{ boxShadow: 'inset 0 -1px 0 var(--ns-line)' }}>
-              <span className="neo-avatar w-11 h-11 shrink-0" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}>
-                <NoniAvatar size={30} mood={pensando ? 'thinking' : 'happy'} />
+              <span className="ui-avatar w-11 h-11 shrink-0" style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)', boxShadow: 'none' }}>
+                <NoniAvatar size={28} mood={pensando ? 'thinking' : 'happy'} />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-black tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>Noni</p>
+                <p className="text-[15px] font-bold tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>Noni</p>
                 <p className="text-[11px] font-semibold mt-1" style={{ color: 'var(--ns-text-muted)' }}>
                   {pensando ? 'Escribiendo…' : 'Tu asistente del panel'}
                 </p>
               </div>
               {mensajes.length > 0 && (
-                <button onClick={limpiar} className="neo-btn neo-btn--ghost neo-btn--quiet" title="Borrar la conversación">
+                <button onClick={limpiar} className="ui-btn ui-btn--ghost ui-btn--quiet" title="Borrar la conversación">
                   Limpiar
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="neo-icon-btn w-9 h-9" aria-label="Cerrar el asistente">
+              <button onClick={() => setOpen(false)} className="ui-icon-btn w-9 h-9" aria-label="Cerrar el asistente">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
             </div>
@@ -278,7 +279,7 @@ export default function NoniAssistantV4({
 
                   {pendientes.length > 0 && (
                     <div className="flex flex-col gap-2">
-                      <p className="neo-eyebrow px-1">Te falta esto</p>
+                      <p className="ui-eyebrow px-1">Te falta esto</p>
                       {pendientes.map((a, i) => (
                         <motion.button
                           key={a.id}
@@ -286,7 +287,7 @@ export default function NoniAssistantV4({
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.05 }}
                           onClick={() => ejecutar(a)}
-                          className="neo-btn neo-btn--quiet justify-start w-full"
+                          className="ui-btn ui-btn--quiet justify-start w-full"
                           style={{ color: 'var(--ns-primary)' }}
                         >
                           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -297,7 +298,7 @@ export default function NoniAssistantV4({
                   )}
 
                   <div className="flex flex-col gap-2">
-                    <p className="neo-eyebrow px-1">Preguntas frecuentes</p>
+                    <p className="ui-eyebrow px-1">Preguntas frecuentes</p>
                     {preguntas.map((q, i) => (
                       <motion.button
                         key={q}
@@ -305,7 +306,7 @@ export default function NoniAssistantV4({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.15 + i * 0.05 }}
                         onClick={() => enviar(q)}
-                        className="neo-btn neo-btn--quiet justify-start w-full text-left"
+                        className="ui-btn ui-btn--quiet justify-start w-full text-left"
                       >
                         {q}
                       </motion.button>
@@ -320,7 +321,7 @@ export default function NoniAssistantV4({
                     {m.texto}
                   </div>
                   {m.accion && (
-                    <button onClick={() => ejecutar(m.accion)} className="neo-btn neo-btn--primary neo-btn--quiet">
+                    <button onClick={() => ejecutar(m.accion)} className="ui-btn ui-btn--primary ui-btn--quiet">
                       {m.accion.label}
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
@@ -345,13 +346,13 @@ export default function NoniAssistantV4({
                 onChange={(e) => setTexto(e.target.value)}
                 placeholder="Escribime lo que necesites…"
                 aria-label="Escribile a Noni"
-                className="neo-field flex-1"
+                className="ui-field flex-1"
                 enterKeyHint="send"
               />
               <button
                 type="submit"
                 disabled={pensando || !texto.trim()}
-                className="neo-btn neo-btn--primary shrink-0"
+                className="ui-btn ui-btn--primary shrink-0"
                 style={{ width: 48, minHeight: 48, padding: 0 }}
                 aria-label="Enviar"
               >

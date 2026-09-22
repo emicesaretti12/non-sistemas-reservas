@@ -1,0 +1,769 @@
+/* ============================================================
+   PRIMITIVAS
+
+   Superficie blanca, línea de un píxel, sombra apenas visible y
+   radio generoso. Todo lo que aquí se define existe en cuatro
+   niveles: el lienzo, el panel, la tarjeta y lo que flota.
+
+   El color no decora: sólo marca la acción principal y el
+   estado. Lo demás vive en la escala de grises azulados.
+   ============================================================ */
+
+@layer components {
+
+  /* ═══════════════ SUPERFICIES ═══════════════ */
+
+  .ui-surface {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-lg);
+  }
+
+  .ui-raised-sm {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-md);
+    box-shadow: var(--ui-shadow-sm);
+  }
+
+  .ui-raised {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-lg);
+    box-shadow: var(--ui-shadow);
+  }
+
+  .ui-raised-lg {
+    background: var(--ns-surface);
+    border-radius: var(--ns-radius-xl);
+    box-shadow: var(--ui-shadow-lg);
+  }
+
+  /* "Hundido" en este idioma es un relleno gris con su línea:
+     el campo se distingue por el tono, no por la profundidad. */
+  .ui-inset-sm {
+    background: var(--ns-sunken);
+    border-radius: var(--ns-radius-sm);
+    box-shadow: var(--ui-field-sm);
+  }
+
+  .ui-inset {
+    background: var(--ns-sunken);
+    border-radius: var(--ns-radius-md);
+    box-shadow: var(--ui-field);
+  }
+
+  /* Panel: el contenedor gris que agrupa un conjunto de piezas. */
+  .ui-well {
+    padding: 14px;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-sunken);
+    box-shadow: var(--ui-field-sm);
+  }
+
+  .ui-well--deep {
+    background: var(--ns-accent-bg);
+    box-shadow: var(--ui-field);
+  }
+
+  /* ═══════════════ TARJETA ═══════════════ */
+
+  .ui-card {
+    position: relative;
+    padding: 18px;
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--ui-shadow-sm);
+    transition:
+      box-shadow var(--dur-3) var(--ease-out),
+      transform var(--dur-3) var(--ease-out);
+  }
+
+  @media (min-width: 768px) {
+    .ui-card { padding: 22px; }
+  }
+
+  .ui-card--interactive {
+    cursor: pointer;
+  }
+
+  .ui-card--interactive:hover {
+    box-shadow: var(--ui-shadow);
+    transform: translateY(-1px);
+  }
+
+  .ui-card--interactive:active {
+    transform: translateY(0);
+    box-shadow: var(--ui-shadow-sm);
+  }
+
+  /* Baldosa: la tarjeta chica de una grilla. */
+  .ui-tile {
+    padding: 14px;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-surface);
+    box-shadow: var(--ui-shadow-sm);
+    transition:
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+
+  .ui-tile--interactive { cursor: pointer; }
+
+  .ui-tile--interactive:hover {
+    box-shadow: var(--ui-shadow);
+    transform: translateY(-1px);
+  }
+
+  .ui-tile--interactive:active {
+    transform: scale(0.99);
+    box-shadow: var(--ui-shadow-sm);
+  }
+
+  /* ═══════════════ BOTONES ═══════════════ */
+
+  .ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-surface);
+    color: var(--ns-text);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: var(--ui-shadow-sm);
+    transition:
+      background var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-1) var(--ease-out),
+      opacity var(--dur-2) var(--ease-out);
+  }
+
+  .ui-btn:hover:not(:disabled) {
+    background: var(--ns-surface-hover);
+    box-shadow: var(--ui-shadow);
+  }
+
+  .ui-btn:active:not(:disabled) {
+    transform: scale(0.97);
+    background: var(--ns-sunken);
+    box-shadow: var(--ui-shadow-sm);
+  }
+
+  .ui-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* Acción principal: el único azul lleno de la pantalla. */
+  .ui-btn--primary {
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand);
+  }
+
+  .ui-btn--primary:hover:not(:disabled) {
+    background: var(--ns-gradient-deep);
+    box-shadow: var(--ui-brand-lg);
+  }
+
+  .ui-btn--primary:active:not(:disabled) {
+    background: var(--ns-primary-dark);
+    box-shadow: var(--ui-brand-pressed);
+  }
+
+  /* Acción secundaria de tono azul, sin relleno. */
+  .ui-btn--quiet {
+    background: var(--ns-primary-bg);
+    color: var(--ns-primary-dark);
+    box-shadow: none;
+  }
+
+  .ui-btn--quiet:hover:not(:disabled) {
+    background: var(--ns-primary-bg-hover);
+    box-shadow: none;
+  }
+
+  .ui-btn--quiet:active:not(:disabled) {
+    background: var(--ns-primary-bg-hover);
+    box-shadow: none;
+  }
+
+  /* Terciaria: sólo texto. */
+  .ui-btn--ghost {
+    background: transparent;
+    color: var(--ns-text-secondary);
+    box-shadow: none;
+  }
+
+  .ui-btn--ghost:hover:not(:disabled) {
+    background: var(--ns-sunken);
+    color: var(--ns-text);
+    box-shadow: none;
+  }
+
+  .ui-btn--ghost:active:not(:disabled) {
+    background: var(--ns-accent);
+    box-shadow: none;
+  }
+
+  .ui-btn--block {
+    display: flex;
+    width: 100%;
+  }
+
+  .ui-btn--pill {
+    border-radius: 999px;
+    padding: 0 20px;
+  }
+
+  /* Acción destructiva. No sale de la referencia: hace falta que
+     cancelar y eliminar se distingan de todo lo demás. */
+  .ui-btn--danger {
+    background: var(--ns-danger-bg);
+    color: var(--ns-danger);
+    box-shadow: inset 0 0 0 1px var(--ns-danger-line);
+  }
+
+  .ui-btn--danger:hover:not(:disabled) {
+    background: var(--ns-danger);
+    color: #FFFFFF;
+    box-shadow: none;
+  }
+
+  /* Botón de sólo ícono */
+  .ui-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: var(--ns-radius-sm);
+    background: var(--ns-surface);
+    color: var(--ns-text-secondary);
+    cursor: pointer;
+    box-shadow: var(--ui-shadow-sm);
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-1) var(--ease-out);
+  }
+
+  .ui-icon-btn:hover {
+    background: var(--ns-surface-hover);
+    color: var(--ns-text);
+    box-shadow: var(--ui-shadow);
+  }
+
+  .ui-icon-btn:active {
+    transform: scale(0.93);
+    background: var(--ns-sunken);
+  }
+
+  .ui-icon-btn--active {
+    background: var(--ns-primary-bg);
+    color: var(--ns-primary-dark);
+    box-shadow: inset 0 0 0 1px var(--ns-primary-line);
+  }
+
+  /* ═══════════════ CAMPOS ═══════════════ */
+
+  .ui-field {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-sunken);
+    color: var(--ns-text);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    box-shadow: var(--ui-field);
+    outline: none;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out);
+  }
+
+  .ui-field::placeholder {
+    color: var(--ns-text-faint);
+    font-weight: 450;
+  }
+
+  .ui-field:hover:not(:disabled):not(:focus) {
+    box-shadow: var(--ui-field-deep);
+  }
+
+  .ui-field:focus {
+    background: var(--ns-surface);
+    box-shadow: var(--ui-field-focus);
+  }
+
+  .ui-field:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* Un campo con un prefijo o un sufijo pegado. */
+  .ui-field-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px 4px 14px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-sunken);
+    color: var(--ns-text-muted);
+    box-shadow: var(--ui-field);
+    transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+  }
+
+  .ui-field-group:focus-within {
+    background: var(--ns-surface);
+    box-shadow: var(--ui-field-focus);
+  }
+
+  .ui-field-group > input {
+    flex: 1;
+    min-width: 0;
+    min-height: 34px;
+    border: 0;
+    background: transparent;
+    color: var(--ns-text);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    outline: none;
+  }
+
+  /* Interruptor al estilo del sistema. */
+  .ui-switch {
+    position: relative;
+    flex: 0 0 auto;
+    width: 51px;
+    height: 31px;
+    border: 0;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--ns-mix-24);
+    cursor: pointer;
+    transition: background var(--dur-3) var(--ease-out);
+  }
+
+  .ui-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 27px;
+    height: 27px;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 3px 8px rgba(16, 24, 40, 0.18), 0 1px 1px rgba(16, 24, 40, 0.1);
+    transition: transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ui-switch.is-on {
+    background: var(--ns-success);
+  }
+
+  .ui-switch.is-on::after {
+    transform: translateX(20px);
+  }
+
+  /* Control segmentado. */
+  .ui-segment {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-sunken);
+    box-shadow: var(--ui-field-sm);
+  }
+
+  .ui-segment > button {
+    flex: 1;
+    min-height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: calc(var(--ns-radius-md) - 3px);
+    background: transparent;
+    color: var(--ns-text-muted);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out);
+  }
+
+  .ui-segment > button:hover {
+    color: var(--ns-text-secondary);
+  }
+
+  .ui-segment > button.is-active {
+    background: var(--ns-surface);
+    color: var(--ns-text);
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12), 0 1px 1px rgba(16, 24, 40, 0.06);
+  }
+
+  /* ═══════════════ ETIQUETAS DE ESTADO ═══════════════
+     Cada estado tiene su color propio. Con una paleta completa
+     no hace falta codificarlos por forma: el tono ya alcanza,
+     y además cada uno lleva su peso y su relleno distintos por
+     si alguien no distingue los colores. */
+
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--ns-sunken);
+    color: var(--ns-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px var(--ns-line);
+  }
+
+  /* Confirmado */
+  .ui-chip--solid {
+    background: var(--ns-success-bg);
+    color: var(--ns-success);
+    box-shadow: inset 0 0 0 1px var(--ns-success-line);
+  }
+
+  /* Pendiente */
+  .ui-chip--outline {
+    background: var(--ns-warning-bg);
+    color: var(--ns-warning);
+    box-shadow: inset 0 0 0 1px var(--ns-warning-line);
+  }
+
+  /* Informativo / destacado */
+  .ui-chip--soft {
+    background: var(--ns-primary-bg);
+    color: var(--ns-primary-dark);
+    box-shadow: inset 0 0 0 1px var(--ns-primary-line);
+  }
+
+  /* Inactivo */
+  .ui-chip--quiet {
+    background: var(--ns-sunken);
+    color: var(--ns-text-muted);
+    box-shadow: inset 0 0 0 1px var(--ns-line);
+  }
+
+  /* Problema que pide acción (sin stock, vencido) */
+  .ui-chip--danger {
+    background: var(--ns-danger-bg);
+    color: var(--ns-danger);
+    box-shadow: inset 0 0 0 1px var(--ns-danger-line);
+  }
+
+  /* Cancelado */
+  .ui-chip--cancelled {
+    background: var(--ns-danger-bg);
+    color: var(--ns-danger);
+    box-shadow: inset 0 0 0 1px var(--ns-danger-line);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* ═══════════════ ÍCONOS EN CÁPSULA ═══════════════ */
+
+  .ui-pod {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ns-radius-md);
+    background: var(--ns-primary-bg);
+    color: var(--ns-primary);
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      transform var(--dur-3) var(--ease-spring);
+  }
+
+  .ui-pod--sm {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--ns-radius-sm);
+  }
+
+  .ui-pod--lg {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--ns-radius-lg);
+  }
+
+  .ui-pod--brand {
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand-sm);
+  }
+
+  .ui-pod--sunken {
+    background: var(--ns-sunken);
+    color: var(--ns-text-muted);
+    box-shadow: var(--ui-field-sm);
+  }
+
+  .ui-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: var(--ns-sunken);
+    color: var(--ns-text-secondary);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+    box-shadow: var(--ui-field-sm);
+  }
+
+  .ui-avatar--brand {
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand-sm);
+  }
+
+  /* ═══════════════ LISTAS ═══════════════ */
+
+  .ui-list {
+    border-radius: var(--ns-radius-xl);
+    background: var(--ns-surface);
+    box-shadow: var(--ui-shadow-sm);
+    overflow: hidden;
+  }
+
+  .ui-list__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 16px;
+    text-align: left;
+    background: transparent;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+
+  /* El separador arranca después del ícono, como en iOS. */
+  .ui-list__row + .ui-list__row {
+    box-shadow: inset 0 1px 0 var(--ns-line);
+  }
+
+  .ui-list__row--interactive {
+    cursor: pointer;
+  }
+
+  .ui-list__row--interactive:hover {
+    background: var(--ns-surface-hover);
+  }
+
+  .ui-list__row--interactive:active {
+    background: var(--ns-sunken);
+  }
+
+  /* ═══════════════ TEXTO ═══════════════ */
+
+  .ui-eyebrow {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ns-text-muted);
+  }
+
+  .ui-title {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ns-text);
+  }
+
+  .ui-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .ui-head__title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--ns-text);
+  }
+
+  .ui-metric {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--ns-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-stat__label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--ns-text-muted);
+  }
+
+  .ui-stat__value {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--ns-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .ui-stat__foot {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--ns-text-faint);
+  }
+
+  .ui-tip {
+    margin-top: 7px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    font-weight: 450;
+    color: var(--ns-text-muted);
+  }
+
+  .ui-divider {
+    height: 1px;
+    background: var(--ns-line);
+  }
+
+  .ns-gradient-text {
+    color: var(--ns-primary);
+  }
+
+  /* ═══════════════ ESTADO VACÍO ═══════════════ */
+
+  .ui-empty {
+    padding: 32px 22px;
+    text-align: center;
+  }
+
+  .ui-empty__title {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: var(--ns-text);
+  }
+
+  .ui-empty__text {
+    max-width: 36ch;
+    margin: 6px auto 16px;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--ns-text-muted);
+  }
+
+  /* ═══════════════ PROGRESO ═══════════════ */
+
+  .ui-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ns-mix-16);
+    overflow: hidden;
+  }
+
+  .ui-progress__fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    transition: width var(--dur-5) var(--ease-out);
+  }
+
+  .ui-progress--indeterminate .ui-progress__fill {
+    width: 38%;
+    animation: ns-slide 1.25s var(--ease-in-out) infinite;
+  }
+
+  /* Barra de un gráfico. */
+  .ui-bar {
+    border-radius: 6px;
+    background: var(--ns-primary);
+    transition:
+      height var(--dur-4) var(--ease-out),
+      background var(--dur-2) var(--ease-out),
+      opacity var(--dur-2) var(--ease-out);
+  }
+
+  .ui-bar--quiet {
+    background: var(--ns-mix-24);
+  }
+
+  /* ═══════════════ ESPERA ═══════════════ */
+
+  .ui-spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: 2.5px solid var(--ns-mix-20);
+    border-top-color: var(--ns-primary);
+    animation: ns-spin 0.7s linear infinite;
+  }
+
+  .ui-spinner--sm {
+    width: 15px;
+    height: 15px;
+    border-width: 2px;
+  }
+
+  /* ═══════════════ ONDA AL TOCAR ═══════════════ */
+
+  .ui-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ui-ripple > .ui-ripple__wave {
+    position: absolute;
+    border-radius: 999px;
+    transform: scale(0);
+    background: currentColor;
+    opacity: 0.14;
+    pointer-events: none;
+    animation: ns-ripple 0.55s var(--ease-out) forwards;
+  }
+}

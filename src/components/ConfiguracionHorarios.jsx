@@ -98,13 +98,13 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
         <div className="flex items-center justify-between relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ns-plastilina-btn)' }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-primary)' }}>Disponibilidad</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Disponibilidad</span>
             </div>
-            <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-none" style={{ color: 'var(--ns-text)' }}>Horarios</h2>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--ns-text-muted)' }}>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>Horarios</h2>
+            <p className="text-[10px] font-bold uppercase tracking-[0.06em] mt-1" style={{ color: 'var(--ns-text-muted)' }}>
               {diasAbiertos} {diasAbiertos === 1 ? 'día abierto' : 'días abiertos'}
             </p>
           </div>
@@ -113,10 +113,10 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
           <button
             onClick={guardarConfiguracion}
             disabled={guardando}
-            className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40 relative overflow-hidden"
+            className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl text-white font-bold text-[10px] uppercase tracking-[0.06em] transition-all active:scale-95 disabled:opacity-40 relative overflow-hidden"
             style={{
               background: saved ? 'var(--ns-success)' : 'var(--ns-primary)',
-              boxShadow: saved ? '0 4px 16px rgba(153,0,17,0.35)' : 'var(--ns-plastilina-btn)'
+              boxShadow: saved ? '0 4px 16px rgba(16,24,40,0.35)' : 'var(--ui-shadow-sm)'
             }}
           >
             {/* Shine overlay */}
@@ -143,12 +143,12 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
             <button
               key={dia.id}
               onClick={() => toggleDia(dia.id)}
-              className="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-90"
+              className="px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-[0.06em] transition-all active:scale-90"
               style={{
                 background: horarios[dia.id]?.abierto ? 'var(--ns-primary)' : 'rgba(255,255,255,0.6)',
                 color: horarios[dia.id]?.abierto ? 'white' : 'var(--ns-text-muted)',
                 border: horarios[dia.id]?.abierto ? 'none' : '1px solid var(--ns-border)',
-                boxShadow: horarios[dia.id]?.abierto ? 'var(--ns-plastilina-btn)' : 'var(--ns-shadow-sm)'
+                boxShadow: horarios[dia.id]?.abierto ? 'var(--ui-shadow-sm)' : 'var(--ns-shadow-sm)'
               }}
             >
               {dia.label}
@@ -164,7 +164,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
             <IconRobot size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-[11px] font-black" style={{ color: 'var(--ns-text)' }}>¿Cómo funcionan los horarios?</p>
+            <p className="text-[11px] font-bold" style={{ color: 'var(--ns-text)' }}>¿Cómo funcionan los horarios?</p>
             <p className="text-[11px] font-medium leading-relaxed mt-0.5" style={{ color: 'var(--ns-text-secondary)' }}>
               Activá los días que abrís y configurá el rango horario. El sistema calcula automáticamente los turnos disponibles según la <strong style={{ color: 'var(--ns-text)' }}>duración de cada servicio</strong>. Usá "Pausa" si cerrás al mediodía.
             </p>
@@ -186,7 +186,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                 animationDelay: `${index * 0.04}s`,
                 borderRadius: 'var(--ns-radius-lg)',
                 background: isOpen ? 'var(--ns-surface)' : 'var(--ns-sunken)',
-                boxShadow: isOpen ? 'var(--neo-raised)' : 'var(--neo-inset-sm)',
+                boxShadow: isOpen ? 'var(--ui-shadow)' : 'var(--ui-field-sm)',
               }}
             >
               {/* Row principal: toggle + nombre + horas */}
@@ -198,19 +198,19 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                   <button
                     type="button"
                     onClick={() => toggleDia(dia.id)}
-                    className={`neo-switch ${isOpen ? 'is-on' : ''}`}
+                    className={`ui-switch ${isOpen ? 'is-on' : ''}`}
                     role="switch"
                     aria-checked={isOpen}
                     aria-label={`${isOpen ? 'Cerrar' : 'Abrir'} ${dia.full}`}
                   />
 
                   <div>
-                    <p className="font-black text-base md:text-lg tracking-tight transition-colors"
+                    <p className="font-bold text-base md:text-lg tracking-tight transition-colors"
                       style={{ color: isOpen ? 'var(--ns-text)' : 'var(--ns-text-muted)' }}>
                       {dia.full}
                     </p>
                     {!isOpen && (
-                      <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Cerrado</p>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-muted)' }}>Cerrado</p>
                     )}
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         disabled={!isOpen}
                         value={dataDia.inicio}
                         onChange={(e) => cambiarHora(dia.id, 'inicio', e.target.value)}
-                        className="bg-transparent font-black outline-none text-sm"
+                        className="bg-transparent font-bold outline-none text-sm"
                         style={{ color: 'var(--ns-text)', minWidth: '80px' }}
                       />
                     </div>
@@ -243,7 +243,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         disabled={!isOpen}
                         value={dataDia.fin}
                         onChange={(e) => cambiarHora(dia.id, 'fin', e.target.value)}
-                        className="bg-transparent font-black outline-none text-sm"
+                        className="bg-transparent font-bold outline-none text-sm"
                         style={{ color: 'var(--ns-text)', minWidth: '80px' }}
                       />
                     </div>
@@ -276,30 +276,30 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         }}
                         className="hidden"
                       />
-                      <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--ns-text-muted)' }}>Pausa</span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-muted)' }}>Pausa</span>
                     </label>
 
                     {dataDia.pausa && (
                       <div className="flex items-center gap-2 ns-slide-right">
                         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
-                          style={{ background: 'rgba(153,0,17,0.08)', border: '1px solid rgba(153,0,17,0.2)' }}>
+                          style={{ background: 'rgba(0,122,255,0.08)', border: '1px solid rgba(0,122,255,0.2)' }}>
                           <input
                             type="time"
                             value={dataDia.inicioPausa || '13:00'}
                             onChange={(e) => cambiarHora(dia.id, 'inicioPausa', e.target.value)}
                             className="bg-transparent font-bold outline-none text-xs"
-                            style={{ color: '#CB7B83', minWidth: '70px' }}
+                            style={{ color: '#BFDBFE', minWidth: '70px' }}
                           />
                         </div>
-                        <div className="w-3 h-0.5 rounded-full" style={{ background: 'rgba(153,0,17,0.3)' }} />
+                        <div className="w-3 h-0.5 rounded-full" style={{ background: 'rgba(0,122,255,0.3)' }} />
                         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
-                          style={{ background: 'rgba(153,0,17,0.08)', border: '1px solid rgba(153,0,17,0.2)' }}>
+                          style={{ background: 'rgba(0,122,255,0.08)', border: '1px solid rgba(0,122,255,0.2)' }}>
                           <input
                             type="time"
                             value={dataDia.finPausa || '17:00'}
                             onChange={(e) => cambiarHora(dia.id, 'finPausa', e.target.value)}
                             className="bg-transparent font-bold outline-none text-xs"
-                            style={{ color: '#CB7B83', minWidth: '70px' }}
+                            style={{ color: '#BFDBFE', minWidth: '70px' }}
                           />
                         </div>
                       </div>
@@ -310,10 +310,10 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                 {/* Indicador de estado — Plastilina Pill */}
                 <div className="shrink-0 hidden sm:flex">
                   <span
-                    className="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest"
+                    className="px-3 py-1.5 rounded-xl text-[8px] font-bold uppercase tracking-[0.06em]"
                     style={{
-                      background: isOpen ? 'rgba(153,0,17,0.1)' : 'var(--ns-border)',
-                      color: isOpen ? '#C36771' : 'var(--ns-text-muted)',
+                      background: isOpen ? 'rgba(0,122,255,0.1)' : 'var(--ns-border)',
+                      color: isOpen ? '#93C5FD' : 'var(--ns-text-muted)',
                     }}
                   >
                     {isOpen ? 'Abierto' : 'Cerrado'}
@@ -334,16 +334,16 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
           background: 'var(--ns-glass-bg-strong)',
           backdropFilter: 'blur(18px) saturate(180%)',
           WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-          boxShadow: 'var(--neo-raised)',
+          boxShadow: 'var(--ui-shadow)',
         }}
       >
         <button
           onClick={guardarConfiguracion}
           disabled={guardando}
-          className="neo-btn neo-btn--primary neo-btn--block"
+          className="ui-btn ui-btn--primary ui-btn--block"
         >
           {guardando ? (
-            <span className="neo-spinner neo-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} />
+            <span className="ui-spinner ui-spinner--sm" style={{ borderTopColor: 'var(--ns-paper)' }} />
           ) : saved ? (
             <>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>

@@ -16,7 +16,7 @@
     background: var(--ns-glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset, 0 6px 22px rgba(153, 0, 17, 0.05);
+    box-shadow: inset 0 -1px 0 var(--ns-line), 0 1px 12px rgba(16, 24, 40, 0.04);
     padding-top: var(--sat);
   }
 
@@ -41,10 +41,9 @@
     border-radius: var(--ns-radius-sm);
     background: transparent;
     color: var(--ns-text-muted);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 550;
+    letter-spacing: -0.005em;
     white-space: nowrap;
     cursor: pointer;
     transition:
@@ -57,7 +56,7 @@
   .ns-tab:hover {
     color: var(--ns-primary);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
   }
 
   .ns-tab:active {
@@ -67,7 +66,7 @@
   .ns-tab.active {
     color: var(--ns-primary);
     background: var(--ns-sunken);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
   }
 
   .ns-tab-content-enter {
@@ -79,7 +78,7 @@
     padding: 20px 22px;
     border-radius: var(--ns-radius-xl);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     overflow: hidden;
   }
 
@@ -101,7 +100,7 @@
     position: relative;
     background: var(--ns-surface);
     border-radius: var(--ns-radius-lg);
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transition:
       box-shadow var(--dur-3) var(--ease-out),
       transform var(--dur-3) var(--ease-out);
@@ -159,13 +158,13 @@
   .ns-kpi-card:hover,
   .ns-testimonial:hover,
   .ns-feature-pro:hover {
-    box-shadow: var(--neo-raised-lg);
+    box-shadow: var(--ui-shadow-lg);
     transform: translateY(-2px);
   }
 
   .ns-cliente-card:active,
   .ns-client-card:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.99);
   }
 
@@ -180,7 +179,7 @@
     border-radius: var(--ns-radius-sm);
     background: var(--ns-sunken);
     color: var(--ns-primary);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
   }
 
   .ns-cliente-avatar {
@@ -194,7 +193,7 @@
     padding: 12px 14px;
     border-radius: var(--ns-radius-md);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
   }
 
   /* ═══════════════ PANEL DE INICIO (nh-*) ═══════════════ */
@@ -208,7 +207,7 @@
     border: 0;
     border-radius: var(--ns-radius-md);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     text-align: left;
     overflow: hidden;
     cursor: pointer;
@@ -218,12 +217,12 @@
   }
 
   .nh-metric:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-2px);
   }
 
   .nh-metric:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.97);
   }
 
@@ -308,7 +307,7 @@
   .nh-link:hover {
     color: var(--ns-primary);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
   }
 
   .nh-next {
@@ -344,7 +343,7 @@
     border: 0;
     border-radius: var(--ns-radius-sm);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition:
       box-shadow var(--dur-2) var(--ease-out),
@@ -352,12 +351,12 @@
   }
 
   .nh-slot:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-2px);
   }
 
   .nh-slot:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.95);
   }
 
@@ -396,7 +395,7 @@
     border: 0;
     border-radius: var(--ns-radius-md);
     background: var(--ns-surface);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition:
       box-shadow var(--dur-2) var(--ease-out),
@@ -404,12 +403,12 @@
   }
 
   .nh-action:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-3px);
   }
 
   .nh-action:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.94);
   }
 
@@ -422,7 +421,7 @@
     border-radius: var(--ns-radius-sm);
     background: var(--ns-sunken);
     color: var(--ns-primary);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
     transition: transform var(--dur-2) var(--ease-spring);
   }
 
@@ -450,7 +449,7 @@
     border-radius: var(--ns-radius-sm);
     background: var(--ns-surface);
     color: var(--ns-primary);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition:
       box-shadow var(--dur-2) var(--ease-out),
@@ -468,18 +467,18 @@
   .nh-wa-btn:hover {
     background: var(--ns-primary);
     color: var(--ns-paper);
-    box-shadow: var(--neo-brand);
+    box-shadow: var(--ui-brand);
   }
 
   .nh-wa-btn:active {
     transform: scale(0.9);
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
   }
 
   .nh-wa-btn.is-sent {
     background: var(--ns-sunken);
     color: var(--ns-text-faint);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
   }
 
   /* ═══════════════ BOTONES HEREDADOS ═══════════════ */
@@ -504,7 +503,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    box-shadow: var(--neo-brand);
+    box-shadow: var(--ui-brand);
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -518,7 +517,7 @@
   .ns-sticky-cta-btn:hover,
   .btn-modern-dark:hover,
   .btn-plastilina-primary:hover {
-    box-shadow: var(--neo-brand-lg);
+    box-shadow: var(--ui-brand-lg);
     transform: translateY(-2px);
   }
 
@@ -527,7 +526,7 @@
   .ns-sticky-cta-btn:active,
   .btn-modern-dark:active,
   .btn-plastilina-primary:active {
-    box-shadow: var(--neo-brand-pressed);
+    box-shadow: var(--ui-brand-pressed);
     transform: scale(0.97);
   }
 
@@ -559,7 +558,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition:
       box-shadow var(--dur-2) var(--ease-out),
@@ -570,7 +569,7 @@
   .ns-btn-celeste:hover,
   .ns-cta-wa:hover,
   .btn-plastilina-secondary:hover {
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
     transform: translateY(-2px);
   }
 
@@ -578,7 +577,7 @@
   .ns-btn-celeste:active,
   .ns-cta-wa:active,
   .btn-plastilina-secondary:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.97);
   }
 
@@ -596,7 +595,7 @@
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition:
       box-shadow var(--dur-2) var(--ease-out),
@@ -606,11 +605,11 @@
 
   .ns-export-btn:hover {
     color: var(--ns-primary);
-    box-shadow: var(--neo-raised);
+    box-shadow: var(--ui-shadow);
   }
 
   .ns-export-btn:active {
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
     transform: scale(0.95);
   }
 
@@ -641,7 +640,7 @@
     background: var(--ns-glass-bg-strong);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 -8px 30px rgba(153, 0, 17, 0.08);
+    box-shadow: inset 0 1px 0 var(--ns-line), 0 -6px 24px rgba(16, 24, 40, 0.06);
   }
 
   .ns-fab-mobile {
@@ -658,14 +657,14 @@
     border-radius: 20px;
     background: var(--ns-gradient-1);
     color: var(--ns-paper);
-    box-shadow: var(--neo-brand-lg);
+    box-shadow: var(--ui-brand-lg);
     cursor: pointer;
     transition: transform var(--dur-2) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out);
   }
 
   .ns-fab-mobile:active {
     transform: scale(0.92);
-    box-shadow: var(--neo-brand-pressed);
+    box-shadow: var(--ui-brand-pressed);
   }
 
   /* ═══════════════ CAMPOS HEREDADOS ═══════════════ */
@@ -682,7 +681,7 @@
     font-family: inherit;
     font-size: 14px;
     font-weight: 500;
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
     outline: none;
     transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
   }
@@ -697,7 +696,7 @@
   .ns-input-clean:focus,
   .ns-login-input:focus {
     background: var(--ns-surface);
-    box-shadow: var(--neo-inset-sm), 0 0 0 3px var(--ns-focus);
+    box-shadow: var(--ui-field-sm), 0 0 0 3px var(--ns-focus);
   }
 
   .ns-input-wrapper {
@@ -707,12 +706,12 @@
     padding: 4px 8px 4px 12px;
     border-radius: var(--ns-radius-md);
     background: var(--ns-sunken);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
     transition: box-shadow var(--dur-2) var(--ease-out);
   }
 
   .ns-input-wrapper:focus-within {
-    box-shadow: var(--neo-inset-sm), 0 0 0 3px var(--ns-focus);
+    box-shadow: var(--ui-field-sm), 0 0 0 3px var(--ns-focus);
   }
 
   .ns-input-wrapper input,
@@ -742,7 +741,7 @@
     padding: 5px;
     border-radius: var(--ns-radius-md);
     background: var(--ns-sunken);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
   }
 
   .ns-period-btn {
@@ -771,19 +770,19 @@
   .ns-period-btn.active {
     background: var(--ns-surface);
     color: var(--ns-primary);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
   }
 
   .ns-bar-chart-bar {
     border-radius: 8px 8px 4px 4px;
     background: var(--ns-gradient-1);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 4px 12px rgba(153, 0, 17, 0.18);
+    box-shadow: var(--ui-brand);
     transition: transform var(--dur-3) var(--ease-spring), box-shadow var(--dur-3) var(--ease-out);
   }
 
   .ns-bar-chart-bar:hover {
     transform: scaleY(1.03);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 20px rgba(153, 0, 17, 0.26);
+    box-shadow: var(--ui-brand-lg);
   }
 
   /* ═══════════════ AVISOS (TOAST) ═══════════════ */
@@ -822,7 +821,7 @@
     border-radius: var(--ns-radius-lg);
     background: var(--ns-surface);
     color: var(--ns-text);
-    box-shadow: var(--neo-float);
+    box-shadow: var(--ui-shadow-xl);
     overflow: hidden;
     pointer-events: auto;
   }
@@ -845,7 +844,7 @@
     border-radius: var(--ns-radius-xs);
     background: var(--ns-sunken);
     color: var(--ns-primary);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
   }
 
   .ns-toast-content {
@@ -929,7 +928,7 @@
 
   .ns-card-lift:hover {
     transform: translateY(-3px);
-    box-shadow: var(--neo-raised-lg);
+    box-shadow: var(--ui-shadow-lg);
   }
 
   .ns-card-lift:active {
@@ -954,7 +953,7 @@
     height: 8px;
     border-radius: 999px;
     background: var(--ns-sunken);
-    box-shadow: var(--neo-inset-sm);
+    box-shadow: var(--ui-field-sm);
     overflow: hidden;
   }
 
@@ -975,14 +974,14 @@
     border-radius: var(--ns-radius-sm);
     background: var(--ns-surface);
     color: var(--ns-text-secondary);
-    box-shadow: var(--neo-raised-sm);
+    box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
   .ns-notif-bell:active {
     transform: scale(0.92);
-    box-shadow: var(--neo-pressed);
+    box-shadow: var(--ui-pressed);
   }
 }
 

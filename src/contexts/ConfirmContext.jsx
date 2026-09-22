@@ -55,12 +55,12 @@ export function ConfirmProvider({ children }) {
       {children}
       {confirmState.show && (
         <div
-          className="neo-scrim flex items-center justify-center p-4"
+          className="ui-scrim flex items-center justify-center p-4"
           onClick={hideConfirm}
           role="presentation"
         >
           <div
-            className="neo-modal"
+            className="ui-modal"
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="ns-confirm-title"
@@ -68,10 +68,10 @@ export function ConfirmProvider({ children }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="neo-avatar w-14 h-14 mb-4"
+              className="ui-avatar w-14 h-14 mb-4"
               style={confirmState.isDestructive
-                ? { background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-brand)' }
-                : { background: 'var(--ns-sunken)', boxShadow: 'var(--neo-inset-sm)' }}
+                ? { background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: 'var(--ui-brand)' }
+                : { background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}
             >
               {confirmState.isDestructive ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -81,7 +81,7 @@ export function ConfirmProvider({ children }) {
             </div>
             <h3
               id="ns-confirm-title"
-              className="font-display text-xl font-black tracking-tight mb-2"
+              className="font-display text-xl font-bold tracking-tight mb-2"
               style={{ color: 'var(--ns-text)' }}
             >
               {confirmState.title}
@@ -94,10 +94,10 @@ export function ConfirmProvider({ children }) {
               {confirmState.message}
             </p>
             <div className="flex gap-3">
-              <button onClick={hideConfirm} className="neo-btn flex-1">
+              <button onClick={hideConfirm} className="ui-btn flex-1">
                 {confirmState.cancelText}
               </button>
-              <button onClick={handleConfirm} autoFocus className="neo-btn neo-btn--primary flex-1">
+              <button onClick={handleConfirm} autoFocus className="ui-btn ui-btn--primary flex-1">
                 {confirmState.confirmText}
               </button>
             </div>

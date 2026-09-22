@@ -104,12 +104,12 @@ function PhoneMockup() {
         {/* Carcasa */}
         <div
           className="rounded-[2.8rem] p-2.5 overflow-hidden"
-          style={{ background: 'var(--ns-surface)', boxShadow: 'var(--neo-float)' }}
+          style={{ background: 'var(--ns-surface)', boxShadow: 'var(--ui-shadow-xl)' }}
         >
           {/* Pantalla hundida dentro de la carcasa */}
           <div
             className="rounded-[2.2rem] overflow-hidden flex flex-col min-h-[392px]"
-            style={{ background: 'var(--ns-paper)', boxShadow: 'var(--neo-inset-deep)' }}
+            style={{ background: 'var(--ns-paper)', boxShadow: 'var(--ui-field-deep)' }}
           >
             {/* Muesca */}
             <div className="flex justify-center pt-2.5 pb-1">
@@ -122,12 +122,12 @@ function PhoneMockup() {
               style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)' }}
             >
               <div>
-                <p className="text-[8px] font-black uppercase tracking-[0.18em] opacity-70">{s.badge}</p>
-                <h4 className="text-sm font-black tracking-tight mt-0.5">{s.title}</h4>
+                <p className="text-[8px] font-bold uppercase tracking-[0.07em] opacity-70">{s.badge}</p>
+                <h4 className="text-sm font-bold tracking-tight mt-0.5">{s.title}</h4>
               </div>
               <div
-                className="w-8 h-8 rounded-[11px] flex items-center justify-center text-[9px] font-black"
-                style={{ background: 'rgba(252,246,245,0.18)' }}
+                className="w-8 h-8 rounded-[11px] flex items-center justify-center text-[9px] font-bold"
+                style={{ background: 'rgba(255,255,255,0.18)' }}
               >
                 NS
               </div>
@@ -141,12 +141,12 @@ function PhoneMockup() {
                   className="flex items-center gap-3 p-3 rounded-[16px] ns-fade-up"
                   style={{
                     background: 'var(--ns-surface)',
-                    boxShadow: 'var(--neo-raised-sm)',
+                    boxShadow: 'var(--ui-shadow-sm)',
                     animationDelay: `${i * 0.08}s`
                   }}
                 >
                   <div
-                    className="w-8 h-8 rounded-[11px] flex items-center justify-center text-[10px] font-black shrink-0"
+                    className="w-8 h-8 rounded-[11px] flex items-center justify-center text-[10px] font-bold shrink-0"
                     style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)' }}
                   >
                     {i + 1}
@@ -158,7 +158,7 @@ function PhoneMockup() {
               ))}
               {screen === 3 && (
                 <div
-                  className="mt-3 py-3 rounded-[16px] text-center font-black text-[10px] uppercase tracking-[0.18em] ns-fade-up"
+                  className="mt-3 py-3 rounded-[16px] text-center font-bold text-[10px] uppercase tracking-[0.07em] ns-fade-up"
                   style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)' }}
                 >
                   Reserva confirmada ✓
@@ -184,7 +184,7 @@ function PhoneMockup() {
               style={{
                 width: screen === i ? 26 : 8,
                 background: screen === i ? 'var(--ns-primary)' : 'var(--ns-mix-16)',
-                boxShadow: screen === i ? '0 2px 8px rgba(153,0,17,0.3)' : 'var(--neo-inset-sm)'
+                boxShadow: screen === i ? '0 2px 8px rgba(16,24,40,0.3)' : 'var(--ui-field-sm)'
               }}
             />
           ))}
@@ -213,25 +213,25 @@ export default function LandingPage() {
           background: 'var(--ns-glass-bg)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.8) inset, 0 6px 22px rgba(153,0,17,0.05)'
+          boxShadow: '0 1px 0 rgba(255,255,255,0.8) inset, 0 6px 22px rgba(0,122,255,0.05)'
         }}
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 md:px-8 h-16">
           <div className="flex items-center gap-2.5">
             <div
               className="w-9 h-9 rounded-[13px] flex items-center justify-center"
-              style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: '0 6px 16px rgba(153,0,17,0.28)' }}
+              style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: '0 6px 16px rgba(16,24,40,0.28)' }}
             >
-              <span className="font-black text-[10px] italic">NS</span>
+              <span className="font-bold text-[10px] italic">NS</span>
             </div>
-            <span className="text-sm font-black tracking-tight">Non Sistemas</span>
+            <span className="text-sm font-bold tracking-tight">Non sistemas</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {[['#features', 'Funciones'], ['#como', 'Cómo funciona'], ['#precio', 'Precio'], ['#faq', 'FAQ']].map(([h, l]) => (
               <a
                 key={h}
                 href={h}
-                className="text-[11px] font-black uppercase tracking-[0.16em] transition-colors"
+                className="text-[11px] font-bold uppercase tracking-[0.06em] transition-colors"
                 style={{ color: 'var(--ns-text-muted)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ns-primary)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ns-text-muted)')}
@@ -241,10 +241,10 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="flex items-center gap-2.5">
-            <button onClick={() => nav('/login')} className="neo-btn neo-btn--quiet neo-btn--pill hidden sm:inline-flex text-xs">
+            <button onClick={() => nav('/login')} className="ui-btn ui-btn--quiet ui-btn--pill hidden sm:inline-flex text-xs">
               Iniciar sesión
             </button>
-            <button onClick={() => nav('/login')} className="neo-btn neo-btn--primary neo-btn--pill text-xs">
+            <button onClick={() => nav('/login')} className="ui-btn ui-btn--primary ui-btn--pill text-xs">
               Empezar gratis
             </button>
           </div>
@@ -256,22 +256,22 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute inset-0 opacity-[0.03]"
-            style={{ backgroundImage: 'radial-gradient(circle,#990011 1px,transparent 1px)', backgroundSize: '38px 38px' }}
+            style={{ backgroundImage: 'radial-gradient(circle,#007AFF 1px,transparent 1px)', backgroundSize: '38px 38px' }}
           />
         </div>
 
         <div className="max-w-6xl mx-auto px-5 md:px-8 pt-16 md:pt-28 pb-14 md:pb-20 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2.5 mb-7 ns-fade-up neo-chip neo-chip--soft">
+            <div className="inline-flex items-center gap-2.5 mb-7 ns-fade-up ui-chip ui-chip--soft">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute h-full w-full rounded-full opacity-70" style={{ background: 'var(--ns-primary)' }} />
                 <span className="relative rounded-full h-2 w-2" style={{ background: 'var(--ns-primary)' }} />
               </span>
-              <span className="text-[10px] font-black uppercase tracking-[0.18em]">+200 negocios activos</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.07em]">+200 negocios activos</span>
             </div>
 
             <h1
-              className="text-[2.6rem] md:text-7xl font-black tracking-[-0.04em] leading-[0.94] mb-5 ns-fade-up"
+              className="text-[2.6rem] md:text-7xl font-bold tracking-[-0.04em] leading-[0.94] mb-5 ns-fade-up"
               style={{ animationDelay: '0.1s', fontFamily: 'var(--font-display)' }}
             >
               El sistema de reservas que <span className="ns-gradient-text">tu negocio merece</span>
@@ -285,16 +285,16 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center ns-fade-up" style={{ animationDelay: '0.3s' }}>
-              <button onClick={() => nav('/login')} className="neo-btn neo-btn--primary neo-btn--pill ns-shimmer-btn px-9 py-4">
+              <button onClick={() => nav('/login')} className="ui-btn ui-btn--primary ui-btn--pill ns-shimmer-btn px-9 py-4">
                 Probar 7 días gratis
               </button>
-              <a href="#como" className="neo-btn neo-btn--pill px-9 py-4">
+              <a href="#como" className="ui-btn ui-btn--pill px-9 py-4">
                 Ver la demo
               </a>
             </div>
 
             <p
-              className="text-[10px] font-bold uppercase tracking-[0.14em] mt-6 ns-fade-up"
+              className="text-[10px] font-bold uppercase tracking-[0.06em] mt-6 ns-fade-up"
               style={{ animationDelay: '0.4s', color: 'var(--ns-text-muted)' }}
             >
               Sin tarjeta · Listo en 5 min · Cancelás cuando quieras
@@ -304,7 +304,7 @@ export default function LandingPage() {
 
         {/* MÉTRICAS */}
         <div className="max-w-4xl mx-auto px-5 md:px-8 pb-10 md:pb-14">
-          <div className="neo-well grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 p-3 md:p-4">
+          <div className="ui-well grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 p-3 md:p-4">
             {[
               { n: 200, s: '+', l: 'Negocios activos' },
               { n: 15000, s: '+', l: 'Reservas por mes' },
@@ -312,11 +312,11 @@ export default function LandingPage() {
               { n: 4.9, s: '★', l: 'Satisfacción', dec: 1 },
             ].map((s) => (
               <div key={s.l} className="ns-stat-landing">
-                <p className="neo-stat__value text-2xl md:text-4xl">
+                <p className="ui-stat__value text-2xl md:text-4xl">
                   <Contador end={s.n} decimales={s.dec || 0} />
                   {s.s}
                 </p>
-                <p className="neo-stat__label mt-1">{s.l}</p>
+                <p className="ui-stat__label mt-1">{s.l}</p>
               </div>
             ))}
           </div>
@@ -326,12 +326,12 @@ export default function LandingPage() {
 
         {/* RUBROS */}
         <div className="max-w-6xl mx-auto px-5 md:px-8 pb-16 md:pb-24">
-          <p className="neo-eyebrow text-center mb-5">Diseñado para todos los rubros</p>
+          <p className="ui-eyebrow text-center mb-5">Diseñado para todos los rubros</p>
           <div className="overflow-hidden relative">
             <div className="flex gap-3 ns-marquee" style={{ width: 'max-content' }}>
               {[...Array(2)].flatMap((_, r) =>
                 ['🏥 Clínicas', '💇 Barberías', '🍽️ Restaurantes', '💅 Estéticas', '🐾 Veterinarias', '🏋️ Gimnasios', '📸 Estudios de foto', '🎓 Academias', '🧘 Spa & wellness', '🔧 Talleres', '🏨 Hoteles', '🎭 Eventos'].map((x) => (
-                  <span key={`${r}-${x}`} className="neo-chip whitespace-nowrap">
+                  <span key={`${r}-${x}`} className="ui-chip whitespace-nowrap">
                     {x}
                   </span>
                 ))
@@ -345,8 +345,8 @@ export default function LandingPage() {
       <section id="features" className="py-16 md:py-28" style={{ background: 'var(--ns-surface)' }}>
         <div className="max-w-6xl mx-auto px-5 md:px-8">
           <div className="text-center mb-12 md:mb-16">
-            <p className="neo-eyebrow mb-3">Plataforma completa</p>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="ui-eyebrow mb-3">Plataforma completa</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Todo lo que necesitás. Nada que sobre.
             </h2>
             <p className="text-sm font-medium mt-4 max-w-lg mx-auto" style={{ color: 'var(--ns-text-secondary)' }}>
@@ -356,7 +356,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {FEATURES.map((f) => (
               <div key={f.t} className="ns-feature-pro group">
-                <div className="neo-pod neo-pod--lg mb-5 transition-transform duration-500 group-hover:scale-110">
+                <div className="ui-pod ui-pod--lg mb-5 transition-transform duration-500 group-hover:scale-110">
                   <Ic d={f.icon} cls="w-5 h-5" />
                 </div>
                 <h3 className="text-lg font-bold tracking-tight mb-2">{f.t}</h3>
@@ -373,17 +373,17 @@ export default function LandingPage() {
       <section id="como" className="py-16 md:py-28">
         <div className="max-w-5xl mx-auto px-5 md:px-8">
           <div className="text-center mb-12 md:mb-16">
-            <p className="neo-eyebrow mb-3">3 pasos</p>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="ui-eyebrow mb-3">3 pasos</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Empezá en minutos, no en semanas
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {PASOS.map((p, i) => (
               <div key={p.n} className="relative group">
-                <div className="neo-card neo-card--interactive p-8 h-full">
+                <div className="ui-card ui-card--interactive p-8 h-full">
                   <span
-                    className="text-6xl font-black tracking-tighter transition-opacity duration-500 opacity-15 group-hover:opacity-30"
+                    className="text-6xl font-bold tracking-tight transition-opacity duration-500 opacity-15 group-hover:opacity-30"
                     style={{ color: 'var(--ns-primary)', fontFamily: 'var(--font-display)' }}
                   >
                     {p.n}
@@ -410,8 +410,8 @@ export default function LandingPage() {
       <section className="py-16 md:py-28" style={{ background: 'var(--ns-surface)' }}>
         <div className="max-w-5xl mx-auto px-5 md:px-8">
           <div className="text-center mb-12 md:mb-16">
-            <p className="neo-eyebrow mb-3">Automatización total</p>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="ui-eyebrow mb-3">Automatización total</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Vos te enfocás en tu trabajo.
               <br />
               <span style={{ color: 'var(--ns-text-muted)' }}>El sistema hace el resto.</span>
@@ -419,15 +419,15 @@ export default function LandingPage() {
           </div>
 
           {/* La secuencia se lee por relieve: cada paso sobresale un poco más */}
-          <div className="neo-well grid grid-cols-1 md:grid-cols-5 gap-3 p-4 md:p-5">
+          <div className="ui-well grid grid-cols-1 md:grid-cols-5 gap-3 p-4 md:p-5">
             {PIPELINE.map((a, i) => (
               <div key={a.t} className="relative flex md:block items-center gap-3">
                 <div
-                  className="neo-tile neo-tile--interactive flex-1 md:flex-none w-full text-center p-4 md:p-5"
+                  className="ui-tile ui-tile--interactive flex-1 md:flex-none w-full text-center p-4 md:p-5"
                   style={{ transitionDelay: `${i * 30}ms` }}
                 >
                   <span className="text-2xl">{a.emoji}</span>
-                  <p className="text-xs font-black mt-2">{a.t}</p>
+                  <p className="text-xs font-bold mt-2">{a.t}</p>
                   <p className="text-[10px] font-medium mt-1" style={{ color: 'var(--ns-text-muted)' }}>
                     {a.d}
                   </p>
@@ -447,7 +447,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="neo-eyebrow text-center mt-8">Todo esto pasa solo. Sin intervención manual.</p>
+          <p className="ui-eyebrow text-center mt-8">Todo esto pasa solo. Sin intervención manual.</p>
         </div>
       </section>
 
@@ -455,8 +455,8 @@ export default function LandingPage() {
       <section className="py-16 md:py-28">
         <div className="max-w-6xl mx-auto px-5 md:px-8">
           <div className="text-center mb-12">
-            <p className="neo-eyebrow mb-3">Casos de éxito</p>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="ui-eyebrow mb-3">Casos de éxito</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Lo que dicen nuestros clientes
             </h2>
           </div>
@@ -475,12 +475,12 @@ export default function LandingPage() {
                 <p className="text-sm font-medium leading-relaxed mb-5 italic" style={{ color: 'var(--ns-text-secondary)' }}>
                   «{t.text}»
                 </p>
-                <div className="neo-divider mb-4" />
+                <div className="ui-divider mb-4" />
                 <div className="flex items-center gap-3">
-                  <div className="neo-avatar neo-avatar--brand">{t.name[0]}</div>
+                  <div className="ui-avatar ui-avatar--brand">{t.name[0]}</div>
                   <div>
                     <p className="text-sm font-bold">{t.name}</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: 'var(--ns-text-muted)' }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--ns-text-muted)' }}>
                       {t.biz}
                     </p>
                   </div>
@@ -495,8 +495,8 @@ export default function LandingPage() {
       <section id="precio" className="py-16 md:py-28" style={{ background: 'var(--ns-surface)' }}>
         <div className="max-w-4xl mx-auto px-5 md:px-8">
           <div className="text-center mb-12">
-            <p className="neo-eyebrow mb-3">Precio transparente</p>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="ui-eyebrow mb-3">Precio transparente</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Un plan. Todo incluido.
             </h2>
           </div>
@@ -505,32 +505,32 @@ export default function LandingPage() {
               className="relative rounded-[var(--ns-radius-2xl)] p-8 md:p-12 overflow-hidden ns-pricing-glow"
               style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)' }}
             >
-              <div className="absolute -top-24 -right-24 w-60 h-60 rounded-full blur-[80px]" style={{ background: 'rgba(252,246,245,0.18)' }} />
-              <div className="absolute -bottom-24 -left-24 w-44 h-44 rounded-full blur-[70px]" style={{ background: 'rgba(52,0,6,0.5)' }} />
+              <div className="absolute -top-24 -right-24 w-60 h-60 rounded-full blur-[80px]" style={{ background: 'rgba(255,255,255,0.18)' }} />
+              <div className="absolute -bottom-24 -left-24 w-44 h-44 rounded-full blur-[70px]" style={{ background: 'rgba(16,24,40,0.5)' }} />
 
               <div className="relative z-10">
                 <div className="flex flex-wrap items-center gap-2 mb-6">
-                  <span className="neo-onbrand-chip is-active text-[9px]">Más elegido</span>
-                  <span className="neo-onbrand-chip text-[9px]">7 días gratis</span>
+                  <span className="ui-onbrand-chip is-active text-[9px]">Más elegido</span>
+                  <span className="ui-onbrand-chip text-[9px]">7 días gratis</span>
                 </div>
 
                 <h3 className="text-2xl font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)' }}>
                   Plan profesional
                 </h3>
-                <p className="text-sm font-medium mb-7" style={{ color: 'rgba(252,246,245,0.6)' }}>
+                <p className="text-sm font-medium mb-7" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   Todo para operar como un profesional.
                 </p>
 
                 <div className="flex items-end gap-1.5 mb-8">
-                  <span className="text-5xl md:text-6xl font-black tracking-tighter">$9.990</span>
-                  <span className="text-sm font-bold mb-2.5" style={{ color: 'rgba(252,246,245,0.55)' }}>
+                  <span className="text-5xl md:text-6xl font-bold tracking-tight">$9.990</span>
+                  <span className="text-sm font-bold mb-2.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
                     /mes
                   </span>
                 </div>
 
                 <ul className="space-y-3 mb-9">
                   {INCLUYE.map((x) => (
-                    <li key={x} className="flex items-center gap-3 text-sm font-medium" style={{ color: 'rgba(252,246,245,0.88)' }}>
+                    <li key={x} className="flex items-center gap-3 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.88)' }}>
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                         style={{ background: 'var(--ns-paper)', color: 'var(--ns-primary)' }}
@@ -544,11 +544,11 @@ export default function LandingPage() {
 
                 <button
                   onClick={() => nav('/login')}
-                  className="neo-onbrand-btn ns-shimmer-btn w-full py-4 text-[11px] uppercase tracking-[0.2em]"
+                  className="ui-onbrand-btn ns-shimmer-btn w-full py-4 text-[11px] uppercase tracking-[0.08em]"
                 >
                   Empezar 7 días gratis
                 </button>
-                <p className="text-[10px] text-center mt-4" style={{ color: 'rgba(252,246,245,0.45)' }}>
+                <p className="text-[10px] text-center mt-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Sin tarjeta de crédito
                 </p>
               </div>
@@ -561,8 +561,8 @@ export default function LandingPage() {
       <section id="faq" className="py-16 md:py-28">
         <div className="max-w-2xl mx-auto px-5 md:px-8">
           <div className="text-center mb-12">
-            <p className="neo-eyebrow mb-3">Preguntas frecuentes</p>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="ui-eyebrow mb-3">Preguntas frecuentes</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Lo que todos preguntan
             </h2>
           </div>
@@ -575,7 +575,7 @@ export default function LandingPage() {
                   className="rounded-[var(--ns-radius-lg)] overflow-hidden transition-all duration-400"
                   style={{
                     background: abierta ? 'var(--ns-sunken)' : 'var(--ns-surface)',
-                    boxShadow: abierta ? 'var(--neo-inset)' : 'var(--neo-raised-sm)'
+                    boxShadow: abierta ? 'var(--ui-field)' : 'var(--ui-shadow-sm)'
                   }}
                 >
                   <button
@@ -617,20 +617,20 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-5 md:px-8">
           <div
             className="relative rounded-[var(--ns-radius-3xl)] overflow-hidden p-10 md:p-16 text-center"
-            style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: 'var(--neo-float)' }}
+            style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)', boxShadow: 'var(--ui-shadow-xl)' }}
           >
-            <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full blur-[100px]" style={{ background: 'rgba(252,246,245,0.2)' }} />
-            <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full blur-[100px]" style={{ background: 'rgba(52,0,6,0.55)' }} />
+            <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full blur-[100px]" style={{ background: 'rgba(255,255,255,0.2)' }} />
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full blur-[100px]" style={{ background: 'rgba(16,24,40,0.55)' }} />
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4" style={{ fontFamily: 'var(--font-display)' }}>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)' }}>
                 ¿Listo para profesionalizar tu negocio?
               </h2>
-              <p className="text-sm md:text-base font-medium mb-9 max-w-lg mx-auto" style={{ color: 'rgba(252,246,245,0.65)' }}>
+              <p className="text-sm md:text-base font-medium mb-9 max-w-lg mx-auto" style={{ color: 'rgba(255,255,255,0.65)' }}>
                 Sumate a los negocios que ya automatizan sus reservas.
               </p>
               <button
                 onClick={() => nav('/login')}
-                className="neo-onbrand-btn ns-shimmer-btn px-10 py-4 text-[11px] uppercase tracking-[0.2em]"
+                className="ui-onbrand-btn ns-shimmer-btn px-10 py-4 text-[11px] uppercase tracking-[0.08em]"
               >
                 Crear mi cuenta gratis
               </button>
@@ -647,7 +647,7 @@ export default function LandingPage() {
               className="w-8 h-8 rounded-[11px] flex items-center justify-center"
               style={{ background: 'var(--ns-gradient-1)', color: 'var(--ns-paper)' }}
             >
-              <span className="font-black text-[8px] italic">NS</span>
+              <span className="font-bold text-[8px] italic">NS</span>
             </div>
             <span className="text-xs font-bold" style={{ color: 'var(--ns-text-muted)' }}>
               Non Sistemas © {new Date().getFullYear()}
@@ -658,14 +658,14 @@ export default function LandingPage() {
               <a
                 key={x}
                 href="#faq"
-                className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors"
+                className="text-[10px] font-bold uppercase tracking-[0.06em] transition-colors"
                 style={{ color: 'var(--ns-text-muted)' }}
               >
                 {x}
               </a>
             ))}
           </div>
-          <p className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--ns-text-muted)' }}>
+          <p className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-text-muted)' }}>
             Salsipuedes, Córdoba, Argentina
           </p>
         </div>

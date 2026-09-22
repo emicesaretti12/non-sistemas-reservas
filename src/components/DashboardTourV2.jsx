@@ -378,12 +378,12 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
           initial={{ opacity: 0, y: 14, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.98 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 36, mass: 0.9 }}
           style={cardStyle}
         >
-          <div className="neo-progress" style={{ height: 4, borderRadius: 0 }}>
+          <div className="ui-progress" style={{ height: 4, borderRadius: 0 }}>
             <motion.div
-              className="neo-progress__fill"
+              className="ui-progress__fill"
               style={{ borderRadius: 0 }}
               initial={{ width: 0 }}
               animate={{ width: `${progreso}%` }}
@@ -394,11 +394,11 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
           <div className={`p-5 ${esCentrado ? 'sm:p-7 text-center' : 'sm:p-6'}`}>
             <div className={`flex items-start gap-3.5 ${esCentrado ? 'flex-col items-center' : ''}`}>
               <motion.span
-                className="neo-avatar neo-avatar--brand shrink-0"
+                className="ui-avatar ui-avatar--brand shrink-0"
                 style={{ width: esCentrado ? 60 : 46, height: esCentrado ? 60 : 46 }}
                 initial={{ scale: 0.4, rotate: -12 }}
                 animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', damping: 13, stiffness: 240, delay: 0.1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.85, delay: 0.08 }}
               >
                 <Icono size={esCentrado ? 28 : 22} />
               </motion.span>
@@ -406,7 +406,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
               <div className="flex-1 min-w-0">
                 <h2
                   id="ns-tour-title"
-                  className={`font-display font-black tracking-tight leading-tight ${esCentrado ? 'text-2xl mt-3' : 'text-[17px]'}`}
+                  className={`font-display font-bold tracking-tight leading-tight ${esCentrado ? 'text-2xl mt-3' : 'text-[17px]'}`}
                   style={{ color: 'var(--ns-text)' }}
                 >
                   {current.title}
@@ -414,13 +414,13 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
                 {step === 0 && negocio?.nombre && (
                   <p className="text-[12px] font-bold mt-1" style={{ color: 'var(--ns-primary)' }}>{negocio.nombre}</p>
                 )}
-                <p className="neo-eyebrow mt-1.5">Paso {step + 1} de {total}</p>
+                <p className="ui-eyebrow mt-1.5">Paso {step + 1} de {total}</p>
               </div>
 
               {!esCentrado && (
                 <button
                   onClick={cerrar}
-                  className="neo-icon-btn w-9 h-9 shrink-0"
+                  className="ui-icon-btn w-9 h-9 shrink-0"
                   aria-label="Cerrar el tour"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -439,7 +439,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
             {current.actionLabel && (
               <button
                 onClick={ejecutarAccion}
-                className="neo-btn neo-btn--quiet mt-3.5"
+                className="ui-btn ui-btn--quiet mt-3.5"
                 style={{ color: 'var(--ns-primary)' }}
               >
                 {current.actionCopyLink && (
@@ -470,20 +470,20 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
             <div className="flex gap-2.5 mt-4">
               {step === 0 ? (
                 <>
-                  <button onClick={cerrar} className="neo-btn flex-1">Ahora no</button>
-                  <button onClick={siguiente} className="neo-btn neo-btn--primary flex-[1.6]">Empecemos</button>
+                  <button onClick={cerrar} className="ui-btn flex-1">Ahora no</button>
+                  <button onClick={siguiente} className="ui-btn ui-btn--primary flex-[1.6]">Empecemos</button>
                 </>
               ) : current.finish ? (
-                <button onClick={cerrar} className="neo-btn neo-btn--primary neo-btn--block">
+                <button onClick={cerrar} className="ui-btn ui-btn--primary ui-btn--block">
                   Ir a mi panel
                 </button>
               ) : (
                 <>
-                  <button onClick={anterior} className="neo-btn" aria-label="Paso anterior">
+                  <button onClick={anterior} className="ui-btn" aria-label="Paso anterior">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
-                  <button onClick={cerrar} className="neo-btn neo-btn--ghost flex-1">Saltar</button>
-                  <button onClick={siguiente} className="neo-btn neo-btn--primary flex-[1.4]">
+                  <button onClick={cerrar} className="ui-btn ui-btn--ghost flex-1">Saltar</button>
+                  <button onClick={siguiente} className="ui-btn ui-btn--primary flex-[1.4]">
                     Siguiente
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
@@ -496,7 +496,7 @@ export default function DashboardTourV2({ active, onDismiss, negocio, onNavigate
 
       {copiado && (
         <div className="ns-copy-toast" role="status" style={{ zIndex: 10001 }}>
-          <span className="neo-avatar w-9 h-9">
+          <span className="ui-avatar w-9 h-9">
             <IconLink size={18} />
           </span>
           <div>

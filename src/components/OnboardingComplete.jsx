@@ -67,14 +67,14 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
           animate={{ opacity: 0.55, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.2 }}
           className="absolute bottom-16 right-4 w-72 h-72 rounded-full blur-3xl"
-          style={{ background: 'rgba(252,246,245,0.5)' }}
+          style={{ background: 'rgba(255,255,255,0.5)' }}
         />
       </div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 24 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.85 }}
         className="max-w-md w-full text-center space-y-7 relative z-10"
       >
         {/* Destellos de festejo */}
@@ -97,17 +97,17 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
         <motion.div
           initial={{ scale: 0, rotate: -160 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', delay: 0.25, damping: 14, stiffness: 190 }}
+          transition={{ type: 'spring', delay: 0.2, stiffness: 420, damping: 34, mass: 0.85 }}
           className="w-28 h-28 mx-auto rounded-[2.2rem] flex items-center justify-center overflow-hidden"
           style={{
             background: 'var(--ns-paper)',
-            boxShadow: '14px 16px 36px rgba(64,0,7,0.45), -10px -10px 26px rgba(255,255,255,0.14)'
+            boxShadow: '14px 16px 36px rgba(16,24,40,0.45), -10px -10px 26px rgba(255,255,255,0.14)'
           }}
         >
           {data.logo_url ? (
             <img src={data.logo_url} className="w-full h-full object-cover" alt="Logo" />
           ) : (
-            <span className="text-5xl font-black" style={{ color: 'var(--ns-primary)' }}>
+            <span className="text-5xl font-bold" style={{ color: 'var(--ns-primary)' }}>
               {data.nombre[0]?.toUpperCase()}
             </span>
           )}
@@ -115,7 +115,7 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
 
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
           <h1
-            className="text-5xl font-black tracking-tight flex items-center justify-center gap-3"
+            className="text-5xl font-bold tracking-tight flex items-center justify-center gap-3"
             style={{ color: 'var(--ns-paper)', fontFamily: 'var(--font-display)' }}
           >
             ¡Listo!
@@ -127,10 +127,10 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
               <IconCelebrate size={38} />
             </motion.span>
           </h1>
-          <p className="text-lg mt-3 font-semibold" style={{ color: 'rgba(252,246,245,0.92)' }}>
+          <p className="text-lg mt-3 font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>
             {data.nombre}
           </p>
-          <p className="text-sm mt-1" style={{ color: 'rgba(252,246,245,0.6)' }}>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
             Tu plataforma ya está activa y lista para recibir clientes
           </p>
         </motion.div>
@@ -145,20 +145,20 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
           onClick={handleCopyLink}
           className="w-full text-left rounded-[26px] p-5 transition-all"
           style={{
-            background: 'rgba(70,0,8,0.28)',
-            boxShadow: 'inset 8px 8px 18px rgba(52,0,6,0.5), inset -6px -6px 16px rgba(255,255,255,0.09)'
+            background: 'rgba(16,24,40,0.28)',
+            boxShadow: 'inset 8px 8px 18px rgba(16,24,40,0.5), inset -6px -6px 16px rgba(255,255,255,0.09)'
           }}
         >
           <p
-            className="text-[10px] uppercase tracking-[0.22em] mb-2 font-black"
-            style={{ color: 'rgba(252,246,245,0.55)' }}
+            className="text-[10px] uppercase tracking-[0.08em] mb-2 font-bold"
+            style={{ color: 'rgba(255,255,255,0.55)' }}
           >
             Tu link de reservas
           </p>
           <code className="text-sm block truncate font-mono" style={{ color: 'var(--ns-paper)' }}>
             {link}
           </code>
-          <p className="text-[10px] mt-3 uppercase tracking-[0.18em] font-bold" style={{ color: 'rgba(252,246,245,0.45)' }}>
+          <p className="text-[10px] mt-3 uppercase tracking-[0.07em] font-bold" style={{ color: 'rgba(255,255,255,0.45)' }}>
             {copiado ? '✓ Copiado' : 'Tocá para copiar'}
           </p>
         </motion.button>
@@ -170,25 +170,25 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
           transition={{ delay: 0.68 }}
           className="rounded-[24px] p-5 text-left"
           style={{
-            background: 'rgba(252,246,245,0.08)',
+            background: 'rgba(255,255,255,0.08)',
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)'
           }}
         >
           <p
-            className="text-[10px] font-black uppercase tracking-[0.22em] mb-3"
-            style={{ color: 'rgba(252,246,245,0.7)' }}
+            className="text-[10px] font-bold uppercase tracking-[0.08em] mb-3"
+            style={{ color: 'rgba(255,255,255,0.7)' }}
           >
             Próximos pasos
           </p>
-          <ul className="space-y-2.5 text-sm" style={{ color: 'rgba(252,246,245,0.82)' }}>
+          <ul className="space-y-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.82)' }}>
             {pasos.map((paso, i) => (
               <li key={paso} className="flex items-center gap-3">
                 <span
-                  className="grid place-items-center w-6 h-6 rounded-full text-[11px] font-black shrink-0"
+                  className="grid place-items-center w-6 h-6 rounded-full text-[11px] font-bold shrink-0"
                   style={{
                     background: 'var(--ns-paper)',
                     color: 'var(--ns-primary)',
-                    boxShadow: '3px 3px 8px rgba(52,0,6,0.4)'
+                    boxShadow: '3px 3px 8px rgba(16,24,40,0.4)'
                   }}
                 >
                   {i + 1}
@@ -204,7 +204,7 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.78 }}
           onClick={handleContinue}
-          className="neo-onbrand-btn w-full py-5 text-base uppercase tracking-[0.16em]"
+          className="ui-onbrand-btn w-full py-5 text-base uppercase tracking-[0.06em]"
         >
           Ir al panel →
         </motion.button>
