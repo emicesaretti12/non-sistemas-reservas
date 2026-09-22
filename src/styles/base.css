@@ -138,6 +138,21 @@
     color: inherit;
   }
 
+  /* Los controles nativos (checkbox, radio, barra de progreso, slider)
+     dibujaban el azul del sistema en medio de la paleta. */
+  input,
+  progress,
+  meter {
+    accent-color: var(--ns-primary);
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
   /* iOS hace zoom automático en cualquier input con texto < 16px. */
   @media (max-width: 767px) {
     input,
