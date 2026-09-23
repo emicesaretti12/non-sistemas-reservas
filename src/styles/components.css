@@ -489,7 +489,7 @@
     position: relative;
     isolation: isolate;
     flex: 1;
-    min-height: 34px;
+    min-height: 38px;
     padding: 0 15px;
     border: 0;
     border-radius: 999px;
@@ -874,23 +874,51 @@
     border-width: 2px;
   }
 
-  /* ═══════════════ ONDA AL TOCAR ═══════════════ */
+  /* ═══════════════ LUZ Y ONDA AL TOCAR ═══════════════
+     Lo inserta useRippleGlobal dentro del elemento tocado. El contenedor
+     recorta con el radio del botón; la luz sigue al dedo mientras está
+     apoyado y la onda sale una vez desde el punto de contacto. */
 
   .ui-ripple {
     position: relative;
     overflow: hidden;
   }
 
-  .ui-ripple > .ui-ripple__wave {
+  .ui-ripple__clip {
     position: absolute;
+    inset: 0;
     z-index: 2;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    background: radial-gradient(
+      140px circle at var(--luz-x, 50%) var(--luz-y, 50%),
+      rgba(255, 255, 255, 0.62),
+      rgba(255, 255, 255, 0.2) 35%,
+      rgba(255, 255, 255, 0) 70%
+    );
+    opacity: 1;
+    transition: opacity var(--dur-2) var(--ease-out);
+  }
+
+  @starting-style {
+    .ui-ripple__clip { opacity: 0; }
+  }
+
+  .ui-ripple__clip.is-out {
+    opacity: 0;
+    transition-duration: var(--dur-4);
+  }
+
+  .ui-ripple__wave {
+    position: absolute;
     border-radius: 999px;
-    transform: scale(0);
+    transform: scale(0.08);
     /* El toque en el vidrio no deja una mancha: deja un destello, con
        el centro blanco y el borde apenas azul para que se vea también
        sobre el vidrio claro. */
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(0, 122, 255, 0.1) 45%, rgba(0, 122, 255, 0) 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(0, 122, 255, 0.12) 42%, rgba(0, 122, 255, 0) 68%);
     pointer-events: none;
-    animation: ns-ripple 0.6s var(--ease-out) forwards;
+    animation: ns-ripple 0.56s var(--ease-out) forwards;
   }
 }

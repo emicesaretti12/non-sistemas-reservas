@@ -131,8 +131,9 @@
 }
 
 @keyframes ns-ripple {
-  from { transform: scale(0); opacity: 0.28; }
-  to { transform: scale(2.4); opacity: 0; }
+  from { transform: scale(0.08); opacity: 0.9; }
+  60% { opacity: 0.45; }
+  to { transform: scale(1); opacity: 0; }
 }
 
 @keyframes ns-marquee {
@@ -143,19 +144,19 @@
 /* ---------- Utilidades ---------- */
 
 @layer components {
-  .ns-fade-in { animation: ns-fade-in var(--dur-2) var(--ease-out) both; }
-  .ns-fade-up { animation: ns-fade-up var(--dur-3) var(--ease-out) both; }
-  .ns-fade-down { animation: ns-fade-down var(--dur-3) var(--ease-out) both; }
-  .ns-slide-right { animation: ns-slide-right var(--dur-3) var(--ease-out) both; }
-  .ns-slide-left { animation: ns-slide-left var(--dur-3) var(--ease-out) both; }
-  .ns-scale-in { animation: ns-scale-in var(--dur-2) var(--ease-out) both; }
-  .ns-pop-in { animation: ns-pop-in var(--dur-3) var(--ease-spring) both; }
-  .ns-spring-in { animation: ns-pop-in var(--dur-4) var(--ease-spring) both; }
-  .ns-page-in { animation: ns-fade-up var(--dur-3) var(--ease-out) both; }
-  .ns-tab-switch { animation: ns-fade-up var(--dur-3) var(--ease-out) both; }
+  .ns-fade-in { animation: ns-fade-in var(--dur-2) var(--ease-out) backwards; }
+  .ns-fade-up { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
+  .ns-fade-down { animation: ns-fade-down var(--dur-3) var(--ease-out) backwards; }
+  .ns-slide-right { animation: ns-slide-right var(--dur-3) var(--ease-out) backwards; }
+  .ns-slide-left { animation: ns-slide-left var(--dur-3) var(--ease-out) backwards; }
+  .ns-scale-in { animation: ns-scale-in var(--dur-2) var(--ease-out) backwards; }
+  .ns-pop-in { animation: ns-pop-in var(--dur-3) var(--ease-spring) backwards; }
+  .ns-spring-in { animation: ns-pop-in var(--dur-4) var(--ease-spring) backwards; }
+  .ns-page-in { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
+  .ns-tab-switch { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
   .ns-counter,
-  .ns-count-in { animation: ns-count-in var(--dur-3) var(--ease-out) both; }
-  .ns-stagger-in { animation: ns-fade-up var(--dur-3) var(--ease-out) both; }
+  .ns-count-in { animation: ns-count-in var(--dur-3) var(--ease-out) backwards; }
+  .ns-stagger-in { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
   .ns-marquee { animation: ns-marquee 40s linear infinite; }
 
   /* Lo que está esperando respira; nada más se mueve solo. */
@@ -177,7 +178,7 @@
      Con más de diez se corta el escalón: a partir de ahí la espera
      acumulada se nota más que el efecto. */
   .ns-stagger > * {
-    animation: ns-fade-up var(--dur-3) var(--ease-out) both;
+    animation: ns-fade-up var(--dur-3) var(--ease-out) backwards;
     animation-delay: calc(var(--i, 0) * 40ms);
   }
 

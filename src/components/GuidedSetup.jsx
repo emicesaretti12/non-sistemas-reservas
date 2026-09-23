@@ -456,8 +456,8 @@ export default function GuidedSetup({
             </span>
             <button
               onClick={cerrarPanel}
-              className="text-[10px] font-bold uppercase tracking-[0.06em] transition-colors"
-              style={{ color: 'var(--ns-text-faint)' }}
+              className="min-h-[36px] px-2 -mr-2 text-[12px] font-semibold transition-colors"
+              style={{ color: 'var(--ns-text-muted)' }}
               data-testid="guided-setup-dismiss"
             >
               Ocultar

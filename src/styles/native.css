@@ -1,0 +1,604 @@
+/* ============================================================
+   NONI — MOVIMIENTO NATIVO
+   Lo que hace que la web se sienta app en el celular: el dock
+   que se compacta al leer, los botones flotantes que se apartan,
+   la gota de "tirar para actualizar", la cápsula de conexión, el
+   arranque y el vidrio que se hincha bajo el dedo.
+
+   Casi todo cuelga de `html[data-scroll]`, que marca
+   useScrollNativo sin pasar por React.
+   ============================================================ */
+
+@layer components {
+
+  /* ═══════════════ ARRANQUE ═══════════════ */
+
+  .ns-arranque {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+  }
+
+  .ns-arranque__marca {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 24px;
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -2px 0 rgba(0, 40, 120, 0.18),
+      0 18px 40px -12px rgba(0, 122, 255, 0.55);
+    animation: ns-arranque-latido 1.8s var(--ease-in-out) infinite;
+  }
+
+  /* El brillo que cruza la gota, como la luz sobre un vidrio que gira. */
+  .ns-arranque__marca::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 48%, transparent 64%);
+    background-size: 250% 100%;
+    animation: ns-arranque-brillo 1.8s var(--ease-in-out) infinite;
+    pointer-events: none;
+  }
+
+  .ns-arranque__barra {
+    position: relative;
+    width: 116px;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(118, 128, 152, 0.16);
+  }
+
+  .ns-arranque__barra > span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 42%;
+    border-radius: inherit;
+    background: var(--ns-gradient-1);
+    animation: ns-arranque-barra 1.2s var(--ease-in-out) infinite;
+  }
+
+  /* ═══════════════ DOCK QUE SE COMPACTA ═══════════════
+     Al bajar leyendo, las etiquetas se esconden y el dock pierde
+     altura; al subir un poco vuelve entero. Como la barra de Safari
+     y la de pestañas de iOS 26. */
+
+  .ns-bottom-nav {
+    animation-fill-mode: backwards;
+    transition:
+      translate var(--dur-4) var(--ease-liquid),
+      padding var(--dur-4) var(--ease-liquid),
+      box-shadow var(--dur-3) var(--ease-out);
+  }
+
+  .ns-bottom-nav-item {
+    transition:
+      color var(--dur-3) var(--ease-out),
+      transform var(--dur-4) var(--ease-liquid),
+      padding var(--dur-4) var(--ease-liquid),
+      min-width var(--dur-4) var(--ease-liquid),
+      gap var(--dur-4) var(--ease-liquid);
+  }
+
+  .ns-bottom-nav-item__label {
+    display: block;
+    max-width: 72px;
+    max-height: 14px;
+    line-height: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+      max-width var(--dur-4) var(--ease-liquid),
+      max-height var(--dur-4) var(--ease-liquid),
+      opacity var(--dur-2) var(--ease-out);
+  }
+
+  html[data-scroll="abajo"] .ns-bottom-nav {
+    translate: -50% 6px;
+    padding: 5px;
+  }
+
+  html[data-scroll="abajo"] .ns-bottom-nav-item {
+    min-width: 50px;
+    padding: 9px 11px;
+    gap: 0;
+  }
+
+  html[data-scroll="abajo"] .ns-bottom-nav-item__label {
+    max-width: 0;
+    max-height: 0;
+    opacity: 0;
+  }
+
+  /* El vidrio se hincha bajo el dedo: la gota activa crece un poco
+     mientras el ícono se aprieta. `scale` es independiente de la
+     transformación que maneja framer-motion para el viaje. */
+  .ns-bottom-nav-item:active { transform: scale(0.94); }
+
+  .ns-bottom-nav .ui-lens,
+  .ui-segment .ui-lens,
+  .ns-tab .ui-lens {
+    transition: scale var(--dur-4) var(--ease-bounce);
+  }
+
+  .ns-bottom-nav-item:active .ui-lens { scale: 1.12 1.08; transition-duration: var(--dur-2); }
+  .ns-tab:active .ui-lens,
+  .ui-segment button:active .ui-lens { scale: 1.06 1.1; transition-duration: var(--dur-2); }
+
+  /* ═══════════════ BOTONES FLOTANTES ═══════════════ */
+
+  /* Acción principal de la sección (hoy: "Nueva cita" en la agenda). */
+  .ns-page-fab {
+    position: fixed;
+    right: 16px;
+    bottom: calc(92px + var(--sab));
+    z-index: 55;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 54px;
+    padding: 0 20px 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 rgba(0, 40, 120, 0.2),
+      0 14px 30px -10px rgba(0, 122, 255, 0.6),
+      0 4px 10px -4px rgba(0, 60, 160, 0.3);
+    animation: ns-pop-in var(--dur-5) var(--ease-liquid) 120ms backwards;
+    transition:
+      translate var(--dur-4) var(--ease-liquid),
+      padding var(--dur-4) var(--ease-liquid),
+      gap var(--dur-4) var(--ease-liquid),
+      transform var(--dur-4) var(--ease-liquid);
+  }
+
+  .ns-page-fab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.3));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  .ns-page-fab:active { transform: scale(0.92); transition-duration: var(--dur-1); }
+
+  .ns-page-fab__label {
+    display: block;
+    max-width: 140px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width var(--dur-4) var(--ease-liquid), opacity var(--dur-2) var(--ease-out);
+  }
+
+  .ns-page-fab__dot {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.9);
+  }
+
+  /* Leyendo hacia abajo, la acción queda como una gota redonda. */
+  html[data-scroll="abajo"] .ns-page-fab {
+    translate: 0 8px;
+    padding: 0 16px;
+    gap: 0;
+  }
+
+  html[data-scroll="abajo"] .ns-page-fab__label {
+    max-width: 0;
+    opacity: 0;
+  }
+
+  @media (max-width: 1023px) {
+    .ns-assistant-fab {
+      bottom: calc(96px + var(--sab));
+      width: 52px;
+      height: 52px;
+      translate: 0 0;
+      transition:
+        translate var(--dur-4) var(--ease-liquid),
+        scale var(--dur-4) var(--ease-liquid),
+        opacity var(--dur-3) var(--ease-out),
+        bottom var(--dur-4) var(--ease-liquid);
+    }
+
+    /* Con una acción principal en pantalla, el asistente se apila
+       arriba, más chico, en lugar de pelear por la misma esquina. */
+    body:has(.ns-page-fab) .ns-assistant-fab {
+      bottom: calc(92px + 54px + 12px + var(--sab));
+      width: 46px;
+      height: 46px;
+    }
+
+    /* Al leer, el asistente se aparta del todo: no tapa botones. */
+    html[data-scroll="abajo"] .ns-assistant-fab {
+      /* `scale` y `translate` no chocan con la transformación que
+         maneja framer-motion para la entrada del botón. */
+      translate: 0 18px;
+      scale: 0;
+      pointer-events: none;
+    }
+
+    /* Aire al final de cada sección para que lo último no quede
+       debajo de los botones flotantes. */
+    .ns-has-bottom-nav { padding-bottom: calc(160px + var(--sab)); }
+  }
+
+  /* ═══════════════ BARRA DE ACCIÓN PEGADA ═══════════════
+     "Guardar" que acompaña al scroll. En el celular se apoya justo
+     encima del dock (antes quedaba escondida detrás) y baja un poco
+     cuando el dock se compacta. */
+
+  .ns-barra-accion {
+    position: sticky;
+    bottom: calc(12px + var(--sab));
+  }
+
+  @media (max-width: 1023px) {
+    .ns-barra-accion {
+      bottom: calc(88px + var(--sab));
+      transition: bottom var(--dur-4) var(--ease-liquid);
+    }
+
+    html[data-scroll="abajo"] .ns-barra-accion { bottom: calc(74px + var(--sab)); }
+
+    body:has(.ns-barra-accion) .ns-assistant-fab {
+      bottom: calc(166px + var(--sab));
+      width: 46px;
+      height: 46px;
+    }
+  }
+
+  /* ═══════════════ TIRAR PARA ACTUALIZAR ═══════════════
+     La gota nace detrás de la barra superior (que es de vidrio: se
+     la ve venir a través) y baja con el dedo. */
+
+  .ns-ptr {
+    position: fixed;
+    top: calc(var(--sat) + 22px);
+    left: 50%;
+    z-index: 39;
+    translate: -50% var(--ptr-y, 0px);
+    opacity: calc(var(--ptr-p, 0) * 1.8);
+    pointer-events: none;
+    transition:
+      translate var(--dur-4) var(--ease-liquid),
+      opacity var(--dur-3) var(--ease-out);
+  }
+
+  .ns-ptr.is-tirando { transition: none; }
+
+  .ns-ptr__gota {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.82);
+    color: var(--ns-primary);
+    box-shadow:
+      var(--glass-rim),
+      0 10px 24px -8px rgba(35, 52, 110, 0.4);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    scale: calc(0.55 + var(--ptr-p, 0) * 0.45) calc((0.55 + var(--ptr-p, 0) * 0.45) * var(--ptr-estira, 1));
+    transition: scale var(--dur-4) var(--ease-bounce);
+  }
+
+  .ns-ptr.is-tirando .ns-ptr__gota { transition: none; }
+  .ns-ptr.is-cargando .ns-ptr__gota { scale: 1; }
+  .ns-ptr.is-listo .ns-ptr__gota { scale: 0.4; }
+
+  .ns-ptr__flecha {
+    width: 18px;
+    height: 18px;
+    rotate: calc(var(--ptr-p, 0) * 180deg);
+  }
+
+  html:has(.ns-ptr),
+  html:has(.ns-ptr) body {
+    /* Sin el "tirar" nativo del navegador: el nuestro lo reemplaza. */
+    overscroll-behavior-y: none;
+  }
+
+  /* ═══════════════ DESLIZAR ENTRE SECCIONES ═══════════════ */
+
+  .ns-swipe-area.is-arrastrando {
+    will-change: translate;
+  }
+
+  .ns-swipe-area.is-volviendo {
+    transition:
+      translate var(--dur-4) var(--ease-liquid),
+      opacity var(--dur-3) var(--ease-out);
+  }
+
+  /* ═══════════════ HOJAS ═══════════════
+     Vidrio grueso con desenfoque real (lo que queda detrás no debe
+     competir con un formulario), flotando a 8 px de los bordes como
+     las hojas de iOS 26, y arrastrables hacia abajo para cerrar
+     (useHojasArrastrables). */
+
+  .ui-scrim { animation-fill-mode: backwards; }
+
+  @media (max-width: 639px) {
+    .ui-scrim:has(> .ns-hoja) {
+      padding: 0 8px calc(8px + var(--sab));
+    }
+  }
+
+  .ns-hoja {
+    position: relative;
+    border-radius: 32px;
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
+    box-shadow:
+      var(--glass-rim),
+      0 -6px 30px -14px rgba(20, 30, 70, 0.22),
+      0 30px 70px -20px rgba(20, 30, 70, 0.4);
+    animation: ns-hoja-sube var(--dur-5) var(--ease-liquid) backwards;
+  }
+
+  .ns-hoja--motion { animation: none; }
+
+  .ns-hoja > .ui-sheet__handle {
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  @media (min-width: 640px) {
+    .ns-hoja {
+      border-radius: 28px;
+      animation-name: ns-hoja-aparece;
+    }
+  }
+
+  /* ═══════════════ CONTENIDO QUE ASOMA ═══════════════
+     Al scrollear, cada tarjeta que entra por abajo sube y se aclara
+     (useAsomar). Sólo las que estaban fuera de pantalla: lo que se ve
+     al abrir la sección ya entró con la sección. Al terminar no queda
+     ningún estilo puesto: nada de `translate: 0px` que convierta la
+     tarjeta en bloque contenedor de un `position: fixed` interno. */
+
+  .ns-asoma {
+    opacity: 0;
+    translate: 0 26px;
+    scale: 0.965;
+  }
+
+  .ns-asomando {
+    transition:
+      opacity 420ms var(--ease-out),
+      translate 620ms var(--ease-liquid),
+      scale 620ms var(--ease-liquid);
+  }
+
+  /* La gota activa del dock agranda un poco su ícono, como una lente. */
+  .ns-bottom-nav-item svg {
+    transition: scale var(--dur-4) var(--ease-bounce), opacity var(--dur-2) var(--ease-out);
+  }
+
+  .ns-bottom-nav-item.active svg { scale: 1.08; }
+
+  /* ═══════════════ CÁPSULA DE CONEXIÓN ═══════════════ */
+
+  .ns-conexion {
+    position: fixed;
+    top: calc(var(--sat) + 74px);
+    left: 50%;
+    z-index: 95;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100vw - 32px);
+    padding: 9px 16px 9px 12px;
+    border-radius: 999px;
+    translate: -50% 0;
+    background: rgba(24, 28, 38, 0.86);
+    color: #FFFFFF;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.008em;
+    white-space: nowrap;
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 14px 34px -10px rgba(10, 16, 40, 0.55);
+    pointer-events: none;
+  }
+
+  .ns-conexion__punto {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #F0666A;
+    box-shadow: 0 0 0 3px rgba(240, 102, 106, 0.25);
+    animation: ns-breathe 1.8s var(--ease-in-out) infinite;
+  }
+
+  .ns-conexion--lento .ns-conexion__punto {
+    background: #F2A93B;
+    box-shadow: 0 0 0 3px rgba(242, 169, 59, 0.25);
+  }
+
+  .ns-conexion--ok .ns-conexion__punto {
+    background: #3CCB7F;
+    box-shadow: 0 0 0 3px rgba(60, 203, 127, 0.25);
+    animation: none;
+  }
+
+  .ns-conexion__detalle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.62);
+    font-weight: 500;
+  }
+
+  @media (min-width: 1024px) {
+    .ns-conexion { top: 22px; }
+  }
+
+  /* ═══════════════ APP PÚBLICA: PRÓXIMO TURNO Y ÉXITO ═══════════════ */
+
+  .ns-proximo {
+    padding: 16px;
+    border-radius: var(--ns-radius-2xl);
+  }
+
+  /* Una hoja de calendario de vidrio: el mes arriba, el día grande. */
+  .ns-proximo__fecha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 58px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: var(--glass-rim), 0 6px 16px -8px rgba(35, 52, 110, 0.35);
+    line-height: 1;
+  }
+
+  .ns-proximo__fecha span {
+    color: var(--ns-primary);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .ns-proximo__fecha b {
+    margin-top: 3px;
+    color: var(--ns-text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .ns-exito {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 92px;
+    height: 92px;
+    margin: 0 auto;
+    border-radius: 999px;
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -3px 0 rgba(0, 40, 120, 0.18),
+      0 22px 44px -14px rgba(0, 122, 255, 0.6);
+  }
+
+  .ns-exito::before {
+    content: '';
+    position: absolute;
+    inset: 6px 14px auto;
+    height: 40%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+
+  .ns-exito__onda {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.35);
+    animation: ns-exito-onda 1.6s var(--ease-out) 0.35s both;
+    pointer-events: none;
+  }
+
+  .ns-exito__onda--2 { animation-delay: 0.6s; }
+
+  @media (min-width: 768px) {
+    .ns-exito { width: 104px; height: 104px; }
+  }
+
+  /* ═══════════════ MENOS MOVIMIENTO ═══════════════ */
+
+  @media (prefers-reduced-motion: reduce) {
+    .ns-arranque__marca,
+    .ns-arranque__marca::after,
+    .ns-conexion__punto,
+    .ns-exito__onda { animation: none; }
+
+    html[data-scroll="abajo"] .ns-bottom-nav { translate: -50% 0; }
+    html[data-scroll="abajo"] .ns-page-fab { translate: 0 0; }
+  }
+}
+
+@keyframes ns-hoja-sube {
+  from { translate: 0 105%; }
+  to { translate: 0 0; }
+}
+
+@keyframes ns-hoja-aparece {
+  from { opacity: 0; scale: 0.94; }
+  to { opacity: 1; scale: 1; }
+}
+
+@keyframes ns-exito-onda {
+  from { scale: 1; opacity: 0.9; }
+  to { scale: 1.9; opacity: 0; }
+}
+
+@keyframes ns-arranque-latido {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.045; }
+}
+
+@keyframes ns-arranque-brillo {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+
+@keyframes ns-arranque-barra {
+  from { translate: -110% 0; }
+  to { translate: 250% 0; }
+}
+
+/* El campo de color se desplaza más lento que el contenido al
+   scrollear: una profundidad mínima, sin JavaScript. */
+@keyframes ns-parallax {
+  from { translate: 0 0; }
+  to { translate: 0 -7%; }
+}

@@ -143,7 +143,8 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
             <button
               key={dia.id}
               onClick={() => toggleDia(dia.id)}
-              className="px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-[0.06em] transition-all active:scale-90"
+              aria-pressed={Boolean(horarios[dia.id]?.abierto)}
+              className="min-h-[36px] min-w-[46px] px-3 rounded-full text-[11px] font-bold uppercase tracking-[0.04em] transition-all active:scale-90"
               style={{
                 background: horarios[dia.id]?.abierto ? 'var(--ns-primary)' : 'rgba(255,255,255,0.6)',
                 color: horarios[dia.id]?.abierto ? 'white' : 'var(--ns-text-muted)',
@@ -220,7 +221,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
 
                   {/* Horario principal */}
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all"
+                    <label className="flex items-center gap-2 px-3 min-h-[44px] rounded-xl transition-all cursor-text"
                       style={{ background: 'var(--ns-accent-bg)', border: '1.5px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
                       <svg className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1M4.22 4.22l.707.707m12.02 12.02l.707.707M1 12h1m20 0h1M4.22 19.78l.707-.707M18.95 5.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <input
@@ -231,11 +232,11 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         className="bg-transparent font-bold outline-none text-sm"
                         style={{ color: 'var(--ns-text)', minWidth: '80px' }}
                       />
-                    </div>
+                    </label>
 
                     <div className="w-5 h-0.5 rounded-full" style={{ background: 'var(--ns-border)' }} />
 
-                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all"
+                    <label className="flex items-center gap-2 px-3 min-h-[44px] rounded-xl transition-all cursor-text"
                       style={{ background: 'var(--ns-accent-bg)', border: '1.5px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
                       <svg className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <input
@@ -246,7 +247,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         className="bg-transparent font-bold outline-none text-sm"
                         style={{ color: 'var(--ns-text)', minWidth: '80px' }}
                       />
-                    </div>
+                    </label>
                   </div>
 
                   {/* Pausa toggle + horas pausa */}
@@ -281,27 +282,27 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
 
                     {dataDia.pausa && (
                       <div className="flex items-center gap-2 ns-slide-right">
-                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
+                        <label className="flex items-center gap-2 px-2.5 min-h-[40px] rounded-xl cursor-text"
                           style={{ background: 'rgba(0,122,255,0.08)', border: '1px solid rgba(0,122,255,0.2)' }}>
                           <input
                             type="time"
                             value={dataDia.inicioPausa || '13:00'}
                             onChange={(e) => cambiarHora(dia.id, 'inicioPausa', e.target.value)}
                             className="bg-transparent font-bold outline-none text-xs"
-                            style={{ color: '#BFDBFE', minWidth: '70px' }}
+                            style={{ color: 'var(--ns-primary-dark)', minWidth: '70px' }}
                           />
-                        </div>
+                        </label>
                         <div className="w-3 h-0.5 rounded-full" style={{ background: 'rgba(0,122,255,0.3)' }} />
-                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
+                        <label className="flex items-center gap-2 px-2.5 min-h-[40px] rounded-xl cursor-text"
                           style={{ background: 'rgba(0,122,255,0.08)', border: '1px solid rgba(0,122,255,0.2)' }}>
                           <input
                             type="time"
                             value={dataDia.finPausa || '17:00'}
                             onChange={(e) => cambiarHora(dia.id, 'finPausa', e.target.value)}
                             className="bg-transparent font-bold outline-none text-xs"
-                            style={{ color: '#BFDBFE', minWidth: '70px' }}
+                            style={{ color: 'var(--ns-primary-dark)', minWidth: '70px' }}
                           />
-                        </div>
+                        </label>
                       </div>
                     )}
                   </div>
@@ -329,7 +330,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       {/* Barra pegada al fondo con velo propio: antes el botón flotaba
           encima de las filas y tapaba el último día. */}
       <div
-        className="sticky bottom-3 mt-3 z-20 rounded-[26px] p-2"
+        className="ns-barra-accion mt-3 z-20 rounded-[26px] p-2"
         style={{
           background: 'var(--ns-glass-bg-strong)',
           backdropFilter: 'blur(18px) saturate(180%)',
@@ -352,7 +353,7 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
           ) : (
             <>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              Guardar Horarios
+              Guardar horarios
             </>
           )}
         </button>

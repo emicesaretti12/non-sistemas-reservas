@@ -74,7 +74,7 @@
     -webkit-backdrop-filter: var(--glass-blur-strong);
     backdrop-filter: var(--glass-blur-strong);
     box-shadow: var(--ui-shadow-xl);
-    animation: ns-pop-in var(--dur-5) var(--ease-liquid) both;
+    animation: ns-pop-in var(--dur-5) var(--ease-liquid) backwards;
   }
 
   .ns-login-card::before {

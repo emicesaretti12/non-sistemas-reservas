@@ -5,6 +5,9 @@ import { useToast } from './Toast'
 import Contador from './ui/Contador'
 import Lente from './ui/Lente'
 import { useConfirm } from '../contexts/ConfirmContext'
+import { usePersistentState } from '../hooks/usePersistentState'
+
+const CATEGORIAS = ['General', 'Insumos', 'Productos', 'Herramientas', 'Limpieza', 'Otros']
 
 // Con una sola tinta el nivel no puede depender del color: lleno = urgente,
 // contorno = atención, hundido = en orden.
@@ -25,7 +28,7 @@ export default function InventarioPro({ negocioId }) {
   const [modalAbierto, setModalAbierto] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [modoEdicion, setModoEdicion] = useState(null)
-  const [filtro, setFiltro] = useState('todos')
+  const [filtro, setFiltro] = usePersistentState('ui:inventario:categoria', 'todos', { validar: (c) => c === 'todos' || CATEGORIAS.includes(c) })
   const [busqueda, setBusqueda] = useState('')
   const [modalMovimiento, setModalMovimiento] = useState(null)
   
@@ -46,7 +49,7 @@ export default function InventarioPro({ negocioId }) {
     motivo: ''
   })
 
-  const categorias = ['General', 'Insumos', 'Productos', 'Herramientas', 'Limpieza', 'Otros']
+  const categorias = CATEGORIAS
 
   useEffect(() => {
     if (negocioId) cargar()
@@ -397,7 +400,7 @@ export default function InventarioPro({ negocioId }) {
                     <button onClick={() => abrirEdicion(item)} className="ui-btn ui-btn--quiet flex-1">
                       Editar
                     </button>
-                    <button onClick={() => eliminar(item.id)} className="ui-icon-btn w-9 h-9 shrink-0" aria-label={`Desactivar ${item.nombre}`}>
+                    <button onClick={() => eliminar(item.id)} className="ui-icon-btn shrink-0" aria-label={`Desactivar ${item.nombre}`}>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
                   </div>
@@ -416,23 +419,29 @@ export default function InventarioPro({ negocioId }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={cerrarModal}
-            className="ui-scrim flex items-end md:items-center justify-center p-0 md:p-4"
+            className="ui-scrim flex items-end md:items-center justify-center md:p-4"
           >
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full md:max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+              className="w-full md:max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain ns-hoja ns-hoja--motion"
               style={{
-                background: 'var(--ns-surface)',
-                boxShadow: 'var(--ui-shadow-xl)',
-                borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
                 paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))',
               }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={modoEdicion ? 'Editar producto' : 'Nuevo producto'}
             >
-              <div className="p-6 md:p-8 space-y-4">
-                <h3 className="ui-head__title text-2xl">{modoEdicion ? 'Editar producto' : 'Nuevo producto'}</h3>
+              <div className="ui-sheet__handle md:hidden" />
+              <div className="p-6 pt-3 md:p-8 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="ui-head__title text-2xl">{modoEdicion ? 'Editar producto' : 'Nuevo producto'}</h3>
+                  <button type="button" onClick={cerrarModal} className="ui-icon-btn" aria-label="Cerrar">
+                    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
+                  </button>
+                </div>
 
                 <form onSubmit={guardar} className="space-y-4">
                   <input
@@ -464,41 +473,61 @@ export default function InventarioPro({ negocioId }) {
                   </select>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="number"
-                      placeholder="Cantidad"
-                      value={form.cantidad}
-                      onChange={(e) => setForm({ ...form, cantidad: parseInt(e.target.value) || 0 })}
-                      className="ui-field"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Stock Mín."
-                      value={form.stock_minimo}
-                      onChange={(e) => setForm({ ...form, stock_minimo: parseInt(e.target.value) || 0 })}
-                      className="ui-field"
-                    />
+                    <label className="flex flex-col gap-1.5">
+                      <span className="ui-eyebrow">Cantidad</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        placeholder="0"
+                        value={form.cantidad}
+                        onChange={(e) => setForm({ ...form, cantidad: parseInt(e.target.value) || 0 })}
+                        className="ui-field"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1.5">
+                      <span className="ui-eyebrow">Stock mínimo</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        placeholder="5"
+                        value={form.stock_minimo}
+                        onChange={(e) => setForm({ ...form, stock_minimo: parseInt(e.target.value) || 0 })}
+                        className="ui-field"
+                      />
+                    </label>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="number"
-                      placeholder="Precio Costo"
-                      value={form.precio_costo}
-                      onChange={(e) => setForm({ ...form, precio_costo: parseFloat(e.target.value) || 0 })}
-                      className="ui-field"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Precio Venta"
-                      value={form.precio_venta}
-                      onChange={(e) => setForm({ ...form, precio_venta: parseFloat(e.target.value) || 0 })}
-                      className="ui-field"
-                    />
+                    <label className="flex flex-col gap-1.5">
+                      <span className="ui-eyebrow">Precio de costo</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        placeholder="$0"
+                        value={form.precio_costo}
+                        onChange={(e) => setForm({ ...form, precio_costo: parseFloat(e.target.value) || 0 })}
+                        className="ui-field"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1.5">
+                      <span className="ui-eyebrow">Precio de venta</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        placeholder="$0"
+                        value={form.precio_venta}
+                        onChange={(e) => setForm({ ...form, precio_venta: parseFloat(e.target.value) || 0 })}
+                        className="ui-field"
+                      />
+                    </label>
                   </div>
 
                   <button type="submit" disabled={guardando} className="ui-btn ui-btn--primary ui-btn--block">
-                    {guardando ? 'Guardando...' : 'Guardar Producto'}
+                    {guardando ? 'Guardando…' : 'Guardar producto'}
                   </button>
                 </form>
               </div>
@@ -515,23 +544,29 @@ export default function InventarioPro({ negocioId }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setModalMovimiento(null)}
-            className="ui-scrim flex items-end md:items-center justify-center p-0 md:p-4"
+            className="ui-scrim flex items-end md:items-center justify-center md:p-4"
           >
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full md:max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+              className="w-full md:max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain ns-hoja ns-hoja--motion"
               style={{
-                background: 'var(--ns-surface)',
-                boxShadow: 'var(--ui-shadow-xl)',
-                borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
                 paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))',
               }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Registrar movimiento"
             >
-              <div className="p-6 md:p-8 space-y-4">
-                <h3 className="ui-head__title text-2xl">Registrar movimiento</h3>
+              <div className="ui-sheet__handle md:hidden" />
+              <div className="p-6 pt-3 md:p-8 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="ui-head__title text-2xl">Registrar movimiento</h3>
+                  <button type="button" onClick={() => setModalMovimiento(null)} className="ui-icon-btn" aria-label="Cerrar">
+                    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>
+                  </button>
+                </div>
 
                 <form onSubmit={registrarMovimiento} className="space-y-4">
                   <select

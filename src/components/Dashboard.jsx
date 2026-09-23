@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { supabase } from '../supabaseClient'
 
 // Inyección de componentes modulares
@@ -45,13 +46,39 @@ import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
 import Atajos from './ui/Atajos'
 import Lente from './ui/Lente'
+import { RESORTE_PANEL, SUAVE } from '../utils/motion'
+import TirarParaActualizar from './ui/TirarParaActualizar'
+import { leer, guardar } from '../utils/almacen'
+import { usePersistentState } from '../hooks/usePersistentState'
+import { useAsomar } from '../hooks/useAsomar'
+
+function linkCompartido() {
+  try { return Boolean(localStorage.getItem('ns_link_shared')) } catch { return false }
+}
+
+const TABS_PANEL = ['inicio', 'agenda', 'reportes', 'servicios', 'equipo', 'horarios', 'inventario', 'clientes', 'flyer', 'ajustes']
+
+// La foto del panel vive 3 días: pasado eso preferimos esperar a la red antes
+// que mostrar números de otra semana.
+const TTL_FOTO = 3 * 24 * 60 * 60 * 1000
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
   const { showConfirm } = useConfirm()
+  // --- FOTO DEL PANEL ---
+  // La última versión del monitor que vio este usuario. Con ella el panel
+  // abre al instante (como una app nativa) y se actualiza por detrás; vive
+  // bajo `cache:` para que se borre al cerrar sesión.
+  const claveFoto = `cache:${session.user.id}:panel:foto`
+  const [foto] = useState(() => {
+    const f = leer(claveFoto)
+    return f?.negocio?.id && !f.negocio.es_admin_plataforma ? f : null
+  })
+  const fotoNegocio = foto?.negocio
+
   // --- ESTADOS DE CARGA Y AUTENTICACIÓN ---
-  const [loading, setLoading] = useState(true)
-  const [negocio, setNegocio] = useState(null)
+  const [loading, setLoading] = useState(!foto)
+  const [negocio, setNegocio] = useState(fotoNegocio || null)
 
   // --- ESTADOS EXCLUSIVOS: NUCLEUS CONTROL (SUPER ADMIN) ---
   const [todosLosNegocios, setTodosLosNegocios] = useState([])
@@ -59,8 +86,23 @@ export default function Dashboard({ session }) {
   const [statsGlobales, setStatsGlobales] = useState({ total: 0, activos: 0, suspendidos: 0, rubros: {} })
 
   // --- ESTADOS: GESTIÓN DE NEGOCIO (OWNER) ---
-  const [tab, setTab] = useState('inicio')
-  const [stats, setStats] = useState({ hoy: 0, ingresos: 0, proximos: 0, popular: '-', semana: 0, mesIngresos: 0, tasaOcupacion: 0 })
+  // La sección abierta sobrevive a recargas: si estabas en la agenda, al
+  // volver seguís en la agenda.
+  const [tab, setTab] = usePersistentState('ui:panel:tab', 'inicio', { validar: (t) => TABS_PANEL.includes(t) })
+  // Dirección del último cambio de sección (-1 izquierda, 1 derecha): se
+  // ajusta durante el render, el patrón que React recomienda para derivar
+  // estado de un cambio de otro estado.
+  const [tabVisto, setTabVisto] = useState(tab)
+  const [direccion, setDireccion] = useState(0)
+  if (tab !== tabVisto) {
+    setDireccion(Math.sign(TABS_PANEL.indexOf(tab) - TABS_PANEL.indexOf(tabVisto)))
+    setTabVisto(tab)
+  }
+  const areaSeccion = useRef(null)
+  // Sube con cada "tirar para actualizar": remonta la sección para que vuelva
+  // a pedir sus datos.
+  const [recarga, setRecarga] = useState(0)
+  const [stats, setStats] = useState(() => foto?.stats || { hoy: 0, ingresos: 0, proximos: 0, popular: '-', semana: 0, mesIngresos: 0, tasaOcupacion: 0 })
 
   // Lógica Granular de Carga
   const [guardandoPerfil, setGuardandoPerfil] = useState(false)
@@ -68,35 +110,35 @@ export default function Dashboard({ session }) {
   const [subiendoPortada, setSubiendoPortada] = useState(false)
 
   // --- ESTADOS: BRANDING & UI ---
-  const [colorPrimario, setColorPrimario] = useState('#007AFF')
-  const [descripcion, setDescripcion] = useState('')
-  const [logoUrl, setLogoUrl] = useState('')
-  const [portadaUrl, setPortadaUrl] = useState('')
-  const [instagram, setInstagram] = useState('')
+  const [colorPrimario, setColorPrimario] = useState(fotoNegocio?.color_primario || '#007AFF')
+  const [descripcion, setDescripcion] = useState(fotoNegocio?.descripcion || '')
+  const [logoUrl, setLogoUrl] = useState(fotoNegocio?.logo_url || '')
+  const [portadaUrl, setPortadaUrl] = useState(fotoNegocio?.portada_url || '')
+  const [instagram, setInstagram] = useState(fotoNegocio?.instagram || '')
 
   // --- ESTADOS: CONTACTO NEGOCIO ---
-  const [telefonoNegocio, setTelefonoNegocio] = useState('')
-  const [direccionNegocio, setDireccionNegocio] = useState('')
-  const [mapaUrl, setMapaUrl] = useState('')
-  const [mensajeBienvenida, setMensajeBienvenida] = useState('')
+  const [telefonoNegocio, setTelefonoNegocio] = useState(fotoNegocio?.telefono || '')
+  const [direccionNegocio, setDireccionNegocio] = useState(fotoNegocio?.direccion || '')
+  const [mapaUrl, setMapaUrl] = useState(fotoNegocio?.mapa_url || '')
+  const [mensajeBienvenida, setMensajeBienvenida] = useState(fotoNegocio?.mensaje_bienvenida || '')
 
   // --- ESTADOS: CLIENTES (NUEVO) ---
   const [clientes, setClientes] = useState([])
   const [cargandoClientes, setCargandoClientes] = useState(false)
   const [busquedaCliente, setBusquedaCliente] = useState('')
-  const [ordenClientes, setOrdenClientes] = useState('visitas') // visitas | nombre | reciente
+  const [ordenClientes, setOrdenClientes] = usePersistentState('ui:clientes:orden', 'visitas', { validar: (o) => ['visitas', 'nombre', 'reciente'].includes(o) })
 
   // --- ESTADOS: ACTIVIDAD RECIENTE ---
-  const [actividadReciente, setActividadReciente] = useState([])
+  const [actividadReciente, setActividadReciente] = useState(() => foto?.actividadReciente || [])
 
   // --- ESTADOS: PRÓXIMA CITA ---
-  const [proximaCita, setProximaCita] = useState(null)
+  const [proximaCita, setProximaCita] = useState(() => foto?.proximaCita || null)
 
   // --- ESTADOS: CRM STATS (NUEVO) ---
-  const [crmStats, setCrmStats] = useState({ stockBajo: 0, empleadosActivos: 0, totalEmpleados: 0, totalServicios: 0 })
+  const [crmStats, setCrmStats] = useState(() => foto?.crmStats || { stockBajo: 0, empleadosActivos: 0, totalEmpleados: 0, totalServicios: 0 })
 
   // --- ESTADOS: DISTRIBUCIÓN SEMANAL ---
-  const [distribucionSemanal, setDistribucionSemanal] = useState([0, 0, 0, 0, 0, 0, 0])
+  const [distribucionSemanal, setDistribucionSemanal] = useState(() => foto?.distribucionSemanal || [0, 0, 0, 0, 0, 0, 0])
 
   // --- ESTADOS: UI ---
   const [searchOpen, setSearchOpen] = useState(false)
@@ -146,12 +188,12 @@ export default function Dashboard({ session }) {
     ))
     // Generate a printable HTML report and trigger print dialog
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)} - ${esc(negocioNombre)}</title>
-    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#007AFF}
-    h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;color:#60A5FA;border-bottom:1px solid #EDF1F7;padding-bottom:8px}
-    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#FDF8F8;border:1px solid #EDF1F7;border-radius:12px;padding:16px;flex:1;text-align:center}
-    .kpi .val{font-size:24px;font-weight:800}.kpi .lbl{font-size:10px;color:#BFDBFE;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
-    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#F8FAFC;text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#60A5FA}
-    td{padding:8px 12px;border-bottom:1px solid #F8FAFC}.meta{font-size:11px;color:#BFDBFE;margin-top:4px}</style></head><body>
+    <style>body{font-family:Inter,system-ui,sans-serif;padding:40px;color:#1D212A}
+    h1{font-size:24px;margin-bottom:4px;letter-spacing:-0.02em}h2{font-size:15px;margin-top:24px;color:#007AFF;border-bottom:1px solid #E3E8EF;padding-bottom:8px}
+    .kpi-grid{display:flex;gap:16px;margin:12px 0}.kpi{background:#F4F7FB;border:1px solid #E3E8EF;border-radius:14px;padding:16px;flex:1;text-align:center}
+    .kpi .val{font-size:24px;font-weight:700;letter-spacing:-0.02em}.kpi .lbl{font-size:11px;color:#6B7686;margin-top:4px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th{background:#F4F7FB;text-align:left;padding:8px 12px;font-size:11px;color:#6B7686;font-weight:600}
+    td{padding:8px 12px;border-bottom:1px solid #EEF2F6}.meta{font-size:12px;color:#6B7686;margin-top:4px}</style></head><body>
     <h1>${esc(title)}</h1><p class="meta">${esc(negocioNombre)} — ${new Date().toLocaleDateString('es-ES', { day:'numeric',month:'long',year:'numeric' })}</p>`
     + sections.map(s => {
       let content = `<h2>${esc(s.title)}</h2>`
@@ -182,9 +224,21 @@ export default function Dashboard({ session }) {
 
   useEffect(() => {
     if (session) {
-      inicializarPanel()
+      // Con foto, el panel ya está en pantalla: se refresca sin taparlo.
+      inicializarPanel({ silencioso: Boolean(foto) })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
+
+  // Guardamos la foto cuando el panel terminó de cargar (y cada vez que
+  // cambian los números). Se agrupa para no escribir en cada setState.
+  useEffect(() => {
+    if (loading || !negocio?.id || negocio.es_admin_plataforma) return undefined
+    const t = setTimeout(() => {
+      guardar(claveFoto, { negocio, stats, crmStats, actividadReciente: actividadReciente.slice(0, 12), proximaCita, distribucionSemanal }, { ttl: TTL_FOTO })
+    }, 600)
+    return () => clearTimeout(t)
+  }, [claveFoto, loading, negocio, stats, crmStats, actividadReciente, proximaCita, distribucionSemanal])
 
   // Cerrar sesión limpiando la suscripción de tiempo real: si no, el canal de
   // Supabase del negocio anterior quedaba abierto al cambiar de cuenta.
@@ -236,9 +290,9 @@ export default function Dashboard({ session }) {
   /**
    * ORQUESTADOR INICIAL
    */
-  async function inicializarPanel() {
+  async function inicializarPanel({ silencioso = false } = {}) {
     try {
-      setLoading(true)
+      if (!silencioso) setLoading(true)
       const { data, error } = await supabase
         .from('negocios')
         .select('*')
@@ -280,6 +334,10 @@ export default function Dashboard({ session }) {
             cargarClientes(data.id),
           ])
         }
+      } else if (!error) {
+        // La foto decía que había negocio pero la base dice que no (se borró
+        // o es otra cuenta): mandamos al alta en vez de mostrar datos viejos.
+        setNegocio(null)
       }
     } catch (e) {
       console.error('Nucleus System Error:', e.message)
@@ -766,16 +824,46 @@ export default function Dashboard({ session }) {
   // Deslizar de costado cambia de sección en móvil, como en una app nativa.
   // Va acá abajo porque necesita `tabsConfig`, que se arma más arriba con el
   // vocabulario del rubro.
+  // Tirar para actualizar: refresca las métricas sin tapar el panel y
+  // remonta la sección abierta para que vuelva a pedir sus datos.
+  async function actualizarPanel() {
+    await inicializarPanel({ silencioso: true })
+    setRecarga((n) => n + 1)
+  }
+
+  // Al volver la señal, el panel se pone al día solo: lo que se estaba
+  // mostrando era la última copia guardada.
+  const actualizarRef = useRef(actualizarPanel)
+  useEffect(() => { actualizarRef.current = actualizarPanel })
+  useEffect(() => {
+    let espera = null
+    const alVolver = () => {
+      clearTimeout(espera)
+      espera = setTimeout(() => actualizarRef.current(), 600)
+    }
+    window.addEventListener('online', alVolver)
+    return () => {
+      clearTimeout(espera)
+      window.removeEventListener('online', alVolver)
+    }
+  }, [])
+
+  // Las tarjetas que están más abajo asoman al scrollear.
+  useAsomar(areaSeccion, !loading && Boolean(negocio) && !negocio?.es_admin_plataforma)
+
   useSwipeTabs({
     tabs: tabsConfig.map((t) => t.id),
     actual: tab,
     onCambiar: (id) => { haptic('select'); setTab(id) },
     habilitado: Boolean(negocio) && !negocio?.es_admin_plataforma,
+    areaRef: areaSeccion,
   })
 
+
   if (loading) return (
-    <div className={`min-h-screen flex items-center justify-center ${negocio?.es_admin_plataforma ? 'bg-[#007AFF]' : 'bg-white'}`}>
-      <span className="ui-spinner" role="status" aria-label="Cargando" />
+    <div className="ns-arranque" role="status" aria-label="Cargando tu panel">
+      <span className="ns-arranque__marca" aria-hidden="true">N</span>
+      <span className="ns-arranque__barra" aria-hidden="true"><span /></span>
     </div>
   )
 
@@ -1253,8 +1341,8 @@ export default function Dashboard({ session }) {
                 className="w-full text-left flex items-center gap-3 px-4 md:px-5 py-3.5 rounded-2xl border transition-all active:scale-[0.99]"
                 style={{ background: '#F8FAFC', borderColor: '#DFE6EF' }}
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#DBEAFE' }}>
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div className="ui-pod ui-pod--amber w-9 h-9 shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-bold text-[#4A5462]">Todavía no configuraste tus horarios</p>
@@ -1282,8 +1370,18 @@ export default function Dashboard({ session }) {
               </div>
             </div>
 
-            {/* AREA DE CONTENIDO PRINCIPAL */}
-            <div className="ns-mobile-content-area">
+            {/* AREA DE CONTENIDO PRINCIPAL
+                La sección entra desde el lado hacia el que te moviste (como
+                un carrusel nativo). El contenedor de afuera es el que sigue
+                al dedo durante el gesto de deslizar. */}
+            <div ref={areaSeccion} className="ns-swipe-area">
+            <motion.div
+              key={`${tab}:${recarga}`}
+              className="ns-mobile-content-area"
+              initial={{ opacity: 0, x: direccion * 36, y: direccion === 0 ? 10 : 0 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ x: RESORTE_PANEL, y: RESORTE_PANEL, opacity: SUAVE }}
+            >
 
               {tab === 'inicio' && (
                 <ErrorGuard fallbackMessage="No pudimos mostrar el resumen">
@@ -1319,7 +1417,7 @@ export default function Dashboard({ session }) {
                 {tab === 'reportes' && <ErrorGuard fallbackMessage="No pudimos generar los reportes"><Reportes negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
                 {tab === 'servicios' && <ErrorGuard fallbackMessage="No pudimos mostrar tus servicios"><div data-tour="servicios"><Servicios negocioId={negocio.id} rubro={negocio.rubro} /></div></ErrorGuard>}
                 {tab === 'equipo' && <ErrorGuard fallbackMessage="No pudimos mostrar tu equipo"><Empleados negocioId={negocio.id} rubro={negocio.rubro} /></ErrorGuard>}
-                {tab === 'horarios' && <ErrorGuard fallbackMessage="No pudimos mostrar los horarios"><ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel()} /></ErrorGuard>}
+                {tab === 'horarios' && <ErrorGuard fallbackMessage="No pudimos mostrar los horarios"><ConfiguracionHorarios negocio={negocio} onUpdate={() => inicializarPanel({ silencioso: true })} /></ErrorGuard>}
                 {tab === 'inventario' && <ErrorGuard fallbackMessage="No pudimos mostrar el inventario"><InventarioPro negocioId={negocio.id} /></ErrorGuard>}
                 {tab === 'flyer' && <ErrorGuard fallbackMessage="No pudimos abrir el creador de flyers"><FlyerCreatorPro negocio={negocio} publicLink={publicLink} /></ErrorGuard>}
               </div>
@@ -1335,7 +1433,7 @@ export default function Dashboard({ session }) {
                           <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                           </div>
-                          <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Base de Datos</span>
+                          <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Base de datos</span>
                         </div>
                         <h2 className="text-2xl md:text-4xl font-bold tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>{vocab.clientePlural}</h2>
                         <p className="text-[10px] font-bold uppercase tracking-[0.06em] mt-1" style={{ color: 'var(--ns-text-muted)' }}>{clientes.length} registrados</p>
@@ -1499,7 +1597,7 @@ export default function Dashboard({ session }) {
                   <div className="ns-settings-card">
                     <div className="ns-settings-card-header">
                       <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.172-1.172a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 115.656-5.656L10 6.343l1.172-1.172z" /></svg>
-                      <h4>Perfil y Marca</h4>
+                      <h4>Perfil y marca</h4>
                     </div>
                     <div className="p-5 md:p-6 space-y-5">
                       {/* Acento de tu app de reservas */}
@@ -1599,7 +1697,7 @@ export default function Dashboard({ session }) {
                   <div className="ns-settings-card">
                     <div className="ns-settings-card-header">
                       <svg className="w-4 h-4" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      <h4>Datos de Contacto</h4>
+                      <h4>Datos de contacto</h4>
                     </div>
                     <div className="p-5 md:p-6 space-y-4">
                       <div>
@@ -1628,7 +1726,7 @@ export default function Dashboard({ session }) {
                         )}
                       </div>
                       <div>
-                        <label className="ui-eyebrow mb-2">Mensaje de Bienvenida</label>
+                        <label className="ui-eyebrow mb-2">Mensaje de bienvenida</label>
                         <textarea value={mensajeBienvenida} onChange={(e) => setMensajeBienvenida(e.target.value)} placeholder="Mensaje que verán tus clientes al abrir la app de reservas..." className="ui-field resize-none h-20" />
                       </div>
                       <button
@@ -1792,6 +1890,7 @@ export default function Dashboard({ session }) {
                 </div>
               )}
 
+            </motion.div>
             </div>
           </div>
         )}
@@ -1800,6 +1899,8 @@ export default function Dashboard({ session }) {
 
         </div>
       </div>
+
+      {esPanelNegocio && <TirarParaActualizar alActualizar={actualizarPanel} />}
 
       {/* ====== DOCK INFERIOR — navegación móvil ====== */}
       {esPanelNegocio && (
@@ -1813,7 +1914,7 @@ export default function Dashboard({ session }) {
             >
               {tab === item.id && <Lente grupo="dock" />}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span>{item.label}</span>
+              <span className="ns-bottom-nav-item__label">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -1842,7 +1943,7 @@ export default function Dashboard({ session }) {
             hasEmpleados: crmStats.totalEmpleados > 0,
             hasHorarios: negocio?.horarios && Object.values(negocio.horarios).some(d => d.abierto),
             hasBranding: !!(logoUrl || descripcion),
-            hasShared: !!localStorage.getItem('ns_link_shared'),
+            hasShared: linkCompartido(),
             hasTurnos: stats.hoy > 0 || actividadReciente.length > 0,
           }}
           vocab={vocab}

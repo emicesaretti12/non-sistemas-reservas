@@ -262,11 +262,8 @@ export default function Servicios({ negocioId, rubro }) {
           role="presentation"
         >
           <div
-            className="w-full max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain"
+            className="w-full max-w-md max-h-[92dvh] overflow-y-auto overscroll-contain ns-hoja"
             style={{
-              background: 'var(--ns-surface)',
-              boxShadow: 'var(--ui-shadow-xl)',
-              borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
               paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
             }}
             onClick={(e) => e.stopPropagation()}

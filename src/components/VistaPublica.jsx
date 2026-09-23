@@ -1,10 +1,26 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario } from '../utils/vocabulario'
 import { getEstadoSuscripcion } from '../utils/suscripcion'
 import { ocupaHorario, duracionTurno, parseFecha, seSolapan, verificarDisponibilidad, mapaEmbedUrl } from '../utils/reservas'
 import { useToast } from './Toast'
+import { usePersistentState } from '../hooks/usePersistentState'
+import { leerCliente, recordarCliente, recordarTurno, proximoTurnoEn, cuandoEs } from '../utils/misTurnos'
+
+const TRES_DIAS = 3 * 24 * 60 * 60 * 1000
+const esCarrito = (c) => Boolean(c) && typeof c === 'object' && !Array.isArray(c)
+
+/** Abre Google Calendar con el turno ya cargado. */
+function abrirEnCalendario({ inicio, duracion = 30, servicio, profesional, negocio, extra = '' }) {
+  const desde = new Date(inicio)
+  const hasta = new Date(desde.getTime() + duracion * 60000)
+  const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '')
+  const titulo = encodeURIComponent(`${servicio || 'Turno'} — ${negocio}`)
+  const detalles = encodeURIComponent(`Reserva confirmada en ${negocio}\n${servicio || ''}${profesional ? `\nCon: ${profesional}` : ''}${extra ? `\n\n${extra}` : ''}`)
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${fmt(desde)}/${fmt(hasta)}&details=${detalles}&sf=true&output=xml`, '_blank')
+}
 
 export default function VistaPublica() {
   const showToast = useToast()
@@ -22,25 +38,37 @@ export default function VistaPublica() {
   const [catalogo, setCatalogo] = useState([])
   const [catFiltro, setCatFiltro] = useState('todos')
   const [catBusqueda, setCatBusqueda] = useState('')
-  const [carrito, setCarrito] = useState({}) // { [prodId]: cantidad }
+  // El carrito sobrevive a cerrar la pestaña (3 días): nadie quiere volver a
+  // armar un pedido porque el navegador recargó la página.
+  const [carrito, setCarrito] = usePersistentState(`publico:carrito:${id}`, {}, { ttl: TRES_DIAS, validar: esCarrito }) // { [prodId]: cantidad }
   const [productoDetalle, setProductoDetalle] = useState(null) // producto seleccionado para modal
   const [carritoAbierto, setCarritoAbierto] = useState(false) // drawer del carrito
   const [checkoutActivo, setCheckoutActivo] = useState(false) // paso final de checkout
-  const [clienteCheckout, setClienteCheckout] = useState({ nombre: '', telefono: '', notas: '' })
+  const [clienteCheckout, setClienteCheckout] = useState(() => {
+    const c = leerCliente()
+    return { nombre: c.nombre, telefono: c.telefono, notas: '' }
+  })
+  // "Tu próximo turno": se lee del teléfono del cliente al cargar el negocio.
+  const [proximo, setProximo] = useState(null)
   
   // --- UI & FLOW STATE ---
   const [paso, setPaso] = useState(1)
   const [bioExpandida, setBioExpandida] = useState(false)
-  const [reserva, setReserva] = useState({
-    servicioId: null, 
-    empleadoId: null, 
-    fecha: '', 
-    hora: '', 
-    horaNextDay: false,
-    clienteNombre: '', 
-    clienteTelefono: '',
-    clienteEmail: '',
-    campoExtra: ''
+  // Los datos de contacto vienen precargados si ya reservó desde este
+  // teléfono: nombre, WhatsApp y correo no se vuelven a tipear.
+  const [reserva, setReserva] = useState(() => {
+    const c = leerCliente()
+    return {
+      servicioId: null,
+      empleadoId: null,
+      fecha: '',
+      hora: '',
+      horaNextDay: false,
+      clienteNombre: c.nombre,
+      clienteTelefono: c.telefono,
+      clienteEmail: c.email,
+      campoExtra: ''
+    }
   })
   
   // --- CALENDAR & SLOTS STATE ---
@@ -79,6 +107,7 @@ export default function VistaPublica() {
         return
       }
       setNegocio(biz)
+      setProximo(proximoTurnoEn(biz.id))
 
       const [resSrvs, resEmps, resCat] = await Promise.all([
         supabase.from('servicios').select('*').eq('negocio_id', id),
@@ -356,6 +385,21 @@ export default function VistaPublica() {
         }
         throw error
       }
+
+      // Quedan en el teléfono del cliente: la próxima vez no tipea sus datos
+      // y al volver al link ve su turno arriba de todo.
+      recordarCliente({ nombre, telefono, email })
+      const servicioElegido = servicios.find(x => x.id === reserva.servicioId)
+      const turnoGuardado = {
+        negocioId: negocio.id,
+        negocio: negocio.nombre,
+        servicio: servicioElegido?.nombre || '',
+        profesional: empleados.find(x => x.id === reserva.empleadoId)?.nombre || '',
+        inicio: fechaHoraISO,
+        duracion: servicioElegido?.duracion_minutos || 30,
+      }
+      recordarTurno(turnoGuardado)
+      setProximo(proximoTurnoEn(negocio.id))
       setPaso(5)
 
     } catch (err) {
@@ -641,7 +685,7 @@ export default function VistaPublica() {
          {paso < 5 && (
            <nav className="ns-progress-nav">
               <div className="flex items-center justify-between mb-1.5 md:mb-2 px-1">
-                 <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Progreso de Reserva</span>
+                 <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Progreso de reserva</span>
                  <span className="text-[9px] md:text-[10px] font-bold" style={{ color: 'var(--ns-text)' }}>{requiereStaff ? paso : paso - 1} / {requiereStaff ? 4 : 3}</span>
               </div>
               <div className="flex gap-1 md:gap-1.5">
@@ -663,6 +707,50 @@ export default function VistaPublica() {
             {/* --- PASO 1: SERVICIOS --- */}
             {paso === 1 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-2.5 md:space-y-3">
+                {proximo && (
+                  <motion.div
+                    className="ns-glass-card ns-proximo"
+                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    data-testid="public-proximo-turno"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className="ns-proximo__fecha" aria-hidden="true">
+                        <span>{new Date(proximo.inicio).toLocaleDateString('es-AR', { month: 'short' }).replace('.', '')}</span>
+                        <b>{new Date(proximo.inicio).getDate()}</b>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-primary)' }}>Tu próximo turno</p>
+                        <p className="text-[17px] font-bold tracking-tight leading-snug" style={{ color: 'var(--ns-text)' }}>
+                          {cuandoEs(proximo.inicio)} · {new Date(proximo.inicio).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })} hs
+                        </p>
+                        <p className="text-[13px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>
+                          {[proximo.servicio, proximo.profesional && `con ${proximo.profesional}`].filter(Boolean).join(' ')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`grid gap-2 mt-3.5 ${negocio.telefono ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                      <button
+                        type="button"
+                        className="ui-btn ui-btn--quiet min-w-0 px-3"
+                        onClick={() => abrirEnCalendario({ ...proximo, negocio: negocio.nombre })}
+                      >
+                        Al calendario
+                      </button>
+                      {negocio.telefono && (
+                        <a
+                          className="ui-btn ui-btn--quiet min-w-0 px-3"
+                          href={`https://wa.me/${negocio.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${negocio.nombre}, tengo un turno el ${new Date(proximo.inicio).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${new Date(proximo.inicio).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })} y necesito hacer un cambio.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Pedir cambio
+                        </a>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
                 <h2 className="text-base md:text-lg font-bold tracking-tight px-1" style={{ color: 'var(--ns-text)' }}>{vocab.paso1Titulo}</h2>
                 {servicios.length === 0 ? (
                   <div className="nh-card" data-testid="public-sin-servicios">
@@ -753,7 +841,7 @@ export default function VistaPublica() {
             {paso === 3 && (
               <section className="animate-in slide-in-from-bottom-6 fade-in zoom-in-[0.98] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between px-1">
-                   <h2 className="text-base md:text-lg font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>Fecha y Horario</h2>
+                   <h2 className="text-base md:text-lg font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>Fecha y horario</h2>
                    <button onClick={() => setPaso(requiereStaff ? 2 : 1)} className="ui-btn ui-btn--quiet">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg> {requiereStaff ? vocab.paso3Volver : vocab.paso2Volver}
                    </button>
@@ -888,7 +976,7 @@ export default function VistaPublica() {
                       </div>
 
                       <div className="space-y-1">
-                         <label className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.06em] ml-1" style={{ color: 'var(--ns-primary)' }}>Correo Electrónico <span style={{ color: 'var(--ns-text-muted)' }}>· opcional</span></label>
+                         <label className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.06em] ml-1" style={{ color: 'var(--ns-primary)' }}>Correo electrónico <span style={{ color: 'var(--ns-text-muted)' }}>· opcional</span></label>
                          <div className="ns-input-wrapper">
                             <div className="ns-input-icon"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
                             <input type="email" autoComplete="email" className="ns-input" placeholder="correo@ejemplo.com" value={reserva.clienteEmail} onChange={(e) => setReserva(prev => ({ ...prev, clienteEmail: e.target.value }))} />
@@ -948,12 +1036,27 @@ export default function VistaPublica() {
             {/* --- PASO 5: ÉXITO --- */}
             {paso === 5 && (
               <section className="text-center py-12 md:py-16 animate-in zoom-in-95 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] space-y-5 md:space-y-6">
-                <div 
-                   className="w-20 h-20 md:w-24 md:h-24 text-white rounded-[1.3rem] md:rounded-[1.5rem] flex items-center justify-center mx-auto rotate-3"
-                   style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 8px 0 rgba(16,24,40,0.1), 0 20px 40px rgba(0,122,255,0.35), inset 0 2px 0 rgba(255,255,255,0.25)' }}
+                {/* La gota de confirmación cae con un resorte, suelta dos ondas
+                    y el tilde se dibuja adentro: la reserva "aterriza". */}
+                <motion.div
+                   className="ns-exito"
+                   initial={{ scale: 0.3, opacity: 0, y: -24 }}
+                   animate={{ scale: 1, opacity: 1, y: 0 }}
+                   transition={{ type: 'spring', stiffness: 360, damping: 17, mass: 0.9 }}
                 >
-                   <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
+                   <span className="ns-exito__onda" aria-hidden="true" />
+                   <span className="ns-exito__onda ns-exito__onda--2" aria-hidden="true" />
+                   <svg className="w-9 h-9 md:w-11 md:h-11" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24" aria-hidden="true">
+                     <motion.path
+                       d="M5 13l4 4L19 7"
+                       strokeLinecap="round"
+                       strokeLinejoin="round"
+                       initial={{ pathLength: 0 }}
+                       animate={{ pathLength: 1 }}
+                       transition={{ delay: 0.28, duration: 0.42, ease: [0.32, 0.72, 0, 1] }}
+                     />
+                   </svg>
+                </motion.div>
                  <div className="space-y-1.5 px-2">
                    <h3 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>{vocab.exitoTitulo}</h3>
                    <p className="text-xs md:text-sm font-medium leading-relaxed max-w-[260px] mx-auto text-balance" style={{ color: 'var(--ns-text-muted)' }}>
@@ -986,20 +1089,20 @@ export default function VistaPublica() {
                     onClick={() => {
                       const [yr, mo, dy] = reserva.fecha.split('-').map(Number)
                       const [hr, mn] = reserva.hora.split(':').map(Number)
-                      const bookDay = reserva.horaNextDay ? dy + 1 : dy
-                      const start = new Date(yr, mo - 1, bookDay, hr, mn, 0)
-                      const dur = servicioSeleccionado?.duracion_minutos || 30
-                      const end = new Date(start.getTime() + dur * 60000)
-                      const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "")
-                      const titulo = encodeURIComponent(`${servicioSeleccionado?.nombre} — ${negocio.nombre}`)
-                      const detalles = encodeURIComponent(`Reserva confirmada en ${negocio.nombre}\n${servicioSeleccionado?.nombre}\nCon: ${empleadoSeleccionado?.nombre}\n\nPrecio: ${precio(servicioSeleccionado?.precio)}`)
-                      window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${fmt(start)}/${fmt(end)}&details=${detalles}&sf=true&output=xml`, '_blank')
+                      abrirEnCalendario({
+                        inicio: new Date(yr, mo - 1, reserva.horaNextDay ? dy + 1 : dy, hr, mn, 0),
+                        duracion: servicioSeleccionado?.duracion_minutos || 30,
+                        servicio: servicioSeleccionado?.nombre,
+                        profesional: empleadoSeleccionado?.nombre,
+                        negocio: negocio.nombre,
+                        extra: `Precio: ${precio(servicioSeleccionado?.precio)}`,
+                      })
                     }}
                     className="ns-cta-primary"
                     style={{}}
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
-                    Agregar al Calendario
+                    Agregar al calendario
                   </button>
                   
                   {/* WhatsApp Confirmation to Negocio */}
@@ -1261,7 +1364,7 @@ export default function VistaPublica() {
                  ) : (
                    <form id="checkoutForm" onSubmit={enviarPedidoWhatsApp} className="space-y-4">
                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.06em] ml-1" style={{ color: accentGlow }}>Nombre Completo *</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.06em] ml-1" style={{ color: accentGlow }}>Nombre completo *</label>
                         <input required className="ui-field" placeholder="¿Cómo te llamas?" value={clienteCheckout.nombre} onChange={(e) => setClienteCheckout({...clienteCheckout, nombre: e.target.value})} />
                      </div>
                      <div className="space-y-1">

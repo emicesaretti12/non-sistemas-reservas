@@ -72,7 +72,7 @@
   .ns-tab.active { color: var(--ns-primary); }
 
   .ns-tab-content-enter {
-    animation: ns-fade-up var(--dur-3) var(--ease-out) both;
+    animation: ns-fade-up var(--dur-3) var(--ease-out) backwards;
   }
 
   .ns-section-header {
@@ -305,6 +305,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    min-height: 36px;
     padding: 7px 11px;
     border: 0;
     border-radius: var(--ns-radius-xs);
@@ -512,14 +513,15 @@
     min-height: 48px;
     padding: 14px 24px;
     border: 0;
-    border-radius: var(--ns-radius-md);
+    border-radius: 999px;
     background: var(--ns-gradient-1);
     color: var(--ns-paper);
     font-family: inherit;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    /* Mismo idioma que .ui-btn: cápsula, texto en oración, sin gritar. */
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    text-transform: none;
     box-shadow: var(--ui-brand);
     cursor: pointer;
     position: relative;
@@ -567,14 +569,14 @@
     min-height: 48px;
     padding: 14px 24px;
     border: 0;
-    border-radius: var(--ns-radius-md);
+    border-radius: 999px;
     background: var(--ns-surface);
     color: var(--ns-primary);
     font-family: inherit;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    text-transform: none;
     box-shadow: var(--ui-shadow-sm);
     cursor: pointer;
     transition:
@@ -844,7 +846,7 @@
   }
 
   .ns-toast-enter {
-    animation: ns-fade-down var(--dur-3) var(--ease-spring) both;
+    animation: ns-fade-down var(--dur-3) var(--ease-spring) backwards;
   }
 
   .ns-toast-exit {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
 import Lente from './ui/Lente'
@@ -6,6 +7,10 @@ import { verificarDisponibilidad, parseFecha, normalizarHorarios } from '../util
 import { useToast } from './Toast'
 import { haptic } from '../utils/haptics'
 import { IconRobot } from './NoniIcons'
+import { usePersistentState } from '../hooks/usePersistentState'
+
+const TURNO_VACIO = { cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00' }
+const DOCE_HORAS = 12 * 60 * 60 * 1000
 
 export default function Turnos({ negocioId, rubro, negocio }) {
   const vocab = getVocabulario(rubro)
@@ -16,15 +21,18 @@ export default function Turnos({ negocioId, rubro, negocio }) {
   const [todosLosTurnos, setTodosLosTurnos] = useState([])
   const [empleados, setEmpleados] = useState([])
   const [servicios, setServicios] = useState([])
-  const [filtroEmpleado, setFiltroEmpleado] = useState('todos')
+  // El filtro de profesional se recuerda por negocio: quien mira siempre la
+  // agenda de una sola persona no tiene que elegirla cada vez.
+  const [filtroEmpleado, setFiltroEmpleado] = usePersistentState(`ui:agenda:empleado:${negocioId}`, 'todos')
 
   const [modalDiaAbierto, setModalDiaAbierto] = useState(false)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [confirmDialog, setConfirmDialog] = useState({ show: false, id: null })
-  const [nuevoTurno, setNuevoTurno] = useState({
-    cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00'
-  })
+  // Borrador de la cita nueva: si se cierra la hoja sin querer, se va la señal
+  // o el sistema mata la pestaña, los datos siguen ahí al volver (12 horas).
+  const [nuevoTurno, setNuevoTurno] = usePersistentState(`borrador:turno:${negocioId}`, TURNO_VACIO, { ttl: DOCE_HORAS })
+  const hayBorrador = Boolean(nuevoTurno.cliente_nombre || nuevoTurno.cliente_telefono)
 
   // Parseo unificado de los timestamps de Supabase (ver utils/reservas.js)
   const safeParseDate = parseFecha
@@ -74,7 +82,13 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         supabase.from('servicios').select('*').eq('negocio_id', negocioId)
       ])
 
-      if (resEmp.data) setEmpleados(resEmp.data)
+      if (resEmp.data) {
+        setEmpleados(resEmp.data)
+        // Un filtro guardado de alguien que ya no está en el equipo no sirve.
+        if (filtroEmpleado !== 'todos' && !resEmp.data.some((e) => String(e.id) === String(filtroEmpleado))) {
+          setFiltroEmpleado('todos')
+        }
+      }
       if (resServ.data) setServicios(resServ.data)
 
       // Traer turnos muy amplios para que el administrador pueda navegar históricamente
@@ -369,7 +383,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
       toast.success("Turno agendado con éxito")
       setModalAbierto(false)
-      setNuevoTurno({ cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00' })
+      setNuevoTurno(TURNO_VACIO)
       bootSmartAgenda()
       dispararGoogleCalendar({ ...nuevoTurno, cliente_nombre: nombre, cliente_telefono: telefono }, serv, emp)
     } catch (err) {
@@ -827,15 +841,22 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       {/* Botón principal flotante. Antes el contenedor llevaba `.ns-fab-mobile`
           (56x56 fijos) con un botón más ancho adentro, y el bloque rojo se veía
           cortado por detrás. */}
-      <button
-        onClick={() => { haptic('select'); setModalAbierto(true) }}
-        className="ui-btn ui-btn--primary ui-btn--pill fixed right-4 z-40 lg:hidden"
-        style={{ bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}
-        data-testid="agenda-nueva-cita"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
-        <span className="hidden sm:inline">{vocab.nuevaCita}</span>
-      </button>
+      {/* Va al <body> por portal: la sección entra con una transformación y un
+          `position: fixed` adentro de algo transformado se ubica respecto de
+          ese algo, no de la pantalla. */}
+      {createPortal(
+        <button
+          onClick={() => { haptic('select'); setModalAbierto(true) }}
+          className="ns-page-fab lg:hidden"
+          data-testid="agenda-nueva-cita"
+          aria-label={vocab.nuevaCita}
+        >
+          <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="2.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" /></svg>
+          <span className="ns-page-fab__label">{vocab.nuevaCita}</span>
+          {hayBorrador && <span className="ns-page-fab__dot" aria-hidden="true" />}
+        </button>,
+        document.body,
+      )}
 
       {/* MODAL BOTTOM-SHEET PARA VER TURNOS DEL DIA SELECCIONADO */}
       {modalDiaAbierto && (
@@ -845,11 +866,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           role="presentation"
         >
           <div
-            className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl h-[86dvh] sm:h-[80dvh] flex flex-col overflow-hidden sm:m-4"
+            className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl h-[86dvh] sm:h-[80dvh] flex flex-col overflow-hidden sm:m-4 ns-hoja"
             style={{
-              background: 'var(--ns-surface)',
-              boxShadow: 'var(--ui-shadow-xl)',
-              borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -944,11 +962,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           role="presentation"
         >
           <div
-            className="w-full max-w-lg max-h-[92dvh] overflow-y-auto overscroll-contain"
+            className="w-full max-w-lg max-h-[92dvh] overflow-y-auto overscroll-contain ns-hoja"
             style={{
-              background: 'var(--ns-surface)',
-              boxShadow: 'var(--ui-shadow-xl)',
-              borderRadius: 'var(--ns-radius-2xl) var(--ns-radius-2xl) 0 0',
               paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -965,6 +980,15 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                   <p className="ui-eyebrow mt-1.5">
                     {fechaActual.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </p>
+                  {hayBorrador && (
+                    <p className="mt-2 flex items-center gap-2 text-[12px] font-medium text-[#6B7686]">
+                      <span className="ui-chip ui-chip--soft">Borrador</span>
+                      Seguís donde lo dejaste
+                      <button type="button" onClick={() => { haptic(); setNuevoTurno(TURNO_VACIO) }} className="font-semibold text-[#007AFF]">
+                        Limpiar
+                      </button>
+                    </p>
+                  )}
                 </div>
                 <button onClick={() => setModalAbierto(false)} className="ui-icon-btn" aria-label="Cerrar">
                   <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" /></svg>

@@ -93,13 +93,13 @@ export default function GlobalSearch({
 
   // Acciones estáticas siempre disponibles
   const ACCIONES = [
-    { type: 'accion', label: 'Nueva Reserva', desc: 'Agendar un turno manual', icon: 'M12 4v16m8-8H4', tab: 'agenda' },
-    { type: 'accion', label: 'Agregar Servicio', desc: 'Crear un nuevo servicio', icon: 'M12 4v16m8-8H4', tab: 'servicios' },
-    { type: 'accion', label: 'Agregar Empleado', desc: 'Registrar staff', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z', tab: 'equipo' },
-    { type: 'accion', label: 'Ver Reportes', desc: 'Análisis de rendimiento', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2z', tab: 'reportes' },
-    { type: 'accion', label: 'Configurar Horarios', desc: 'Días y horas de atención', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', tab: 'horarios' },
-    { type: 'accion', label: 'Ajustes del Negocio', desc: 'Marca, contacto, link público', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35', tab: 'ajustes' },
-    { type: 'accion', label: 'Copiar Link Público', desc: 'Copiar link de reservas', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1', tab: '__copylink' },
+    { type: 'accion', label: 'Nueva reserva', desc: 'Agendar un turno manual', icon: 'M12 4v16m8-8H4', tab: 'agenda' },
+    { type: 'accion', label: 'Agregar servicio', desc: 'Crear un nuevo servicio', icon: 'M12 4v16m8-8H4', tab: 'servicios' },
+    { type: 'accion', label: 'Agregar a tu equipo', desc: 'Registrar staff', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z', tab: 'equipo' },
+    { type: 'accion', label: 'Ver reportes', desc: 'Análisis de rendimiento', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', tab: 'reportes' },
+    { type: 'accion', label: 'Configurar horarios', desc: 'Días y horas de atención', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', tab: 'horarios' },
+    { type: 'accion', label: 'Ajustes del negocio', desc: 'Marca, contacto, link público', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35', tab: 'ajustes' },
+    { type: 'accion', label: 'Copiar link público', desc: 'Copiar link de reservas', icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1', tab: '__copylink' },
   ]
 
   const handleSelect = useCallback((item) => {
@@ -300,7 +300,8 @@ export default function GlobalSearch({
 
         {/* Footer */}
         <div className="px-5 py-3 flex items-center justify-between" style={{ boxShadow: 'inset 0 1px 0 var(--ns-line)' }}>
-          <div className="flex items-center gap-3">
+          {/* Los atajos de teclado no significan nada con el dedo. */}
+          <div className="hidden md:flex items-center gap-3">
             <span className="text-[9px] font-bold uppercase tracking-[0.06em] flex items-center gap-1.5" style={{ color: 'var(--ns-text-muted)' }}>
               <kbd className="px-1.5 py-0.5 rounded-lg" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}>↑↓</kbd> Navegar
             </span>

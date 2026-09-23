@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { crearFetchConCache, limpiarCopias } from './utils/cacheRed'
+import { purgarVencidos } from './utils/almacen'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -56,15 +58,22 @@ export const supabase = createClient(
       detectSessionInUrl: true,
     },
     global: {
-      fetch: fetchConTimeout,
+      // Primero la red; sin señal, la última copia guardada (ver cacheRed.js).
+      fetch: crearFetchConCache(fetchConTimeout),
     },
   }
 )
+
+// Lo vencido del almacén local se limpia una vez por arranque.
+purgarVencidos()
 
 // Interceptor global: si la sesión se cierra o el token deja de ser válido,
 // sacamos al usuario de las rutas protegidas.
 if (supabaseConfigurado) {
   supabase.auth.onAuthStateChange((event, session) => {
+    // Al salir no queda ningún dato del negocio en el dispositivo: puede ser
+    // un celular compartido o la compu de un local.
+    if (event === 'SIGNED_OUT') limpiarCopias()
     if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
       if (window.location.pathname.startsWith('/admin')) {
         window.location.href = '/login'

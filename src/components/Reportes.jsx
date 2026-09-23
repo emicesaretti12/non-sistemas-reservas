@@ -4,11 +4,13 @@ import Contador from './ui/Contador'
 import Lente from './ui/Lente'
 import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
 import { factura, precioTurno } from '../utils/reservas'
+import { usePersistentState } from '../hooks/usePersistentState'
 
 export default function Reportes({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
   const [loading, setLoading] = useState(true)
-  const [periodo, setPeriodo] = useState('semana') // semana | mes | todo
+  // El período elegido se recuerda: quien mira el mes, vuelve al mes.
+  const [periodo, setPeriodo] = usePersistentState('ui:reportes:periodo', 'semana', { validar: (p) => ['semana', 'mes', 'todo'].includes(p) })
   const [datos, setDatos] = useState({
     ingresosPeriodo: 0,
     turnosPeriodo: 0,
@@ -178,7 +180,7 @@ export default function Reportes({ negocioId, rubro }) {
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Análisis de Rendimiento</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Análisis de rendimiento</span>
             </div>
             <h2 className="ui-head__title">Reportes</h2>
           </div>
@@ -266,7 +268,7 @@ export default function Reportes({ negocioId, rubro }) {
               Promedio
             </span>
           </div>
-          <p className="text-[12px] font-semibold mb-0.5 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ticket Prom.</p>
+          <p className="text-[12px] font-semibold mb-0.5 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ticket prom.</p>
           <h3 className="font-display text-[26px] md:text-[30px] font-bold tracking-tight relative z-10" style={{ color: 'var(--ns-text)' }}>
             <Contador valor={datos.ticketPromedio} prefijo="$" />
           </h3>
