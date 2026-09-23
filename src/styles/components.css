@@ -143,9 +143,11 @@
 
   .ui-card--interactive { cursor: pointer; }
 
-  .ui-card--interactive:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ui-shadow-lg);
+  @media (hover: hover) {
+    .ui-card--interactive:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--ui-shadow-lg);
+    }
   }
 
   .ui-card--interactive:active {
@@ -181,10 +183,12 @@
   .ui-tile--interactive,
   button.ui-tile { cursor: pointer; text-align: left; }
 
-  .ui-tile--interactive:hover,
-  button.ui-tile:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ui-shadow);
+  @media (hover: hover) {
+    .ui-tile--interactive:hover,
+    button.ui-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--ui-shadow);
+    }
   }
 
   .ui-tile--interactive:active,
@@ -245,9 +249,11 @@
 
   .ui-btn > * { position: relative; z-index: 1; }
 
-  .ui-btn:hover:not(:disabled) {
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.9);
-    box-shadow: var(--ui-shadow);
+  @media (hover: hover) {
+    .ui-btn:hover:not(:disabled) {
+      background: var(--glass-sheen), rgba(255, 255, 255, 0.9);
+      box-shadow: var(--ui-shadow);
+    }
   }
 
   .ui-btn:active:not(:disabled) {
@@ -268,10 +274,12 @@
     text-shadow: 0 1px 1px rgba(0, 40, 120, 0.25);
   }
 
-  .ui-btn--primary:hover:not(:disabled) {
-    background: var(--ns-gradient-deep);
-    box-shadow: var(--ui-brand-lg);
-    filter: saturate(1.06);
+  @media (hover: hover) {
+    .ui-btn--primary:hover:not(:disabled) {
+      background: var(--ns-gradient-deep);
+      box-shadow: var(--ui-brand-lg);
+      filter: saturate(1.06);
+    }
   }
 
   .ui-btn--primary:active:not(:disabled) {
@@ -286,9 +294,11 @@
     box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.1);
   }
 
-  .ui-btn--quiet:hover:not(:disabled) {
-    background: var(--ns-primary-bg-hover);
-    box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18);
+  @media (hover: hover) {
+    .ui-btn--quiet:hover:not(:disabled) {
+      background: var(--ns-primary-bg-hover);
+      box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18);
+    }
   }
 
   /* Terciaria: sólo texto hasta que la tocás. */
@@ -298,10 +308,12 @@
     box-shadow: none;
   }
 
-  .ui-btn--ghost:hover:not(:disabled) {
-    background: var(--ns-sunken);
-    color: var(--ns-text);
-    box-shadow: none;
+  @media (hover: hover) {
+    .ui-btn--ghost:hover:not(:disabled) {
+      background: var(--ns-sunken);
+      color: var(--ns-text);
+      box-shadow: none;
+    }
   }
 
   .ui-btn--block {
@@ -317,10 +329,12 @@
     box-shadow: inset 0 0 0 1px var(--ns-danger-line);
   }
 
-  .ui-btn--danger:hover:not(:disabled) {
-    background: linear-gradient(180deg, #F0666A 0%, #E5484D 50%, #D23A3F 100%);
-    color: #FFFFFF;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 24px -8px rgba(229, 72, 77, 0.6);
+  @media (hover: hover) {
+    .ui-btn--danger:hover:not(:disabled) {
+      background: linear-gradient(180deg, #F0666A 0%, #E5484D 50%, #D23A3F 100%);
+      color: #FFFFFF;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 24px -8px rgba(229, 72, 77, 0.6);
+    }
   }
 
   /* Botón de sólo ícono: una lenteja de vidrio. */
@@ -348,9 +362,11 @@
 
   .ui-icon-btn > * { position: relative; z-index: 1; }
 
-  .ui-icon-btn:hover {
-    color: var(--ns-text);
-    box-shadow: var(--ui-shadow);
+  @media (hover: hover) {
+    .ui-icon-btn:hover {
+      color: var(--ns-text);
+      box-shadow: var(--ui-shadow);
+    }
   }
 
   .ui-icon-btn:active {
@@ -390,8 +406,10 @@
     font-weight: 450;
   }
 
-  .ui-field:hover:not(:disabled):not(:focus) {
-    background: rgba(118, 128, 152, 0.15);
+  @media (hover: hover) {
+    .ui-field:hover:not(:disabled):not(:focus) {
+      background: rgba(118, 128, 152, 0.15);
+    }
   }
 
   .ui-field:focus {
@@ -505,7 +523,9 @@
     transition: color var(--dur-2) var(--ease-out);
   }
 
-  .ui-segment > button:hover { color: var(--ns-text-secondary); }
+  @media (hover: hover) {
+    .ui-segment > button:hover { color: var(--ns-text-secondary); }
+  }
   .ui-segment > button.is-active { color: var(--ns-text); }
 
   /* Si la opción activa no trae lente (código viejo), se pinta sola. */
@@ -692,7 +712,9 @@
   }
 
   .ui-list__row--interactive { cursor: pointer; }
-  .ui-list__row--interactive:hover { background: rgba(255, 255, 255, 0.4); }
+  @media (hover: hover) {
+    .ui-list__row--interactive:hover { background: rgba(255, 255, 255, 0.4); }
+  }
   .ui-list__row--interactive:active { background: var(--ns-sunken); }
 
   /* ═══════════════ TEXTO ═══════════════ */

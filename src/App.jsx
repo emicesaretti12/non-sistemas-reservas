@@ -7,7 +7,7 @@ import { ConfirmProvider } from './contexts/ConfirmContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import { MotionConfig } from 'framer-motion'
 import { useRippleGlobal } from './hooks/useRippleGlobal'
-import { useScrollNativo } from './hooks/useScrollNativo'
+import { usePantallaNativa } from './hooks/usePantallaNativa'
 import { useHojasArrastrables } from './hooks/useHojasArrastrables'
 import EstadoConexion from './components/ui/EstadoConexion'
 
@@ -67,10 +67,10 @@ function AppShell() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Respuesta física al toque en toda la app, y el dock/botones flotantes
-  // que se apartan al leer hacia abajo.
+  // Comportamiento de app en el celular: sin zoom, hojas que se cierran
+  // deslizando, luz bajo el dedo al tocar y la pantalla siempre en su lugar.
+  usePantallaNativa()
   useRippleGlobal()
-  useScrollNativo()
   useHojasArrastrables()
 
   useEffect(() => {

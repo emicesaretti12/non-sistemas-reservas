@@ -31,46 +31,6 @@
     gap: 16px;
   }
 
-  /* Tira de pestañas del celular: una bandeja de vidrio fino con la
-     misma lente que viaja en el riel y en el dock. */
-  .ns-tab-track {
-    border-radius: 999px;
-    background: var(--glass-sheen), var(--glass-thin);
-    box-shadow: var(--glass-rim), 0 6px 18px -10px rgba(35, 52, 110, 0.25);
-  }
-
-  .ns-tab {
-    position: relative;
-    isolation: isolate;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    min-height: 38px;
-    padding: 0 15px;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--ns-text-muted);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.008em;
-    white-space: nowrap;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition:
-      color var(--dur-2) var(--ease-out),
-      transform var(--dur-4) var(--ease-liquid);
-  }
-
-  .ns-tab:hover { color: var(--ns-text-secondary); }
-
-  .ns-tab:active {
-    transform: scale(0.95);
-    transition-duration: var(--dur-1);
-  }
-
-  .ns-tab.active { color: var(--ns-primary); }
-
   .ns-tab-content-enter {
     animation: ns-fade-up var(--dur-3) var(--ease-out) backwards;
   }
@@ -160,23 +120,31 @@
     transition: background var(--dur-2) var(--ease-out);
   }
 
-  .ns-settings-row:hover {
-    background: var(--ns-primary-bg);
+  @media (hover: hover) {
+    .ns-settings-row:hover {
+      background: var(--ns-primary-bg);
+    }
   }
 
+  /* Fila de cliente: avatar | datos | acciones. Había perdido el
+     `display: flex` y en el celular los tres bloques quedaban apilados. */
   .ns-cliente-card,
   .ns-client-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 14px;
-    cursor: pointer;
   }
 
-  .ns-cliente-card:hover,
-  .ns-client-card:hover,
-  .ns-stat-card:hover,
-  .ns-testimonial:hover,
-  .ns-feature-pro:hover {
-    box-shadow: var(--ui-shadow-lg);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .ns-cliente-card:hover,
+    .ns-client-card:hover,
+    .ns-stat-card:hover,
+    .ns-testimonial:hover,
+    .ns-feature-pro:hover {
+      box-shadow: var(--ui-shadow-lg);
+      transform: translateY(-2px);
+    }
   }
 
   .ns-cliente-card:active,
@@ -233,9 +201,11 @@
       transform var(--dur-2) var(--ease-spring);
   }
 
-  .nh-metric:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .nh-metric:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-2px);
+    }
   }
 
   .nh-metric:active {
@@ -322,10 +292,12 @@
       box-shadow var(--dur-2) var(--ease-out);
   }
 
-  .nh-link:hover {
-    color: var(--ns-primary);
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow-sm);
+  @media (hover: hover) {
+    .nh-link:hover {
+      color: var(--ns-primary);
+      background: var(--ns-surface);
+      box-shadow: var(--ui-shadow-sm);
+    }
   }
 
   .nh-next {
@@ -368,9 +340,11 @@
       transform var(--dur-2) var(--ease-spring);
   }
 
-  .nh-slot:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .nh-slot:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-2px);
+    }
   }
 
   .nh-slot:active {
@@ -420,9 +394,11 @@
       transform var(--dur-2) var(--ease-spring);
   }
 
-  .nh-action:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-3px);
+  @media (hover: hover) {
+    .nh-action:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-3px);
+    }
   }
 
   .nh-action:active {
@@ -443,8 +419,10 @@
     transition: transform var(--dur-2) var(--ease-spring);
   }
 
-  .nh-action:hover .nh-action-ic {
-    transform: scale(1.06);
+  @media (hover: hover) {
+    .nh-action:hover .nh-action-ic {
+      transform: scale(1.06);
+    }
   }
 
   .nh-action-label {
@@ -482,10 +460,12 @@
     border-radius: var(--ns-radius-xs);
   }
 
-  .nh-wa-btn:hover {
-    background: var(--ns-primary);
-    color: var(--ns-paper);
-    box-shadow: var(--ui-brand);
+  @media (hover: hover) {
+    .nh-wa-btn:hover {
+      background: var(--ns-primary);
+      color: var(--ns-paper);
+      box-shadow: var(--ui-brand);
+    }
   }
 
   .nh-wa-btn:active {
@@ -531,13 +511,15 @@
       transform var(--dur-2) var(--ease-spring);
   }
 
-  .ns-btn-primary:hover,
-  .ns-cta-primary:hover,
-  .ns-sticky-cta-btn:hover,
-  .btn-modern-dark:hover,
-  .btn-plastilina-primary:hover {
-    box-shadow: var(--ui-brand-lg);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .ns-btn-primary:hover,
+    .ns-cta-primary:hover,
+    .ns-sticky-cta-btn:hover,
+    .btn-modern-dark:hover,
+    .btn-plastilina-primary:hover {
+      box-shadow: var(--ui-brand-lg);
+      transform: translateY(-2px);
+    }
   }
 
   .ns-btn-primary:active,
@@ -584,12 +566,14 @@
       transform var(--dur-2) var(--ease-spring);
   }
 
-  .btn-modern-light:hover,
-  .ns-btn-celeste:hover,
-  .ns-cta-wa:hover,
-  .btn-plastilina-secondary:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .btn-modern-light:hover,
+    .ns-btn-celeste:hover,
+    .ns-cta-wa:hover,
+    .btn-plastilina-secondary:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-2px);
+    }
   }
 
   .btn-modern-light:active,
@@ -622,9 +606,11 @@
       transform var(--dur-2) var(--ease-spring);
   }
 
-  .ns-export-btn:hover {
-    color: var(--ns-primary);
-    box-shadow: var(--ui-shadow);
+  @media (hover: hover) {
+    .ns-export-btn:hover {
+      color: var(--ns-primary);
+      box-shadow: var(--ui-shadow);
+    }
   }
 
   .ns-export-btn:active {
@@ -799,9 +785,11 @@
     transition: transform var(--dur-3) var(--ease-spring), box-shadow var(--dur-3) var(--ease-out);
   }
 
-  .ns-bar-chart-bar:hover {
-    transform: scaleY(1.03);
-    box-shadow: var(--ui-brand-lg);
+  @media (hover: hover) {
+    .ns-bar-chart-bar:hover {
+      transform: scaleY(1.03);
+      box-shadow: var(--ui-brand-lg);
+    }
   }
 
   /* ═══════════════ AVISOS (TOAST) ═══════════════ */
@@ -902,9 +890,11 @@
     transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
   }
 
-  .ns-toast-close:hover {
-    background: var(--ns-sunken);
-    color: var(--ns-primary);
+  @media (hover: hover) {
+    .ns-toast-close:hover {
+      background: var(--ns-sunken);
+      color: var(--ns-primary);
+    }
   }
 
   .ns-toast-progress {
@@ -945,9 +935,11 @@
     transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
   }
 
-  .ns-card-lift:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--ui-shadow-lg);
+  @media (hover: hover) {
+    .ns-card-lift:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--ui-shadow-lg);
+    }
   }
 
   .ns-card-lift:active {

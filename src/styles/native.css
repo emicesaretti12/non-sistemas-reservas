@@ -1,12 +1,13 @@
 /* ============================================================
-   NONI — MOVIMIENTO NATIVO
-   Lo que hace que la web se sienta app en el celular: el dock
-   que se compacta al leer, los botones flotantes que se apartan,
-   la gota de "tirar para actualizar", la cápsula de conexión, el
-   arranque y el vidrio que se hincha bajo el dedo.
+   NONI — PIEZAS NATIVAS
+   El arranque, el dock, la hoja "Más", el botón de acción de cada
+   sección, la gota de "tirar para actualizar", las hojas que se
+   cierran deslizando, la cápsula de conexión y las piezas de la
+   app pública.
 
-   Casi todo cuelga de `html[data-scroll]`, que marca
-   useScrollNativo sin pasar por React.
+   Regla de esta capa: lo fijo no se mueve. El dock y la barra
+   superior no cambian de tamaño ni de lugar por el scroll ni al
+   tocarlos; sólo se mueve lo que el dedo mueve.
    ============================================================ */
 
 @layer components {
@@ -72,72 +73,32 @@
     animation: ns-arranque-barra 1.2s var(--ease-in-out) infinite;
   }
 
-  /* ═══════════════ DOCK QUE SE COMPACTA ═══════════════
-     Al bajar leyendo, las etiquetas se esconden y el dock pierde
-     altura; al subir un poco vuelve entero. Como la barra de Safari
-     y la de pestañas de iOS 26. */
-
-  .ns-bottom-nav {
-    animation-fill-mode: backwards;
-    transition:
-      translate var(--dur-4) var(--ease-liquid),
-      padding var(--dur-4) var(--ease-liquid),
-      box-shadow var(--dur-3) var(--ease-out);
-  }
-
-  .ns-bottom-nav-item {
-    transition:
-      color var(--dur-3) var(--ease-out),
-      transform var(--dur-4) var(--ease-liquid),
-      padding var(--dur-4) var(--ease-liquid),
-      min-width var(--dur-4) var(--ease-liquid),
-      gap var(--dur-4) var(--ease-liquid);
-  }
+  /* ═══════════════ DOCK ═══════════════
+     Cinco lugares iguales y un tamaño fijo. Antes el dock se achicaba
+     al bajar y se agrandaba al subir; como tocar una pestaña te lleva
+     arriba, cada toque lo hacía cambiar de forma mientras la lente
+     viajaba: se veía deformarse. Ahora no cambia nunca. */
 
   .ns-bottom-nav-item__label {
     display: block;
-    max-width: 72px;
-    max-height: 14px;
-    line-height: 14px;
+    max-width: 100%;
     overflow: hidden;
+    line-height: 14px;
     white-space: nowrap;
-    transition:
-      max-width var(--dur-4) var(--ease-liquid),
-      max-height var(--dur-4) var(--ease-liquid),
-      opacity var(--dur-2) var(--ease-out);
+    text-overflow: ellipsis;
   }
 
-  html[data-scroll="abajo"] .ns-bottom-nav {
-    translate: -50% 6px;
-    padding: 5px;
+  /* Al presionar sólo se atenúa el contenido, como una barra de
+     pestañas de iOS: nada de escalas que muevan el vidrio. */
+  .ns-bottom-nav-item > svg,
+  .ns-bottom-nav-item__label {
+    transition: opacity var(--dur-1) var(--ease-out);
   }
 
-  html[data-scroll="abajo"] .ns-bottom-nav-item {
-    min-width: 50px;
-    padding: 9px 11px;
-    gap: 0;
+  .ns-bottom-nav-item:active > svg,
+  .ns-bottom-nav-item:active .ns-bottom-nav-item__label {
+    opacity: 0.5;
   }
-
-  html[data-scroll="abajo"] .ns-bottom-nav-item__label {
-    max-width: 0;
-    max-height: 0;
-    opacity: 0;
-  }
-
-  /* El vidrio se hincha bajo el dedo: la gota activa crece un poco
-     mientras el ícono se aprieta. `scale` es independiente de la
-     transformación que maneja framer-motion para el viaje. */
-  .ns-bottom-nav-item:active { transform: scale(0.94); }
-
-  .ns-bottom-nav .ui-lens,
-  .ui-segment .ui-lens,
-  .ns-tab .ui-lens {
-    transition: scale var(--dur-4) var(--ease-bounce);
-  }
-
-  .ns-bottom-nav-item:active .ui-lens { scale: 1.12 1.08; transition-duration: var(--dur-2); }
-  .ns-tab:active .ui-lens,
-  .ui-segment button:active .ui-lens { scale: 1.06 1.1; transition-duration: var(--dur-2); }
 
   /* ═══════════════ BOTONES FLOTANTES ═══════════════ */
 
@@ -169,11 +130,8 @@
       0 4px 10px -4px rgba(0, 60, 160, 0.3);
     animation: ns-pop-in var(--dur-5) var(--ease-liquid) 120ms backwards;
     transition:
-      translate var(--dur-4) var(--ease-liquid),
       scale var(--dur-4) var(--ease-liquid),
-      padding var(--dur-4) var(--ease-liquid),
-      gap var(--dur-4) var(--ease-liquid),
-      transform var(--dur-4) var(--ease-liquid);
+      transform var(--dur-3) var(--ease-liquid);
   }
 
   .ns-page-fab::before {
@@ -199,10 +157,7 @@
 
   .ns-page-fab__label {
     display: block;
-    max-width: 140px;
-    overflow: hidden;
     white-space: nowrap;
-    transition: max-width var(--dur-4) var(--ease-liquid), opacity var(--dur-2) var(--ease-out);
   }
 
   .ns-page-fab__dot {
@@ -216,57 +171,19 @@
     box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.9);
   }
 
-  /* Leyendo hacia abajo, la acción queda como una gota redonda. */
-  html[data-scroll="abajo"] .ns-page-fab {
-    translate: 0 8px;
-    padding: 0 16px;
-    gap: 0;
-  }
-
-  html[data-scroll="abajo"] .ns-page-fab__label {
-    max-width: 0;
-    opacity: 0;
-  }
-
   @media (max-width: 1023px) {
-    .ns-assistant-fab {
-      bottom: calc(96px + var(--sab));
-      width: 52px;
-      height: 52px;
-      translate: 0 0;
-      transition:
-        translate var(--dur-4) var(--ease-liquid),
-        scale var(--dur-4) var(--ease-liquid),
-        opacity var(--dur-3) var(--ease-out),
-        bottom var(--dur-4) var(--ease-liquid);
-    }
-
-    /* Con una acción principal en pantalla, el asistente se apila
-       arriba, más chico, en lugar de pelear por la misma esquina. */
-    body:has(.ns-page-fab) .ns-assistant-fab {
-      bottom: calc(92px + 54px + 12px + var(--sab));
-      width: 46px;
-      height: 46px;
-    }
-
-    /* Al leer, el asistente se aparta del todo: no tapa botones. */
-    html[data-scroll="abajo"] .ns-assistant-fab {
-      /* `scale` y `translate` no chocan con la transformación que
-         maneja framer-motion para la entrada del botón. */
-      translate: 0 18px;
-      scale: 0;
-      pointer-events: none;
-    }
+    /* El asistente se abre desde la barra superior: la burbuja
+       flotante tapaba botones de las listas. */
+    .ns-assistant-fab { display: none; }
 
     /* Aire al final de cada sección para que lo último no quede
-       debajo de los botones flotantes. */
-    .ns-has-bottom-nav { padding-bottom: calc(160px + var(--sab)); }
+       debajo del dock. */
+    .ns-has-bottom-nav { padding-bottom: calc(104px + var(--sab)); }
   }
 
   /* ═══════════════ BARRA DE ACCIÓN PEGADA ═══════════════
      "Guardar" que acompaña al scroll. En el celular se apoya justo
-     encima del dock (antes quedaba escondida detrás) y baja un poco
-     cuando el dock se compacta. */
+     encima del dock (antes quedaba escondida detrás). */
 
   .ns-barra-accion {
     position: sticky;
@@ -274,18 +191,7 @@
   }
 
   @media (max-width: 1023px) {
-    .ns-barra-accion {
-      bottom: calc(88px + var(--sab));
-      transition: bottom var(--dur-4) var(--ease-liquid);
-    }
-
-    html[data-scroll="abajo"] .ns-barra-accion { bottom: calc(74px + var(--sab)); }
-
-    body:has(.ns-barra-accion) .ns-assistant-fab {
-      bottom: calc(166px + var(--sab));
-      width: 46px;
-      height: 46px;
-    }
+    .ns-barra-accion { bottom: calc(86px + var(--sab)); }
   }
 
   /* ═══════════════ TIRAR PARA ACTUALIZAR ═══════════════
@@ -334,24 +240,6 @@
     rotate: calc(var(--ptr-p, 0) * 180deg);
   }
 
-  html:has(.ns-ptr),
-  html:has(.ns-ptr) body {
-    /* Sin el "tirar" nativo del navegador: el nuestro lo reemplaza. */
-    overscroll-behavior-y: none;
-  }
-
-  /* ═══════════════ DESLIZAR ENTRE SECCIONES ═══════════════ */
-
-  .ns-swipe-area.is-arrastrando {
-    will-change: translate;
-  }
-
-  .ns-swipe-area.is-volviendo {
-    transition:
-      translate var(--dur-4) var(--ease-liquid),
-      opacity var(--dur-3) var(--ease-out);
-  }
-
   /* ═══════════════ HOJAS ═══════════════
      Vidrio grueso con desenfoque real (lo que queda detrás no debe
      competir con un formulario), flotando a 8 px de los bordes como
@@ -393,32 +281,116 @@
     }
   }
 
-  /* ═══════════════ CONTENIDO QUE ASOMA ═══════════════
-     Al scrollear, cada tarjeta que entra por abajo sube y se aclara
-     (useAsomar). Sólo las que estaban fuera de pantalla: lo que se ve
-     al abrir la sección ya entró con la sección. Al terminar no queda
-     ningún estilo puesto: nada de `translate: 0px` que convierta la
-     tarjeta en bloque contenedor de un `position: fixed` interno. */
+  /* ═══════════════ HOJA "MÁS" ═══════════════ */
 
-  .ns-asoma {
-    opacity: 0;
-    translate: 0 26px;
-    scale: 0.965;
+  .ns-mas__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 92px;
+    padding: 12px 6px;
+    border: 0;
+    border-radius: 22px;
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.62);
+    box-shadow: var(--glass-rim), 0 4px 14px -8px rgba(35, 52, 110, 0.3);
+    color: var(--ns-text);
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
   }
 
-  .ns-asomando {
-    transition:
-      opacity 420ms var(--ease-out),
-      translate 620ms var(--ease-liquid),
-      scale 620ms var(--ease-liquid);
+  .ns-mas__item:active { transform: scale(0.96); }
+
+  .ns-mas__item.is-active {
+    background: var(--glass-sheen), rgba(0, 122, 255, 0.12);
+    box-shadow: var(--glass-rim), inset 0 0 0 1.5px rgba(0, 122, 255, 0.45);
   }
 
-  /* La gota activa del dock agranda un poco su ícono, como una lente. */
-  .ns-bottom-nav-item svg {
-    transition: scale var(--dur-4) var(--ease-bounce), opacity var(--dur-2) var(--ease-out);
+  .ns-mas__icono {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--ns-primary);
   }
 
-  .ns-bottom-nav-item.active svg { scale: 1.08; }
+  .ns-mas__icono svg { width: 22px; height: 22px; }
+
+  .ns-mas__item.is-active .ns-mas__icono {
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 14px -6px rgba(0, 122, 255, 0.6);
+  }
+
+  .ns-mas__texto {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ns-mas__lista {
+    overflow: hidden;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: var(--glass-rim);
+  }
+
+  .ns-mas__fila {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    border: 0;
+    background: transparent;
+    color: var(--ns-text);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ns-mas__fila + .ns-mas__fila { box-shadow: inset 0 1px 0 var(--ns-line); }
+  .ns-mas__fila svg { width: 20px; height: 20px; color: var(--ns-primary); flex-shrink: 0; }
+  .ns-mas__fila:active { background: rgba(118, 128, 152, 0.1); }
+  .ns-mas__fila--peligro { color: var(--ns-danger); }
+  .ns-mas__fila--peligro svg { color: var(--ns-danger); }
+
+  .ns-asistente-manija {
+    display: grid;
+    place-items: center;
+    height: 28px;
+    cursor: grab;
+  }
+
+  .ns-asistente-manija > .ui-sheet__handle { margin: 0; }
+
+  /* ═══════════════ NONI EN LA BARRA SUPERIOR ═══════════════ */
+
+  .ns-topbar-noni { color: var(--ns-primary); }
+
+  .ns-topbar-noni__punto {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95);
+  }
 
   /* ═══════════════ CÁPSULA DE CONEXIÓN ═══════════════ */
 
@@ -567,9 +539,6 @@
     .ns-arranque__marca::after,
     .ns-conexion__punto,
     .ns-exito__onda { animation: none; }
-
-    html[data-scroll="abajo"] .ns-bottom-nav { translate: -50% 0; }
-    html[data-scroll="abajo"] .ns-page-fab { translate: 0 0; }
   }
 }
 
@@ -601,11 +570,4 @@
 @keyframes ns-arranque-barra {
   from { translate: -110% 0; }
   to { translate: 250% 0; }
-}
-
-/* El campo de color se desplaza más lento que el contenido al
-   scrollear: una profundidad mínima, sin JavaScript. */
-@keyframes ns-parallax {
-  from { translate: 0 0; }
-  to { translate: 0 -7%; }
 }

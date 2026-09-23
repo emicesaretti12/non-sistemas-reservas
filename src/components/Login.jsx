@@ -479,7 +479,7 @@ export default function Login() {
               <div className="flex items-center justify-between mb-2">
                 <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-[0.08em] text-[#94A1B2]">Contraseña</label>
                 {mode === 'login' && (
-                  <button type="button" onClick={() => cambiarModo('recuperar')} className="text-[10px] font-bold uppercase tracking-[0.06em] text-[#007AFF] hover:text-[#0062D6] transition-colors">¿La olvidaste?</button>
+                  <button type="button" onClick={() => cambiarModo('recuperar')} className="py-2 -my-2 px-1 -mx-1 text-[12px] font-semibold text-[#007AFF] hover:text-[#0062D6] transition-colors">¿La olvidaste?</button>
                 )}
               </div>
               <div className="relative">
@@ -497,7 +497,8 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A1B2] hover:text-[#4A9CFF] transition-colors"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full text-[#94A1B2] hover:text-[#4A9CFF] transition-colors"
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
@@ -576,7 +577,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => cambiarModo(mode === 'login' ? 'registro' : 'login')}
-                className="text-[#007AFF] hover:text-[#0062D6] transition-colors ml-2 font-bold"
+                className="py-2 -my-2 px-1 text-[#007AFF] hover:text-[#0062D6] transition-colors ml-1 font-bold"
               >
                 {mode === 'login' ? 'Creá una cuenta gratis' : 'Iniciá sesión'}
               </button>

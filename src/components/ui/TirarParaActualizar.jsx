@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { haptic } from '../../utils/haptics'
+import { posicionScroll } from '../../utils/scroll'
 
 /**
  * Tirar para actualizar, con una gota de vidrio.
@@ -59,7 +60,7 @@ export default function TirarParaActualizar({ alActualizar, habilitado = true })
 
     const inicio = (e) => {
       if (fase === 'cargando' || e.touches.length !== 1) return
-      if (window.scrollY > 0 || hayAlgoAbierto()) return
+      if (posicionScroll() > 0 || hayAlgoAbierto()) return
       if (e.target?.closest?.('input, textarea, select, [data-no-ptr], .overflow-y-auto')) return
       inicioY = e.touches[0].clientY
       inicioX = e.touches[0].clientX
@@ -78,7 +79,7 @@ export default function TirarParaActualizar({ alActualizar, habilitado = true })
         if (dx > Math.abs(d)) { inicioY = null; return }
         ejeVertical = true
       }
-      if (d <= 0 || window.scrollY > 0) {
+      if (d <= 0 || posicionScroll() > 0) {
         if (tirado > 0) { tirado = 0; pintar(0) }
         return
       }

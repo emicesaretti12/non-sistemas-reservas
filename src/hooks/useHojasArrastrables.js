@@ -102,14 +102,17 @@ export function useHojasArrastrables() {
         window.setTimeout(() => {
           velo.click()
           // Si la pantalla no cerró con el velo, la hoja vuelve a su lugar.
+          // Se espera a que termine cualquier animación de salida (las hojas
+          // con AnimatePresence siguen en el DOM mientras se van): antes se
+          // restauraba enseguida y la hoja saltaba de vuelta un instante.
           window.setTimeout(() => {
             if (!hoja.isConnected) return
             hoja.style.translate = ''
             hoja.style.transition = ''
             velo.style.opacity = ''
             velo.style.transition = ''
-          }, 60)
-        }, 240)
+          }, 750)
+        }, 200)
         return
       }
 

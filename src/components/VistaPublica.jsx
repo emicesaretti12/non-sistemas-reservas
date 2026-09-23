@@ -606,11 +606,11 @@ export default function VistaPublica() {
                    href={`https://instagram.com/${negocio.instagram.replace('@', '')}`} 
                    target="_blank" 
                    rel="noopener noreferrer" 
-                   className="mb-2 md:mb-4 flex items-center gap-1.5 px-3 py-1 md:py-1.5 rounded-full transition-all active:scale-95 brand-pill-hover"
+                   className="mb-2 md:mb-4 flex items-center gap-1.5 px-3.5 min-h-[34px] rounded-full transition-all active:scale-95 brand-pill-hover"
                    style={{ backgroundColor: accentUltraSoft, color: accentDark }}
                  >
                     <svg className="w-3 h-3 md:w-3.5 md:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.06em]">{negocio.instagram.replace('@', '')}</span>
+                    <span className="text-[11px] md:text-[12px] font-semibold">@{negocio.instagram.replace('@', '')}</span>
                  </a>
                )}
                
@@ -626,10 +626,10 @@ export default function VistaPublica() {
                    </div>
                    <button 
                      onClick={() => setBioExpandida(!bioExpandida)} 
-                     className="mt-2 md:mt-3 text-[8px] md:text-[9px] font-bold px-3 md:px-4 py-1 md:py-1.5 rounded-full uppercase tracking-[0.06em] transition-colors active:scale-95"
+                     className="mt-2 md:mt-3 text-[12px] font-semibold px-4 min-h-[34px] rounded-full transition-colors active:scale-95"
                      style={{ color: 'var(--ns-primary)', backgroundColor: 'var(--ns-primary-bg)' }}
                    >
-                      {bioExpandida ? 'Ocultar info' : 'Leer más'}
+                      {bioExpandida ? 'Ver menos' : 'Leer más'}
                    </button>
                  </>
                )}
@@ -655,7 +655,7 @@ export default function VistaPublica() {
          {paso >= 2 && (
            <div className="mt-3 flex flex-wrap gap-1.5 px-1 animate-in fade-in duration-300">
              {servicioSeleccionado && (
-               <button onClick={() => setPaso(1)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)', boxShadow: '0 2px 0 rgba(16,24,40,0.03), 0 4px 8px rgba(0,122,255,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+               <button onClick={() => setPaso(1)} className="flex items-center gap-1.5 px-3 min-h-[36px] rounded-full text-[12px] font-semibold border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)', boxShadow: '0 2px 0 rgba(16,24,40,0.03), 0 4px 8px rgba(0,122,255,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                  <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
                    <svg className="w-2.5 h-2.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>
@@ -663,7 +663,7 @@ export default function VistaPublica() {
                </button>
              )}
              {empleadoSeleccionado && paso >= 3 && (
-               <button onClick={() => setPaso(2)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)', boxShadow: '0 2px 0 rgba(16,24,40,0.03), 0 4px 8px rgba(0,122,255,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+               <button onClick={() => setPaso(2)} className="flex items-center gap-1.5 px-3 min-h-[36px] rounded-full text-[12px] font-semibold border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)', boxShadow: '0 2px 0 rgba(16,24,40,0.03), 0 4px 8px rgba(0,122,255,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                  <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
                    <svg className="w-2.5 h-2.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>
@@ -671,7 +671,7 @@ export default function VistaPublica() {
                </button>
              )}
              {reserva.fecha && paso >= 4 && (
-               <button onClick={() => setPaso(3)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)', boxShadow: '0 2px 0 rgba(16,24,40,0.03), 0 4px 8px rgba(0,122,255,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+               <button onClick={() => setPaso(3)} className="flex items-center gap-1.5 px-3 min-h-[36px] rounded-full text-[12px] font-semibold border active:scale-95 transition-all" style={{ background: 'var(--ns-surface)', borderColor: 'var(--ns-border)', color: 'var(--ns-text)', boxShadow: '0 2px 0 rgba(16,24,40,0.03), 0 4px 8px rgba(0,122,255,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                  <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--ns-primary-bg)' }}>
                    <svg className="w-2.5 h-2.5" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>

@@ -128,10 +128,17 @@ export default function DashboardHome({
 
   let countdown = ''
   if (proximaCita) {
-    const diff = Math.round((new Date(proximaCita.fecha_hora) - ahora) / 60000)
+    const cuando = new Date(proximaCita.fecha_hora)
+    const diff = Math.round((cuando - ahora) / 60000)
+    // Días de calendario, no bloques de 24 h: un turno de mañana a las 9
+    // es "mañana" aunque falten menos de 24 horas.
+    const dia = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+    const dias = Math.round((dia(cuando) - dia(ahora)) / 86400000)
     if (diff <= 0) countdown = 'ahora'
     else if (diff < 60) countdown = `en ${diff} min`
-    else countdown = `en ${Math.floor(diff / 60)}h ${diff % 60}m`
+    else if (dias === 0) countdown = diff % 60 ? `en ${Math.floor(diff / 60)} h ${diff % 60} min` : `en ${diff / 60} h`
+    else if (dias === 1) countdown = 'mañana'
+    else countdown = `en ${dias} días`
   }
 
   // ── Lugares disponibles hoy (mismo algoritmo que la Agenda) ─────────────────

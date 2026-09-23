@@ -77,7 +77,7 @@ function accionesPendientes({ setupData = {}, vocab = {}, tab, publicLink }) {
 }
 
 export default function NoniAssistantV4({
-  tab, setupData, vocab, negocio, smartAlerts, publicLink, onNavigate, onStartTour,
+  tab, setupData, vocab, negocio, smartAlerts, publicLink, onNavigate, onStartTour, onPendientes,
 }) {
   const [open, setOpen] = useState(false)
   const [mensajes, setMensajes] = useState(() => leerHistorial(`${ASSISTANT_KEY_BASE}_${negocio?.id || 'anon'}`))
@@ -191,6 +191,15 @@ export default function NoniAssistantV4({
 
   const pendientesCount = pendientes.length
 
+  // El panel avisa cuántas sugerencias hay (el punto del botón de Noni en la
+  // barra superior del celular) y se abre desde ese botón con un evento.
+  useEffect(() => { onPendientes?.(pendientesCount) }, [pendientesCount, onPendientes])
+  useEffect(() => {
+    const abrir = () => setOpen(true)
+    window.addEventListener('noni:asistente', abrir)
+    return () => window.removeEventListener('noni:asistente', abrir)
+  }, [])
+
   return (
     <>
       <AnimatePresence>
@@ -238,12 +247,18 @@ export default function NoniAssistantV4({
               if (info.offset.y > 110 || info.velocity.y > 650) setOpen(false)
             }}
           >
-            {/* Manija: sólo desde acá arranca el gesto de arrastre */}
+            {/* Manija: sólo desde acá arranca el gesto de arrastre. Es una
+                franja de 28 px (la rayita sola era imposible de agarrar) y
+                con `touch-action: none` para que el navegador no se quede
+                con el gesto. */}
             <div
-              className="ui-sheet__handle md:hidden"
+              className="ns-asistente-manija md:hidden"
               onPointerDown={(e) => dragControls.start(e)}
+              style={{ touchAction: 'none' }}
               role="presentation"
-            />
+            >
+              <span className="ui-sheet__handle" />
+            </div>
 
             {/* Cabecera */}
             <div className="flex items-center gap-3 px-4 pb-3 pt-1 md:pt-4" style={{ boxShadow: 'inset 0 -1px 0 var(--ns-line)' }}>

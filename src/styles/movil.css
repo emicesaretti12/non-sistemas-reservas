@@ -1,0 +1,178 @@
+/* ============================================================
+   NONI — COMPORTAMIENTO DE APP EN EL CELULAR
+
+   Va fuera de las capas (@layer) a propósito: estas reglas le
+   ganan a cualquier estilo de componente y a las utilidades de
+   Tailwind. Son las que hacen que el navegador deje de comportarse
+   como navegador.
+   ============================================================ */
+
+/* ── Toques ─────────────────────────────────────────────────────
+   Sin el destello gris/azul que pinta el navegador al tocar. */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ── Sin rebote ─────────────────────────────────────────────────
+   Ni el rebote elástico de la página entera ni el "tirar para
+   recargar" del navegador: la app tiene el suyo. */
+html,
+body {
+  overscroll-behavior: none;
+}
+
+img,
+svg {
+  -webkit-user-drag: none;
+}
+
+@media (pointer: coarse) {
+  /* ── Sin zoom ─────────────────────────────────────────────────
+     Sólo desplazamiento: ni pellizco ni doble toque agrandan la
+     pantalla. iOS ignora `user-scalable=no`, pero sí respeta esto
+     (y usePantallaNativa cancela además el gesto de Safari). */
+  html,
+  body,
+  body * {
+    touch-action: pan-x pan-y;
+  }
+
+  /* ── La interfaz no se selecciona ─────────────────────────────
+     Mantener apretado un botón, una tarjeta o una pestaña no marca
+     el texto ni abre el menú de copiar/compartir. En los campos sí. */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable],
+  .ui-selectable,
+  .ui-selectable * {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+}
+
+/* ── Campos de texto a 16 px ────────────────────────────────────
+   iOS agranda la página al tocar un campo con letra más chica y
+   después no la vuelve a su tamaño: la pantalla quedaba ampliada y
+   se podía arrastrar para los costados. Los campos del sistema
+   estaban a 15 px. */
+@media (max-width: 1023px), (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ── Pantalla fija ──────────────────────────────────────────────
+   En el celular el panel funciona como una app: el documento no
+   scrollea nunca. La barra superior y el dock quedan quietos y lo
+   único que se desplaza es el contenido, que pasa por debajo del
+   vidrio de las dos. Así la página no rebota entera, la barra del
+   navegador no aparece y desaparece moviendo todo, y nada se corre
+   al abrir el teclado. */
+@media (max-width: 1023px) {
+  html:has(.noni-shell--app),
+  html:has(.noni-shell--app) body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  html:has(.noni-shell--app) #root {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .noni-shell--app,
+  .noni-shell--app > .noni-layout {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .noni-shell--app .noni-columna {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .noni-shell--app .noni-topbar {
+    position: absolute;
+    top: calc(8px + var(--sat));
+    left: 10px;
+    right: 10px;
+    margin: 0;
+  }
+
+  .noni-shell--app .noni-main {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* El contenido rebota dentro de su lugar (como una lista de iOS)
+       sin arrastrar la página ni las barras. */
+    overscroll-behavior-y: contain;
+    padding-top: calc(var(--sat) + 66px);
+    scroll-padding-top: calc(var(--sat) + 84px);
+    scroll-padding-bottom: calc(96px + var(--sab));
+  }
+
+  /* Con una hoja, el buscador o el asistente abiertos, lo de atrás
+     no se mueve. */
+  .noni-shell--app:has(.ui-scrim, .ns-search-overlay, .ns-assistant-panel) .noni-main {
+    overflow: hidden;
+  }
+}
+
+/* ── Hojas ──────────────────────────────────────────────────────
+   Al tirar hacia abajo una hoja se mueve la hoja entera (y se
+   cierra), no su contenido rebotando adentro. */
+.ns-hoja {
+  overscroll-behavior-y: none;
+}
+
+/* ── Teclado ────────────────────────────────────────────────────
+   `--teclado` y `--alto-visible` los mide usePantallaNativa. Las
+   hojas y el asistente se apoyan encima del teclado en lugar de
+   quedar escondidos detrás. */
+@media (max-width: 639px) {
+  .ui-scrim:has(> .ns-hoja) {
+    padding-bottom: calc(8px + max(var(--sab), var(--teclado, 0px)));
+    transition: padding-bottom 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .ns-teclado-abierto .ui-scrim > .ns-hoja {
+    max-height: calc(var(--alto-visible, 100dvh) - var(--sat) - 16px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .ns-assistant-panel {
+    bottom: calc(8px + max(var(--sab), var(--teclado, 0px)));
+    transition: bottom 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .ns-teclado-abierto .ns-assistant-panel {
+    max-height: calc(var(--alto-visible, 100dvh) - var(--sat) - 16px);
+  }
+
+  /* Con el teclado arriba, el botón flotante no se asoma entre el
+     teclado y el campo. */
+  .ns-teclado-abierto .ns-page-fab {
+    visibility: hidden;
+  }
+}

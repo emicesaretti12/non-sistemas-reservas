@@ -243,10 +243,7 @@ export default function ActualizarClave() {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
                 data-testid="toggle-password-visibility"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors"
-                style={{ color: 'var(--ns-text-muted)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ns-primary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ns-text-muted)')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors text-[var(--ns-text-muted)] hover:text-[var(--ns-primary)]"
               >
                 {showPassword ? (
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

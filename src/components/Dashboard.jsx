@@ -33,7 +33,6 @@ import { ErrorGuard } from './ErrorBoundary'
 // Suscripción / planes
 import { getEstadoSuscripcion, etiquetaEstado, whatsappActivacion, calcularNuevoVencimiento, PLAN, cobroSinConfigurar, formatearPrecio } from '../utils/suscripcion'
 import { haptic } from '../utils/haptics'
-import { useSwipeTabs } from '../hooks/useSwipeTabs'
 import { ocupaHorario, factura, precioTurno, parseFecha, tieneHorariosConfigurados, mapaEmbedUrl } from '../utils/reservas'
 import { PALETA_MARCA, colorSeguro } from '../utils/paleta'
 
@@ -46,11 +45,12 @@ import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
 import Atajos from './ui/Atajos'
 import Lente from './ui/Lente'
-import { RESORTE_PANEL, SUAVE } from '../utils/motion'
+import { SUAVE } from '../utils/motion'
+import { irArriba, esScrollPrincipal, posicionDe } from '../utils/scroll'
+import HojaMas from './ui/HojaMas'
 import TirarParaActualizar from './ui/TirarParaActualizar'
 import { leer, guardar } from '../utils/almacen'
 import { usePersistentState } from '../hooks/usePersistentState'
-import { useAsomar } from '../hooks/useAsomar'
 
 function linkCompartido() {
   try { return Boolean(localStorage.getItem('ns_link_shared')) } catch { return false }
@@ -89,16 +89,10 @@ export default function Dashboard({ session }) {
   // La sección abierta sobrevive a recargas: si estabas en la agenda, al
   // volver seguís en la agenda.
   const [tab, setTab] = usePersistentState('ui:panel:tab', 'inicio', { validar: (t) => TABS_PANEL.includes(t) })
-  // Dirección del último cambio de sección (-1 izquierda, 1 derecha): se
-  // ajusta durante el render, el patrón que React recomienda para derivar
-  // estado de un cambio de otro estado.
-  const [tabVisto, setTabVisto] = useState(tab)
-  const [direccion, setDireccion] = useState(0)
-  if (tab !== tabVisto) {
-    setDireccion(Math.sign(TABS_PANEL.indexOf(tab) - TABS_PANEL.indexOf(tabVisto)))
-    setTabVisto(tab)
-  }
-  const areaSeccion = useRef(null)
+  // Hoja "Más" del dock y los pendientes del asistente (el punto azul del
+  // botón de Noni en la barra superior).
+  const [masAbierto, setMasAbierto] = useState(false)
+  const [pendientesNoni, setPendientesNoni] = useState(0)
   // Sube con cada "tirar para actualizar": remonta la sección para que vuelva
   // a pedir sus datos.
   const [recarga, setRecarga] = useState(0)
@@ -147,19 +141,23 @@ export default function Dashboard({ session }) {
   // --- TOUR GUIADO ---
   const tour = useTour()
 
-  // Al cambiar de sección arrancamos arriba, como cualquier app nativa:
-  // antes entrabas a Ajustes y aparecías en la mitad de la pantalla.
+  // Al cambiar de sección arrancamos arriba, como cualquier app nativa. Sin
+  // animación: un scroll suave mientras cambia el contenido movía la página
+  // entera (y con ella el dock) en cada toque.
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    irArriba()
   }, [tab])
 
   // --- BARRA SUPERIOR: sombra sólo cuando hay contenido por encima ---
   const [scrolleado, setScrolleado] = useState(false)
   useEffect(() => {
-    const alScrollear = () => setScrolleado(window.scrollY > 6)
-    alScrollear()
-    window.addEventListener('scroll', alScrollear, { passive: true })
-    return () => window.removeEventListener('scroll', alScrollear)
+    // En el celular scrollea el contenido, no la ventana: escuchamos en fase
+    // de captura para enterarnos de los dos casos con un solo listener.
+    const alScrollear = (e) => {
+      if (esScrollPrincipal(e)) setScrolleado(posicionDe(e) > 6)
+    }
+    document.addEventListener('scroll', alScrollear, { capture: true, passive: true })
+    return () => document.removeEventListener('scroll', alScrollear, { capture: true })
   }, [])
 
   // --- UTILIDADES DE EXPORTACIÓN ---
@@ -812,18 +810,20 @@ export default function Dashboard({ session }) {
     { id: 'ajustes', label: 'Ajustes', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
   ]
 
-  // Bottom nav: 5 items para acceso rápido en móvil (por ID, no por índice)
-  const bottomNavTabs = [
-    tabsConfig.find(t => t.id === 'inicio'),
-    tabsConfig.find(t => t.id === 'agenda'),
-    tabsConfig.find(t => t.id === 'reportes'),
-    tabsConfig.find(t => t.id === 'clientes'),
-    tabsConfig.find(t => t.id === 'ajustes'),
-  ]
+  // Dock del celular: cuatro destinos fijos y "Más" con el resto, como la
+  // barra de pestañas de iOS. Por id, no por índice.
+  const bottomNavTabs = ['inicio', 'agenda', 'clientes', 'reportes'].map((id) => tabsConfig.find((t) => t.id === id))
+  const idsDock = bottomNavTabs.map((t) => t.id)
+  const seccionesMas = tabsConfig.filter((t) => !idsDock.includes(t.id))
+  const enMas = !idsDock.includes(tab)
 
-  // Deslizar de costado cambia de sección en móvil, como en una app nativa.
-  // Va acá abajo porque necesita `tabsConfig`, que se arma más arriba con el
-  // vocabulario del rubro.
+  // Tocar la pestaña en la que ya estás te lleva arriba de todo (iOS).
+  const irASeccion = (id) => {
+    if (id === tab) { irArriba({ suave: true }); return }
+    haptic('select')
+    setTab(id)
+  }
+
   // Tirar para actualizar: refresca las métricas sin tapar el panel y
   // remonta la sección abierta para que vuelva a pedir sus datos.
   async function actualizarPanel() {
@@ -847,17 +847,6 @@ export default function Dashboard({ session }) {
       window.removeEventListener('online', alVolver)
     }
   }, [])
-
-  // Las tarjetas que están más abajo asoman al scrollear.
-  useAsomar(areaSeccion, !loading && Boolean(negocio) && !negocio?.es_admin_plataforma)
-
-  useSwipeTabs({
-    tabs: tabsConfig.map((t) => t.id),
-    actual: tab,
-    onCambiar: (id) => { haptic('select'); setTab(id) },
-    habilitado: Boolean(negocio) && !negocio?.es_admin_plataforma,
-    areaRef: areaSeccion,
-  })
 
 
   if (loading) return (
@@ -1012,7 +1001,7 @@ export default function Dashboard({ session }) {
 
   return (
     <div
-      className={`noni-shell font-sans antialiased ${negocio?.es_admin_plataforma ? 'ns-admin-shell' : ''}`}
+      className={`noni-shell noni-shell--app font-sans antialiased ${negocio?.es_admin_plataforma ? 'ns-admin-shell' : ''}`}
       style={{ colorScheme: 'light' }}
     >
 
@@ -1082,7 +1071,7 @@ export default function Dashboard({ session }) {
           </aside>
         )}
 
-        <div className="flex-1 min-w-0 flex flex-col">
+        <div className="noni-columna flex-1 min-w-0 flex flex-col">
 
         {/* ══════════ BARRA SUPERIOR ══════════ */}
         <header className={`noni-topbar ${scrolleado ? 'is-stuck' : ''}`}>
@@ -1104,15 +1093,28 @@ export default function Dashboard({ session }) {
           <div className="relative flex items-center gap-2">
             {esPanelNegocio && (
               <>
+                {/* Noni vive acá en el celular: la burbuja flotante tapaba
+                    botones de las listas y chocaba con "Nueva cita". */}
+                <button
+                  onClick={() => { haptic(); window.dispatchEvent(new Event('noni:asistente')) }}
+                  aria-label={pendientesNoni > 0 ? `Hablar con Noni (${pendientesNoni} sugerencias)` : 'Hablar con Noni'}
+                  className="ui-icon-btn ns-topbar-noni lg:hidden"
+                >
+                  <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  {pendientesNoni > 0 && <span className="ns-topbar-noni__punto" aria-hidden="true" />}
+                </button>
                 <button onClick={() => { haptic(); setSearchOpen(true) }} aria-label="Buscar (Ctrl+K)" className="ui-icon-btn lg:hidden">
                   <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </button>
                 <NotificationCenter negocioId={negocio.id} rubro={negocio.rubro} />
               </>
             )}
-            <button onClick={cerrarSesion} className="ui-icon-btn lg:hidden" aria-label="Cerrar sesión" title="Cerrar sesión">
-              <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
+            {/* En el panel del negocio, cerrar sesión está en "Más". */}
+            {!esPanelNegocio && (
+              <button onClick={cerrarSesion} className="ui-icon-btn lg:hidden" aria-label="Cerrar sesión" title="Cerrar sesión">
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            )}
           </div>
         </header>
 
@@ -1125,7 +1127,9 @@ export default function Dashboard({ session }) {
         />
       )}
 
-      <main className={`noni-main ${esPanelNegocio ? 'ns-has-bottom-nav' : ''}`}>
+      {/* En el celular esto es lo único que scrollea: la barra de arriba y el
+          dock quedan quietos, como en una app (ver movil.css). */}
+      <main className={`noni-main ${esPanelNegocio ? 'ns-has-bottom-nav' : ''}`} data-scroller="principal">
         <div className="noni-container">
 
         {!negocio ? (
@@ -1352,35 +1356,17 @@ export default function Dashboard({ session }) {
               </button>
             )}
 
-            {/* ══════════ PESTAÑAS — barra deslizable bajo 1024px ══════════ */}
-            <div className="lg:hidden -mx-1 px-1 overflow-x-auto no-scrollbar" data-tour="tabs">
-              <div className="ns-tab-track flex gap-1 w-max p-1.5">
-                {tabsConfig.map((i) => (
-                  <button
-                    key={i.id}
-                    onClick={() => { haptic(); setTab(i.id) }}
-                    aria-current={tab === i.id ? 'page' : undefined}
-                    className={`ns-tab ${tab === i.id ? 'active' : ''}`}
-                  >
-                    {tab === i.id && <Lente grupo="pestanas" />}
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    {i.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* AREA DE CONTENIDO PRINCIPAL
-                La sección entra desde el lado hacia el que te moviste (como
-                un carrusel nativo). El contenedor de afuera es el que sigue
-                al dedo durante el gesto de deslizar. */}
-            <div ref={areaSeccion} className="ns-swipe-area">
+                Al cambiar de sección el contenido aparece con un fundido
+                corto, sin deslizarse: en una app las pestañas cambian en el
+                lugar. Sólo opacidad, nada de transformaciones (un transform
+                acá descoloca los `position: fixed` de adentro). */}
             <motion.div
               key={`${tab}:${recarga}`}
               className="ns-mobile-content-area"
-              initial={{ opacity: 0, x: direccion * 36, y: direccion === 0 ? 10 : 0 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ x: RESORTE_PANEL, y: RESORTE_PANEL, opacity: SUAVE }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={SUAVE}
             >
 
               {tab === 'inicio' && (
@@ -1891,7 +1877,6 @@ export default function Dashboard({ session }) {
               )}
 
             </motion.div>
-            </div>
           </div>
         )}
         </div>
@@ -1902,22 +1887,47 @@ export default function Dashboard({ session }) {
 
       {esPanelNegocio && <TirarParaActualizar alActualizar={actualizarPanel} />}
 
-      {/* ====== DOCK INFERIOR — navegación móvil ====== */}
+      {/* ====== DOCK INFERIOR — navegación móvil ======
+          Tamaño fijo y cinco lugares iguales: la lente sólo se desliza, nunca
+          cambia de forma, y el dock no se mueve ni se estira al tocarlo. */}
       {esPanelNegocio && (
         <nav className="ns-bottom-nav" aria-label="Navegación principal" data-tour="nav-mobile">
           {bottomNavTabs.map(item => (
             <button
               key={item.id}
-              onClick={() => { haptic(); setTab(item.id) }}
+              onClick={() => irASeccion(item.id)}
               aria-current={tab === item.id ? 'page' : undefined}
               className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
             >
               {tab === item.id && <Lente grupo="dock" />}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
               <span className="ns-bottom-nav-item__label">{item.label}</span>
             </button>
           ))}
+          <button
+            onClick={() => { haptic(); setMasAbierto(true) }}
+            aria-haspopup="dialog"
+            aria-expanded={masAbierto}
+            aria-current={enMas ? 'page' : undefined}
+            className={`ns-bottom-nav-item ${enMas ? 'active' : ''}`}
+          >
+            {enMas && <Lente grupo="dock" />}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span className="ns-bottom-nav-item__label">Más</span>
+          </button>
         </nav>
+      )}
+
+      {esPanelNegocio && (
+        <HojaMas
+          abierta={masAbierto}
+          onCerrar={() => setMasAbierto(false)}
+          secciones={seccionesMas}
+          actual={tab}
+          onElegir={(id) => { setMasAbierto(false); if (id !== tab) setTab(id) }}
+          onCopiarLink={() => { setMasAbierto(false); showCopyToast() }}
+          onCerrarSesion={() => { setMasAbierto(false); cerrarSesion() }}
+        />
       )}
 
       {/* Ayuda de atajos con "?" */}
@@ -1938,6 +1948,7 @@ export default function Dashboard({ session }) {
       {negocio && !negocio.es_admin_plataforma && (
         <FloatingAssistant
           tab={tab}
+          onPendientes={setPendientesNoni}
           setupData={{
             hasServicios: crmStats.totalServicios > 0,
             hasEmpleados: crmStats.totalEmpleados > 0,

@@ -1,25 +1,25 @@
 import { useEffect } from 'react'
 
 /**
- * Respuesta al toque, delegada a todo el documento.
+ * Luz bajo el dedo, delegada a todo el documento.
  *
- * Se monta una sola vez en lugar de envolver cada botón: cualquier elemento
- * con `.ui-btn`, `.ui-icon-btn`, `.ui-tile`, `.nh-action` o `data-ripple`
- * responde al dedo con dos cosas, como el vidrio de iOS:
+ * Se monta una sola vez en lugar de envolver cada botón: los botones, las
+ * tarjetas tocables y los ítems de la hoja "Más" se iluminan donde apoyás el
+ * dedo y la luz te sigue mientras arrastrás, como el vidrio de iOS 26. Al
+ * soltar se apaga.
  *
- *   · una luz que nace donde apoyaste y te sigue mientras arrastrás;
- *   · una onda que sale de ese punto al presionar.
+ * Sin onda expansiva (eso es de Android y se leía como web) y sin tocar la
+ * navegación: el dock, las pestañas y la barra lateral no se iluminan ni
+ * cambian de tamaño al tocarlos.
  *
- * Todo vive dentro de un `<span class="ui-ripple__clip">` que recorta con el
- * mismo radio del botón. Antes se le ponía `overflow: hidden` al botón
- * mientras duraba la onda, y eso cortaba los globitos de notificación que
- * sobresalen de la esquina.
+ * La luz vive dentro de un `<span class="ui-ripple__clip">` que recorta con
+ * el mismo radio del botón, sin cortar los globitos que sobresalen.
  */
 
 // Tarjetas y chips sólo cuando son tocables: una etiqueta de estado que se
 // ilumina al tocarla promete una acción que no existe.
 const SELECTOR = [
-  '.ui-btn', '.ui-icon-btn', '.ns-tab', '.nh-action', '.nh-slot', '.ns-bottom-nav-item', '.noni-rail__item', '[data-ripple]',
+  '.ui-btn', '.ui-icon-btn', '.nh-action', '.nh-slot', '[data-ripple]', '.ns-mas__item', '.ns-mas__fila',
   'button.ui-tile', 'a.ui-tile', 'button.ui-chip', 'a.ui-chip', 'button.ui-card', 'a.ui-card',
 ].join(', ')
 
@@ -30,18 +30,16 @@ function ubicar(clip, r, x, y) {
 
 export function useRippleGlobal() {
   useEffect(() => {
-    const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
     let activo = null
 
     const soltar = () => {
       if (!activo) return
       const { clip, desde } = activo
       activo = null
-      // La luz se apaga al soltar; la onda termina su recorrido.
+      // La luz se apaga al soltar, con un fundido corto.
       clip.classList.add('is-out')
-      const resta = Math.max(0, 560 - (performance.now() - desde))
-      window.setTimeout(() => clip.remove(), Math.max(resta, 380))
+      const resta = Math.max(0, 200 - (performance.now() - desde))
+      window.setTimeout(() => clip.remove(), resta + 380)
     }
 
     const alPresionar = (e) => {
@@ -62,17 +60,6 @@ export function useRippleGlobal() {
       clip.className = 'ui-ripple__clip'
       clip.setAttribute('aria-hidden', 'true')
       ubicar(clip, r, x, y)
-
-      if (!sinMovimiento) {
-        const size = Math.max(r.width, r.height) * 2.1
-        const onda = document.createElement('span')
-        onda.className = 'ui-ripple__wave'
-        onda.style.width = `${size}px`
-        onda.style.height = `${size}px`
-        onda.style.left = `${x - r.left - size / 2}px`
-        onda.style.top = `${y - r.top - size / 2}px`
-        clip.appendChild(onda)
-      }
 
       el.appendChild(clip)
       activo = { el, clip, r, desde: performance.now() }

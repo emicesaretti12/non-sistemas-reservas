@@ -5,9 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Sin `maximum-scale`/`user-scalable=no`: bloquear el zoom deja fuera a
-         quien necesita agrandar el texto (y iOS lo ignora igual desde iOS 10). -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Se usa como app: la pantalla no se agranda con dos dedos ni con doble
+         toque. Android respeta `user-scalable=no`; iOS lo ignora desde iOS 10,
+         así que ahí el zoom se corta además con `touch-action` (movil.css) y
+         cancelando `gesturestart` (usePantallaNativa). `maximum-scale=1` evita
+         además el zoom automático de iOS al tocar un campo de texto. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="Noni — Reservas online y gestión de agenda para barberías, bares, estética, veterinarias y más." />
     <meta name="theme-color" content="#E9EEF4" />
     <meta name="color-scheme" content="light" />
@@ -15,7 +18,9 @@
     <!-- iOS / PWA Support (iOS no soporta SVG como apple-touch-icon) -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- `default`: barra de estado con texto oscuro. Con `black-translucent` la
+         hora y la batería salían en blanco sobre el fondo claro y no se veían. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Noni" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
@@ -32,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300..900;1,400..700&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300..900&display=swap" rel="stylesheet" />
 
-    <title>Noni — Gestión Inteligente</title>
+    <title>Noni — Reservas y gestión</title>
   </head>
   <body>
     <div id="root"></div>

@@ -127,9 +127,11 @@
     transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
-  .ns-login-social-btn:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-1px);
+  @media (hover: hover) {
+    .ns-login-social-btn:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-1px);
+    }
   }
 
   .ns-login-social-btn:active {
@@ -165,9 +167,11 @@
     transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
-  .ns-login-submit-btn:hover {
-    box-shadow: var(--ui-brand-lg);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .ns-login-submit-btn:hover {
+      box-shadow: var(--ui-brand-lg);
+      transform: translateY(-2px);
+    }
   }
 
   .ns-login-submit-btn:active {
@@ -217,8 +221,10 @@
     transition: transform var(--dur-3) var(--ease-spring);
   }
 
-  .ns-public-logo:hover {
-    transform: scale(1.05) rotate(-2deg);
+  @media (hover: hover) {
+    .ns-public-logo:hover {
+      transform: scale(1.05) rotate(-2deg);
+    }
   }
 
   .ns-public-logo img,
@@ -261,8 +267,10 @@
     box-shadow: inset 0 1px 0 var(--ns-line);
   }
 
-  .ns-public-service-item:hover {
-    background: var(--ns-primary-bg);
+  @media (hover: hover) {
+    .ns-public-service-item:hover {
+      background: var(--ns-primary-bg);
+    }
   }
 
   .ns-public-service-item:active {
@@ -275,8 +283,10 @@
     transition: transform var(--dur-3) var(--ease-spring);
   }
 
-  .ns-public-service-item:hover .ns-public-service-ic {
-    transform: scale(1.07);
+  @media (hover: hover) {
+    .ns-public-service-item:hover .ns-public-service-ic {
+      transform: scale(1.07);
+    }
   }
 
   .ns-public-employee-card {
@@ -293,9 +303,11 @@
     transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
-  .ns-public-employee-card:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-3px);
+  @media (hover: hover) {
+    .ns-public-employee-card:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-3px);
+    }
   }
 
   .ns-public-employee-card:active {
@@ -341,9 +353,11 @@
     transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
   }
 
-  .ns-public-product-card:hover {
-    box-shadow: var(--ui-shadow-lg);
-    transform: translateY(-3px);
+  @media (hover: hover) {
+    .ns-public-product-card:hover {
+      box-shadow: var(--ui-shadow-lg);
+      transform: translateY(-3px);
+    }
   }
 
   .ns-public-product-card:active {
@@ -354,14 +368,18 @@
     transition: transform 0.6s var(--ease-out);
   }
 
-  .ns-public-product-card:hover img {
-    transform: scale(1.05);
+  @media (hover: hover) {
+    .ns-public-product-card:hover img {
+      transform: scale(1.05);
+    }
   }
 
   /* Franja de horarios: pastillas moldeadas. */
-  .brand-date-hover:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    .brand-date-hover:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-2px);
+    }
   }
 
   /* ═══════════════ LANDING ═══════════════ */
@@ -392,8 +410,10 @@
     transition: transform var(--dur-4) var(--ease-out);
   }
 
-  .ns-feature-pro:hover::before {
-    transform: scaleX(1);
+  @media (hover: hover) {
+    .ns-feature-pro:hover::before {
+      transform: scaleX(1);
+    }
   }
 
   .ns-testimonial {
@@ -460,9 +480,11 @@
     transition: box-shadow var(--dur-3) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   }
 
-  .ns-template-card:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-3px);
+  @media (hover: hover) {
+    .ns-template-card:hover {
+      box-shadow: var(--ui-shadow);
+      transform: translateY(-3px);
+    }
   }
 
   .ns-template-card:active {
@@ -503,8 +525,10 @@
     color: rgba(255, 255, 255, 0.4);
   }
 
-  .ui-onbrand-field:hover:not(:focus) {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  @media (hover: hover) {
+    .ui-onbrand-field:hover:not(:focus) {
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+    }
   }
 
   .ui-onbrand-field:focus {
@@ -536,9 +560,11 @@
     transition: background var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
   }
 
-  .ui-onbrand-btn:hover:not(:disabled) {
-    background: var(--ns-gradient-deep);
-    box-shadow: var(--ui-brand-lg);
+  @media (hover: hover) {
+    .ui-onbrand-btn:hover:not(:disabled) {
+      background: var(--ns-gradient-deep);
+      box-shadow: var(--ui-brand-lg);
+    }
   }
 
   .ui-onbrand-btn:active:not(:disabled) {
@@ -559,10 +585,12 @@
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
   }
 
-  .ui-onbrand-btn--ghost:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+  @media (hover: hover) {
+    .ui-onbrand-btn--ghost:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+    }
   }
 
   .ui-onbrand-btn--ghost:active:not(:disabled) {
@@ -587,9 +615,11 @@
     transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
   }
 
-  .ui-onbrand-chip:hover {
-    background: rgba(255, 255, 255, 0.16);
-    color: #FFFFFF;
+  @media (hover: hover) {
+    .ui-onbrand-chip:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #FFFFFF;
+    }
   }
 
   .ui-onbrand-chip.is-active {
@@ -605,8 +635,10 @@
    hoy se pintan. El resto son números sobre el papel.
    ============================================================ */
 @layer components {
-  .ns-cal-day:hover {
-    background: var(--ns-sunken) !important;
+  @media (hover: hover) {
+    .ns-cal-day:hover {
+      background: var(--ns-sunken) !important;
+    }
   }
 
   .ns-cal-day:active {
@@ -626,9 +658,11 @@
     transition: transform var(--dur-4) var(--ease-liquid), box-shadow var(--dur-3) var(--ease-out);
   }
 
-  .ns-glass-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ui-shadow-lg);
+  @media (hover: hover) {
+    .ns-glass-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--ui-shadow-lg);
+    }
   }
 
   /* Lo que se abre encima del contenido lleva desenfoque real. */

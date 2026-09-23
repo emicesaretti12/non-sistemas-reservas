@@ -138,9 +138,11 @@
     transition: color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
   }
 
-  .noni-rail__item:hover {
-    background: var(--ns-sidebar-hover);
-    color: #FFFFFF;
+  @media (hover: hover) {
+    .noni-rail__item:hover {
+      background: var(--ns-sidebar-hover);
+      color: #FFFFFF;
+    }
   }
 
   .noni-rail__item.is-active { background: transparent; }
@@ -153,7 +155,9 @@
     transition: opacity var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
   }
 
-  .noni-rail__item:hover svg { opacity: 1; }
+  @media (hover: hover) {
+    .noni-rail__item:hover svg { opacity: 1; }
+  }
 
   .noni-rail__item.is-active {
     color: #FFFFFF;
@@ -266,24 +270,30 @@
 
   .ns-bottom-nav {
     position: fixed;
-    left: 50%;
-    bottom: calc(12px + var(--sab));
+    left: 0;
+    right: 0;
+    bottom: calc(10px + var(--sab));
     z-index: 50;
-    display: flex;
-    align-items: center;
+    /* Centrado con márgenes, no con `translate`: nada de transformaciones
+       en el vidrio que lleva desenfoque (en iOS parpadeaba y se deformaba
+       mientras la lente viajaba por adentro). */
+    width: min(calc(100% - 24px), 430px);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 2px;
-    max-width: calc(100vw - 20px);
     padding: 6px;
     border-radius: 999px;
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.58);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.62);
     -webkit-backdrop-filter: var(--glass-blur-strong);
     backdrop-filter: var(--glass-blur-strong);
     box-shadow:
       var(--glass-rim),
       0 2px 6px rgba(20, 30, 70, 0.06),
       0 18px 44px -12px rgba(35, 52, 110, 0.34);
-    translate: -50% 0;
-    animation: ns-dock-in var(--dur-5) var(--ease-liquid) backwards;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .ns-bottom-nav::before {
@@ -310,9 +320,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    min-width: 60px;
-    padding: 7px 9px;
+    gap: 3px;
+    min-width: 0;
+    height: 52px;
+    padding: 0 2px;
     border: 0;
     border-radius: 999px;
     background: transparent;
@@ -323,23 +334,16 @@
     letter-spacing: -0.004em;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: color var(--dur-3) var(--ease-out), transform var(--dur-4) var(--ease-liquid);
-  }
-
-  .ns-bottom-nav-item:active {
-    transform: scale(0.9);
-    transition-duration: var(--dur-1);
+    transition: color var(--dur-2) var(--ease-out);
   }
 
   .ns-bottom-nav-item.active { color: #FFFFFF; }
 
   .ns-bottom-nav-item svg {
-    width: 21px;
-    height: 21px;
-    opacity: 0.85;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
   }
-
-  .ns-bottom-nav-item.active svg { opacity: 1; }
 
   /* La gota azul del dock */
   .ns-bottom-nav .ui-lens {
@@ -491,7 +495,9 @@
     transition: background-color var(--dur-1) var(--ease-out);
   }
 
-  .ns-search-item:hover { background: rgba(118, 128, 152, 0.1); }
+  @media (hover: hover) {
+    .ns-search-item:hover { background: rgba(118, 128, 152, 0.1); }
+  }
 
   .ns-search-item.is-active {
     background: var(--ns-gradient-1);
@@ -608,7 +614,9 @@
     }
   }
 
-  .ns-assistant-fab:hover { transform: translateY(-2px); }
+  @media (hover: hover) {
+    .ns-assistant-fab:hover { transform: translateY(-2px); }
+  }
   .ns-assistant-fab:active { transform: scale(0.9); transition-duration: var(--dur-1); }
 
   .ns-assistant-badge {
@@ -729,7 +737,9 @@
   }
 
   .ns-admin-shell .ui-icon-btn::before { background: var(--glass-edge-dark); }
-  .ns-admin-shell .ui-icon-btn:hover { background: rgba(255, 255, 255, 0.16); color: #FFFFFF; }
+  @media (hover: hover) {
+    .ns-admin-shell .ui-icon-btn:hover { background: rgba(255, 255, 255, 0.16); color: #FFFFFF; }
+  }
 
   /* ═══════════════ NOTIFICACIONES ═══════════════ */
 
@@ -794,7 +804,9 @@
     transition: background-color var(--dur-2) var(--ease-out);
   }
 
-  .ns-notif-ask:hover { background: var(--ns-primary-bg-hover); }
+  @media (hover: hover) {
+    .ns-notif-ask:hover { background: var(--ns-primary-bg-hover); }
+  }
 
   .ns-notif-ask__bell {
     display: grid;
@@ -833,7 +845,9 @@
     transition: background-color var(--dur-2) var(--ease-out);
   }
 
-  .ns-notif-item:hover { background: rgba(118, 128, 152, 0.09); }
+  @media (hover: hover) {
+    .ns-notif-item:hover { background: rgba(118, 128, 152, 0.09); }
+  }
   .ns-notif-item:active { background: rgba(118, 128, 152, 0.14); }
   .ns-notif-item.is-read { opacity: 0.6; }
 
@@ -918,6 +932,7 @@
   .ns-tour-card,
   .ui-modal,
   .ui-sheet,
+  .ns-hoja,
   .ns-glass-sheet,
   .ns-glass-bar,
   .ns-login-card {
@@ -936,6 +951,7 @@
   .ns-tour-card,
   .ui-modal,
   .ui-sheet,
+  .ns-hoja,
   .ns-glass-sheet,
   .ns-glass-bar,
   .ns-login-card {

@@ -355,9 +355,7 @@ export default function Reportes({ negocioId, rubro }) {
                 const maxRev = datos.topServicios[0]?.revenue || 1
                 const pct = (s.revenue / maxRev) * 100
                 return (
-                  <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors group/item" style={{ '--hover-bg': 'var(--ns-accent-bg)' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--ns-accent-bg)'}
-                    onMouseLeave={e => e.currentTarget.style.background = ''}>
+                  <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors group/item hover:bg-[var(--ns-accent-bg)]">
                     <span className="text-[10px] font-bold w-5 shrink-0 group-hover/item:text-[#4A5462] transition-colors" style={{ color: 'var(--ns-text-muted)' }}>{idx + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-bold truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{s.nombre}</p>
@@ -399,9 +397,7 @@ export default function Reportes({ negocioId, rubro }) {
               {datos.topEmpleados.map((e, idx) => {
                 const maxRev = datos.topEmpleados[0]?.revenue || 1
                 return (
-                  <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors"
-                    onMouseEnter={ev => ev.currentTarget.style.background = 'var(--ns-accent-bg)'}
-                    onMouseLeave={ev => ev.currentTarget.style.background = ''}>
+                  <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors hover:bg-[var(--ns-accent-bg)]">
                     <span className="ui-pod ui-pod--sm font-bold text-sm">{e.nombre.charAt(0)}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-bold truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{e.nombre}</p>
@@ -480,9 +476,7 @@ export default function Reportes({ negocioId, rubro }) {
           ) : (
             <div className="divide-y relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
               {datos.topClientes.map((c, idx) => (
-                <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors"
-                  onMouseEnter={ev => ev.currentTarget.style.background = 'var(--ns-accent-bg)'}
-                  onMouseLeave={ev => ev.currentTarget.style.background = ''}>
+                <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors hover:bg-[var(--ns-accent-bg)]">
                   <span className={`ui-pod ui-pod--sm font-bold text-sm ${idx === 0 ? 'ui-pod--brand' : ''}`}>
                     {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                   </span>

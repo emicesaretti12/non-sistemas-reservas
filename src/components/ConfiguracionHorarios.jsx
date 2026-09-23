@@ -219,9 +219,10 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                 {/* Controles de hora */}
                 <div className={`flex flex-col gap-3 flex-1 transition-all duration-400 ${isOpen ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
 
-                  {/* Horario principal */}
-                  <div className="flex items-center gap-2">
-                    <label className="flex items-center gap-2 px-3 min-h-[44px] rounded-xl transition-all cursor-text"
+                  {/* Horario principal: dos campos que se reparten el ancho. En
+                      pantallas de 360 px el segundo quedaba cortado afuera. */}
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+                    <label className="flex items-center gap-2 min-w-0 px-3 min-h-[44px] rounded-xl transition-all cursor-text"
                       style={{ background: 'var(--ns-accent-bg)', border: '1.5px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
                       <svg className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--ns-primary)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1M4.22 4.22l.707.707m12.02 12.02l.707.707M1 12h1m20 0h1M4.22 19.78l.707-.707M18.95 5.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <input
@@ -229,14 +230,14 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         disabled={!isOpen}
                         value={dataDia.inicio}
                         onChange={(e) => cambiarHora(dia.id, 'inicio', e.target.value)}
-                        className="bg-transparent font-bold outline-none text-sm"
-                        style={{ color: 'var(--ns-text)', minWidth: '80px' }}
+                        className="w-full min-w-0 bg-transparent font-bold outline-none text-sm sm:min-w-[80px]"
+                        style={{ color: 'var(--ns-text)' }}
                       />
                     </label>
 
-                    <div className="w-5 h-0.5 rounded-full" style={{ background: 'var(--ns-border)' }} />
+                    <div className="hidden sm:block w-5 h-0.5 rounded-full shrink-0" style={{ background: 'var(--ns-border)' }} />
 
-                    <label className="flex items-center gap-2 px-3 min-h-[44px] rounded-xl transition-all cursor-text"
+                    <label className="flex items-center gap-2 min-w-0 px-3 min-h-[44px] rounded-xl transition-all cursor-text"
                       style={{ background: 'var(--ns-accent-bg)', border: '1.5px solid var(--ns-border)', boxShadow: 'var(--ns-shadow-inner)' }}>
                       <svg className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--ns-text-muted)' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       <input
@@ -244,8 +245,8 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
                         disabled={!isOpen}
                         value={dataDia.fin}
                         onChange={(e) => cambiarHora(dia.id, 'fin', e.target.value)}
-                        className="bg-transparent font-bold outline-none text-sm"
-                        style={{ color: 'var(--ns-text)', minWidth: '80px' }}
+                        className="w-full min-w-0 bg-transparent font-bold outline-none text-sm sm:min-w-[80px]"
+                        style={{ color: 'var(--ns-text)' }}
                       />
                     </label>
                   </div>
