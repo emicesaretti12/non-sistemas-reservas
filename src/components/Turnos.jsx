@@ -841,7 +841,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
       {/* Botón principal flotante. Antes el contenedor llevaba `.ns-fab-mobile`
           (56x56 fijos) con un botón más ancho adentro, y el bloque rojo se veía
           cortado por detrás. */}
-      {/* Va al <body> por portal: la sección entra con una transformación y un
+      {/* Va a la raíz por portal: la sección entra con una transformación y un
           `position: fixed` adentro de algo transformado se ubica respecto de
           ese algo, no de la pantalla. */}
       {createPortal(
@@ -855,7 +855,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           <span className="ns-page-fab__label">{vocab.nuevaCita}</span>
           {hayBorrador && <span className="ns-page-fab__dot" aria-hidden="true" />}
         </button>,
-        document.body,
+        // Dentro de #root (no en <body>): así comparte el orden de capas con
+        // las hojas y queda debajo de su velo en lugar de flotar encima.
+        document.getElementById('root') || document.body,
       )}
 
       {/* MODAL BOTTOM-SHEET PARA VER TURNOS DEL DIA SELECCIONADO */}

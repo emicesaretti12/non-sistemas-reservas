@@ -170,6 +170,7 @@
     animation: ns-pop-in var(--dur-5) var(--ease-liquid) 120ms backwards;
     transition:
       translate var(--dur-4) var(--ease-liquid),
+      scale var(--dur-4) var(--ease-liquid),
       padding var(--dur-4) var(--ease-liquid),
       gap var(--dur-4) var(--ease-liquid),
       transform var(--dur-4) var(--ease-liquid);
@@ -189,6 +190,12 @@
   }
 
   .ns-page-fab:active { transform: scale(0.92); transition-duration: var(--dur-1); }
+
+  /* Con una hoja abierta, la acción flotante se guarda. */
+  body:has(.ui-scrim) .ns-page-fab {
+    scale: 0;
+    pointer-events: none;
+  }
 
   .ns-page-fab__label {
     display: block;
