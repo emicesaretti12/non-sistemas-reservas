@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
+import Lente from './ui/Lente'
 import { verificarDisponibilidad, parseFecha, normalizarHorarios } from '../utils/reservas'
 import { useToast } from './Toast'
 import { haptic } from '../utils/haptics'
@@ -124,7 +125,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
   function enviarRecordatorio(t) {
     const tDate = safeParseDate(t.fecha_hora)
-    const horaStr  = tDate ? tDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+    const horaStr  = tDate ? tDate.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : ''
     const fechaStr = tDate ? tDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
     const negocioNombre = negocio?.nombre || 'nuestro local'
     const msg = encodeURIComponent(
@@ -408,7 +409,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
    */
   const renderTurnoCard = (t) => {
     const fechaTurno = safeParseDate(t.fecha_hora) || new Date(t.fecha_hora)
-    const horaLocal = fechaTurno.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+    const horaLocal = fechaTurno.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
     const fechaAmigable = fechaTurno.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
     const esResuelto = t.estado === 'completado' || t.estado === 'no_show' || t.estado === 'cancelado'
     const esFuturo = fechaTurno > new Date()
@@ -544,7 +545,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
         {/* Header */}
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="ui-head__title text-[22px] md:text-[26px]">Agenda</h1>
+            <h1 className="ui-head__title">Agenda</h1>
             <div className="flex items-center gap-2 mt-2">
               <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
               <p className="ui-eyebrow">{todosLosTurnos.length} {vocab.citasRegistradas.toLowerCase()}</p>
@@ -588,6 +589,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
               className={filtroEmpleado === 'todos' ? 'is-active' : ''}
               aria-pressed={filtroEmpleado === 'todos'}
             >
+              {filtroEmpleado === 'todos' && <Lente grupo="agenda-equipo" />}
               {vocab.filtroTodos}
             </button>
             {empleados.map(e => (
@@ -597,6 +599,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 className={`flex items-center gap-2 ${filtroEmpleado === e.id ? 'is-active' : ''}`}
                 aria-pressed={filtroEmpleado === e.id}
               >
+                {filtroEmpleado === e.id && <Lente grupo="agenda-equipo" />}
                 <span className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ boxShadow: 'var(--ui-shadow-sm)' }}>
                   {e.foto_url
                     ? <img src={e.foto_url} alt="" className="object-cover h-full w-full" />
@@ -628,7 +631,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
               <div className="grid gap-3">
                 {proximos.map(t => {
                   const tDate = safeParseDate(t.fecha_hora)
-                  const horaStr = tDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                  const horaStr = tDate.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
                   const fechaStr = tDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
                   const esHoy = tDate.toDateString() === new Date().toDateString()
                   return (
@@ -640,8 +643,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate mb-0.5" style={{ color: 'var(--ns-text)' }}>{t.cliente_nombre}</p>
                         <p className="text-[11px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>
-                          {t.servicios?.nombre}
-                          {t.empleados?.nombre ? ` · ${t.empleados.nombre.split(' ')[0]}` : ` · ${vocab.fallbackStaff}`}
+                          {[t.servicios?.nombre, t.empleados?.nombre ? t.empleados.nombre.split(' ')[0] : vocab.fallbackStaff]
+                            .filter(Boolean)
+                            .join(' · ')}
                         </p>
                       </div>
                       <a

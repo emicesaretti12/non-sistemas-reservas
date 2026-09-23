@@ -31,43 +31,45 @@
     gap: 16px;
   }
 
+  /* Tira de pestañas del celular: una bandeja de vidrio fino con la
+     misma lente que viaja en el riel y en el dock. */
+  .ns-tab-track {
+    border-radius: 999px;
+    background: var(--glass-sheen), var(--glass-thin);
+    box-shadow: var(--glass-rim), 0 6px 18px -10px rgba(35, 52, 110, 0.25);
+  }
+
   .ns-tab {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    min-height: 40px;
-    padding: 9px 15px;
+    min-height: 38px;
+    padding: 0 15px;
     border: 0;
-    border-radius: var(--ns-radius-sm);
+    border-radius: 999px;
     background: transparent;
     color: var(--ns-text-muted);
     font-size: 13px;
-    font-weight: 550;
-    letter-spacing: -0.005em;
+    font-weight: 600;
+    letter-spacing: -0.008em;
     white-space: nowrap;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     transition:
       color var(--dur-2) var(--ease-out),
-      background var(--dur-2) var(--ease-out),
-      box-shadow var(--dur-2) var(--ease-out),
-      transform var(--dur-2) var(--ease-spring);
+      transform var(--dur-4) var(--ease-liquid);
   }
 
-  .ns-tab:hover {
-    color: var(--ns-primary);
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow-sm);
-  }
+  .ns-tab:hover { color: var(--ns-text-secondary); }
 
   .ns-tab:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
+    transition-duration: var(--dur-1);
   }
 
-  .ns-tab.active {
-    color: var(--ns-primary);
-    background: var(--ns-sunken);
-    box-shadow: var(--ui-field-sm);
-  }
+  .ns-tab.active { color: var(--ns-primary); }
 
   .ns-tab-content-enter {
     animation: ns-fade-up var(--dur-3) var(--ease-out) both;
@@ -84,9 +86,10 @@
 
   /* ═══════════════ TARJETAS ═══════════════ */
 
+  /* Las tarjetas heredadas de cada pantalla también son vidrio: el
+     mismo relleno con brillo arriba y el mismo borde de luz. */
   .nh-card,
   .ns-stat-card,
-  .ns-kpi-card,
   .ns-settings-card,
   .ns-cliente-card,
   .ns-client-card,
@@ -98,12 +101,27 @@
   .ns-feature-pro,
   .ns-stat-landing {
     position: relative;
-    background: var(--ns-surface);
-    border-radius: var(--ns-radius-lg);
+    background: var(--glass-sheen), var(--glass);
+    border-radius: var(--ns-radius-xl);
     box-shadow: var(--ui-shadow);
     transition:
       box-shadow var(--dur-3) var(--ease-out),
-      transform var(--dur-3) var(--ease-out);
+      transform var(--dur-4) var(--ease-liquid);
+  }
+
+  :where(.nh-card, .ns-stat-card, .ns-settings-card, .ns-cliente-card, .ns-client-card,
+         .ns-public-form-card, .ns-public-summary-card, .ns-public-identity-card,
+         .ns-public-product-card, .ns-testimonial, .ns-stat-landing)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
   }
 
   .ns-stat-card,
@@ -155,7 +173,6 @@
   .ns-cliente-card:hover,
   .ns-client-card:hover,
   .ns-stat-card:hover,
-  .ns-kpi-card:hover,
   .ns-testimonial:hover,
   .ns-feature-pro:hover {
     box-shadow: var(--ui-shadow-lg);

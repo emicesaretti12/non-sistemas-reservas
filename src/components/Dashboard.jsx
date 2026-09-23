@@ -44,6 +44,7 @@ import NotificationCenter from './NotificationCenterV2'
 import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
 import Atajos from './ui/Atajos'
+import Lente from './ui/Lente'
 
 export default function Dashboard({ session }) {
   const showToast = useToast()
@@ -971,6 +972,7 @@ export default function Dashboard({ session }) {
                   aria-current={tab === i.id ? 'page' : undefined}
                   className={`noni-rail__item ${tab === i.id ? 'is-active' : ''}`}
                 >
+                  {tab === i.id && <Lente grupo="riel" />}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {i.label}
                 </button>
@@ -999,12 +1001,12 @@ export default function Dashboard({ session }) {
           <div className="flex items-center gap-3 min-w-0">
             <span className={`ui-avatar ui-avatar--brand w-10 h-10 text-sm ${esPanelNegocio ? 'lg:hidden' : ''}`}>N</span>
             <div className="noni-topbar__title">
-              <p className="text-[14px] md:text-[15px] font-bold tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
+              <p className="noni-topbar__title text-[14px] md:text-[15px] font-bold tracking-tight leading-none truncate">
                 {negocio?.es_admin_plataforma ? 'Nucleus Master' : (esPanelNegocio ? tituloSeccion : (negocio?.nombre || 'Panel'))}
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="ns-live-dot" style={{ width: 6, height: 6 }} />
-                <p className="text-[9px] font-bold tracking-[0.06em] uppercase truncate" style={{ color: 'var(--ns-text-muted)' }}>
+                <p className="noni-topbar__sub text-[9px] font-bold tracking-[0.06em] uppercase truncate">
                   {esPanelNegocio ? (negocio?.nombre || '') : (negocio?.rubro || 'Gestión de Reservas')}
                 </p>
               </div>
@@ -1048,7 +1050,7 @@ export default function Dashboard({ session }) {
           <div className="space-y-5 md:space-y-7 animate-in fade-in duration-700">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6">
               <div>
-                <h2 className="text-3xl md:text-6xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>Nucleus control</h2>
+                <h2 className="text-3xl md:text-6xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>Nucleus Control</h2>
                 <p className="font-medium mt-1 md:mt-2 text-sm md:text-lg tracking-tight" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   Arquitectura centralizada de Non Sistemas.
                 </p>
@@ -1264,15 +1266,15 @@ export default function Dashboard({ session }) {
 
             {/* ══════════ PESTAÑAS — barra deslizable bajo 1024px ══════════ */}
             <div className="lg:hidden -mx-1 px-1 overflow-x-auto no-scrollbar" data-tour="tabs">
-              <div className="flex gap-1.5 w-max p-1.5 rounded-[22px]" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' }}>
+              <div className="ns-tab-track flex gap-1 w-max p-1.5">
                 {tabsConfig.map((i) => (
                   <button
                     key={i.id}
                     onClick={() => { haptic(); setTab(i.id) }}
                     aria-current={tab === i.id ? 'page' : undefined}
                     className={`ns-tab ${tab === i.id ? 'active' : ''}`}
-                    style={tab === i.id ? { background: 'var(--ns-surface)', boxShadow: 'var(--ui-shadow-sm)' } : undefined}
                   >
+                    {tab === i.id && <Lente grupo="pestanas" />}
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                     {i.label}
                   </button>
@@ -1566,7 +1568,7 @@ export default function Dashboard({ session }) {
                             Logo
                             {subiendoLogo && <div className="ui-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
                           </label>
-                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field)' }}>
+                          <div className="relative h-32 md:h-36 rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field)' }}>
                             {logoUrl ? <img src={logoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
@@ -1576,7 +1578,7 @@ export default function Dashboard({ session }) {
                             Portada
                             {subiendoPortada && <div className="ui-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></div>}
                           </label>
-                          <div className="relative aspect-square rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field)' }}>
+                          <div className="relative h-32 md:h-36 rounded-[20px] flex items-center justify-center overflow-hidden group" style={{ background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field)' }}>
                             {portadaUrl ? <img src={portadaUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <svg className="h-5 w-5" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                             <input type="file" accept="image/*" onChange={(e) => manejarSubidaImagen(e, 'portada')} className="absolute inset-0 opacity-0 cursor-pointer" />
                           </div>
@@ -1809,6 +1811,7 @@ export default function Dashboard({ session }) {
               aria-current={tab === item.id ? 'page' : undefined}
               className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
             >
+              {tab === item.id && <Lente grupo="dock" />}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
               <span>{item.label}</span>
             </button>

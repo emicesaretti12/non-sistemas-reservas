@@ -1,43 +1,96 @@
 /* ============================================================
-   PRIMITIVAS
+   PRIMITIVAS DE VIDRIO
 
-   Superficie blanca, línea de un píxel, sombra apenas visible y
-   radio generoso. Todo lo que aquí se define existe en cuatro
-   niveles: el lienzo, el panel, la tarjeta y lo que flota.
+   Todo lo que es interfaz se arma con tres ingredientes:
 
-   El color no decora: sólo marca la acción principal y el
-   estado. Lo demás vive en la escala de grises azulados.
+   · un relleno translúcido que deja pasar el color del fondo,
+   · un borde de luz —un píxel que agarra el brillo arriba a la
+     izquierda y rebota tenue abajo a la derecha—,
+   · una sombra con tinte azul que lo despega del campo.
+
+   Las tarjetas de contenido NO llevan backdrop-filter: están
+   sobre el campo ambiental, que ya es suave, y el desenfoque no
+   cambiaría nada salvo el costo de pintar al hacer scroll. El
+   desenfoque real queda para lo que flota encima de contenido:
+   barras, dock, hojas, menús.
    ============================================================ */
 
 @layer components {
 
+  /* ═══════════════ BORDE ESPECULAR ═══════════════
+     Un anillo de un píxel pintado con un degradé y recortado con
+     máscara: el centro queda transparente y sólo se ve el borde. */
+  :where(.ui-card, .ui-tile, .ui-list, .ui-glass, .ui-raised, .ui-raised-lg, .ui-well--glass)::before,
+  :where(.ui-btn:not(.ui-btn--ghost):not(.ui-btn--quiet), .ui-icon-btn, .ui-pod--brand, .ui-avatar--brand)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  /* En lo azul el borde es más tenue: el brillo ya lo da el relleno. */
+  :where(.ui-btn--primary, .ui-pod--brand, .ui-avatar--brand)::before {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.24));
+  }
+
   /* ═══════════════ SUPERFICIES ═══════════════ */
 
   .ui-surface {
-    background: var(--ns-surface);
+    background: var(--glass);
     border-radius: var(--ns-radius-lg);
   }
 
+  .ui-glass {
+    position: relative;
+    background: var(--glass-sheen), var(--glass);
+    border-radius: var(--ns-radius-xl);
+    box-shadow: var(--ui-shadow);
+  }
+
+  /* Vidrio que flota sobre contenido: con desenfoque de verdad. */
+  .ui-glass--float {
+    background: var(--glass-sheen), var(--glass-thick);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+
+  .ui-glass--dark {
+    background: var(--ns-gradient-dark);
+    color: #FFFFFF;
+    box-shadow: var(--glass-rim-dark), 0 20px 50px -20px rgba(15, 20, 40, 0.5);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+
+  .ui-glass--dark::before { background: var(--glass-edge-dark); }
+
   .ui-raised-sm {
-    background: var(--ns-surface);
+    background: var(--glass);
     border-radius: var(--ns-radius-md);
     box-shadow: var(--ui-shadow-sm);
   }
 
   .ui-raised {
-    background: var(--ns-surface);
+    position: relative;
+    background: var(--glass-sheen), var(--glass);
     border-radius: var(--ns-radius-lg);
     box-shadow: var(--ui-shadow);
   }
 
   .ui-raised-lg {
-    background: var(--ns-surface);
+    position: relative;
+    background: var(--glass-sheen), var(--glass-thick);
     border-radius: var(--ns-radius-xl);
     box-shadow: var(--ui-shadow-lg);
   }
 
-  /* "Hundido" en este idioma es un relleno gris con su línea:
-     el campo se distingue por el tono, no por la profundidad. */
   .ui-inset-sm {
     background: var(--ns-sunken);
     border-radius: var(--ns-radius-sm);
@@ -50,151 +103,195 @@
     box-shadow: var(--ui-field);
   }
 
-  /* Panel: el contenedor gris que agrupa un conjunto de piezas. */
+  /* Grupo: una bandeja apenas más oscura que el vidrio que la
+     contiene, para juntar piezas relacionadas. */
   .ui-well {
-    padding: 14px;
+    position: relative;
+    padding: 12px;
     border-radius: var(--ns-radius-xl);
-    background: var(--ns-sunken);
+    background: var(--ns-accent-bg);
     box-shadow: var(--ui-field-sm);
   }
 
   .ui-well--deep {
-    background: var(--ns-accent-bg);
+    background: var(--ns-sunken);
     box-shadow: var(--ui-field);
+  }
+
+  .ui-well--glass {
+    background: var(--glass-thin);
+    box-shadow: var(--glass-rim);
   }
 
   /* ═══════════════ TARJETA ═══════════════ */
 
   .ui-card {
     position: relative;
-    padding: 18px;
+    padding: 20px;
     border-radius: var(--ns-radius-xl);
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow-sm);
+    background: var(--glass-sheen), var(--glass);
+    box-shadow: var(--ui-shadow);
     transition:
+      transform var(--dur-4) var(--ease-liquid),
       box-shadow var(--dur-3) var(--ease-out),
-      transform var(--dur-3) var(--ease-out);
+      background-color var(--dur-3) var(--ease-out);
   }
 
   @media (min-width: 768px) {
-    .ui-card { padding: 22px; }
+    .ui-card { padding: 24px; }
   }
 
-  .ui-card--interactive {
-    cursor: pointer;
-  }
+  .ui-card--interactive { cursor: pointer; }
 
   .ui-card--interactive:hover {
-    box-shadow: var(--ui-shadow);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--ui-shadow-lg);
   }
 
   .ui-card--interactive:active {
-    transform: translateY(0);
-    box-shadow: var(--ui-shadow-sm);
+    transform: translateY(0) scale(0.992);
+    transition-duration: var(--dur-1);
   }
 
-  /* Baldosa: la tarjeta chica de una grilla. */
+  /* ═══════════════ BALDOSA ═══════════════
+     La tarjeta chica de una grilla. Con un tinte opcional: una luz
+     de color en la esquina que dice de qué es la métrica sin
+     escribirlo, como los bordes de color de la referencia. */
+
+  /* Es columna flexible: quince pantallas la usan así y le cambian la
+     dirección con `!flex-row` cuando la quieren en fila. */
   .ui-tile {
-    padding: 14px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
     border-radius: var(--ns-radius-lg);
-    background: var(--ns-surface);
+    background: var(--glass-sheen), var(--glass);
     box-shadow: var(--ui-shadow-sm);
+    overflow: hidden;
+    isolation: isolate;
     transition:
-      box-shadow var(--dur-2) var(--ease-out),
-      transform var(--dur-2) var(--ease-out);
+      transform var(--dur-4) var(--ease-liquid),
+      box-shadow var(--dur-3) var(--ease-out);
   }
 
-  .ui-tile--interactive { cursor: pointer; }
+  .ui-tile > * { position: relative; z-index: 1; }
 
-  .ui-tile--interactive:hover {
+  .ui-tile--interactive,
+  button.ui-tile { cursor: pointer; text-align: left; }
+
+  .ui-tile--interactive:hover,
+  button.ui-tile:hover {
+    transform: translateY(-2px);
     box-shadow: var(--ui-shadow);
-    transform: translateY(-1px);
   }
 
-  .ui-tile--interactive:active {
-    transform: scale(0.99);
-    box-shadow: var(--ui-shadow-sm);
+  .ui-tile--interactive:active,
+  button.ui-tile:active {
+    transform: scale(0.985);
+    transition-duration: var(--dur-1);
   }
 
-  /* ═══════════════ BOTONES ═══════════════ */
+  .ui-tile--blue,
+  .ui-tile--green,
+  .ui-tile--amber,
+  .ui-tile--violet,
+  .ui-tile--teal {
+    background:
+      radial-gradient(120% 90% at 100% 0%, var(--tile-tint), transparent 62%),
+      var(--glass-sheen),
+      var(--glass);
+  }
+
+  .ui-tile--blue   { --tile-tint: rgba(0, 122, 255, 0.2); }
+  .ui-tile--green  { --tile-tint: rgba(37, 156, 91, 0.2); }
+  .ui-tile--amber  { --tile-tint: rgba(224, 145, 18, 0.2); }
+  .ui-tile--violet { --tile-tint: rgba(139, 92, 246, 0.2); }
+  .ui-tile--teal   { --tile-tint: rgba(14, 156, 156, 0.2); }
+
+  /* ═══════════════ BOTONES ═══════════════
+     Cápsulas. El claro es vidrio; el principal es vidrio teñido de
+     azul, con el reflejo arriba y la sombra de color abajo. Al
+     soltarlo vuelve con el resorte: por eso se siente líquido. */
 
   .ui-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 40px;
-    padding: 0 16px;
+    min-height: 42px;
+    padding: 0 18px;
     border: 0;
-    border-radius: var(--ns-radius-md);
-    background: var(--ns-surface);
+    border-radius: 999px;
+    background: var(--glass-sheen), var(--glass-thick);
     color: var(--ns-text);
     font-family: inherit;
     font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
     white-space: nowrap;
     cursor: pointer;
     box-shadow: var(--ui-shadow-sm);
+    -webkit-tap-highlight-color: transparent;
     transition:
-      background var(--dur-2) var(--ease-out),
+      transform var(--dur-4) var(--ease-liquid),
       box-shadow var(--dur-2) var(--ease-out),
-      transform var(--dur-1) var(--ease-out),
+      background-color var(--dur-2) var(--ease-out),
+      filter var(--dur-2) var(--ease-out),
       opacity var(--dur-2) var(--ease-out);
   }
 
+  .ui-btn > * { position: relative; z-index: 1; }
+
   .ui-btn:hover:not(:disabled) {
-    background: var(--ns-surface-hover);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.9);
     box-shadow: var(--ui-shadow);
   }
 
   .ui-btn:active:not(:disabled) {
-    transform: scale(0.97);
-    background: var(--ns-sunken);
-    box-shadow: var(--ui-shadow-sm);
+    transform: scale(0.96);
+    transition-duration: var(--dur-1);
+    filter: brightness(1.04);
   }
 
   .ui-btn:disabled {
-    opacity: 0.45;
+    opacity: 0.42;
     cursor: not-allowed;
   }
 
-  /* Acción principal: el único azul lleno de la pantalla. */
   .ui-btn--primary {
     background: var(--ns-gradient-1);
     color: #FFFFFF;
     box-shadow: var(--ui-brand);
+    text-shadow: 0 1px 1px rgba(0, 40, 120, 0.25);
   }
 
   .ui-btn--primary:hover:not(:disabled) {
     background: var(--ns-gradient-deep);
     box-shadow: var(--ui-brand-lg);
+    filter: saturate(1.06);
   }
 
   .ui-btn--primary:active:not(:disabled) {
-    background: var(--ns-primary-dark);
     box-shadow: var(--ui-brand-pressed);
+    filter: brightness(0.97);
   }
 
-  /* Acción secundaria de tono azul, sin relleno. */
+  /* Secundaria teñida: el azul diluido en el vidrio. */
   .ui-btn--quiet {
     background: var(--ns-primary-bg);
     color: var(--ns-primary-dark);
-    box-shadow: none;
+    box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.1);
   }
 
   .ui-btn--quiet:hover:not(:disabled) {
     background: var(--ns-primary-bg-hover);
-    box-shadow: none;
+    box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18);
   }
 
-  .ui-btn--quiet:active:not(:disabled) {
-    background: var(--ns-primary-bg-hover);
-    box-shadow: none;
-  }
-
-  /* Terciaria: sólo texto. */
+  /* Terciaria: sólo texto hasta que la tocás. */
   .ui-btn--ghost {
     background: transparent;
     color: var(--ns-text-secondary);
@@ -207,23 +304,13 @@
     box-shadow: none;
   }
 
-  .ui-btn--ghost:active:not(:disabled) {
-    background: var(--ns-accent);
-    box-shadow: none;
-  }
-
   .ui-btn--block {
     display: flex;
     width: 100%;
   }
 
-  .ui-btn--pill {
-    border-radius: 999px;
-    padding: 0 20px;
-  }
+  .ui-btn--pill { padding: 0 22px; }
 
-  /* Acción destructiva. No sale de la referencia: hace falta que
-     cancelar y eliminar se distingan de todo lo demás. */
   .ui-btn--danger {
     background: var(--ns-danger-bg);
     color: var(--ns-danger);
@@ -231,47 +318,49 @@
   }
 
   .ui-btn--danger:hover:not(:disabled) {
-    background: var(--ns-danger);
+    background: linear-gradient(180deg, #F0666A 0%, #E5484D 50%, #D23A3F 100%);
     color: #FFFFFF;
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 24px -8px rgba(229, 72, 77, 0.6);
   }
 
-  /* Botón de sólo ícono */
+  /* Botón de sólo ícono: una lenteja de vidrio. */
   .ui-icon-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     flex: 0 0 auto;
     border: 0;
-    border-radius: var(--ns-radius-sm);
-    background: var(--ns-surface);
+    border-radius: 999px;
+    background: var(--glass-sheen), var(--glass-thick);
     color: var(--ns-text-secondary);
     cursor: pointer;
     box-shadow: var(--ui-shadow-sm);
+    -webkit-tap-highlight-color: transparent;
     transition:
-      background var(--dur-2) var(--ease-out),
+      transform var(--dur-4) var(--ease-liquid),
+      background-color var(--dur-2) var(--ease-out),
       color var(--dur-2) var(--ease-out),
-      box-shadow var(--dur-2) var(--ease-out),
-      transform var(--dur-1) var(--ease-out);
+      box-shadow var(--dur-2) var(--ease-out);
   }
 
+  .ui-icon-btn > * { position: relative; z-index: 1; }
+
   .ui-icon-btn:hover {
-    background: var(--ns-surface-hover);
     color: var(--ns-text);
     box-shadow: var(--ui-shadow);
   }
 
   .ui-icon-btn:active {
-    transform: scale(0.93);
-    background: var(--ns-sunken);
+    transform: scale(0.9);
+    transition-duration: var(--dur-1);
   }
 
   .ui-icon-btn--active {
-    background: var(--ns-primary-bg);
-    color: var(--ns-primary-dark);
-    box-shadow: inset 0 0 0 1px var(--ns-primary-line);
+    background: var(--ns-primary-bg-hover);
+    color: var(--ns-primary);
   }
 
   /* ═══════════════ CAMPOS ═══════════════ */
@@ -279,8 +368,8 @@
   .ui-field {
     display: block;
     width: 100%;
-    min-height: 42px;
-    padding: 10px 14px;
+    min-height: 44px;
+    padding: 11px 15px;
     border: 0;
     border-radius: var(--ns-radius-md);
     background: var(--ns-sunken);
@@ -292,7 +381,7 @@
     box-shadow: var(--ui-field);
     outline: none;
     transition:
-      background var(--dur-2) var(--ease-out),
+      background-color var(--dur-2) var(--ease-out),
       box-shadow var(--dur-2) var(--ease-out);
   }
 
@@ -302,11 +391,11 @@
   }
 
   .ui-field:hover:not(:disabled):not(:focus) {
-    box-shadow: var(--ui-field-deep);
+    background: rgba(118, 128, 152, 0.15);
   }
 
   .ui-field:focus {
-    background: var(--ns-surface);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: var(--ui-field-focus);
   }
 
@@ -315,28 +404,27 @@
     cursor: not-allowed;
   }
 
-  /* Un campo con un prefijo o un sufijo pegado. */
   .ui-field-group {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 4px 8px 4px 14px;
+    padding: 4px 8px 4px 15px;
     border-radius: var(--ns-radius-md);
     background: var(--ns-sunken);
     color: var(--ns-text-muted);
     box-shadow: var(--ui-field);
-    transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+    transition: background-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
   }
 
   .ui-field-group:focus-within {
-    background: var(--ns-surface);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: var(--ui-field-focus);
   }
 
   .ui-field-group > input {
     flex: 1;
     min-width: 0;
-    min-height: 34px;
+    min-height: 36px;
     border: 0;
     background: transparent;
     color: var(--ns-text);
@@ -346,18 +434,19 @@
     outline: none;
   }
 
-  /* Interruptor al estilo del sistema. */
+  /* Interruptor del sistema: el pomo salta con el resorte. */
   .ui-switch {
     position: relative;
     flex: 0 0 auto;
-    width: 51px;
-    height: 31px;
+    width: 52px;
+    height: 32px;
     border: 0;
     padding: 0;
     border-radius: 999px;
-    background: var(--ns-mix-24);
+    background: rgba(118, 128, 152, 0.28);
     cursor: pointer;
-    transition: background var(--dur-3) var(--ease-out);
+    box-shadow: inset 0 1px 2px rgba(20, 30, 70, 0.12);
+    transition: background-color var(--dur-3) var(--ease-out);
   }
 
   .ui-switch::after {
@@ -365,67 +454,83 @@
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 27px;
-    height: 27px;
+    width: 28px;
+    height: 28px;
     border-radius: 999px;
-    background: #FFFFFF;
-    box-shadow: 0 3px 8px rgba(16, 24, 40, 0.18), 0 1px 1px rgba(16, 24, 40, 0.1);
-    transition: transform var(--dur-3) var(--ease-spring);
+    background: linear-gradient(180deg, #FFFFFF 0%, #F4F6FA 100%);
+    box-shadow: 0 3px 8px rgba(20, 30, 70, 0.2), 0 1px 1px rgba(20, 30, 70, 0.1), inset 0 -1px 0 rgba(20, 30, 70, 0.04);
+    transition: transform var(--dur-4) var(--ease-bounce), width var(--dur-2) var(--ease-out);
   }
+
+  .ui-switch:active::after { width: 33px; }
+  .ui-switch.is-on:active::after { transform: translateX(15px); }
 
   .ui-switch.is-on {
-    background: var(--ns-success);
+    background: linear-gradient(180deg, #34B06C 0%, #259C5B 100%);
   }
 
-  .ui-switch.is-on::after {
-    transform: translateX(20px);
-  }
+  .ui-switch.is-on::after { transform: translateX(20px); }
 
-  /* Control segmentado. */
+  /* ═══════════════ SEGMENTADO ═══════════════
+     La opción elegida no se pinta: se le pone encima una lente de
+     vidrio que viaja de una opción a otra (ver ui/Lente.jsx). */
+
   .ui-segment {
+    position: relative;
     display: inline-flex;
     gap: 2px;
-    padding: 2px;
-    border-radius: var(--ns-radius-md);
+    padding: 3px;
+    border-radius: 999px;
     background: var(--ns-sunken);
     box-shadow: var(--ui-field-sm);
   }
 
   .ui-segment > button {
+    position: relative;
+    isolation: isolate;
     flex: 1;
-    min-height: 32px;
-    padding: 0 14px;
+    min-height: 34px;
+    padding: 0 15px;
     border: 0;
-    border-radius: calc(var(--ns-radius-md) - 3px);
+    border-radius: 999px;
     background: transparent;
     color: var(--ns-text-muted);
     font-family: inherit;
     font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: -0.005em;
+    letter-spacing: -0.008em;
     white-space: nowrap;
     cursor: pointer;
-    transition:
-      background var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out),
-      box-shadow var(--dur-2) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-2) var(--ease-out);
   }
 
-  .ui-segment > button:hover {
-    color: var(--ns-text-secondary);
+  .ui-segment > button:hover { color: var(--ns-text-secondary); }
+  .ui-segment > button.is-active { color: var(--ns-text); }
+
+  /* Si la opción activa no trae lente (código viejo), se pinta sola. */
+  .ui-segment > button.is-active:not(:has(.ui-lens)) {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 1px 3px rgba(20, 30, 70, 0.12), 0 3px 10px -2px rgba(20, 30, 70, 0.1), inset 0 1px 0 #FFFFFF;
   }
 
-  .ui-segment > button.is-active {
-    background: var(--ns-surface);
-    color: var(--ns-text);
-    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12), 0 1px 1px rgba(16, 24, 40, 0.06);
+  /* La lente. Se posiciona sobre la opción activa y framer-motion la
+     hace viajar a la siguiente cuando cambia. */
+  .ui-lens {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.86) 100%);
+    box-shadow:
+      0 1px 3px rgba(20, 30, 70, 0.12),
+      0 4px 12px -2px rgba(20, 30, 70, 0.12),
+      inset 0 1px 0 #FFFFFF,
+      inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    pointer-events: none;
   }
 
-  /* ═══════════════ ETIQUETAS DE ESTADO ═══════════════
-     Cada estado tiene su color propio. Con una paleta completa
-     no hace falta codificarlos por forma: el tono ya alcanza,
-     y además cada uno lleva su peso y su relleno distintos por
-     si alguien no distingue los colores. */
+  /* ═══════════════ ETIQUETAS DE ESTADO ═══════════════ */
 
   .ui-chip {
     display: inline-flex;
@@ -433,51 +538,45 @@
     gap: 6px;
     padding: 4px 10px;
     border-radius: 999px;
-    background: var(--ns-sunken);
+    background: rgba(255, 255, 255, 0.5);
     color: var(--ns-text-secondary);
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: -0.005em;
+    letter-spacing: -0.004em;
     white-space: nowrap;
-    box-shadow: inset 0 0 0 1px var(--ns-line);
+    box-shadow: inset 0 0 0 1px rgba(118, 128, 152, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
-  /* Confirmado */
   .ui-chip--solid {
     background: var(--ns-success-bg);
     color: var(--ns-success);
     box-shadow: inset 0 0 0 1px var(--ns-success-line);
   }
 
-  /* Pendiente */
   .ui-chip--outline {
     background: var(--ns-warning-bg);
     color: var(--ns-warning);
     box-shadow: inset 0 0 0 1px var(--ns-warning-line);
   }
 
-  /* Informativo / destacado */
   .ui-chip--soft {
     background: var(--ns-primary-bg);
     color: var(--ns-primary-dark);
     box-shadow: inset 0 0 0 1px var(--ns-primary-line);
   }
 
-  /* Inactivo */
   .ui-chip--quiet {
     background: var(--ns-sunken);
     color: var(--ns-text-muted);
-    box-shadow: inset 0 0 0 1px var(--ns-line);
+    box-shadow: none;
   }
 
-  /* Problema que pide acción (sin stock, vencido) */
   .ui-chip--danger {
     background: var(--ns-danger-bg);
     color: var(--ns-danger);
     box-shadow: inset 0 0 0 1px var(--ns-danger-line);
   }
 
-  /* Cancelado */
   .ui-chip--cancelled {
     background: var(--ns-danger-bg);
     color: var(--ns-danger);
@@ -486,33 +585,48 @@
     text-decoration-thickness: 1.5px;
   }
 
-  /* ═══════════════ ÍCONOS EN CÁPSULA ═══════════════ */
+  /* ═══════════════ ÍCONOS EN CÁPSULA ═══════════════
+     Vidrio teñido: el color del ícono se diluye en el relleno. */
 
   .ui-pod {
+    position: relative;
     display: grid;
     place-items: center;
     flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: var(--ns-radius-md);
-    background: var(--ns-primary-bg);
+    background: linear-gradient(180deg, rgba(0, 122, 255, 0.18) 0%, rgba(0, 122, 255, 0.09) 100%);
     color: var(--ns-primary);
-    transition:
-      background var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out),
-      transform var(--dur-3) var(--ease-spring);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(0, 122, 255, 0.12);
+    transition: transform var(--dur-4) var(--ease-liquid);
   }
 
-  .ui-pod--sm {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--ns-radius-sm);
+  .ui-pod--sm { width: 32px; height: 32px; border-radius: var(--ns-radius-sm); }
+  .ui-pod--lg { width: 54px; height: 54px; border-radius: 18px; }
+
+  .ui-pod--green {
+    background: linear-gradient(180deg, rgba(37, 156, 91, 0.2), rgba(37, 156, 91, 0.1));
+    color: var(--ns-success);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(37, 156, 91, 0.14);
   }
 
-  .ui-pod--lg {
-    width: 52px;
-    height: 52px;
-    border-radius: var(--ns-radius-lg);
+  .ui-pod--amber {
+    background: linear-gradient(180deg, rgba(224, 145, 18, 0.22), rgba(224, 145, 18, 0.1));
+    color: var(--ns-warning);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(224, 145, 18, 0.16);
+  }
+
+  .ui-pod--violet {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+    color: var(--ns-highlight);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(139, 92, 246, 0.14);
+  }
+
+  .ui-pod--teal {
+    background: linear-gradient(180deg, rgba(14, 156, 156, 0.2), rgba(14, 156, 156, 0.1));
+    color: var(--ns-teal);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(14, 156, 156, 0.14);
   }
 
   .ui-pod--brand {
@@ -528,18 +642,19 @@
   }
 
   .ui-avatar {
+    position: relative;
     display: grid;
     place-items: center;
     flex: 0 0 auto;
     width: 40px;
     height: 40px;
     border-radius: 999px;
-    background: var(--ns-sunken);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
     color: var(--ns-text-secondary);
-    font-weight: 700;
+    font-weight: 650;
     font-size: 0.9375rem;
     letter-spacing: -0.01em;
-    box-shadow: var(--ui-field-sm);
+    box-shadow: var(--ui-shadow-sm);
   }
 
   .ui-avatar--brand {
@@ -551,39 +666,34 @@
   /* ═══════════════ LISTAS ═══════════════ */
 
   .ui-list {
+    position: relative;
     border-radius: var(--ns-radius-xl);
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow-sm);
+    background: var(--glass-sheen), var(--glass);
+    box-shadow: var(--ui-shadow);
     overflow: hidden;
   }
 
   .ui-list__row {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 13px 16px;
+    padding: 14px 18px;
     text-align: left;
     background: transparent;
-    transition: background var(--dur-2) var(--ease-out);
+    transition: background-color var(--dur-2) var(--ease-out);
   }
 
   /* El separador arranca después del ícono, como en iOS. */
   .ui-list__row + .ui-list__row {
-    box-shadow: inset 0 1px 0 var(--ns-line);
+    box-shadow: inset 60px 0 0 -59px transparent, inset 0 1px 0 var(--ns-line);
   }
 
-  .ui-list__row--interactive {
-    cursor: pointer;
-  }
-
-  .ui-list__row--interactive:hover {
-    background: var(--ns-surface-hover);
-  }
-
-  .ui-list__row--interactive:active {
-    background: var(--ns-sunken);
-  }
+  .ui-list__row--interactive { cursor: pointer; }
+  .ui-list__row--interactive:hover { background: rgba(255, 255, 255, 0.4); }
+  .ui-list__row--interactive:active { background: var(--ns-sunken); }
 
   /* ═══════════════ TEXTO ═══════════════ */
 
@@ -591,15 +701,15 @@
     display: block;
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     color: var(--ns-text-muted);
   }
 
   .ui-title {
     font-family: var(--font-display);
-    font-size: 1.0625rem;
+    font-size: 1.125rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.022em;
     color: var(--ns-text);
   }
 
@@ -608,52 +718,59 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
+  /* Título grande, como la cabecera de una app de iOS. */
   .ui-head__title {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
     font-family: var(--font-display);
-    font-size: 1.25rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.028em;
+    line-height: 1.08;
     color: var(--ns-text);
+  }
+
+  @media (min-width: 768px) {
+    .ui-head__title { font-size: 2.125rem; }
   }
 
   .ui-metric {
     font-family: var(--font-display);
     font-size: 2rem;
     font-weight: 700;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.04em;
     color: var(--ns-text);
     font-variant-numeric: tabular-nums;
   }
 
   .ui-stat__label {
     display: block;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.004em;
     color: var(--ns-text-muted);
   }
 
   .ui-stat__value {
     display: block;
+    margin-top: 6px;
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: 1.875rem;
     font-weight: 700;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.04em;
     color: var(--ns-text);
     font-variant-numeric: tabular-nums;
-    line-height: 1.1;
+    line-height: 1.05;
   }
 
   .ui-stat__foot {
     display: block;
-    margin-top: 4px;
-    font-size: 0.6875rem;
+    margin-top: 5px;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--ns-text-faint);
   }
@@ -672,13 +789,16 @@
   }
 
   .ns-gradient-text {
-    color: var(--ns-primary);
+    background: linear-gradient(120deg, #007AFF 0%, #5B6CFF 55%, #8B5CF6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* ═══════════════ ESTADO VACÍO ═══════════════ */
 
   .ui-empty {
-    padding: 32px 22px;
+    padding: 34px 22px;
     text-align: center;
   }
 
@@ -701,17 +821,19 @@
   /* ═══════════════ PROGRESO ═══════════════ */
 
   .ui-progress {
-    height: 6px;
+    height: 7px;
     border-radius: 999px;
-    background: var(--ns-mix-16);
+    background: var(--ns-sunken);
+    box-shadow: inset 0 1px 2px rgba(20, 30, 70, 0.08);
     overflow: hidden;
   }
 
   .ui-progress__fill {
     height: 100%;
     border-radius: 999px;
-    background: var(--ns-primary);
-    transition: width var(--dur-5) var(--ease-out);
+    background: linear-gradient(90deg, #4DA2FF 0%, #007AFF 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 0 12px rgba(0, 122, 255, 0.35);
+    transition: width var(--dur-5) var(--ease-liquid);
   }
 
   .ui-progress--indeterminate .ui-progress__fill {
@@ -719,18 +841,20 @@
     animation: ns-slide 1.25s var(--ease-in-out) infinite;
   }
 
-  /* Barra de un gráfico. */
+  /* Barra de gráfico: una columna de vidrio azul. */
   .ui-bar {
-    border-radius: 6px;
-    background: var(--ns-primary);
+    border-radius: 8px 8px 5px 5px;
+    background: linear-gradient(180deg, #4DA2FF 0%, #007AFF 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 14px -6px rgba(0, 122, 255, 0.55);
     transition:
-      height var(--dur-4) var(--ease-out),
-      background var(--dur-2) var(--ease-out),
-      opacity var(--dur-2) var(--ease-out);
+      height var(--dur-5) var(--ease-liquid),
+      opacity var(--dur-2) var(--ease-out),
+      filter var(--dur-2) var(--ease-out);
   }
 
   .ui-bar--quiet {
-    background: var(--ns-mix-24);
+    background: linear-gradient(180deg, rgba(118, 128, 152, 0.32), rgba(118, 128, 152, 0.2));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   /* ═══════════════ ESPERA ═══════════════ */
@@ -739,7 +863,7 @@
     width: 20px;
     height: 20px;
     border-radius: 999px;
-    border: 2.5px solid var(--ns-mix-20);
+    border: 2.5px solid rgba(118, 128, 152, 0.22);
     border-top-color: var(--ns-primary);
     animation: ns-spin 0.7s linear infinite;
   }
@@ -759,11 +883,14 @@
 
   .ui-ripple > .ui-ripple__wave {
     position: absolute;
+    z-index: 2;
     border-radius: 999px;
     transform: scale(0);
-    background: currentColor;
-    opacity: 0.14;
+    /* El toque en el vidrio no deja una mancha: deja un destello, con
+       el centro blanco y el borde apenas azul para que se vea también
+       sobre el vidrio claro. */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(0, 122, 255, 0.1) 45%, rgba(0, 122, 255, 0) 70%);
     pointer-events: none;
-    animation: ns-ripple 0.55s var(--ease-out) forwards;
+    animation: ns-ripple 0.6s var(--ease-out) forwards;
   }
 }

@@ -1,18 +1,20 @@
 /* ============================================================
    SHELL
 
-   La estructura de la referencia: barra lateral azul pizarra a
-   la izquierda, barra superior clara y translúcida, y el área
-   de contenido sobre el lienzo gris. En el celular la lateral
-   se va y aparece un dock abajo.
+   Nada toca los bordes de la pantalla. La barra lateral, la barra
+   superior y el dock flotan despegados del borde, como piezas de
+   vidrio apoyadas sobre el campo de color. Son lo único con
+   desenfoque real: lo que pasa por debajo al hacer scroll se ve
+   borroso a través de ellas.
    ============================================================ */
 
 @layer components {
 
   .noni-shell {
+    position: relative;
     min-height: 100vh;
     min-height: 100dvh;
-    background: var(--ns-bg);
+    background: transparent;
     color: var(--ns-text);
   }
 
@@ -31,40 +33,63 @@
 
   .noni-container {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 16px 14px 28px;
+    padding: 18px 14px 28px;
   }
 
   @media (min-width: 768px) {
-    .noni-container { padding: 22px 26px 36px; }
+    .noni-container { padding: 26px 26px 40px; }
   }
 
   @media (min-width: 1024px) {
-    .noni-container { padding: 26px 32px 44px; }
+    .noni-container { padding: 28px 30px 48px; }
   }
 
-  /* ═══════════════ BARRA LATERAL ═══════════════ */
+  /* ═══════════════ BARRA LATERAL ═══════════════
+     Vidrio oscuro —el #252C35 de la referencia, translúcido— con el
+     campo de color filtrándose por detrás. */
 
-  .noni-rail {
-    display: none;
-  }
+  .noni-rail { display: none; }
 
   @media (min-width: 1024px) {
     .noni-rail {
       position: sticky;
-      top: 0;
+      top: 12px;
       z-index: 45;
       display: flex;
       flex-direction: column;
-      flex: 0 0 248px;
-      width: 248px;
-      height: 100vh;
-      height: 100dvh;
-      padding: 18px 12px calc(14px + var(--sab));
-      background: var(--ns-sidebar);
+      flex: 0 0 256px;
+      width: 256px;
+      height: calc(100vh - 24px);
+      height: calc(100dvh - 24px);
+      margin: 12px 0 12px 12px;
+      padding: 16px 12px calc(14px + var(--sab));
+      border-radius: var(--ns-radius-2xl);
+      background:
+        radial-gradient(130% 55% at 0% 0%, rgba(0, 122, 255, 0.3), transparent 62%),
+        radial-gradient(120% 50% at 100% 100%, rgba(139, 92, 246, 0.22), transparent 62%),
+        var(--ns-gradient-dark);
       color: var(--ns-sidebar-text);
-      box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.07);
+      -webkit-backdrop-filter: var(--glass-blur-strong);
+      backdrop-filter: var(--glass-blur-strong);
+      box-shadow:
+        var(--glass-rim-dark),
+        0 2px 6px rgba(15, 20, 40, 0.16),
+        0 30px 60px -24px rgba(15, 20, 40, 0.55);
+    }
+
+    .noni-rail::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: var(--glass-edge-dark);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      pointer-events: none;
     }
   }
 
@@ -72,7 +97,7 @@
     display: flex;
     align-items: center;
     gap: 11px;
-    padding: 6px 10px 20px;
+    padding: 6px 8px 18px;
     color: #FFFFFF;
   }
 
@@ -80,38 +105,37 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .noni-rail__label {
-    padding: 0 12px 7px;
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    padding: 0 12px 8px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     color: var(--ns-sidebar-muted);
   }
 
   .noni-rail__item {
     position: relative;
+    isolation: isolate;
     display: flex;
     align-items: center;
     gap: 11px;
     width: 100%;
     padding: 9px 12px;
     border: 0;
-    border-radius: var(--ns-radius-sm);
+    border-radius: 13px;
     background: transparent;
     color: var(--ns-sidebar-text);
     font-family: inherit;
     font-size: 0.875rem;
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
     text-align: left;
     cursor: pointer;
-    transition:
-      background var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
   }
 
   .noni-rail__item:hover {
@@ -119,41 +143,37 @@
     color: #FFFFFF;
   }
 
-  /* Los íconos del riel vienen sin width/height propios: si no se los
-     damos acá, el SVG cae en su tamaño por defecto y desborda la barra. */
+  .noni-rail__item.is-active { background: transparent; }
+
   .noni-rail__item svg {
     flex: 0 0 auto;
     width: 19px;
     height: 19px;
-    opacity: 0.72;
-    transition: opacity var(--dur-2) var(--ease-out);
+    opacity: 0.7;
+    transition: opacity var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
   }
 
   .noni-rail__item:hover svg { opacity: 1; }
 
-  /* El activo se marca con relleno y una barra a la izquierda,
-     igual que en la referencia. */
   .noni-rail__item.is-active {
-    background: var(--ns-sidebar-active);
     color: #FFFFFF;
     font-weight: 600;
   }
 
   .noni-rail__item.is-active svg {
     opacity: 1;
-    color: var(--ns-primary-light);
+    color: #8CC2FF;
   }
 
-  .noni-rail__item.is-active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 3px;
-    height: 20px;
-    border-radius: 0 3px 3px 0;
-    background: var(--ns-primary);
-    transform: translateY(-50%);
+  /* La lente del riel: vidrio teñido de azul sobre el vidrio oscuro. */
+  .noni-rail .ui-lens {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),
+      linear-gradient(120deg, rgba(0, 122, 255, 0.42), rgba(0, 122, 255, 0.18));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      inset 0 0 0 1px rgba(140, 194, 255, 0.24),
+      0 6px 18px -6px rgba(0, 122, 255, 0.55);
   }
 
   .noni-rail__spacer { flex: 1; }
@@ -161,42 +181,71 @@
   .noni-rail__footer {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     padding-top: 12px;
     box-shadow: inset 0 1px 0 var(--ns-sidebar-line);
   }
 
-  /* ═══════════════ BARRA SUPERIOR ═══════════════ */
+  /* ═══════════════ BARRA SUPERIOR ═══════════════
+     Una cápsula de vidrio que queda arriba mientras el contenido
+     pasa por debajo, borroso. */
 
   .noni-topbar {
     position: sticky;
-    top: 0;
+    top: calc(8px + var(--sat));
     z-index: 40;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    min-height: 56px;
-    padding: 8px 14px;
-    padding-top: calc(8px + var(--sat));
-    background: var(--ns-glass-bg);
-    backdrop-filter: var(--ns-glass-blur);
-    -webkit-backdrop-filter: var(--ns-glass-blur);
-    box-shadow: inset 0 -1px 0 transparent;
-    transition: box-shadow var(--dur-3) var(--ease-out);
+    min-height: 58px;
+    margin: calc(8px + var(--sat)) 10px 0;
+    padding: 8px 10px 8px 14px;
+    border-radius: 22px;
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.56);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
+    box-shadow:
+      var(--glass-rim),
+      0 1px 2px rgba(20, 30, 70, 0.04),
+      0 10px 30px -14px rgba(35, 52, 110, 0.22);
+    transition: box-shadow var(--dur-3) var(--ease-out), background-color var(--dur-3) var(--ease-out);
+  }
+
+  .noni-topbar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
   }
 
   @media (min-width: 768px) {
     .noni-topbar {
-      min-height: 64px;
-      padding: 10px 26px;
-      padding-top: calc(10px + var(--sat));
+      top: 12px;
+      min-height: 62px;
+      margin: 12px 14px 0;
+      padding: 9px 12px 9px 20px;
+      border-radius: 24px;
     }
   }
 
-  /* Al hacer scroll aparece la línea que separa del contenido. */
+  @media (min-width: 1024px) {
+    .noni-topbar { margin: 12px 12px 0 14px; }
+  }
+
+  /* Con contenido pasando por debajo, el vidrio se espesa un poco. */
   .noni-topbar.is-stuck {
-    box-shadow: inset 0 -1px 0 var(--ns-line), 0 1px 12px rgba(16, 24, 40, 0.04);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.7);
+    box-shadow:
+      var(--glass-rim),
+      0 2px 4px rgba(20, 30, 70, 0.05),
+      0 16px 40px -16px rgba(35, 52, 110, 0.3);
   }
 
   .noni-topbar__title {
@@ -211,28 +260,43 @@
     .noni-topbar__title { font-size: 1.1875rem; }
   }
 
-  /* ═══════════════ DOCK DEL CELULAR ═══════════════ */
+  /* ═══════════════ DOCK DEL CELULAR ═══════════════
+     La barra de pestañas de iOS 26: una cápsula de vidrio flotante,
+     con una gota azul que se desliza hasta la pestaña que tocás. */
 
   .ns-bottom-nav {
     position: fixed;
     left: 50%;
-    bottom: calc(10px + var(--sab));
+    bottom: calc(12px + var(--sab));
     z-index: 50;
     display: flex;
     align-items: center;
     gap: 2px;
     max-width: calc(100vw - 20px);
-    padding: 5px;
+    padding: 6px;
     border-radius: 999px;
-    background: var(--ns-glass-bg-strong);
-    backdrop-filter: var(--ns-glass-blur);
-    -webkit-backdrop-filter: var(--ns-glass-blur);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.58);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
     box-shadow:
-      0 8px 28px rgba(16, 24, 40, 0.16),
-      0 2px 6px rgba(16, 24, 40, 0.08),
-      inset 0 0 0 1px rgba(16, 24, 40, 0.06);
+      var(--glass-rim),
+      0 2px 6px rgba(20, 30, 70, 0.06),
+      0 18px 44px -12px rgba(35, 52, 110, 0.34);
     translate: -50% 0;
-    animation: ns-dock-in var(--dur-4) var(--ease-spring) both;
+    animation: ns-dock-in var(--dur-5) var(--ease-liquid) both;
+  }
+
+  .ns-bottom-nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
   }
 
   @media (min-width: 1024px) {
@@ -241,13 +305,14 @@
 
   .ns-bottom-nav-item {
     position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-width: 58px;
-    padding: 7px 8px;
+    min-width: 60px;
+    padding: 7px 9px;
     border: 0;
     border-radius: 999px;
     background: transparent;
@@ -255,36 +320,38 @@
     font-family: inherit;
     font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: -0.005em;
+    letter-spacing: -0.004em;
     cursor: pointer;
-    transition:
-      background var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out),
-      transform var(--dur-1) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-3) var(--ease-out), transform var(--dur-4) var(--ease-liquid);
   }
 
   .ns-bottom-nav-item:active {
-    transform: scale(0.92);
+    transform: scale(0.9);
+    transition-duration: var(--dur-1);
   }
 
-  .ns-bottom-nav-item.active {
-    background: var(--ns-primary);
-    color: #FFFFFF;
-    box-shadow: var(--ui-brand-sm);
-  }
-
-  .ns-bottom-nav-item.active svg { opacity: 1; }
+  .ns-bottom-nav-item.active { color: #FFFFFF; }
 
   .ns-bottom-nav-item svg {
     width: 21px;
     height: 21px;
-    opacity: 0.8;
-    transition: opacity var(--dur-2) var(--ease-out);
+    opacity: 0.85;
   }
 
-  /* Deja aire abajo para que el dock no tape el contenido. */
+  .ns-bottom-nav-item.active svg { opacity: 1; }
+
+  /* La gota azul del dock */
+  .ns-bottom-nav .ui-lens {
+    background: var(--ns-gradient-1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 rgba(0, 40, 120, 0.2),
+      0 6px 16px -4px rgba(0, 122, 255, 0.6);
+  }
+
   .ns-has-bottom-nav {
-    padding-bottom: calc(92px + var(--sab));
+    padding-bottom: calc(96px + var(--sab));
   }
 
   @media (min-width: 1024px) {
@@ -297,45 +364,52 @@
     position: fixed;
     inset: 0;
     z-index: 70;
-    background: rgba(16, 24, 40, 0.34);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    background: rgba(18, 26, 48, 0.24);
+    -webkit-backdrop-filter: blur(6px) saturate(140%);
+    backdrop-filter: blur(6px) saturate(140%);
+    animation: ns-fade-in var(--dur-3) var(--ease-out) both;
+  }
+
+  .ui-modal,
+  .ui-sheet {
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.84);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
+    box-shadow: var(--ui-shadow-xl);
   }
 
   .ui-modal {
     position: relative;
     width: 100%;
-    max-width: 440px;
+    max-width: 460px;
     max-height: calc(100dvh - 48px);
     overflow-y: auto;
-    padding: 22px;
+    padding: 24px;
     border-radius: var(--ns-radius-2xl);
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow-xl);
+    animation: ns-pop-in var(--dur-4) var(--ease-liquid) both;
   }
 
   /* En el celular todo lo que abre lo hace desde abajo. */
   .ui-sheet {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + var(--sab));
     z-index: 80;
-    max-height: 92dvh;
+    max-height: calc(92dvh - var(--sab));
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 10px 18px calc(24px + var(--sab));
-    border-radius: var(--ns-radius-3xl) var(--ns-radius-3xl) 0 0;
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow-xl);
+    padding: 10px 18px 22px;
+    border-radius: var(--ns-radius-3xl);
+    animation: ns-sheet-up var(--dur-5) var(--ease-liquid) both;
   }
 
   .ui-sheet__handle {
-    width: 40px;
+    width: 38px;
     height: 5px;
     margin: 0 auto 16px;
     border-radius: 999px;
-    background: var(--ns-mix-24);
+    background: rgba(118, 128, 152, 0.34);
   }
 
   @media (min-width: 768px) {
@@ -345,11 +419,12 @@
       bottom: auto;
       top: 50%;
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       max-height: 86dvh;
-      padding: 24px;
+      padding: 26px;
       border-radius: var(--ns-radius-2xl);
       translate: -50% -50%;
+      animation: ns-pop-in var(--dur-4) var(--ease-liquid) both;
     }
 
     .ui-sheet__handle { display: none; }
@@ -365,59 +440,66 @@
     align-items: flex-start;
     justify-content: center;
     padding: 12vh 16px 16px;
-    background: rgba(16, 24, 40, 0.3);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(18, 26, 48, 0.22);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    backdrop-filter: blur(8px) saturate(150%);
   }
 
   .ns-search-modal {
     width: 100%;
-    max-width: 560px;
+    max-width: 580px;
     max-height: 62dvh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     border-radius: var(--ns-radius-2xl);
-    background: var(--ns-surface);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.84);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
     box-shadow: var(--ui-shadow-xl);
+    animation: ns-pop-in var(--dur-4) var(--ease-liquid) both;
   }
 
   .ns-search-input {
     width: 100%;
-    padding: 17px 20px;
+    padding: 18px 22px;
     border: 0;
     background: transparent;
     color: var(--ns-text);
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 1.0625rem;
     font-weight: 500;
+    letter-spacing: -0.015em;
     outline: none;
     box-shadow: inset 0 -1px 0 var(--ns-line);
   }
 
-  .ns-search-input::placeholder {
-    color: var(--ns-text-faint);
-  }
+  .ns-search-input::placeholder { color: var(--ns-text-faint); }
 
   .ns-search-item {
     display: flex;
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 11px 16px;
+    margin: 0 6px;
+    width: calc(100% - 12px);
+    padding: 10px 12px;
+    border-radius: 14px;
     text-align: left;
     background: transparent;
     cursor: pointer;
-    transition: background var(--dur-1) var(--ease-out);
+    transition: background-color var(--dur-1) var(--ease-out);
   }
 
-  .ns-search-item:hover {
-    background: var(--ns-surface-hover);
-  }
+  .ns-search-item:hover { background: rgba(118, 128, 152, 0.1); }
 
   .ns-search-item.is-active {
-    background: var(--ns-primary-bg);
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand-sm);
   }
+
+  .ns-search-item.is-active * { color: #FFFFFF !important; }
 
   .ns-search-selected {
     color: var(--ns-primary-dark);
@@ -429,16 +511,18 @@
   .ns-copy-toast {
     position: fixed;
     left: 50%;
-    bottom: calc(104px + var(--sab));
+    bottom: calc(108px + var(--sab));
     z-index: 95;
-    padding: 11px 20px;
+    padding: 12px 20px;
     border-radius: 999px;
-    background: var(--ns-sidebar);
+    background: var(--glass-dark-thick);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
     color: #FFFFFF;
     font-size: 0.8125rem;
     font-weight: 600;
     white-space: nowrap;
-    box-shadow: var(--ui-shadow-lg);
+    box-shadow: var(--glass-rim-dark), 0 16px 40px -12px rgba(15, 20, 40, 0.5);
     translate: -50% 0;
   }
 
@@ -452,31 +536,33 @@
     position: fixed;
     inset: 0;
     z-index: 100;
-    background: rgba(16, 24, 40, 0.58);
-    transition: clip-path var(--dur-4) var(--ease-out);
+    background: rgba(18, 26, 48, 0.5);
+    transition: clip-path var(--dur-5) var(--ease-liquid);
   }
 
-  /* El anillo que rodea lo que el tour está señalando. */
   .ns-tour-ring {
     position: fixed;
     z-index: 101;
     border-radius: var(--ns-radius-lg);
     box-shadow:
-      0 0 0 2px var(--ns-primary),
-      0 0 0 6px rgba(0, 122, 255, 0.28);
+      0 0 0 2px rgba(255, 255, 255, 0.95),
+      0 0 0 6px rgba(0, 122, 255, 0.45),
+      0 0 40px rgba(0, 122, 255, 0.45);
     pointer-events: none;
-    transition: all var(--dur-4) var(--ease-out);
+    transition: all var(--dur-5) var(--ease-liquid);
   }
 
   .ns-tour-card {
     position: fixed;
     z-index: 102;
-    width: min(340px, calc(100vw - 28px));
-    padding: 20px;
+    width: min(350px, calc(100vw - 28px));
+    padding: 22px;
     border-radius: var(--ns-radius-xl);
-    background: var(--ns-surface);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
     box-shadow: var(--ui-shadow-xl);
-    transition: all var(--dur-4) var(--ease-out);
+    transition: all var(--dur-5) var(--ease-liquid);
   }
 
   /* ═══════════════ ASISTENTE ═══════════════ */
@@ -484,64 +570,79 @@
   .ns-assistant-fab {
     position: fixed;
     right: 16px;
-    bottom: calc(96px + var(--sab));
+    bottom: calc(100px + var(--sab));
     z-index: 60;
     display: grid;
     place-items: center;
-    width: 52px;
-    height: 52px;
+    width: 54px;
+    height: 54px;
     border: 0;
     border-radius: 999px;
     background: var(--ns-gradient-1);
     color: #FFFFFF;
     cursor: pointer;
     box-shadow: var(--ui-brand-lg);
-    transition: transform var(--dur-2) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--dur-4) var(--ease-liquid), box-shadow var(--dur-2) var(--ease-out);
+  }
+
+  .ns-assistant-fab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.3));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
   }
 
   @media (min-width: 1024px) {
     .ns-assistant-fab {
       right: 26px;
       bottom: 26px;
-      width: 56px;
-      height: 56px;
+      width: 58px;
+      height: 58px;
     }
   }
 
-  .ns-assistant-fab:active {
-    transform: scale(0.92);
-  }
+  .ns-assistant-fab:hover { transform: translateY(-2px); }
+  .ns-assistant-fab:active { transform: scale(0.9); transition-duration: var(--dur-1); }
 
   .ns-assistant-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
+    top: -3px;
+    right: -3px;
     display: grid;
     place-items: center;
-    min-width: 19px;
-    height: 19px;
+    min-width: 20px;
+    height: 20px;
     padding: 0 5px;
     border-radius: 999px;
-    background: var(--ns-danger);
+    background: linear-gradient(180deg, #F0666A, #E5484D);
     color: #FFFFFF;
     font-size: 0.625rem;
     font-weight: 700;
-    box-shadow: 0 0 0 2px var(--ns-bg);
+    box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.9), 0 4px 10px -2px rgba(229, 72, 77, 0.6);
   }
 
   .ns-assistant-panel {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + var(--sab));
     z-index: 85;
     display: flex;
     flex-direction: column;
     max-height: 86dvh;
-    padding-bottom: var(--sab);
-    border-radius: var(--ns-radius-3xl) var(--ns-radius-3xl) 0 0;
-    background: var(--ns-surface);
+    border-radius: var(--ns-radius-3xl);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
     box-shadow: var(--ui-shadow-xl);
+    overflow: hidden;
   }
 
   @media (min-width: 768px) {
@@ -549,8 +650,8 @@
       left: auto;
       right: 24px;
       bottom: 24px;
-      width: 392px;
-      max-height: 640px;
+      width: 400px;
+      max-height: 660px;
       border-radius: var(--ns-radius-2xl);
     }
   }
@@ -558,25 +659,26 @@
   .ns-assistant-chat-msg {
     max-width: 84%;
     padding: 11px 15px;
-    border-radius: var(--ns-radius-lg);
+    border-radius: 20px;
     font-size: 0.9375rem;
     line-height: 1.5;
     white-space: pre-line;
   }
 
-  /* Burbujas de conversación al estilo de Mensajes. */
+  /* Burbujas como en Mensajes */
   .ns-chat-user {
     align-self: flex-end;
-    background: var(--ns-primary);
+    background: var(--ns-gradient-1);
     color: #FFFFFF;
-    border-bottom-right-radius: 5px;
+    border-bottom-right-radius: 6px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 16px -6px rgba(0, 122, 255, 0.55);
   }
 
   .ns-chat-assistant {
     align-self: flex-start;
-    background: var(--ns-sunken);
+    background: rgba(118, 128, 152, 0.13);
     color: var(--ns-text);
-    border-bottom-left-radius: 5px;
+    border-bottom-left-radius: 6px;
   }
 
   .ns-typing-dot {
@@ -587,22 +689,29 @@
     animation: ns-typing-dot 1.2s var(--ease-in-out) infinite;
   }
 
-  /* ═══════════════ PANEL DE SUPER ADMIN ═══════════════
-     Pantalla entera en el azul pizarra de la barra lateral: se
-     ve de un vistazo que no es el panel de un negocio. */
+  /* ═══════════════ SUPER ADMIN ═══════════════
+     Campo ambiental oscuro propio: se reconoce de un vistazo que no
+     es el panel de un negocio. */
 
   .ns-admin-shell {
-    background: var(--ns-sidebar);
+    background:
+      radial-gradient(60% 50% at 10% 0%, rgba(0, 122, 255, 0.34), transparent 70%),
+      radial-gradient(50% 45% at 95% 15%, rgba(139, 92, 246, 0.28), transparent 70%),
+      radial-gradient(55% 50% at 80% 100%, rgba(14, 156, 156, 0.2), transparent 70%),
+      linear-gradient(180deg, #1F252E 0%, #252C35 100%);
+    background-attachment: fixed;
     color: rgba(255, 255, 255, 0.86);
   }
 
   .ns-admin-shell .noni-topbar {
-    background: rgba(37, 44, 53, 0.78);
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    background: rgba(40, 48, 60, 0.55);
+    box-shadow: var(--glass-rim-dark), 0 16px 40px -16px rgba(0, 0, 0, 0.5);
   }
 
+  .ns-admin-shell .noni-topbar::before { background: var(--glass-edge-dark); }
+
   .ns-admin-shell .noni-topbar.is-stuck {
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.12), 0 4px 18px rgba(0, 0, 0, 0.22);
+    background: rgba(40, 48, 60, 0.72);
   }
 
   .ns-admin-shell .noni-topbar__title,
@@ -614,34 +723,30 @@
   }
 
   .ns-admin-shell .ui-icon-btn {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.82);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.86);
+    box-shadow: var(--glass-rim-dark);
   }
 
-  .ns-admin-shell .ui-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
-  }
-
-  .ns-admin-shell .ui-avatar--brand {
-    background: var(--ns-primary);
-    color: #FFFFFF;
-  }
+  .ns-admin-shell .ui-icon-btn::before { background: var(--glass-edge-dark); }
+  .ns-admin-shell .ui-icon-btn:hover { background: rgba(255, 255, 255, 0.16); color: #FFFFFF; }
 
   /* ═══════════════ NOTIFICACIONES ═══════════════ */
 
   .ns-notif-panel {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     right: 0;
-    width: 376px;
+    width: 380px;
     max-width: calc(100vw - 24px);
     z-index: 60;
     border-radius: var(--ns-radius-xl);
-    background: var(--ns-surface);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.82);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
     box-shadow: var(--ui-shadow-xl);
     overflow: hidden;
+    transform-origin: top right;
   }
 
   .ns-notif-panel__head {
@@ -649,20 +754,20 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 15px 18px;
+    padding: 16px 18px;
     box-shadow: inset 0 -1px 0 var(--ns-line);
   }
 
   .ns-notif-panel__title {
     font-family: var(--font-display);
-    font-size: 1rem;
-    font-weight: 650;
-    letter-spacing: -0.02em;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.022em;
     color: var(--ns-text);
   }
 
   .ns-notif-panel__body {
-    max-height: min(62vh, 400px);
+    max-height: min(62vh, 420px);
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 8px;
@@ -675,7 +780,6 @@
     box-shadow: inset 0 1px 0 var(--ns-line);
   }
 
-  /* Aviso para habilitar las notificaciones del navegador */
   .ns-notif-ask {
     display: flex;
     align-items: center;
@@ -687,7 +791,7 @@
     background: var(--ns-primary-bg);
     color: var(--ns-text);
     cursor: pointer;
-    transition: background var(--dur-2) var(--ease-out);
+    transition: background-color var(--dur-2) var(--ease-out);
   }
 
   .ns-notif-ask:hover { background: var(--ns-primary-bg-hover); }
@@ -699,9 +803,9 @@
     width: 34px;
     height: 34px;
     border-radius: 999px;
-    background: var(--ns-surface);
-    color: var(--ns-primary);
-    box-shadow: var(--ui-shadow-sm);
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand-sm);
   }
 
   .ns-notif-ask__title { display: block; font-size: 0.8125rem; font-weight: 650; }
@@ -715,7 +819,6 @@
     background: var(--ns-sunken);
   }
 
-  /* Un aviso sin leer se marca con el punto azul, no con relieve. */
   .ns-notif-item {
     display: flex;
     align-items: flex-start;
@@ -724,16 +827,15 @@
     padding: 11px 12px;
     border: 0;
     text-align: left;
-    border-radius: var(--ns-radius-md);
+    border-radius: 16px;
     background: transparent;
     cursor: pointer;
-    transition: background var(--dur-2) var(--ease-out);
+    transition: background-color var(--dur-2) var(--ease-out);
   }
 
-  .ns-notif-item:hover { background: var(--ns-surface-hover); }
-  .ns-notif-item:active { background: var(--ns-sunken); }
-
-  .ns-notif-item.is-read { opacity: 0.62; }
+  .ns-notif-item:hover { background: rgba(118, 128, 152, 0.09); }
+  .ns-notif-item:active { background: rgba(118, 128, 152, 0.14); }
+  .ns-notif-item.is-read { opacity: 0.6; }
 
   .ns-notif-item__icon {
     display: grid;
@@ -741,14 +843,15 @@
     flex: 0 0 auto;
     width: 38px;
     height: 38px;
-    border-radius: var(--ns-radius-sm);
+    border-radius: 12px;
     background: var(--ns-sunken);
     color: var(--ns-text-muted);
   }
 
   .ns-notif-item__icon--brand {
-    background: var(--ns-primary-bg);
-    color: var(--ns-primary);
+    background: var(--ns-gradient-1);
+    color: #FFFFFF;
+    box-shadow: var(--ui-brand-sm);
   }
 
   .ns-notif-item__title {
@@ -783,6 +886,7 @@
     height: 8px;
     border-radius: 999px;
     background: var(--ns-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.16);
   }
 
   @media (max-width: 520px) {
@@ -792,7 +896,65 @@
       left: 10px;
       width: auto;
       max-width: none;
-      top: calc(var(--sat, 0px) + 62px);
+      top: calc(var(--sat, 0px) + 76px);
     }
   }
+}
+
+/* ============================================================
+   RESPALDO SIN DESENFOQUE
+   Si el navegador no sabe desenfocar lo que queda detrás (o el
+   usuario pidió menos transparencia en su sistema), el vidrio
+   translúcido dejaría leer el texto de abajo, nítido, mezclado
+   con el propio. En esos casos la pieza flotante se espesa hasta
+   quedar casi opaca: pierde el efecto, no la legibilidad.
+   ============================================================ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .noni-topbar,
+  .ns-bottom-nav,
+  .ns-notif-panel,
+  .ns-search-modal,
+  .ns-assistant-panel,
+  .ns-tour-card,
+  .ui-modal,
+  .ui-sheet,
+  .ns-glass-sheet,
+  .ns-glass-bar,
+  .ns-login-card {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .noni-rail { background-color: rgba(34, 40, 50, 0.97) !important; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .noni-topbar,
+  .ns-bottom-nav,
+  .ns-notif-panel,
+  .ns-search-modal,
+  .ns-assistant-panel,
+  .ns-tour-card,
+  .ui-modal,
+  .ui-sheet,
+  .ns-glass-sheet,
+  .ns-glass-bar,
+  .ns-login-card {
+    background: rgba(255, 255, 255, 0.97) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .noni-rail {
+    background: #252C35 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body::before,
+  body::after { display: none; }
+}
+
+@layer components {
+  .noni-topbar__sub { color: var(--ns-text-muted); }
+  .ns-admin-shell .noni-topbar__sub { color: rgba(255, 255, 255, 0.5); }
 }

@@ -21,57 +21,73 @@
   .ns-login-bg {
     position: absolute;
     inset: 0;
-    background: var(--ns-bg);
+    background: transparent;
     pointer-events: none;
   }
 
-  /* Manchas de marca muy diluidas: dan profundidad sin ruido. */
+  /* Tres gotas de color cerca de la tarjeta: son lo que el vidrio
+     refracta. Sin filtro de desenfoque —que repinta un área enorme
+     en cada cuadro—: la suavidad la da el propio degradé radial, y
+     la deriva se hace con transform. */
   .ns-login-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(70px);
     pointer-events: none;
-    animation: ns-blob 16s ease-in-out infinite;
+    will-change: transform;
   }
 
   .ns-login-orb-1 {
-    top: -12%;
-    left: -10%;
-    width: 46vw;
-    height: 46vw;
-    max-width: 420px;
-    max-height: 420px;
-    background: rgba(0, 122, 255, 0.12);
+    top: 8%;
+    left: calc(50% - 360px);
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(0, 122, 255, 0.55) 0%, rgba(0, 122, 255, 0) 68%);
   }
 
   .ns-login-orb-2 {
-    bottom: -16%;
-    right: -12%;
-    width: 52vw;
-    height: 52vw;
-    max-width: 460px;
-    max-height: 460px;
-    background: rgba(0, 122, 255, 0.09);
-    animation-delay: 3s;
+    bottom: 4%;
+    right: calc(50% - 380px);
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.46) 0%, rgba(139, 92, 246, 0) 68%);
   }
 
   .ns-login-orb-3 {
-    top: 42%;
-    right: 18%;
-    width: 24vw;
-    height: 24vw;
-    max-width: 240px;
-    max-height: 240px;
-    background: rgba(139, 92, 246, 0.08);
-    animation-delay: 6s;
+    top: 46%;
+    left: calc(50% + 60px);
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(14, 156, 156, 0.4) 0%, rgba(14, 156, 156, 0) 68%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ns-login-orb-1 { animation: ns-orb-a 22s var(--ease-in-out) infinite alternate; }
+    .ns-login-orb-2 { animation: ns-orb-b 26s var(--ease-in-out) infinite alternate; }
+    .ns-login-orb-3 { animation: ns-orb-a 18s var(--ease-in-out) infinite alternate-reverse; }
   }
 
   .ns-login-card {
-    padding: 28px 24px;
-    border-radius: var(--ns-radius-2xl);
-    background: var(--ns-surface);
+    position: relative;
+    padding: 30px 24px;
+    border-radius: var(--ns-radius-3xl);
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.58);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
     box-shadow: var(--ui-shadow-xl);
-    animation: ns-pop-in var(--dur-5) var(--ease-spring) both;
+    animation: ns-pop-in var(--dur-5) var(--ease-liquid) both;
+  }
+
+  .ns-login-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
   }
 
   @media (min-width: 768px) {
@@ -296,30 +312,23 @@
   }
 
   /* Ticket de confirmación: papel troquelado. */
+  /* El comprobante es vidrio con las dos muescas de ticket CORTADAS con
+     máscara: se ve el campo de color a través, no un círculo gris
+     pintado encima. */
   .ns-public-ticket {
     position: relative;
     padding: 24px 20px;
     border-radius: var(--ns-radius-xl);
-    background: var(--ns-surface);
+    background: var(--glass-sheen), var(--glass-thick);
     box-shadow: var(--ui-shadow-lg);
     overflow: hidden;
+    -webkit-mask:
+      radial-gradient(circle 13px at 0 50%, transparent 12.5px, #000 13px) left / 51% 100% no-repeat,
+      radial-gradient(circle 13px at 100% 50%, transparent 12.5px, #000 13px) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 13px at 0 50%, transparent 12.5px, #000 13px) left / 51% 100% no-repeat,
+      radial-gradient(circle 13px at 100% 50%, transparent 12.5px, #000 13px) right / 51% 100% no-repeat;
   }
-
-  .ns-public-ticket::before,
-  .ns-public-ticket::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 26px;
-    height: 26px;
-    border-radius: 999px;
-    background: var(--ns-bg);
-    box-shadow: var(--ui-field-sm);
-    transform: translateY(-50%);
-  }
-
-  .ns-public-ticket::before { left: -13px; }
-  .ns-public-ticket::after { right: -13px; }
 
   .ns-public-product-card {
     display: flex;
@@ -602,5 +611,86 @@
 
   .ns-cal-day:active {
     transform: scale(0.94);
+  }
+}
+
+/* ============================================================
+   VIDRIO DE LA APP PÚBLICA
+   Las tarjetas y hojas que antes eran blanco opaco.
+   ============================================================ */
+@layer components {
+  .ns-glass-card {
+    position: relative;
+    background: var(--glass-sheen), var(--glass);
+    box-shadow: var(--ui-shadow);
+    transition: transform var(--dur-4) var(--ease-liquid), box-shadow var(--dur-3) var(--ease-out);
+  }
+
+  .ns-glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ui-shadow-lg);
+  }
+
+  /* Lo que se abre encima del contenido lleva desenfoque real. */
+  .ns-glass-sheet {
+    background: var(--glass-sheen), rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    backdrop-filter: var(--glass-blur-strong);
+    box-shadow: var(--ui-shadow-xl);
+  }
+
+  .ns-glass-bar {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 var(--ns-line);
+  }
+
+  :where(.ns-glass-card, .ns-glass-sheet)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+}
+
+/* ============================================================
+   CAMPO AMBIENTAL OSCURO
+   Para el alta de negocio: el azul pizarra de la referencia con
+   el azul y el violeta encendidos detrás. El vidrio claro de los
+   campos flota encima como en el modo oscuro del sistema.
+   ============================================================ */
+@layer components {
+  .ns-ambient-dark {
+    position: relative;
+    isolation: isolate;
+    color: #FFFFFF;
+    background:
+      radial-gradient(55% 45% at 12% 8%, rgba(0, 122, 255, 0.5), transparent 70%),
+      radial-gradient(45% 40% at 92% 18%, rgba(139, 92, 246, 0.4), transparent 70%),
+      radial-gradient(50% 45% at 78% 96%, rgba(14, 156, 156, 0.3), transparent 72%),
+      radial-gradient(40% 35% at 10% 92%, rgba(224, 145, 18, 0.16), transparent 72%),
+      linear-gradient(180deg, #1C222B 0%, #252C35 100%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* El alta tapa todo el panel: es un momento aparte, como la
+     configuración inicial de un teléfono. */
+  .ns-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    min-height: 100dvh;
   }
 }

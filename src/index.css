@@ -8,23 +8,27 @@
 @import "./styles/views.css";
 
 /* ============================================================
-   NONI — SISTEMA DE DISEÑO
+   NONI — LIQUID GLASS
 
-   Paleta tomada de la referencia, píxel por píxel:
-     · #E9EEF4  lienzo        gris azulado del área de contenido
-     · #FFFFFF  superficie    tarjetas y paneles
-     · #252C35  barra lateral azul pizarra profundo
+   Paleta de la referencia, medida píxel por píxel:
+     · #E9EEF4  lienzo        gris azulado
+     · #FFFFFF  superficie    el vidrio claro
+     · #252C35  barra lateral el vidrio oscuro
      · #1D212A  tinta         texto principal
-     · #007AFF  acción        el azul del botón y del avatar
-     · #259C5B  confirmado    verde del ícono de estado
-     · #E09112  pendiente     ámbar del ícono de estado
-     · #8B5CF6  destacado     violeta del borde de tarjeta
+     · #007AFF  acción        el azul del sistema
+     · #259C5B  confirmado    · #E09112 pendiente · #8B5CF6 destacado
 
-   Criterio: superficies planas, líneas de un píxel, sombras
-   apenas perceptibles y radios generosos. La jerarquía la dan
-   el contraste y el espacio, no el relieve. El color se reserva
-   para el estado y para la acción principal; todo lo demás vive
-   en la escala de grises azulados.
+   El material manda. Todo lo que es interfaz es vidrio: deja pasar
+   el color del fondo, lo desenfoca y lo satura, y tiene un borde
+   que agarra la luz. Para que el vidrio se lea tiene que haber algo
+   vivo detrás, así que el lienzo deja de ser un gris plano y pasa a
+   ser un campo de color de la misma paleta, desenfocado y en
+   movimiento lento.
+
+   Tres capas y nada más:
+     1. el fondo ambiental — color, nunca contenido;
+     2. el contenido — tarjetas de vidrio claro;
+     3. los controles — flotan encima, con desenfoque real.
    ============================================================ */
 
 /* ------------------------------------------------------------
@@ -80,13 +84,13 @@
 
   /* Sombras: en este sistema casi no se ven. Sirven para separar
      una capa de la siguiente, no para dar volumen. */
-  --shadow-2xs: 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-md: 0 4px 10px rgba(16, 24, 40, 0.07), 0 2px 4px rgba(16, 24, 40, 0.04);
-  --shadow-lg: 0 12px 24px rgba(16, 24, 40, 0.09), 0 4px 8px rgba(16, 24, 40, 0.04);
-  --shadow-xl: 0 24px 48px rgba(16, 24, 40, 0.13), 0 8px 16px rgba(16, 24, 40, 0.05);
-  --shadow-2xl: 0 32px 64px rgba(16, 24, 40, 0.18);
+  --shadow-2xs: 0 1px 2px rgba(20, 30, 70, 0.05);
+  --shadow-xs: 0 1px 2px rgba(20, 30, 70, 0.06), 0 2px 8px -2px rgba(35, 52, 110, 0.08);
+  --shadow-sm: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(20, 30, 70, 0.05), 0 6px 16px -6px rgba(35, 52, 110, 0.16);
+  --shadow-md: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(20, 30, 70, 0.05), 0 12px 28px -10px rgba(35, 52, 110, 0.2);
+  --shadow-lg: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 8px rgba(20, 30, 70, 0.05), 0 22px 46px -16px rgba(35, 52, 110, 0.26);
+  --shadow-xl: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 16px rgba(20, 30, 70, 0.06), 0 34px 70px -22px rgba(20, 30, 70, 0.34);
+  --shadow-2xl: 0 44px 90px -24px rgba(20, 30, 70, 0.42);
 }
 
 :root {
@@ -97,160 +101,245 @@
   --ns-sidebar: #252C35;
   --ns-brand: #007AFF;
 
-  /* ── Superficies ──────────────────────────────────────────── */
-  --ns-bg: var(--ns-canvas);
-  --ns-surface: #FFFFFF;
-  --ns-surface-elevated: #FFFFFF;
-  --ns-surface-hover: #F6F9FC;
-  --ns-sunken: #F1F4F9;
-  --ns-accent: #E4EAF2;
-  --ns-accent-bg: #F1F5F9;
+  /* ── Campo ambiental ──────────────────────────────────────────
+     Los cuatro acentos de la paleta, muy diluidos, sobre el
+     lienzo. Es lo que el vidrio deja ver y refracta. */
+  --ns-ambient-base: linear-gradient(165deg, #EDF2FA 0%, #E6ECF5 46%, #DFE6F1 100%);
+  --ns-ambient-blue: rgba(0, 122, 255, 0.52);
+  --ns-ambient-violet: rgba(139, 92, 246, 0.42);
+  --ns-ambient-teal: rgba(14, 156, 156, 0.36);
+  --ns-ambient-amber: rgba(224, 145, 18, 0.26);
 
-  /* Barra lateral oscura, como en la referencia */
-  --ns-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --ns-sidebar-active: rgba(255, 255, 255, 0.11);
+  /* ── Vidrio ───────────────────────────────────────────────────
+     Rellenos translúcidos en tres espesores. El borde de luz va
+     como sombra interior, así cualquier elemento que use estos
+     tokens —incluso con estilo en línea— se ve como vidrio. */
+  --glass-thin: rgba(255, 255, 255, 0.36);
+  --glass: rgba(255, 255, 255, 0.5);
+  --glass-thick: rgba(255, 255, 255, 0.68);
+  --glass-solid: rgba(255, 255, 255, 0.9);
+  --glass-dark: rgba(37, 44, 53, 0.62);
+  --glass-dark-thick: rgba(30, 36, 45, 0.86);
+  --glass-blur: blur(26px) saturate(185%);
+  --glass-blur-strong: blur(40px) saturate(190%);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 46%);
+  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 0 0 1px rgba(255, 255, 255, 0.52);
+  --glass-rim-dark: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  /* Borde especular: más brillante arriba a la izquierda, donde
+     pega la luz, y con un rebote más tenue abajo a la derecha. */
+  --glass-edge: linear-gradient(145deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(255, 255, 255, 0.42) 20%,
+      rgba(255, 255, 255, 0.06) 46%,
+      rgba(255, 255, 255, 0.22) 74%,
+      rgba(255, 255, 255, 0.78) 100%);
+  --glass-edge-dark: linear-gradient(145deg,
+      rgba(255, 255, 255, 0.36) 0%,
+      rgba(255, 255, 255, 0.08) 34%,
+      rgba(255, 255, 255, 0.02) 60%,
+      rgba(255, 255, 255, 0.18) 100%);
+
+  /* ── Superficies ──────────────────────────────────────────────
+     La superficie ES vidrio: los estilos en línea que ya usan
+     `var(--ns-surface)` se vuelven translúcidos sin tocarlos. */
+  --ns-bg: var(--ns-canvas);
+  --ns-surface: var(--glass);
+  --ns-surface-elevated: var(--glass-thick);
+  --ns-surface-hover: rgba(255, 255, 255, 0.8);
+  --ns-surface-solid: var(--glass-solid);
+  --ns-sunken: rgba(118, 128, 152, 0.11);
+  --ns-accent: rgba(118, 128, 152, 0.16);
+  --ns-accent-bg: rgba(118, 128, 152, 0.08);
+
+  /* Barra lateral de vidrio oscuro */
+  --ns-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --ns-sidebar-active: rgba(255, 255, 255, 0.13);
   --ns-sidebar-line: rgba(255, 255, 255, 0.09);
-  --ns-sidebar-text: rgba(255, 255, 255, 0.72);
-  --ns-sidebar-muted: rgba(255, 255, 255, 0.42);
+  --ns-sidebar-text: rgba(255, 255, 255, 0.74);
+  --ns-sidebar-muted: rgba(255, 255, 255, 0.44);
 
   /* ── Tinta ────────────────────────────────────────────────── */
   --ns-text: #1D212A;
-  --ns-text-secondary: #4A5462;
-  --ns-text-muted: #68748A;
-  --ns-text-faint: #94A1B2;
-  --ns-ink-faint: #CBD4E1;
+  --ns-text-secondary: #454F5E;
+  --ns-text-muted: #66718A;
+  --ns-text-faint: #8F9AAE;
+  --ns-ink-faint: #C3CCDA;
 
-  /* ── Líneas de un píxel ───────────────────────────────────── */
-  --ns-line: #E4EAF2;
-  --ns-line-strong: #D6DEE9;
-  --ns-border: #E0E6EF;
-  --ns-border-hover: #CBD4E1;
-  --ns-border-strong: #B8C2D2;
-  --ns-hairline: rgba(16, 24, 40, 0.08);
+  /* ── Líneas ───────────────────────────────────────────────── */
+  --ns-line: rgba(118, 128, 152, 0.16);
+  --ns-line-strong: rgba(118, 128, 152, 0.26);
+  --ns-border: rgba(118, 128, 152, 0.2);
+  --ns-border-hover: rgba(118, 128, 152, 0.32);
+  --ns-border-strong: rgba(118, 128, 152, 0.4);
+  --ns-hairline: rgba(20, 30, 70, 0.08);
 
   /* ── Acción ───────────────────────────────────────────────── */
   --ns-primary: #007AFF;
   --ns-primary-dark: #0062D6;
-  --ns-primary-light: #4A9CFF;
-  --ns-primary-bg: #EFF6FF;
-  --ns-primary-bg-hover: #DBEAFE;
-  --ns-primary-line: #BFDBFE;
+  --ns-primary-light: #4DA2FF;
+  --ns-primary-bg: rgba(0, 122, 255, 0.1);
+  --ns-primary-bg-hover: rgba(0, 122, 255, 0.16);
+  --ns-primary-line: rgba(0, 122, 255, 0.26);
 
   /* ── Estados ──────────────────────────────────────────────── */
-  --ns-success: #259C5B;
-  --ns-success-bg: #ECFDF3;
-  --ns-success-line: #A9EEC4;
-  --ns-warning: #E09112;
-  --ns-warning-bg: #FFF8EB;
-  --ns-warning-line: #FBDF92;
-  --ns-danger: #E5484D;
-  --ns-danger-bg: #FFF1F1;
-  --ns-danger-line: #FFC6C3;
-  --ns-highlight: #8B5CF6;
-  --ns-highlight-bg: #F5F2FF;
-  --ns-highlight-line: #D9CEFF;
+  --ns-success: #1E8A51;
+  --ns-success-solid: #259C5B;
+  --ns-success-bg: rgba(37, 156, 91, 0.13);
+  --ns-success-line: rgba(37, 156, 91, 0.26);
+  --ns-warning: #B8720A;
+  --ns-warning-solid: #E09112;
+  --ns-warning-bg: rgba(224, 145, 18, 0.14);
+  --ns-warning-line: rgba(224, 145, 18, 0.3);
+  --ns-danger: #D63A3F;
+  --ns-danger-solid: #E5484D;
+  --ns-danger-bg: rgba(229, 72, 77, 0.12);
+  --ns-danger-line: rgba(229, 72, 77, 0.26);
+  --ns-highlight: #7443E6;
+  --ns-highlight-solid: #8B5CF6;
+  --ns-highlight-bg: rgba(139, 92, 246, 0.13);
+  --ns-highlight-line: rgba(139, 92, 246, 0.28);
+  --ns-teal: #0B8585;
+  --ns-teal-bg: rgba(14, 156, 156, 0.13);
 
-  /* ── Degradados (muy contenidos) ──────────────────────────── */
-  --ns-gradient-1: linear-gradient(180deg, #1A88FF 0%, #007AFF 100%);
-  --ns-gradient-deep: linear-gradient(180deg, #0A7CFF 0%, #0062D6 100%);
-  --ns-gradient-soft: linear-gradient(180deg, #FFFFFF 0%, #F6F9FC 100%);
-  --ns-gradient-card: linear-gradient(180deg, #FFFFFF 0%, #FBFCFE 100%);
-  --ns-gradient-hero: linear-gradient(180deg, #F4F7FB 0%, #E9EEF4 100%);
-  --ns-gradient-dark: linear-gradient(180deg, #2B333E 0%, #252C35 100%);
+  /* ── Degradados ─────────────────────────────────────────────
+     El azul del botón principal es vidrio teñido: más claro
+     arriba, donde refleja, y más profundo abajo. */
+  --ns-gradient-1: linear-gradient(180deg, #3D9BFF 0%, #0A7CFF 48%, #0066E6 100%);
+  --ns-gradient-deep: linear-gradient(180deg, #2E8FFF 0%, #006EF0 50%, #005AD1 100%);
+  --ns-gradient-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 100%);
+  --ns-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.56) 100%);
+  --ns-gradient-hero: linear-gradient(160deg, rgba(0, 122, 255, 0.16), rgba(139, 92, 246, 0.12));
+  --ns-gradient-dark: linear-gradient(180deg, rgba(46, 54, 67, 0.66) 0%, rgba(30, 36, 45, 0.78) 100%);
 
-  /* ── Elevación ────────────────────────────────────────────────
-     Cuatro niveles y basta. El primero es casi sólo la línea; el
-     último es para lo que flota sobre un velo. */
-  --ui-hairline: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
-  --ui-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05), inset 0 0 0 1px rgba(16, 24, 40, 0.07);
-  --ui-shadow: 0 1px 3px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.05), inset 0 0 0 1px rgba(16, 24, 40, 0.06);
-  --ui-shadow-lg: 0 4px 10px rgba(16, 24, 40, 0.06), 0 14px 32px rgba(16, 24, 40, 0.09), inset 0 0 0 1px rgba(16, 24, 40, 0.05);
-  --ui-shadow-xl: 0 8px 20px rgba(16, 24, 40, 0.08), 0 28px 60px rgba(16, 24, 40, 0.16);
+  /* ── Elevación ──────────────────────────────────────────────
+     Cada nivel trae su borde de luz. Las sombras tienen un tinte
+     azul apenas: sobre un fondo de color, una sombra gris pura se
+     ve sucia. */
+  --ui-hairline: var(--glass-rim);
+  --ui-shadow-sm:
+    var(--glass-rim),
+    0 1px 2px rgba(20, 30, 70, 0.05),
+    0 6px 18px -8px rgba(35, 52, 110, 0.18);
+  --ui-shadow:
+    var(--glass-rim),
+    0 1px 2px rgba(20, 30, 70, 0.05),
+    0 14px 34px -12px rgba(35, 52, 110, 0.22);
+  --ui-shadow-lg:
+    var(--glass-rim),
+    0 2px 6px rgba(20, 30, 70, 0.06),
+    0 24px 52px -18px rgba(35, 52, 110, 0.3);
+  --ui-shadow-xl:
+    var(--glass-rim),
+    0 8px 20px -6px rgba(20, 30, 70, 0.14),
+    0 40px 90px -28px rgba(20, 30, 70, 0.42);
 
-  /* Campos y superficies hundidas: en este idioma no se hunden,
-     se llenan de gris y se marcan con una línea. */
-  --ui-field: inset 0 0 0 1px rgba(16, 24, 40, 0.10);
-  --ui-field-sm: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
-  --ui-field-deep: inset 0 0 0 1px rgba(16, 24, 40, 0.12);
-  --ui-field-focus: inset 0 0 0 1px var(--ns-primary), 0 0 0 4px rgba(0, 122, 255, 0.16);
-  --ui-pressed: inset 0 1px 3px rgba(16, 24, 40, 0.12), inset 0 0 0 1px rgba(16, 24, 40, 0.10);
+  /* Campos: relleno de sistema, sin borde duro. */
+  --ui-field: inset 0 0 0 1px rgba(118, 128, 152, 0.1);
+  --ui-field-sm: inset 0 0 0 1px rgba(118, 128, 152, 0.08);
+  --ui-field-deep: inset 0 0 0 1px rgba(118, 128, 152, 0.2);
+  --ui-field-focus: inset 0 0 0 1px rgba(0, 122, 255, 0.62), 0 0 0 4px rgba(0, 122, 255, 0.16);
+  --ui-pressed: inset 0 1px 3px rgba(20, 30, 70, 0.12), inset 0 0 0 1px rgba(118, 128, 152, 0.14);
 
-  /* Acento azul con sombra propia, para el botón principal */
-  --ui-brand-sm: 0 1px 2px rgba(0, 86, 179, 0.24);
-  --ui-brand: 0 1px 2px rgba(0, 86, 179, 0.22), 0 6px 16px rgba(0, 122, 255, 0.28);
-  --ui-brand-lg: 0 2px 4px rgba(0, 86, 179, 0.22), 0 12px 28px rgba(0, 122, 255, 0.32);
-  --ui-brand-pressed: inset 0 2px 5px rgba(0, 60, 130, 0.35);
+  /* Vidrio azul del botón principal */
+  --ui-brand-sm:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(0, 40, 120, 0.2),
+    0 4px 12px -4px rgba(0, 122, 255, 0.5);
+  --ui-brand:
+    inset 0 1px 0 rgba(255, 255, 255, 0.46),
+    inset 0 -1px 0 rgba(0, 40, 120, 0.22),
+    0 2px 4px rgba(0, 80, 200, 0.18),
+    0 10px 26px -8px rgba(0, 122, 255, 0.62);
+  --ui-brand-lg:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 40, 120, 0.22),
+    0 3px 6px rgba(0, 80, 200, 0.2),
+    0 18px 40px -12px rgba(0, 122, 255, 0.7);
+  --ui-brand-pressed:
+    inset 0 2px 6px rgba(0, 40, 120, 0.36),
+    inset 0 0 0 1px rgba(0, 40, 120, 0.14);
 
-  /* Compatibilidad con los llamados que quedan en el código */
+  /* Alias de compatibilidad */
   --ui-surface: var(--ns-surface);
   --ui-light: rgba(255, 255, 255, 0.9);
-  --ui-shadow-soft: rgba(16, 24, 40, 0.06);
+  --ui-shadow-soft: rgba(35, 52, 110, 0.12);
   --ui-flat: none;
 
-  /* ── Vidrio ───────────────────────────────────────────────── */
-  --ns-glass-bg: rgba(255, 255, 255, 0.78);
-  --ns-glass-bg-strong: rgba(255, 255, 255, 0.92);
-  --ns-glass-border: rgba(16, 24, 40, 0.07);
-  --ns-glass-blur: blur(20px) saturate(180%);
-  --ns-glass-dark: rgba(37, 44, 53, 0.82);
+  /* ── Barras translúcidas ──────────────────────────────────── */
+  --ns-glass-bg: rgba(255, 255, 255, 0.58);
+  --ns-glass-bg-strong: rgba(255, 255, 255, 0.74);
+  --ns-glass-border: rgba(255, 255, 255, 0.6);
+  --ns-glass-blur: var(--glass-blur);
+  --ns-glass-dark: var(--glass-dark);
 
-  --ns-focus: rgba(0, 122, 255, 0.35);
-  --ns-shadow-glow: 0 0 0 4px rgba(0, 122, 255, 0.16);
+  --ns-focus: rgba(0, 122, 255, 0.4);
+  --ns-shadow-glow: 0 0 0 4px rgba(0, 122, 255, 0.18);
 
   /* Sombras semánticas heredadas */
-  --ns-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --ns-shadow-md: 0 4px 10px rgba(16, 24, 40, 0.07);
-  --ns-shadow-lg: 0 12px 24px rgba(16, 24, 40, 0.09);
-  --ns-shadow-xl: 0 24px 48px rgba(16, 24, 40, 0.13);
-  --ns-shadow-inner: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
+  --ns-shadow-sm: var(--ui-shadow-sm);
+  --ns-shadow-md: var(--ui-shadow);
+  --ns-shadow-lg: var(--ui-shadow-lg);
+  --ns-shadow-xl: var(--ui-shadow-xl);
+  --ns-shadow-inner: var(--ui-field);
 
-  /* ── Radios ─────────────────────────────────────────────────
-     La curva de iOS: chica en controles, amplia en tarjetas. */
-  --ns-radius-xs: 7px;
-  --ns-radius-sm: 9px;
-  --ns-radius-md: 11px;
-  --ns-radius-lg: 14px;
-  --ns-radius-xl: 18px;
-  --ns-radius-2xl: 22px;
-  --ns-radius-3xl: 28px;
+  /* ── Radios concéntricos ────────────────────────────────────
+     Un elemento dentro de otro lleva el radio de afuera menos el
+     margen que los separa: así las curvas quedan paralelas, que
+     es lo que hace que el vidrio se vea tallado de una pieza. */
+  --ns-radius-xs: 8px;
+  --ns-radius-sm: 11px;
+  --ns-radius-md: 14px;
+  --ns-radius-lg: 20px;
+  --ns-radius-xl: 26px;
+  --ns-radius-2xl: 30px;
+  --ns-radius-3xl: 36px;
 
-  /* ── Escala de mezcla ───────────────────────────────────────
-     Mezclas del lienzo con la tinta. Sustituye a la vieja escala
-     de bordó sobre papel; los nombres se mantienen para no
-     romper los llamados que ya existen. */
-  --ns-mix-02: #FAFBFD;
-  --ns-mix-03: #F8FAFC;
-  --ns-mix-05: #F5F8FB;
-  --ns-mix-06: #F3F6FA;
-  --ns-mix-08: #F0F4F9;
-  --ns-mix-10: #EDF1F7;
-  --ns-mix-12: #E9EEF4;
-  --ns-mix-14: #E4EAF2;
-  --ns-mix-16: #DFE6EF;
-  --ns-mix-20: #D6DEE9;
-  --ns-mix-24: #CBD4E1;
-  --ns-mix-28: #BFC9D8;
-  --ns-mix-44: #94A1B2;
-  --ns-mix-56: #68748A;
-  --ns-mix-68: #4A5462;
-  --ns-mix-80: #374151;
+  /* ── Escala de mezcla (nombres heredados) ─────────────────── */
+  --ns-mix-02: rgba(255, 255, 255, 0.78);
+  --ns-mix-03: rgba(255, 255, 255, 0.66);
+  --ns-mix-05: rgba(118, 128, 152, 0.05);
+  --ns-mix-06: rgba(118, 128, 152, 0.07);
+  --ns-mix-08: rgba(118, 128, 152, 0.09);
+  --ns-mix-10: rgba(118, 128, 152, 0.11);
+  --ns-mix-12: rgba(118, 128, 152, 0.13);
+  --ns-mix-14: rgba(118, 128, 152, 0.16);
+  --ns-mix-16: rgba(118, 128, 152, 0.19);
+  --ns-mix-20: rgba(118, 128, 152, 0.24);
+  --ns-mix-24: rgba(118, 128, 152, 0.3);
+  --ns-mix-28: rgba(118, 128, 152, 0.36);
+  --ns-mix-44: #8F9AAE;
+  --ns-mix-56: #66718A;
+  --ns-mix-68: #454F5E;
+  --ns-mix-80: #333B48;
   --ns-mix-90: #252C35;
 
   /* ── Tiempos ────────────────────────────────────────────────
-     Cortos y con una curva suave: el movimiento acompaña, no se
-     hace notar. */
-  --dur-1: 90ms;
-  --dur-2: 140ms;
-  --dur-3: 220ms;
-  --dur-4: 320ms;
-  --dur-5: 480ms;
+     Cortos. La curva por defecto es la salida de iOS; la curva
+     líquida es un resorte de verdad (4% de sobrepaso) escrito
+     con linear(), para las transiciones de CSS que no pasan por
+     framer-motion. */
+  --dur-1: 110ms;
+  --dur-2: 180ms;
+  --dur-3: 260ms;
+  --dur-4: 380ms;
+  --dur-5: 560ms;
   --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-spring: cubic-bezier(0.34, 1.32, 0.48, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.5, 1);
+  --ease-liquid: var(--ease-out);
+  --ease-bounce: var(--ease-spring);
 
   /* Márgenes seguros del dispositivo */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+}
+
+/* Donde el navegador sabe dibujar un resorte, se usa el resorte. */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-liquid: linear(0, 0.0347, 0.1207, 0.2351, 0.3611, 0.4866, 0.6036, 0.7072, 0.7953, 0.8673, 0.9239, 0.9665, 0.9971, 1.0176, 1.0302, 1.0365, 1.0384, 1.0372, 1.0339, 1.0295, 1.0247, 1.0199, 1.0154, 1.0114, 1.008, 1.0052, 1.003, 1.0013, 1.0001, 0.9993, 0.9989, 0.9986, 0.9985, 0.9986, 1);
+    --ease-bounce: linear(0, 0.042, 0.1467, 0.2865, 0.4394, 0.5892, 0.7252, 0.8407, 0.9331, 1.0022, 1.0497, 1.0785, 1.0923, 1.0944, 1.0885, 1.0774, 1.0636, 1.049, 1.0351, 1.0227, 1.0124, 1.0043, 0.9983, 0.9943, 0.9921, 0.9911, 0.9911, 0.9919, 0.993, 0.9944, 0.9957, 0.997, 0.9981, 0.9991, 1);
+  }
 }

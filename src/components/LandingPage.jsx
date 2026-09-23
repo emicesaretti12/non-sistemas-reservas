@@ -224,7 +224,7 @@ export default function LandingPage() {
             >
               <span className="font-bold text-[10px] italic">NS</span>
             </div>
-            <span className="text-sm font-bold tracking-tight">Non sistemas</span>
+            <span className="text-sm font-bold tracking-tight">Non Sistemas</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {[['#features', 'Funciones'], ['#como', 'Cómo funciona'], ['#precio', 'Precio'], ['#faq', 'FAQ']].map(([h, l]) => (

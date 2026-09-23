@@ -385,7 +385,7 @@ export default function OnboardingWizard({ session, onComplete }) {
   // ── Saving screen ────────────────────────────────────────────────────────
   if (saving) {
     return (
-      <div className="min-h-screen bg-[#007AFF] flex items-center justify-center">
+      <div className="ns-ambient-dark ns-fullscreen flex items-center justify-center">
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center space-y-6">
           <motion.div animate={{rotate:360}} transition={{repeat:Infinity,duration:1,ease:'linear'}}
             className="w-14 h-14 rounded-full mx-auto" style={{ border: '4px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--ns-paper)' }} />
@@ -552,7 +552,7 @@ export default function OnboardingWizard({ session, onComplete }) {
 
   // ── Main layout ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-dvh flex" style={{ background: 'var(--ns-gradient-1)' }}>
+    <div className="ns-ambient-dark ns-fullscreen flex">
       {/* Left: Chat / Form panel */}
       <div className="flex-1 flex flex-col max-w-2xl mx-auto lg:mx-0 p-6 lg:p-12">
         {/* Header */}
@@ -561,7 +561,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             <span className="font-bold text-sm italic">NS</span>
           </div>
           <div>
-            <p className="font-bold text-sm leading-none" style={{ color: 'var(--ns-paper)' }}>Non sistemas</p>
+            <p className="font-bold text-sm leading-none" style={{ color: 'var(--ns-paper)' }}>Non Sistemas</p>
             <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Configuración guiada</p>
           </div>
         </div>
@@ -594,7 +594,7 @@ export default function OnboardingWizard({ session, onComplete }) {
       </div>
 
       {/* Right: Live Preview Phone */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-12" style={{ background: 'var(--ns-primary)', boxShadow: 'inset 1px 0 0 rgba(255,255,255,0.08)' }}>
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12" style={{ boxShadow: 'inset 1px 0 0 rgba(255,255,255,0.08)' }}>
         <div className="text-center space-y-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: 'rgba(255,255,255,0.5)' }}>Vista en tiempo real</p>

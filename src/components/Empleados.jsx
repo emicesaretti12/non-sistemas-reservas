@@ -229,7 +229,7 @@ export default function Empleados({ negocioId, rubro }) {
 
       <header className="ui-card p-5 md:p-7 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="ui-head__title text-[22px] md:text-[26px]">{vocab.empleadoPlural}</h2>
+          <h2 className="ui-head__title">{vocab.empleadoPlural}</h2>
           <div className="flex items-center gap-2 mt-2">
             <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
             <p className="ui-eyebrow">

@@ -21,7 +21,7 @@ function saludo() {
   return 'Buenas noches'
 }
 
-const fmtHora = (d) => new Date(d).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+const fmtHora = (d) => new Date(d).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 
 export default function DashboardHome({
   negocio,
@@ -281,17 +281,20 @@ export default function DashboardHome({
 
       {/* ═══════════ MÉTRICAS DEL DÍA ═══════════ */}
       <div className="grid grid-cols-3 gap-3 md:gap-4" data-testid="home-today-stats">
-        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="ui-tile" data-testid="metric-citas">
+        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="ui-tile ui-tile--blue" data-testid="metric-citas">
+          <span className="ui-pod ui-pod--sm  mb-3" aria-hidden="true"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
           <span className="ui-stat__label">{mayusculaInicial(vocab?.turnos || 'Citas')} hoy</span>
           <span className="ui-stat__value"><Contador valor={turnosHoy.length} /></span>
           <span className="ui-stat__foot">{proximos.length} por venir</span>
         </button>
-        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="ui-tile" data-testid="metric-lugares">
+        <button onClick={() => { haptic(); onNavigate?.('agenda') }} className="ui-tile ui-tile--violet" data-testid="metric-lugares">
+          <span className="ui-pod ui-pod--sm ui-pod--violet mb-3" aria-hidden="true"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
           <span className="ui-stat__label">Libres hoy</span>
           <span className="ui-stat__value"><Contador valor={lugaresCount} /></span>
           <span className="ui-stat__foot">{lugaresCount === 1 ? 'Cupo disponible' : 'Cupos disponibles'}</span>
         </button>
-        <div className="ui-tile" data-testid="metric-ingresos">
+        <div className="ui-tile ui-tile--green" data-testid="metric-ingresos">
+          <span className="ui-pod ui-pod--sm ui-pod--green mb-3" aria-hidden="true"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
           <span className="ui-stat__label">Ingresos</span>
           <span className="ui-stat__value" style={{ fontSize: 'clamp(20px, 4.4vw, 32px)' }}>
             <Contador valor={ingresosHoy} prefijo="$" />

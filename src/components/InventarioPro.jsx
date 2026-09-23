@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../supabaseClient'
 import { useToast } from './Toast'
 import Contador from './ui/Contador'
+import Lente from './ui/Lente'
 import { useConfirm } from '../contexts/ConfirmContext'
 
 // Con una sola tinta el nivel no puede depender del color: lleno = urgente,
@@ -256,7 +257,7 @@ export default function InventarioPro({ negocioId }) {
       {/* Header */}
       <header className="ui-card p-5 md:p-7 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="ui-head__title text-[22px] md:text-[26px]">Inventario</h2>
+          <h2 className="ui-head__title">Inventario</h2>
           <div className="flex items-center gap-2 mt-2">
             <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
             <p className="ui-eyebrow">{items.length} productos cargados</p>
@@ -317,7 +318,8 @@ export default function InventarioPro({ negocioId }) {
                 className={filtro === cat ? 'is-active' : ''}
                 aria-pressed={filtro === cat}
               >
-                {cat}
+                {filtro === cat && <Lente grupo="inventario-categoria" />}
+                {cat === 'todos' ? 'Todos' : cat}
               </button>
             ))}
           </div>

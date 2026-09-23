@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import Contador from './ui/Contador'
+import Lente from './ui/Lente'
 import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
 import { factura, precioTurno } from '../utils/reservas'
 
@@ -179,11 +180,11 @@ export default function Reportes({ negocioId, rubro }) {
               </div>
               <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Análisis de Rendimiento</span>
             </div>
-            <h2 className="ui-head__title text-[22px] md:text-[26px]">Reportes</h2>
+            <h2 className="ui-head__title">Reportes</h2>
           </div>
 
-          {/* Selector de período — Plastilina Pill */}
-          <div className="ns-period-selector self-start sm:self-auto">
+          {/* Selector de período */}
+          <div className="ui-segment self-start sm:self-auto">
             {[
               { id: 'semana', label: 'Semana' },
               { id: 'mes', label: 'Mes' },
@@ -192,8 +193,10 @@ export default function Reportes({ negocioId, rubro }) {
               <button
                 key={p.id}
                 onClick={() => setPeriodo(p.id)}
-                className={`ns-period-btn ${periodo === p.id ? 'active' : ''}`}
+                className={periodo === p.id ? 'is-active' : ''}
+                aria-pressed={periodo === p.id}
               >
+                {periodo === p.id && <Lente grupo="reportes-periodo" />}
                 {p.label}
               </button>
             ))}
@@ -204,9 +207,9 @@ export default function Reportes({ negocioId, rubro }) {
       {/* ── KPIs PRINCIPALES — Plastilina 3D ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Ingresos */}
-        <div className="ns-kpi-card ns-stagger-in ns-delay-1">
+        <div className="ns-kpi-card ui-tile ui-tile--green ns-stagger-in ns-delay-1">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <span className="ui-pod ui-pod--brand ui-pod--sm">
+            <span className="ui-pod ui-pod--green ui-pod--sm">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
             <span
@@ -219,20 +222,19 @@ export default function Reportes({ negocioId, rubro }) {
               {Math.abs(variacionIngresos)}%
             </span>
           </div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.15em] mb-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ingresos</p>
+          <p className="text-[12px] font-semibold mb-0.5 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ingresos</p>
           <h3 className="font-display text-[26px] md:text-[30px] font-bold tracking-tight relative z-10" style={{ color: 'var(--ns-text)' }}>
             <Contador valor={datos.ingresosPeriodo} prefijo="$" />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             vs. ${datos.comparacion.ingresosAnterior.toLocaleString()} período anterior
           </p>
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(0,122,255,0.08)' }} />
         </div>
 
         {/* Turnos */}
-        <div className="ns-kpi-card ns-stagger-in ns-delay-2">
+        <div className="ns-kpi-card ui-tile ui-tile--blue ns-stagger-in ns-delay-2">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <span className="ui-pod ui-pod--brand ui-pod--sm">
+            <span className="ui-pod ui-pod--sm">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
             <span
@@ -245,34 +247,32 @@ export default function Reportes({ negocioId, rubro }) {
               {Math.abs(variacionTurnos)}%
             </span>
           </div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.15em] mb-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>{vocab.turnos}</p>
+          <p className="text-[12px] font-semibold mb-0.5 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>{vocab.turnos}</p>
           <h3 className="font-display text-[26px] md:text-[30px] font-bold tracking-tight relative z-10" style={{ color: 'var(--ns-text)' }}>
             <Contador valor={datos.turnosPeriodo} />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             vs. {datos.comparacion.turnosAnterior} período anterior
           </p>
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(0,122,255,0.08)' }} />
         </div>
 
         {/* Ticket Promedio */}
-        <div className="ns-kpi-card ns-stagger-in ns-delay-3">
+        <div className="ns-kpi-card ui-tile ui-tile--violet ns-stagger-in ns-delay-3">
           <div className="flex items-start justify-between mb-3 relative z-10">
-            <span className="ui-pod ui-pod--brand ui-pod--sm">
+            <span className="ui-pod ui-pod--violet ui-pod--sm">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
             <span className="text-[9px] font-bold px-2.5 py-1 rounded-xl" style={{ background: 'var(--ns-primary-bg)', color: 'var(--ns-primary)' }}>
               Promedio
             </span>
           </div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.15em] mb-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ticket Prom.</p>
+          <p className="text-[12px] font-semibold mb-0.5 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>Ticket Prom.</p>
           <h3 className="font-display text-[26px] md:text-[30px] font-bold tracking-tight relative z-10" style={{ color: 'var(--ns-text)' }}>
             <Contador valor={datos.ticketPromedio} prefijo="$" />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
             por {vocab.turno} confirmado
           </p>
-          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none" style={{ background: 'rgba(0,122,255,0.08)' }} />
         </div>
       </div>
 

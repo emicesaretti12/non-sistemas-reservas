@@ -169,7 +169,7 @@ export default function Servicios({ negocioId, rubro }) {
       {/* Encabezado */}
       <header className="ui-card p-5 md:p-7 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="ui-head__title text-[22px] md:text-[26px]">{vocab.servicioPlural}</h2>
+          <h2 className="ui-head__title">{vocab.servicioPlural}</h2>
           <div className="flex items-center gap-2 mt-2">
             <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
             <p className="ui-eyebrow">{servicios.length} {vocab.servicios} activos</p>
@@ -225,7 +225,7 @@ export default function Servicios({ negocioId, rubro }) {
             <article key={srv.id} className="ui-tile !gap-0 justify-between">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-display text-xl md:text-2xl font-bold leading-tight truncate" style={{ color: 'var(--ns-text)' }}>
+                  <h4 className="font-display text-lg md:text-xl font-bold leading-snug line-clamp-2" style={{ color: 'var(--ns-text)', letterSpacing: '-0.02em' }}>
                     {srv.nombre}
                   </h4>
                   <span className="ui-chip ui-chip--quiet mt-2.5">
@@ -233,7 +233,7 @@ export default function Servicios({ negocioId, rubro }) {
                     {srv.duracion_minutos} min
                   </span>
                 </div>
-                <span className="font-display text-2xl md:text-3xl font-bold tracking-tight leading-none tabular-nums shrink-0" style={{ color: 'var(--ns-text)' }}>
+                <span className="font-display text-xl md:text-2xl font-bold tracking-tight leading-none tabular-nums shrink-0 pt-0.5" style={{ color: 'var(--ns-primary)' }}>
                   ${Number(srv.precio || 0).toLocaleString('es-AR')}
                 </span>
               </div>

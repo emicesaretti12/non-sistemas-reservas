@@ -123,7 +123,7 @@ class NotificationService {
         id: turno.id,
         type: 'new_reservation',
         title: '¡Nueva reserva!',
-        message: `${cliente.nombre} reservó ${servicio?.nombre || 'un turno'}${turno.fecha_hora ? ` · ${new Date(turno.fecha_hora).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : ''}`,
+        message: `${cliente.nombre} reservó ${servicio?.nombre || 'un turno'}${turno.fecha_hora ? ` · ${new Date(turno.fecha_hora).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}` : ''}`,
         timestamp: new Date().toISOString(),
         turno: turno,
         cliente: cliente,

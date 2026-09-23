@@ -50,8 +50,7 @@ export default function OnboardingComplete({ data, negocioId, onComplete, showTo
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden"
-      style={{ background: 'var(--ns-gradient-1)' }}
+      className="ns-ambient-dark ns-fullscreen flex items-center justify-center p-6"
     >
       {/* Halos de fondo: dan profundidad sin romper la paleta */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">

@@ -87,7 +87,10 @@ export default function VistaPublica() {
       ])
       
       setServicios(resSrvs.data || [])
-      setEmpleados(resEmps.data || [])
+      // Sólo el personal activo recibe reservas. El panel promete que alguien
+      // dado de baja "ya no recibe reservas nuevas", y antes igual aparecía
+      // acá para elegir. Los registros viejos sin `estado` cuentan como activos.
+      setEmpleados((resEmps.data || []).filter(e => (e.estado ?? 'activo') === 'activo'))
       setCatalogo(resCat.data || [])
       generarCalendarioPro(biz.horarios)
     } catch (e) {
@@ -508,10 +511,12 @@ export default function VistaPublica() {
   }
 
   return (
-    <div className="booking-shell min-h-screen text-[#1D212A] font-sans antialiased relative overflow-x-hidden" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light', background: 'var(--ns-bg)' }}>
+    <div className="booking-shell min-h-screen text-[#1D212A] font-sans antialiased relative overflow-x-hidden" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', colorScheme: 'light', background: 'transparent' }}>
       
       {/* BAÑO DE COLOR (Sutil resplandor de fondo — marca lilac) */}
-      <div className="absolute top-0 inset-x-0 h-[60vh] pointer-events-none z-0" style={{ background: 'linear-gradient(to bottom, #E4EAF2, transparent)' }}></div>
+      {/* Luz del acento del negocio: tiñe el campo ambiental arriba, así el
+          vidrio de la ficha toma el color de la marca. */}
+      <div className="absolute top-0 inset-x-0 h-[70vh] pointer-events-none z-0" style={{ background: `radial-gradient(70% 60% at 50% 0%, ${hexToRgba(accent, 0.28)}, transparent 70%)` }}></div>
 
       {/* 1. HERO & BRANDING SECTION — Más compacto en mobile con glass overlay */}
       <header
@@ -567,13 +572,13 @@ export default function VistaPublica() {
                
                {negocio.descripcion && (
                  <>
-                   <div className={`relative overflow-hidden transition-[max-height] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] w-full px-1 md:px-2 ${bioExpandida ? 'max-h-[500px]' : 'max-h-[40px]'}`}>
+                   <div
+                     className={`relative overflow-hidden transition-[max-height] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] w-full px-1 md:px-2 ${bioExpandida ? 'max-h-[500px]' : 'max-h-[40px]'}`}
+                     style={bioExpandida ? undefined : { WebkitMaskImage: 'linear-gradient(to bottom, #000 45%, transparent)', maskImage: 'linear-gradient(to bottom, #000 45%, transparent)' }}
+                   >
                       <p className="text-[12px] md:text-[13px] font-medium leading-relaxed text-balance" style={{ color: 'var(--ns-text-muted)' }}>
                          {negocio.descripcion}
                       </p>
-                      {!bioExpandida && (
-                        <div className="absolute bottom-0 inset-x-0 h-5 bg-gradient-to-t from-white/95 to-transparent pointer-events-none"></div>
-                      )}
                    </div>
                    <button 
                      onClick={() => setBioExpandida(!bioExpandida)} 
@@ -1053,7 +1058,7 @@ export default function VistaPublica() {
                  .filter(p => !catBusqueda || p.nombre.toLowerCase().includes(catBusqueda.toLowerCase()))
                
                    if (filtered.length === 0) return (
-                 <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/40 shadow-sm p-12 text-center">
+                 <div className="ns-glass-card rounded-[2rem] p-12 text-center">
                    <div className="ui-pod ui-pod--sunken ui-pod--lg mx-auto mb-4">
                      <svg className="w-8 h-8" style={{ color: 'var(--ns-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                    </div>
@@ -1067,7 +1072,7 @@ export default function VistaPublica() {
                    {filtered.map(prod => {
                      const qty = carrito[prod.id] || 0
                      return (
-                       <div key={prod.id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] border  shadow-[0_4px_20px_rgba(16,24,40,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(16,24,40,0.08)] hover:-translate-y-1 flex flex-col group cursor-pointer" onClick={() => setProductoDetalle(prod)}>
+                       <div key={prod.id} className="ns-glass-card rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(16,24,40,0.08)] hover:-translate-y-1 flex flex-col group cursor-pointer" onClick={() => setProductoDetalle(prod)}>
                          {/* IMAGEN DEL PRODUCTO */}
                          <div className="aspect-[4/4] w-full  relative overflow-hidden shrink-0">
                            {prod.imagen_url ? (
@@ -1143,7 +1148,7 @@ export default function VistaPublica() {
          {productoDetalle && (
            <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setProductoDetalle(null)}></div>
-             <div className="relative w-full max-w-md bg-white rounded-t-[2rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-12 md:slide-in-from-bottom-8 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+             <div className="ns-glass-sheet relative w-full max-w-md rounded-t-[2rem] md:rounded-[2rem] overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-12 md:slide-in-from-bottom-8 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
                
                {/* Btn Cerrar */}
                <button onClick={() => setProductoDetalle(null)} className="absolute top-4 right-4 z-10 w-8 h-8 bg-black/10 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black/20 transition-colors">
@@ -1183,7 +1188,7 @@ export default function VistaPublica() {
                </div>
 
                {/* Acciones Sticky Modal */}
-               <div className="absolute bottom-0 inset-x-0 p-4 bg-white border-t border-[var(--ns-line)] flex items-center justify-between gap-4" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+               <div className="ns-glass-bar absolute bottom-0 inset-x-0 p-4 flex items-center justify-between gap-4" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
                  {(() => {
                    const qty = carrito[productoDetalle.id] || 0
                    return qty > 0 ? (
@@ -1208,7 +1213,7 @@ export default function VistaPublica() {
          {carritoAbierto && (
            <div className="fixed inset-0 z-[110] flex items-end md:items-center justify-end md:justify-center p-0 md:p-4 animate-in fade-in duration-300">
              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setCarritoAbierto(false)}></div>
-             <div className="relative w-full h-[85vh] md:h-auto md:max-h-[85vh] md:max-w-md bg-white rounded-t-[2rem] md:rounded-[2rem] shadow-2xl flex flex-col animate-in slide-in-from-bottom-full md:slide-in-from-bottom-12 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+             <div className="ns-glass-sheet relative w-full h-[85vh] md:h-auto md:max-h-[85vh] md:max-w-md rounded-t-[2rem] md:rounded-[2rem] flex flex-col animate-in slide-in-from-bottom-full md:slide-in-from-bottom-12 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
                
                {/* Header Carrito */}
                <div className="px-5 py-4 border-b border-[var(--ns-line)] flex items-center justify-between shrink-0">
@@ -1367,7 +1372,7 @@ export default function VistaPublica() {
       {paso < 5 && (
         <footer className="mt-8 py-6 md:py-8 flex flex-col items-center gap-2 opacity-35 relative z-10">
            <div className="w-6 h-6 rounded-[0.5rem] flex items-center justify-center rotate-3 shadow-lg" style={{ background: 'var(--ns-gradient-1)', boxShadow: '0 3px 0 rgba(16,24,40,0.1), 0 6px 12px rgba(0,122,255,0.2)' }}><span className="text-white font-bold text-[6px] italic">NS</span></div>
-           <p className="text-[7px] font-bold uppercase tracking-[0.4em]" style={{ color: 'var(--ns-text)' }}>Engineered by Non Sistemas</p>
+           <p className="text-[11px] font-medium" style={{ color: 'var(--ns-text-muted)' }}>Reservas con Noni</p>
         </footer>
       )}
 

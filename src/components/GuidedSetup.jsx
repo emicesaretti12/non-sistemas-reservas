@@ -181,7 +181,7 @@ export default function GuidedSetup({
           <div className="flex-1 min-w-0">
             <p
               className="text-[10px] font-bold uppercase tracking-[0.08em] mb-1"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--ns-text-muted)' }}
+              style={{ color: 'var(--ns-text-muted)' }}
             >
               {allDone ? 'Asistente · Listo' : 'Noni · Tu asistente'}
             </p>
@@ -268,11 +268,17 @@ export default function GuidedSetup({
                   <div
                     className="flex flex-wrap items-center gap-3 p-3 md:p-4 rounded-[18px] transition-all duration-300"
                     style={{
-                      background: done ? 'var(--ns-sunken)' : 'var(--ns-surface)',
-                      boxShadow: done
-                        ? 'var(--ui-field-sm)'
+                      // Hecho: vidrio fino, casi transparente. Siguiente: vidrio
+                      // teñido de azul con su anillo. Pendiente: vidrio normal.
+                      background: done
+                        ? 'rgba(255, 255, 255, 0.28)'
                         : isNext
-                        ? 'var(--ui-shadow), 0 0 0 2px var(--ns-primary)'
+                        ? 'linear-gradient(135deg, rgba(0, 122, 255, 0.12), rgba(139, 92, 246, 0.08)), var(--glass-thick)'
+                        : 'var(--glass)',
+                      boxShadow: done
+                        ? 'var(--glass-rim)'
+                        : isNext
+                        ? 'var(--ui-shadow), 0 0 0 1.5px rgba(0, 122, 255, 0.55)'
                         : 'var(--ui-shadow-sm)',
                       cursor: done ? 'default' : 'pointer',
                     }}
@@ -286,8 +292,10 @@ export default function GuidedSetup({
                     {/* Check / Number */}
                     <div
                       className="ui-avatar w-9 h-9 font-bold transition-all duration-500"
-                      style={done || isNext
-                        ? { background: 'var(--ns-primary)', color: 'var(--ns-paper)', boxShadow: 'var(--ui-brand)' }
+                      style={done
+                        ? { background: 'linear-gradient(180deg, #3DBB76 0%, #259C5B 100%)', color: '#FFFFFF', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px -4px rgba(37,156,91,0.6)' }
+                        : isNext
+                        ? { background: 'var(--ns-gradient-1)', color: '#FFFFFF', boxShadow: 'var(--ui-brand-sm)' }
                         : { background: 'var(--ns-sunken)', color: 'var(--ns-text-muted)', boxShadow: 'var(--ui-field-sm)' }}
                     >
                       {done ? (

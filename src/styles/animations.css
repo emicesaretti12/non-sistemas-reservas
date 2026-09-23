@@ -272,3 +272,23 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* El campo ambiental deriva muy despacio: casi no se ve moverse,
+   pero el vidrio que tiene encima cambia de color y se siente vivo. */
+@keyframes ns-ambient {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  33%  { transform: translate3d(2.5%, -1.8%, 0) rotate(4deg) scale(1.04); }
+  66%  { transform: translate3d(-2%, 2.2%, 0) rotate(-3deg) scale(1.02); }
+  100% { transform: translate3d(1.2%, 1%, 0) rotate(2deg) scale(1.05); }
+}
+
+/* Deriva de las gotas de color detrás del vidrio del login. */
+@keyframes ns-orb-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(48px, 36px, 0) scale(1.12); }
+}
+
+@keyframes ns-orb-b {
+  from { transform: translate3d(0, 0, 0) scale(1.06); }
+  to   { transform: translate3d(-56px, -30px, 0) scale(0.94); }
+}
