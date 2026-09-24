@@ -377,6 +377,76 @@
 
   .ns-asistente-manija > .ui-sheet__handle { margin: 0; }
 
+  /* ═══════════════ CATÁLOGO PÚBLICO ═══════════════ */
+
+  .ns-cat-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px;
+    border-radius: var(--ns-radius-xl);
+  }
+
+  /* Un producto oculto se ve apagado, pero sus botones siguen nítidos. */
+  .ns-cat-item.is-oculto .ns-cat-item__foto,
+  .ns-cat-item.is-oculto h3,
+  .ns-cat-item.is-oculto .font-display {
+    opacity: 0.5;
+  }
+
+  .ns-cat-item__foto {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 96px;
+    height: 96px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 18px;
+    background: var(--ns-sunken);
+    color: var(--ns-text-faint);
+    cursor: pointer;
+  }
+
+  .ns-cat-item__foto img,
+  .ns-cat-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ns-cat-foto {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 112px;
+    height: 112px;
+    overflow: hidden;
+    border-radius: 24px;
+    background: rgba(0, 122, 255, 0.06);
+    color: var(--ns-primary);
+    outline: 2px dashed rgba(0, 122, 255, 0.35);
+    outline-offset: -8px;
+    cursor: pointer;
+  }
+
+  .ns-cat-foto.tiene-foto {
+    outline: none;
+    box-shadow: var(--glass-rim), 0 8px 18px -10px rgba(35, 52, 110, 0.45);
+  }
+
+  .ns-atajo-catalogo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
   /* ═══════════════ NONI EN LA BARRA SUPERIOR ═══════════════ */
 
   .ns-topbar-noni { color: var(--ns-primary); }

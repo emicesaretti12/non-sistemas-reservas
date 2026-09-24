@@ -121,6 +121,8 @@ export default function VistaPublica() {
       // acá para elegir. Los registros viejos sin `estado` cuentan como activos.
       setEmpleados((resEmps.data || []).filter(e => (e.estado ?? 'activo') === 'activo'))
       setCatalogo(resCat.data || [])
+      // "Ver como cliente" desde el editor del catálogo abre con #catalogo.
+      if (window.location.hash === '#catalogo' && (resCat.data || []).length > 0) setVistaActiva('catalogo')
       generarCalendarioPro(biz.horarios)
     } catch (e) {
       console.error('Error cargando la app de reservas:', e.message)

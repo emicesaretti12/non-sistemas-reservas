@@ -19,7 +19,7 @@ const STOCK_LEVELS = {
   ok: { chip: 'ui-chip--solid', label: 'En orden' },
 }
 
-export default function InventarioPro({ negocioId }) {
+export default function InventarioPro({ negocioId, onNavigate }) {
   const toast = useToast()
   const { showConfirm } = useConfirm()
   
@@ -273,6 +273,21 @@ export default function InventarioPro({ negocioId }) {
           <span className="hidden sm:inline">Nuevo producto</span>
         </button>
       </header>
+
+      {/* El catálogo público vivía acá adentro: el acceso sigue en el mismo
+          lugar para quien lo busque desde el inventario. */}
+      {onNavigate && (
+        <button type="button" onClick={() => onNavigate('catalogo')} className="ui-card ns-atajo-catalogo" data-testid="inventario-ir-catalogo">
+          <span className="ui-pod ui-pod--violet shrink-0" aria-hidden="true">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-[15px] font-bold" style={{ color: 'var(--ns-text)' }}>Catálogo público</span>
+            <span className="block text-[12px] mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>Los productos con foto y precio que ven tus clientes en tu link</span>
+          </span>
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" style={{ color: 'var(--ns-text-faint)' }} aria-hidden="true"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
+      )}
 
       {/* Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
