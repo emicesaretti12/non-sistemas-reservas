@@ -1,0 +1,38 @@
+/* ============================================================
+   TIPOGRAFÍA DE SISTEMA
+
+   Va fuera de las capas, como movil.css, para ganarle a las
+   utilidades de Tailwind que quedaron repartidas en las pantallas.
+
+   Las apps de Apple no usan rótulos en mayúsculas con letras
+   separadas ni letra de 8, 9 o 10 px: el texto más chico de iOS
+   es de 11 pt y los encabezados van en minúscula, con la jerarquía
+   puesta en el tamaño, el peso y el gris. Había unos ciento
+   cincuenta rótulos así ("BASE DE DATOS", "HOY", "ÚLTIMA VISITA")
+   y eran buena parte de lo que hacía ver la app armada a mano.
+   ============================================================ */
+
+.uppercase {
+  text-transform: none;
+}
+
+.text-\[8px\],
+.text-\[9px\],
+.text-\[10px\] {
+  font-size: 11px;
+}
+
+[class*='tracking-[0.0'],
+[class*='tracking-[0.1'],
+.tracking-wide,
+.tracking-wider,
+.tracking-widest {
+  letter-spacing: 0;
+}
+
+/* El peso más fuerte del sistema en el panel es el negrito de los
+   títulos grandes; lo extra-negro se ve a póster, no a app. */
+.font-black,
+.font-extrabold {
+  font-weight: 700;
+}

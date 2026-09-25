@@ -47,8 +47,8 @@
   }
 
   /* ═══════════════ BARRA LATERAL ═══════════════
-     Vidrio oscuro —el #252C35 de la referencia, translúcido— con el
-     campo de color filtrándose por detrás. */
+     El #252C35 de la referencia, liso, como la barra lateral oscura
+     de una app de Mac. */
 
   .noni-rail { display: none; }
 
@@ -66,30 +66,8 @@
       margin: 12px 0 12px 12px;
       padding: 16px 12px calc(14px + var(--sab));
       border-radius: var(--ns-radius-2xl);
-      background:
-        radial-gradient(130% 55% at 0% 0%, rgba(0, 122, 255, 0.3), transparent 62%),
-        radial-gradient(120% 50% at 100% 100%, rgba(139, 92, 246, 0.22), transparent 62%),
-        var(--ns-gradient-dark);
+      background: var(--ns-sidebar);
       color: var(--ns-sidebar-text);
-      -webkit-backdrop-filter: var(--glass-blur-strong);
-      backdrop-filter: var(--glass-blur-strong);
-      box-shadow:
-        var(--glass-rim-dark),
-        0 2px 6px rgba(15, 20, 40, 0.16),
-        0 30px 60px -24px rgba(15, 20, 40, 0.55);
-    }
-
-    .noni-rail::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1px;
-      background: var(--glass-edge-dark);
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-      pointer-events: none;
     }
   }
 
@@ -145,8 +123,6 @@
     }
   }
 
-  .noni-rail__item.is-active { background: transparent; }
-
   .noni-rail__item svg {
     flex: 0 0 auto;
     width: 19px;
@@ -169,15 +145,10 @@
     color: #8CC2FF;
   }
 
-  /* La lente del riel: vidrio teñido de azul sobre el vidrio oscuro. */
-  .noni-rail .ui-lens {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),
-      linear-gradient(120deg, rgba(0, 122, 255, 0.42), rgba(0, 122, 255, 0.18));
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.24),
-      inset 0 0 0 1px rgba(140, 194, 255, 0.24),
-      0 6px 18px -6px rgba(0, 122, 255, 0.55);
+  /* La fila elegida, como en la barra lateral de macOS: se pinta en
+     el lugar, sin nada que viaje. */
+  .noni-rail__item.is-active {
+    background: rgba(255, 255, 255, 0.12);
   }
 
   .noni-rail__spacer { flex: 1; }
@@ -191,167 +162,198 @@
   }
 
   /* ═══════════════ BARRA SUPERIOR ═══════════════
-     Una cápsula de vidrio que queda arriba mientras el contenido
-     pasa por debajo, borroso. */
+     La barra de navegación de iOS. Arriba de todo es transparente y
+     no muestra título: el título grande está en el contenido. Cuando
+     el contenido pasa por debajo aparecen el material translúcido, la
+     línea de abajo y el título chico en el centro. `is-stuck` lo pone
+     Dashboard directo en el DOM. */
 
   .noni-topbar {
     position: sticky;
-    top: calc(8px + var(--sat));
+    top: 0;
     z-index: 40;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    min-height: 58px;
-    margin: calc(8px + var(--sat)) 10px 0;
-    padding: 8px 10px 8px 14px;
-    border-radius: 22px;
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.56);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
-    box-shadow:
-      var(--glass-rim),
-      0 1px 2px rgba(20, 30, 70, 0.04),
-      0 10px 30px -14px rgba(35, 52, 110, 0.22);
-    transition: box-shadow var(--dur-3) var(--ease-out), background-color var(--dur-3) var(--ease-out);
+    min-height: 52px;
+    padding: var(--sat) 16px 0;
+    background: transparent;
+    box-shadow: 0 0.5px 0 transparent;
+    transition: background-color 200ms linear, box-shadow 200ms linear;
   }
 
-  .noni-topbar::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--glass-edge);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
-  }
-
-  @media (min-width: 768px) {
-    .noni-topbar {
-      top: 12px;
-      min-height: 62px;
-      margin: 12px 14px 0;
-      padding: 9px 12px 9px 20px;
-      border-radius: 24px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .noni-topbar { margin: 12px 12px 0 14px; }
-  }
-
-  /* Con contenido pasando por debajo, el vidrio se espesa un poco. */
   .noni-topbar.is-stuck {
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.7);
-    box-shadow:
-      var(--glass-rim),
-      0 2px 4px rgba(20, 30, 70, 0.05),
-      0 16px 40px -16px rgba(35, 52, 110, 0.3);
+    background: var(--ns-bar);
+    -webkit-backdrop-filter: var(--ns-bar-blur);
+    backdrop-filter: var(--ns-bar-blur);
+    box-shadow: 0 0.5px 0 var(--ns-separator);
   }
+
+  .noni-topbar__lead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .noni-topbar__titulos { min-width: 0; }
 
   .noni-topbar__title {
+    overflow: hidden;
     font-family: var(--font-display);
     font-size: 1.0625rem;
-    font-weight: 650;
-    letter-spacing: -0.022em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     color: var(--ns-text);
   }
 
-  @media (min-width: 768px) {
-    .noni-topbar__title { font-size: 1.1875rem; }
+  .noni-topbar__sub {
+    overflow: hidden;
+    margin-top: 1px;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .noni-topbar__acciones {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .noni-topbar__acciones .ui-icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* En el panel del celular: el título chico va centrado y sólo se ve
+     cuando el grande ya pasó por debajo de la barra. */
+  @media (max-width: 1023px) {
+    .noni-topbar--app .noni-topbar__lead {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      height: 52px;
+      max-width: calc(100% - 2 * 140px);
+      translate: -50% 0;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 150ms linear;
+      pointer-events: none;
+    }
+
+    .noni-topbar--app .noni-topbar__sub { display: none; }
+    .noni-topbar--app.is-stuck .noni-topbar__lead { opacity: 1; }
+    .noni-topbar--app .noni-topbar__acciones { margin-left: auto; }
+  }
+
+  /* En escritorio el título chico queda a la izquierda y, como en el
+     celular, aparece recién cuando el grande pasó por debajo. */
+  @media (min-width: 1024px) {
+    .noni-topbar {
+      min-height: 56px;
+      padding: 0 30px;
+    }
+
+    .noni-topbar--app .noni-topbar__lead {
+      opacity: 0;
+      transition: opacity 150ms linear;
+    }
+
+    .noni-topbar--app .noni-topbar__sub { display: none; }
+    .noni-topbar--app.is-stuck .noni-topbar__lead { opacity: 1; }
+    .noni-topbar--app .noni-topbar__acciones { margin-left: auto; }
   }
 
   /* ═══════════════ DOCK DEL CELULAR ═══════════════
-     La barra de pestañas de iOS 26: una cápsula de vidrio flotante,
-     con una gota azul que se desliza hasta la pestaña que tocás. */
+     La barra de pestañas de iOS: una cápsula translúcida flotante. La
+     pestaña activa se pinta de azul y lleva detrás una cápsula gris
+     suave, que se desliza de un lugar a otro.
+
+     Lo único que se anima es `translate` sobre una pieza chica, que va
+     por el compositor: el vidrio del dock no se vuelve a pintar ni a
+     desenfocar mientras la marca viaja. */
 
   .ns-bottom-nav {
+    --gap-dock: 2px;
+    --pad-dock: 5px;
     position: fixed;
     left: 0;
     right: 0;
     bottom: calc(10px + var(--sab));
     z-index: 50;
-    /* Centrado con márgenes, no con `translate`: nada de transformaciones
-       en el vidrio que lleva desenfoque (en iOS parpadeaba y se deformaba
-       mientras la lente viajaba por adentro). */
     width: min(calc(100% - 24px), 430px);
     margin-inline: auto;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 2px;
-    padding: 6px;
+    gap: var(--gap-dock);
+    padding: var(--pad-dock);
     border-radius: 999px;
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.62);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: rgba(255, 255, 255, 0.78);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
     box-shadow:
-      var(--glass-rim),
-      0 2px 6px rgba(20, 30, 70, 0.06),
-      0 18px 44px -12px rgba(35, 52, 110, 0.34);
+      inset 0 0 0 0.5px rgba(0, 0, 0, 0.08),
+      0 8px 28px -10px rgba(20, 30, 50, 0.28);
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-  }
-
-  .ns-bottom-nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--glass-edge);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
+    contain: layout paint;
   }
 
   @media (min-width: 1024px) {
     .ns-bottom-nav { display: none; }
   }
 
+  .ns-bottom-nav__marca {
+    position: absolute;
+    top: var(--pad-dock);
+    bottom: var(--pad-dock);
+    left: var(--pad-dock);
+    width: calc((100% - 2 * var(--pad-dock) - 4 * var(--gap-dock)) / 5);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.06);
+    translate: calc(var(--i, 0) * (100% + var(--gap-dock))) 0;
+    transition: translate 340ms var(--ease-out);
+    pointer-events: none;
+  }
+
   .ns-bottom-nav-item {
     position: relative;
-    isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
-    height: 52px;
+    height: 50px;
     padding: 0 2px;
     border: 0;
     border-radius: 999px;
     background: transparent;
-    color: var(--ns-text-muted);
+    color: #6B7280;
     font-family: inherit;
-    font-size: 0.625rem;
+    /* 10 pt, como las etiquetas de la barra de pestañas de iOS. */
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: -0.004em;
+    letter-spacing: 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: color var(--dur-2) var(--ease-out);
   }
 
-  .ns-bottom-nav-item.active { color: #FFFFFF; }
+  .ns-bottom-nav-item.active { color: var(--ns-primary); }
 
   .ns-bottom-nav-item svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
-  }
-
-  /* La gota azul del dock */
-  .ns-bottom-nav .ui-lens {
-    background: var(--ns-gradient-1);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.45),
-      inset 0 -1px 0 rgba(0, 40, 120, 0.2),
-      0 6px 16px -4px rgba(0, 122, 255, 0.6);
   }
 
   .ns-has-bottom-nav {
@@ -368,17 +370,14 @@
     position: fixed;
     inset: 0;
     z-index: 70;
-    background: rgba(18, 26, 48, 0.24);
-    -webkit-backdrop-filter: blur(6px) saturate(140%);
-    backdrop-filter: blur(6px) saturate(140%);
-    animation: ns-fade-in var(--dur-3) var(--ease-out) backwards;
+    /* El atenuado de iOS detrás de una hoja: oscurece, no desenfoca. */
+    background: rgba(0, 0, 0, 0.28);
+    animation: ns-fade-in var(--dur-3) linear backwards;
   }
 
   .ui-modal,
   .ui-sheet {
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.84);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: var(--ns-paper);
     box-shadow: var(--ui-shadow-xl);
   }
 
@@ -390,7 +389,7 @@
     overflow-y: auto;
     padding: 24px;
     border-radius: var(--ns-radius-2xl);
-    animation: ns-pop-in var(--dur-4) var(--ease-liquid) backwards;
+    animation: ns-pop-in var(--dur-3) var(--ease-out) backwards;
   }
 
   /* En el celular todo lo que abre lo hace desde abajo. */
@@ -405,7 +404,7 @@
     overscroll-behavior: contain;
     padding: 10px 18px 22px;
     border-radius: var(--ns-radius-3xl);
-    animation: ns-sheet-up var(--dur-5) var(--ease-liquid) backwards;
+    animation: ns-sheet-up 420ms var(--ease-out) backwards;
   }
 
   .ui-sheet__handle {
@@ -413,7 +412,7 @@
     height: 5px;
     margin: 0 auto 16px;
     border-radius: 999px;
-    background: rgba(118, 128, 152, 0.34);
+    background: rgba(60, 60, 67, 0.3);
   }
 
   @media (min-width: 768px) {
@@ -428,7 +427,7 @@
       padding: 26px;
       border-radius: var(--ns-radius-2xl);
       translate: -50% -50%;
-      animation: ns-pop-in var(--dur-4) var(--ease-liquid) backwards;
+      animation: ns-pop-in var(--dur-3) var(--ease-out) backwards;
     }
 
     .ui-sheet__handle { display: none; }
@@ -444,9 +443,7 @@
     align-items: flex-start;
     justify-content: center;
     padding: 12vh 16px 16px;
-    background: rgba(18, 26, 48, 0.22);
-    -webkit-backdrop-filter: blur(8px) saturate(150%);
-    backdrop-filter: blur(8px) saturate(150%);
+    background: rgba(0, 0, 0, 0.28);
   }
 
   .ns-search-modal {
@@ -457,11 +454,9 @@
     flex-direction: column;
     overflow: hidden;
     border-radius: var(--ns-radius-2xl);
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.84);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: var(--ns-paper);
     box-shadow: var(--ui-shadow-xl);
-    animation: ns-pop-in var(--dur-4) var(--ease-liquid) backwards;
+    animation: ns-pop-in var(--dur-3) var(--ease-out) backwards;
   }
 
   .ns-search-input {
@@ -500,9 +495,8 @@
   }
 
   .ns-search-item.is-active {
-    background: var(--ns-gradient-1);
+    background: var(--ns-primary);
     color: #FFFFFF;
-    box-shadow: var(--ui-brand-sm);
   }
 
   .ns-search-item.is-active * { color: #FFFFFF !important; }
@@ -522,13 +516,11 @@
     padding: 12px 20px;
     border-radius: 999px;
     background: var(--glass-dark-thick);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
     color: #FFFFFF;
     font-size: 0.8125rem;
     font-weight: 600;
     white-space: nowrap;
-    box-shadow: var(--glass-rim-dark), 0 16px 40px -12px rgba(15, 20, 40, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     translate: -50% 0;
   }
 
@@ -552,8 +544,7 @@
     border-radius: var(--ns-radius-lg);
     box-shadow:
       0 0 0 2px rgba(255, 255, 255, 0.95),
-      0 0 0 6px rgba(0, 122, 255, 0.45),
-      0 0 40px rgba(0, 122, 255, 0.45);
+      0 0 0 5px rgba(0, 122, 255, 0.5);
     pointer-events: none;
     transition: all var(--dur-5) var(--ease-liquid);
   }
@@ -564,9 +555,7 @@
     width: min(350px, calc(100vw - 28px));
     padding: 22px;
     border-radius: var(--ns-radius-xl);
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.86);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: var(--ns-paper);
     box-shadow: var(--ui-shadow-xl);
     transition: all var(--dur-5) var(--ease-liquid);
   }
@@ -584,25 +573,12 @@
     height: 54px;
     border: 0;
     border-radius: 999px;
-    background: var(--ns-gradient-1);
+    background: var(--ns-primary);
     color: #FFFFFF;
     cursor: pointer;
-    box-shadow: var(--ui-brand-lg);
+    box-shadow: 0 6px 18px -4px rgba(0, 60, 140, 0.35);
     -webkit-tap-highlight-color: transparent;
-    transition: transform var(--dur-4) var(--ease-liquid), box-shadow var(--dur-2) var(--ease-out);
-  }
-
-  .ns-assistant-fab::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.3));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
+    transition: opacity var(--dur-2) linear;
   }
 
   @media (min-width: 1024px) {
@@ -614,10 +590,7 @@
     }
   }
 
-  @media (hover: hover) {
-    .ns-assistant-fab:hover { transform: translateY(-2px); }
-  }
-  .ns-assistant-fab:active { transform: scale(0.9); transition-duration: var(--dur-1); }
+  .ns-assistant-fab:active { opacity: 0.7; transition-duration: 0ms; }
 
   .ns-assistant-badge {
     position: absolute;
@@ -629,11 +602,11 @@
     height: 20px;
     padding: 0 5px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #F0666A, #E5484D);
+    background: var(--ns-primary);
     color: #FFFFFF;
-    font-size: 0.625rem;
-    font-weight: 700;
-    box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.9), 0 4px 10px -2px rgba(229, 72, 77, 0.6);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px #FFFFFF;
   }
 
   .ns-assistant-panel {
@@ -646,9 +619,7 @@
     flex-direction: column;
     max-height: 86dvh;
     border-radius: var(--ns-radius-3xl);
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.8);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: var(--ns-paper);
     box-shadow: var(--ui-shadow-xl);
     overflow: hidden;
   }
@@ -676,15 +647,14 @@
   /* Burbujas como en Mensajes */
   .ns-chat-user {
     align-self: flex-end;
-    background: var(--ns-gradient-1);
+    background: var(--ns-primary);
     color: #FFFFFF;
     border-bottom-right-radius: 6px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 16px -6px rgba(0, 122, 255, 0.55);
   }
 
   .ns-chat-assistant {
     align-self: flex-start;
-    background: rgba(118, 128, 152, 0.13);
+    background: #E9E9EB;
     color: var(--ns-text);
     border-bottom-left-radius: 6px;
   }
@@ -702,24 +672,12 @@
      es el panel de un negocio. */
 
   .ns-admin-shell {
-    background:
-      radial-gradient(60% 50% at 10% 0%, rgba(0, 122, 255, 0.34), transparent 70%),
-      radial-gradient(50% 45% at 95% 15%, rgba(139, 92, 246, 0.28), transparent 70%),
-      radial-gradient(55% 50% at 80% 100%, rgba(14, 156, 156, 0.2), transparent 70%),
-      linear-gradient(180deg, #1F252E 0%, #252C35 100%);
-    background-attachment: fixed;
+    background: #1F252E;
     color: rgba(255, 255, 255, 0.86);
   }
 
-  .ns-admin-shell .noni-topbar {
-    background: rgba(40, 48, 60, 0.55);
-    box-shadow: var(--glass-rim-dark), 0 16px 40px -16px rgba(0, 0, 0, 0.5);
-  }
-
-  .ns-admin-shell .noni-topbar::before { background: var(--glass-edge-dark); }
-
   .ns-admin-shell .noni-topbar.is-stuck {
-    background: rgba(40, 48, 60, 0.72);
+    background: rgba(31, 37, 46, 0.86);
   }
 
   .ns-admin-shell .noni-topbar__title,
@@ -733,10 +691,7 @@
   .ns-admin-shell .ui-icon-btn {
     background: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.86);
-    box-shadow: var(--glass-rim-dark);
   }
-
-  .ns-admin-shell .ui-icon-btn::before { background: var(--glass-edge-dark); }
   @media (hover: hover) {
     .ns-admin-shell .ui-icon-btn:hover { background: rgba(255, 255, 255, 0.16); color: #FFFFFF; }
   }
@@ -751,9 +706,7 @@
     max-width: calc(100vw - 24px);
     z-index: 60;
     border-radius: var(--ns-radius-xl);
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.82);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: var(--ns-paper);
     box-shadow: var(--ui-shadow-xl);
     overflow: hidden;
     transform-origin: top right;
@@ -917,57 +870,25 @@
 
 /* ============================================================
    RESPALDO SIN DESENFOQUE
-   Si el navegador no sabe desenfocar lo que queda detrás (o el
-   usuario pidió menos transparencia en su sistema), el vidrio
-   translúcido dejaría leer el texto de abajo, nítido, mezclado
-   con el propio. En esos casos la pieza flotante se espesa hasta
-   quedar casi opaca: pierde el efecto, no la legibilidad.
+   Las únicas piezas translúcidas son la barra superior y el dock.
+   Si el navegador no sabe desenfocar (o el sistema pide menos
+   transparencia), se vuelven opacas: pierden el efecto, no la
+   legibilidad.
    ============================================================ */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .noni-topbar,
-  .ns-bottom-nav,
-  .ns-notif-panel,
-  .ns-search-modal,
-  .ns-assistant-panel,
-  .ns-tour-card,
-  .ui-modal,
-  .ui-sheet,
-  .ns-hoja,
-  .ns-glass-sheet,
-  .ns-glass-bar,
-  .ns-login-card {
-    background-color: rgba(255, 255, 255, 0.95) !important;
-  }
-
-  .noni-rail { background-color: rgba(34, 40, 50, 0.97) !important; }
+  .noni-topbar.is-stuck { background-color: var(--ns-bg) !important; }
+  .ns-bottom-nav { background-color: rgba(255, 255, 255, 0.97) !important; }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .noni-topbar,
-  .ns-bottom-nav,
-  .ns-notif-panel,
-  .ns-search-modal,
-  .ns-assistant-panel,
-  .ns-tour-card,
-  .ui-modal,
-  .ui-sheet,
-  .ns-hoja,
-  .ns-glass-sheet,
-  .ns-glass-bar,
-  .ns-login-card {
-    background: rgba(255, 255, 255, 0.97) !important;
+  .noni-topbar.is-stuck,
+  .ns-bottom-nav {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
 
-  .noni-rail {
-    background: #252C35 !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  body::before,
-  body::after { display: none; }
+  .noni-topbar.is-stuck { background: var(--ns-bg) !important; }
+  .ns-bottom-nav { background: #FFFFFF !important; }
 }
 
 @layer components {

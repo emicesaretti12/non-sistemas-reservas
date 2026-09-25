@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
 import { supabase } from '../supabaseClient'
 
 // Inyección de componentes modulares
@@ -17,9 +16,6 @@ import { getVocabulario } from '../utils/vocabulario'
 
 // Wizard de Onboarding Guiado
 import OnboardingWizard from './OnboardingWizard'
-
-// Panel de Configuración Guiada Post-Onboarding
-import GuidedSetup from './GuidedSetup'
 
 // Hooks globales
 import { useToast } from './Toast'
@@ -45,13 +41,12 @@ import NotificationCenter from './NotificationCenterV2'
 import { notificationService } from '../utils/notificationService'
 import GlobalSearch from './GlobalSearch'
 import Atajos from './ui/Atajos'
-import Lente from './ui/Lente'
-import { SUAVE } from '../utils/motion'
 import { irArriba, esScrollPrincipal, posicionDe } from '../utils/scroll'
 import HojaMas from './ui/HojaMas'
 import TirarParaActualizar from './ui/TirarParaActualizar'
 import { leer, guardar } from '../utils/almacen'
 import { usePersistentState } from '../hooks/usePersistentState'
+import { numero } from '../utils/formato'
 
 function linkCompartido() {
   try { return Boolean(localStorage.getItem('ns_link_shared')) } catch { return false }
@@ -149,16 +144,33 @@ export default function Dashboard({ session }) {
     irArriba()
   }, [tab])
 
-  // --- BARRA SUPERIOR: sombra sólo cuando hay contenido por encima ---
-  const [scrolleado, setScrolleado] = useState(false)
+  // --- BARRA SUPERIOR: material y título sólo con contenido por debajo ---
+  // Se marca directo en el DOM: con un estado de React, cruzar el umbral
+  // volvía a renderizar el panel entero (y la sección abierta) en medio del
+  // scroll, y eso se sentía como un tirón.
+  const barraRef = useRef(null)
   useEffect(() => {
     // En el celular scrollea el contenido, no la ventana: escuchamos en fase
     // de captura para enterarnos de los dos casos con un solo listener.
+    let marcada = false
     const alScrollear = (e) => {
-      if (esScrollPrincipal(e)) setScrolleado(posicionDe(e) > 6)
+      if (!esScrollPrincipal(e)) return
+      const debe = posicionDe(e) > 6
+      if (debe === marcada) return
+      marcada = debe
+      barraRef.current?.classList.toggle('is-stuck', debe)
     }
     document.addEventListener('scroll', alScrollear, { capture: true, passive: true })
     return () => document.removeEventListener('scroll', alScrollear, { capture: true })
+  }, [])
+
+  // La pantalla fija del celular (movil.css) se engancha de esta clase en
+  // <html>. Antes era `html:has(.noni-shell--app)`, que el navegador tenía
+  // que volver a evaluar ante cambios en cualquier parte de la página.
+  useEffect(() => {
+    const raiz = document.documentElement
+    raiz.classList.add('ns-modo-app')
+    return () => raiz.classList.remove('ns-modo-app')
   }, [])
 
   // --- UTILIDADES DE EXPORTACIÓN ---
@@ -1051,7 +1063,6 @@ export default function Dashboard({ session }) {
                   aria-current={tab === i.id ? 'page' : undefined}
                   className={`noni-rail__item ${tab === i.id ? 'is-active' : ''}`}
                 >
-                  {tab === i.id && <Lente grupo="riel" />}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d={i.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {i.label}
                 </button>
@@ -1076,23 +1087,20 @@ export default function Dashboard({ session }) {
         <div className="noni-columna flex-1 min-w-0 flex flex-col">
 
         {/* ══════════ BARRA SUPERIOR ══════════ */}
-        <header className={`noni-topbar ${scrolleado ? 'is-stuck' : ''}`}>
-          <div className="flex items-center gap-3 min-w-0">
-            <span className={`ui-avatar ui-avatar--brand w-10 h-10 text-sm ${esPanelNegocio ? 'lg:hidden' : ''}`}>N</span>
-            <div className="noni-topbar__title">
-              <p className="noni-topbar__title text-[14px] md:text-[15px] font-bold tracking-tight leading-none truncate">
+        <header ref={barraRef} className={`noni-topbar ${esPanelNegocio ? 'noni-topbar--app' : ''}`}>
+          <div className="noni-topbar__lead">
+            {!esPanelNegocio && <span className="ui-avatar ui-avatar--brand w-9 h-9 text-sm lg:hidden">N</span>}
+            <div className="noni-topbar__titulos">
+              <p className="noni-topbar__title">
                 {negocio?.es_admin_plataforma ? 'Nucleus Master' : (esPanelNegocio ? tituloSeccion : (negocio?.nombre || 'Panel'))}
               </p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="ns-live-dot" style={{ width: 6, height: 6 }} />
-                <p className="noni-topbar__sub text-[9px] font-bold tracking-[0.06em] uppercase truncate">
-                  {esPanelNegocio ? (negocio?.nombre || '') : (negocio?.rubro || 'Gestión de Reservas')}
-                </p>
-              </div>
+              <p className="noni-topbar__sub">
+                {esPanelNegocio ? (negocio?.nombre || '') : (negocio?.rubro || 'Gestión de Reservas')}
+              </p>
             </div>
           </div>
 
-          <div className="relative flex items-center gap-2">
+          <div className="noni-topbar__acciones">
             {esPanelNegocio && (
               <>
                 {/* Noni vive acá en el celular: la burbuja flotante tapaba
@@ -1102,7 +1110,7 @@ export default function Dashboard({ session }) {
                   aria-label={pendientesNoni > 0 ? `Hablar con Noni (${pendientesNoni} sugerencias)` : 'Hablar con Noni'}
                   className="ui-icon-btn ns-topbar-noni lg:hidden"
                 >
-                  <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="2.1" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {pendientesNoni > 0 && <span className="ns-topbar-noni__punto" aria-hidden="true" />}
                 </button>
                 <button onClick={() => { haptic(); setSearchOpen(true) }} aria-label="Buscar (Ctrl+K)" className="ui-icon-btn lg:hidden">
@@ -1359,30 +1367,14 @@ export default function Dashboard({ session }) {
             )}
 
             {/* AREA DE CONTENIDO PRINCIPAL
-                Al cambiar de sección el contenido aparece con un fundido
-                corto, sin deslizarse: en una app las pestañas cambian en el
-                lugar. Sólo opacidad, nada de transformaciones (un transform
-                acá descoloca los `position: fixed` de adentro). */}
-            <motion.div
-              key={`${tab}:${recarga}`}
-              className="ns-mobile-content-area"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={SUAVE}
-            >
+                Al cambiar de pestaña el contenido cambia en el lugar y en el
+                mismo cuadro, como en la barra de pestañas de iOS. Antes
+                entraba con un fundido: el toque se sentía demorado. */}
+            <div key={`${tab}:${recarga}`} className="ns-mobile-content-area">
 
               {tab === 'inicio' && (
                 <ErrorGuard fallbackMessage="No pudimos mostrar el resumen">
                 <div data-tour="monitor">
-                  {/* Panel de configuración guiada: estaba importado pero nunca
-                      se renderizaba, así que el usuario nuevo caía en un panel
-                      vacío sin saber qué hacer. */}
-                  <GuidedSetup
-                    negocio={negocio}
-                    serviciosCount={crmStats.totalServicios}
-                    empleadosCount={crmStats.totalEmpleados}
-                    onNavigate={(t) => setTab(t)}
-                  />
                   <DashboardHome
                     negocio={negocio}
                     vocab={vocab}
@@ -1414,18 +1406,12 @@ export default function Dashboard({ session }) {
               {/* ====== TAB: CLIENTES — COMPLETO ====== */}
               {tab === 'clientes' && (
                 <div className="space-y-4 ns-tab-content-enter">
-                  {/* HEADER + BÚSQUEDA — Plastilina 3D */}
-                  <header className="ns-section-header">
-                    <div className="flex items-center justify-between relative z-10">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                          </div>
-                          <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Base de datos</span>
-                        </div>
-                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>{vocab.clientePlural}</h2>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.06em] mt-1" style={{ color: 'var(--ns-text-muted)' }}>{clientes.length} registrados</p>
+                  {/* Título grande, exportar, números y búsqueda */}
+                  <header className="ns-cabecera ns-cabecera--bloque">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h2 className="ui-head__title">{vocab.clientePlural}</h2>
+                        <p className="ui-eyebrow mt-1">{clientes.length} registrados</p>
                       </div>
                       {/* EXPORT BUTTONS */}
                       {clientes.length > 0 && (
@@ -1454,7 +1440,7 @@ export default function Dashboard({ session }) {
                                   title: 'Resumen', type: 'kpi', data: [
                                     { label: 'Total Clientes', value: clientes.length },
                                     { label: 'Recurrentes', value: clientesVIP + clientesFrecuentes },
-                                    { label: 'Facturado', value: `$${totalIngresosClientes.toLocaleString()}` },
+                                    { label: 'Facturado', value: `$${numero(totalIngresosClientes)}` },
                                   ]
                                 },
                                 {
@@ -1462,7 +1448,7 @@ export default function Dashboard({ session }) {
                                     { key: 'nombre', label: 'Nombre' },
                                     { key: 'telefono', label: 'Teléfono' },
                                     { key: 'visitas', label: 'Visitas' },
-                                    { key: (c) => `$${c.ingresoTotal.toLocaleString()}`, label: 'Facturado' },
+                                    { key: (c) => `$${numero(c.ingresoTotal)}`, label: 'Facturado' },
                                     { key: 'frecuencia', label: 'Frecuencia' },
                                   ], data: clientes
                                 },
@@ -1488,7 +1474,7 @@ export default function Dashboard({ session }) {
                         <span className="ui-stat__label">Recurrentes</span>
                       </div>
                       <div className="ui-tile !p-3.5 text-center items-center">
-                        <span className="ui-stat__value" style={{ fontSize: 'clamp(16px,3.2vw,22px)' }}>${totalIngresosClientes.toLocaleString('es-AR')}</span>
+                        <span className="ui-stat__value" style={{ fontSize: 'clamp(16px,3.2vw,22px)' }}>${numero(totalIngresosClientes)}</span>
                         <span className="ui-stat__label">Facturado</span>
                       </div>
                     </div>
@@ -1534,9 +1520,9 @@ export default function Dashboard({ session }) {
                   ) : (
                     <div className="grid gap-3">
                       {clientesFiltrados.map((c, idx) => (
-                        <div key={idx} className="ns-cliente-card ns-stagger-in" style={{ animationDelay: `${idx * 0.04}s` }}>
-                          {/* Avatar Plastilina */}
-                          <span className={`ui-pod ui-pod--lg font-display text-xl shrink-0 ${c.frecuencia === 'VIP' ? 'ui-pod--brand' : ''}`}>
+                        <div key={idx} className="ns-cliente-card">
+                          {/* Avatar de Contactos */}
+                          <span className="ui-avatar ui-avatar--grande shrink-0">
                             {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                           </span>
                           
@@ -1552,7 +1538,7 @@ export default function Dashboard({ session }) {
                             <p className="text-[11px] font-semibold truncate" style={{ color: 'var(--ns-text-secondary)' }}>{c.telefono}{c.email ? ` · ${c.email}` : ''}</p>
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                               <span className="ui-chip ui-chip--soft">{c.visitas} visita{c.visitas !== 1 ? 's' : ''}</span>
-                              <span className="ui-chip ui-chip--quiet tabular-nums">${c.ingresoTotal.toLocaleString('es-AR')}</span>
+                              <span className="ui-chip ui-chip--quiet tabular-nums">${numero(c.ingresoTotal)}</span>
                               <span className="text-[9px] font-semibold" style={{ color: 'var(--ns-text-muted)' }}>Última: {formatearFechaRelativa(c.ultimaVisita)}</span>
                             </div>
                           </div>
@@ -1562,7 +1548,7 @@ export default function Dashboard({ session }) {
                               const num = c.telefono?.replace(/[^0-9]/g, '') || ''
                               window.open(`https://wa.me/${num}?text=${encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}, te escribimos desde ${negocio.nombre}.`)}`, '_blank')
                             }} className="nh-wa-btn shrink-0" title="Escribir por WhatsApp" aria-label={`Escribirle por WhatsApp a ${c.nombre}`}>
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
                             </button>
                             <button onClick={() => {
                               const num = c.telefono?.replace(/[^0-9]/g, '') || ''
@@ -1879,7 +1865,7 @@ export default function Dashboard({ session }) {
                 </div>
               )}
 
-            </motion.div>
+            </div>
           </div>
         )}
         </div>
@@ -1891,10 +1877,12 @@ export default function Dashboard({ session }) {
       {esPanelNegocio && <TirarParaActualizar alActualizar={actualizarPanel} />}
 
       {/* ====== DOCK INFERIOR — navegación móvil ======
-          Tamaño fijo y cinco lugares iguales: la lente sólo se desliza, nunca
-          cambia de forma, y el dock no se mueve ni se estira al tocarlo. */}
+          Cinco lugares iguales y una sola pieza que marca el activo. Se mueve
+          con `--i` (el número de lugar) y un `translate` en CSS: no se mide
+          nada al tocar, así el cambio arranca en el mismo cuadro. */}
       {esPanelNegocio && (
-        <nav className="ns-bottom-nav" aria-label="Navegación principal" data-tour="nav-mobile">
+        <nav className="ns-bottom-nav" aria-label="Navegación principal" data-tour="nav-mobile" style={{ '--i': enMas ? idsDock.length : idsDock.indexOf(tab) }}>
+          <span className="ns-bottom-nav__marca" aria-hidden="true" />
           {bottomNavTabs.map(item => (
             <button
               key={item.id}
@@ -1902,7 +1890,6 @@ export default function Dashboard({ session }) {
               aria-current={tab === item.id ? 'page' : undefined}
               className={`ns-bottom-nav-item ${tab === item.id ? 'active' : ''}`}
             >
-              {tab === item.id && <Lente grupo="dock" />}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" aria-hidden="true"><path d={item.d} strokeLinecap="round" strokeLinejoin="round" /></svg>
               <span className="ns-bottom-nav-item__label">{item.label}</span>
             </button>
@@ -1914,7 +1901,6 @@ export default function Dashboard({ session }) {
             aria-current={enMas ? 'page' : undefined}
             className={`ns-bottom-nav-item ${enMas ? 'active' : ''}`}
           >
-            {enMas && <Lente grupo="dock" />}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
             <span className="ns-bottom-nav-item__label">Más</span>
           </button>

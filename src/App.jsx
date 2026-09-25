@@ -6,7 +6,6 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { ConfirmProvider } from './contexts/ConfirmContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import { MotionConfig } from 'framer-motion'
-import { useRippleGlobal } from './hooks/useRippleGlobal'
 import { usePantallaNativa } from './hooks/usePantallaNativa'
 import { useHojasArrastrables } from './hooks/useHojasArrastrables'
 import EstadoConexion from './components/ui/EstadoConexion'
@@ -68,9 +67,8 @@ function AppShell() {
   const [loading, setLoading] = useState(true)
 
   // Comportamiento de app en el celular: sin zoom, hojas que se cierran
-  // deslizando, luz bajo el dedo al tocar y la pantalla siempre en su lugar.
+  // deslizando y la pantalla siempre en su lugar.
   usePantallaNativa()
-  useRippleGlobal()
   useHojasArrastrables()
 
   useEffect(() => {

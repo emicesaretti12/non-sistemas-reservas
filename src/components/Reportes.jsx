@@ -5,6 +5,7 @@ import Lente from './ui/Lente'
 import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
 import { factura, precioTurno } from '../utils/reservas'
 import { usePersistentState } from '../hooks/usePersistentState'
+import { numero } from '../utils/formato'
 
 export default function Reportes({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
@@ -172,21 +173,13 @@ export default function Reportes({ negocioId, rubro }) {
   return (
     <div className="flex flex-col gap-4 ns-tab-content-enter pb-6">
 
-      {/* ── HEADER BENTO PLASTILINA ── */}
-      <header className="ns-section-header">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Análisis de rendimiento</span>
-            </div>
-            <h2 className="ui-head__title">Reportes</h2>
-          </div>
+      {/* Título grande y el período, como en Salud o en Tiempo de uso. */}
+      <header className="ns-cabecera ns-cabecera--bloque">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="ui-head__title">Reportes</h2>
 
           {/* Selector de período */}
-          <div className="ui-segment self-start sm:self-auto">
+          <div className="ui-segment self-stretch sm:self-auto">
             {[
               { id: 'semana', label: 'Semana' },
               { id: 'mes', label: 'Mes' },
@@ -198,7 +191,7 @@ export default function Reportes({ negocioId, rubro }) {
                 className={periodo === p.id ? 'is-active' : ''}
                 aria-pressed={periodo === p.id}
               >
-                {periodo === p.id && <Lente grupo="reportes-periodo" />}
+                {periodo === p.id && <Lente />}
                 {p.label}
               </button>
             ))}
@@ -229,7 +222,7 @@ export default function Reportes({ negocioId, rubro }) {
             <Contador valor={datos.ingresosPeriodo} prefijo="$" />
           </h3>
           <p className="text-[10px] font-semibold mt-1 relative z-10" style={{ color: 'var(--ns-text-muted)' }}>
-            vs. ${datos.comparacion.ingresosAnterior.toLocaleString()} período anterior
+            vs. ${numero(datos.comparacion.ingresosAnterior)} período anterior
           </p>
         </div>
 
@@ -288,7 +281,7 @@ export default function Reportes({ negocioId, rubro }) {
             <p className="text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5" style={{ color: 'var(--ns-text-muted)' }}>Tendencia de facturación</p>
           </div>
           <span className="text-xl font-bold tracking-tight" style={{ color: 'var(--ns-primary)' }}>
-            ${datos.ingresosPeriodo.toLocaleString()}
+            ${numero(datos.ingresosPeriodo)}
           </span>
         </div>
 
@@ -302,7 +295,7 @@ export default function Reportes({ negocioId, rubro }) {
                 <div className="w-full relative h-full flex items-end">
                   {/* Tooltip */}
                   <div className="ui-tip absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${d.valor.toLocaleString('es-AR')}
+                    ${numero(d.valor)}
                   </div>
                   {/* Barra */}
                   <div
@@ -364,7 +357,7 @@ export default function Reportes({ negocioId, rubro }) {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[12px] font-bold" style={{ color: 'var(--ns-text)' }}>${s.revenue.toLocaleString()}</p>
+                      <p className="text-[12px] font-bold" style={{ color: 'var(--ns-text)' }}>${numero(s.revenue)}</p>
                       <p className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-muted)' }}>{s.count} {vocab.turnos}</p>
                     </div>
                   </div>
@@ -398,7 +391,7 @@ export default function Reportes({ negocioId, rubro }) {
                 const maxRev = datos.topEmpleados[0]?.revenue || 1
                 return (
                   <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors hover:bg-[var(--ns-accent-bg)]">
-                    <span className="ui-pod ui-pod--sm font-bold text-sm">{e.nombre.charAt(0)}</span>
+                    <span className="ui-avatar w-8 h-8 text-sm">{e.nombre.charAt(0)}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-bold truncate leading-tight" style={{ color: 'var(--ns-text)' }}>{e.nombre}</p>
                       <div className="ui-progress mt-2" style={{ height: 7 }}>
@@ -406,7 +399,7 @@ export default function Reportes({ negocioId, rubro }) {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[12px] font-bold" style={{ color: 'var(--ns-text)' }}>${e.revenue.toLocaleString()}</p>
+                      <p className="text-[12px] font-bold" style={{ color: 'var(--ns-text)' }}>${numero(e.revenue)}</p>
                       <p className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-muted)' }}>{e.count} {vocab.turnos}</p>
                     </div>
                   </div>
@@ -477,7 +470,7 @@ export default function Reportes({ negocioId, rubro }) {
             <div className="divide-y relative z-10" style={{ borderColor: 'var(--ns-border)' }}>
               {datos.topClientes.map((c, idx) => (
                 <div key={idx} className="px-5 py-4 flex items-center gap-3 transition-colors hover:bg-[var(--ns-accent-bg)]">
-                  <span className={`ui-pod ui-pod--sm font-bold text-sm ${idx === 0 ? 'ui-pod--brand' : ''}`}>
+                  <span className="ui-avatar w-8 h-8 text-sm">
                     {c.nombre?.charAt(0)?.toUpperCase() || '?'}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -485,7 +478,7 @@ export default function Reportes({ negocioId, rubro }) {
                     <p className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-muted)' }}>{c.count} {vocab.turnos}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[12px] font-bold" style={{ color: 'var(--ns-text)' }}>${c.revenue.toLocaleString()}</p>
+                    <p className="text-[12px] font-bold" style={{ color: 'var(--ns-text)' }}>${numero(c.revenue)}</p>
                     {idx === 0 && <p className="ui-eyebrow" style={{ color: 'var(--ns-primary)' }}>Top</p>}
                   </div>
                 </div>

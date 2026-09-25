@@ -67,40 +67,29 @@ export default function NotificationCenterV2({ negocioId }) {
 
   return (
     <>
-      <motion.button
+      <button
         ref={botonRef}
         onClick={() => setOpen((v) => !v)}
-        whileTap={{ scale: 0.92 }}
-        className="ns-notif-bell relative"
+        className="ui-icon-btn ns-notif-bell"
         title="Notificaciones"
         aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'}
         aria-expanded={open}
       >
-        <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
+            strokeWidth={2.1}
             d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
           />
         </svg>
 
         {unreadCount > 0 && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 560, damping: 30, mass: 0.7 }}
-            className="absolute -top-1 -right-1 w-5 h-5 text-[10px] font-bold rounded-full flex items-center justify-center"
-            style={{
-              background: 'var(--ns-gradient-1)',
-              color: 'var(--ns-paper)',
-              boxShadow: '0 3px 10px rgba(16,24,40,0.45)'
-            }}
-          >
+          <span className="ns-notif-bell__badge" aria-hidden="true">
             {unreadCount > 9 ? '9+' : unreadCount}
-          </motion.span>
+          </span>
         )}
-      </motion.button>
+      </button>
 
       <AnimatePresence>
         {open && (

@@ -93,63 +93,48 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
   return (
     <div className="flex flex-col gap-4 ns-tab-content-enter pb-6">
 
-      {/* ── HEADER BENTO PLASTILINA ── */}
-      <header className="ns-section-header">
-        <div className="flex items-center justify-between relative z-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--ns-gradient-1)', boxShadow: 'var(--ui-shadow-sm)' }}>
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Disponibilidad</span>
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight leading-none" style={{ color: 'var(--ns-text)' }}>Horarios</h2>
-            <p className="text-[10px] font-bold uppercase tracking-[0.06em] mt-1" style={{ color: 'var(--ns-text-muted)' }}>
+      {/* Título grande y "Guardar" a la derecha */}
+      <header className="ns-cabecera ns-cabecera--bloque">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="ui-head__title">Horarios</h2>
+            <p className="ui-eyebrow mt-1">
               {diasAbiertos} {diasAbiertos === 1 ? 'día abierto' : 'días abiertos'}
             </p>
           </div>
 
-          {/* Botón Guardar — Plastilina */}
           <button
             onClick={guardarConfiguracion}
             disabled={guardando}
-            className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl text-white font-bold text-[10px] uppercase tracking-[0.06em] transition-all active:scale-95 disabled:opacity-40 relative overflow-hidden"
-            style={{
-              background: saved ? 'var(--ns-success)' : 'var(--ns-primary)',
-              boxShadow: saved ? '0 4px 16px rgba(16,24,40,0.35)' : 'var(--ui-shadow-sm)'
-            }}
+            className="ui-btn ui-btn--primary shrink-0"
+            style={saved ? { background: 'var(--ns-success-solid)' } : undefined}
           >
-            {/* Shine overlay */}
-            <span className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl pointer-events-none" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 100%)' }} />
             {guardando ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : saved ? (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span className="hidden sm:inline">Guardado</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span>Guardado</span>
               </>
             ) : (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span className="hidden sm:inline">Guardar</span>
+                <span>Guardar</span>
               </>
             )}
           </button>
         </div>
 
         {/* Mini resumen de días — Pills */}
-        <div className="flex gap-1.5 mt-4 flex-wrap relative z-10">
+        <div className="flex gap-1.5 flex-wrap">
           {diasSemana.map(dia => (
             <button
               key={dia.id}
               onClick={() => toggleDia(dia.id)}
               aria-pressed={Boolean(horarios[dia.id]?.abierto)}
-              className="min-h-[36px] min-w-[46px] px-3 rounded-full text-[11px] font-bold uppercase tracking-[0.04em] transition-all active:scale-90"
+              className="min-h-[36px] min-w-[46px] px-3 rounded-full text-[13px] font-semibold active:opacity-60"
               style={{
-                background: horarios[dia.id]?.abierto ? 'var(--ns-primary)' : 'rgba(255,255,255,0.6)',
+                background: horarios[dia.id]?.abierto ? 'var(--ns-primary)' : 'var(--ns-paper)',
                 color: horarios[dia.id]?.abierto ? 'white' : 'var(--ns-text-muted)',
-                border: horarios[dia.id]?.abierto ? 'none' : '1px solid var(--ns-border)',
-                boxShadow: horarios[dia.id]?.abierto ? 'var(--ui-shadow-sm)' : 'var(--ns-shadow-sm)'
               }}
             >
               {dia.label}
@@ -333,10 +318,8 @@ export default function ConfiguracionHorarios({ negocio, onUpdate }) {
       <div
         className="ns-barra-accion mt-3 z-20 rounded-[26px] p-2"
         style={{
-          background: 'var(--ns-glass-bg-strong)',
-          backdropFilter: 'blur(18px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-          boxShadow: 'var(--ui-shadow)',
+          background: 'var(--ns-paper)',
+          boxShadow: 'var(--ui-shadow-lg)',
         }}
       >
         <button

@@ -45,12 +45,10 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Un resorte apenas pasado de rosca: 1.4% de sobrepaso alcanza
-   para que se sienta vivo sin que rebote. */
+/* Un diálogo que aparece: crece apenas desde el 96%, sin rebote. */
 @keyframes ns-pop-in {
-  0% { opacity: 0; transform: scale(0.94); }
-  62% { opacity: 1; transform: scale(1.014); }
-  100% { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* El dock se centra con `translate`, así que su entrada anima esa
@@ -94,13 +92,6 @@
   100% { transform: translateX(160%) scaleX(0.4); }
 }
 
-/* Onda del punto "en vivo". */
-@keyframes ns-pulse-ring {
-  0% { transform: scale(0.9); opacity: 0.5; }
-  70% { transform: scale(2.1); opacity: 0; }
-  100% { transform: scale(2.1); opacity: 0; }
-}
-
 /* Latido mínimo, para lo que está cargando y nada más. */
 @keyframes ns-breathe {
   0%, 100% { opacity: 1; }
@@ -124,18 +115,6 @@
 
 /* ---------- Respuesta al toque ---------- */
 
-@keyframes ns-press {
-  0% { transform: scale(1); }
-  45% { transform: scale(0.97); }
-  100% { transform: scale(1); }
-}
-
-@keyframes ns-ripple {
-  from { transform: scale(0.08); opacity: 0.9; }
-  60% { opacity: 0.45; }
-  to { transform: scale(1); opacity: 0; }
-}
-
 @keyframes ns-marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -144,29 +123,23 @@
 /* ---------- Utilidades ---------- */
 
 @layer components {
-  .ns-fade-in { animation: ns-fade-in var(--dur-2) var(--ease-out) backwards; }
-  .ns-fade-up { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
-  .ns-fade-down { animation: ns-fade-down var(--dur-3) var(--ease-out) backwards; }
-  .ns-slide-right { animation: ns-slide-right var(--dur-3) var(--ease-out) backwards; }
-  .ns-slide-left { animation: ns-slide-left var(--dur-3) var(--ease-out) backwards; }
-  .ns-scale-in { animation: ns-scale-in var(--dur-2) var(--ease-out) backwards; }
-  .ns-pop-in { animation: ns-pop-in var(--dur-3) var(--ease-spring) backwards; }
-  .ns-spring-in { animation: ns-pop-in var(--dur-4) var(--ease-spring) backwards; }
-  .ns-page-in { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
-  .ns-tab-switch { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
+  /* Entradas de contenido. En las apps de Apple el contenido de una
+     pantalla aparece ya en su lugar: nada sube, nada entra en
+     escalera. Estas clases quedan en muchas listas y tarjetas; ahora
+     no animan, así cambiar de sección o cargar una lista no pone a
+     trabajar al navegador en decenas de animaciones a la vez. */
+  .ns-fade-in,
+  .ns-fade-up,
+  .ns-fade-down,
+  .ns-slide-right,
+  .ns-slide-left,
+  .ns-scale-in,
+  .ns-page-in,
+  .ns-tab-switch,
   .ns-counter,
-  .ns-count-in { animation: ns-count-in var(--dur-3) var(--ease-out) backwards; }
-  .ns-stagger-in { animation: ns-fade-up var(--dur-3) var(--ease-out) backwards; }
-  .ns-marquee { animation: ns-marquee 40s linear infinite; }
-
-  /* Lo que está esperando respira; nada más se mueve solo. */
-  .ns-breathe,
-  .ns-pulse-soft { animation: ns-breathe 1.8s var(--ease-in-out) infinite; }
-
-  /* Clases que quedaron de la etapa anterior. Ya no flotan ni se
-     deforman: en este idioma nada se mueve porque sí. Se dejan
-     definidas para que los elementos que las llevan sigan siendo
-     válidos, sin animación. */
+  .ns-count-in,
+  .ns-stagger-in,
+  .ns-stagger > *,
   .ns-float,
   .ns-float-slow,
   .ns-float-slower,
@@ -174,34 +147,15 @@
   .ns-wiggle,
   .ns-shimmer-btn::after { animation: none; }
 
-  /* Entrada escalonada: el hijo n entra 40ms después del anterior.
-     Con más de diez se corta el escalón: a partir de ahí la espera
-     acumulada se nota más que el efecto. */
-  .ns-stagger > * {
-    animation: ns-fade-up var(--dur-3) var(--ease-out) backwards;
-    animation-delay: calc(var(--i, 0) * 40ms);
-  }
+  /* Lo que aparece encima (un aviso, un diálogo) sí entra. */
+  .ns-pop-in,
+  .ns-spring-in { animation: ns-pop-in var(--dur-3) var(--ease-out) backwards; }
 
-  .ns-stagger > *:nth-child(1) { --i: 0; }
-  .ns-stagger > *:nth-child(2) { --i: 1; }
-  .ns-stagger > *:nth-child(3) { --i: 2; }
-  .ns-stagger > *:nth-child(4) { --i: 3; }
-  .ns-stagger > *:nth-child(5) { --i: 4; }
-  .ns-stagger > *:nth-child(6) { --i: 5; }
-  .ns-stagger > *:nth-child(7) { --i: 6; }
-  .ns-stagger > *:nth-child(8) { --i: 7; }
-  .ns-stagger > *:nth-child(n + 9) { --i: 8; }
+  .ns-marquee { animation: ns-marquee 40s linear infinite; }
 
-  .ns-delay-1 { animation-delay: 40ms; }
-  .ns-delay-2 { animation-delay: 80ms; }
-  .ns-delay-3 { animation-delay: 120ms; }
-  .ns-delay-4 { animation-delay: 160ms; }
-  .ns-delay-5 { animation-delay: 200ms; }
-  .ns-delay-6 { animation-delay: 240ms; }
-  .ns-delay-7 { animation-delay: 280ms; }
-  .ns-delay-8 { animation-delay: 320ms; }
-  .ns-delay-9 { animation-delay: 360ms; }
-  .ns-delay-10 { animation-delay: 400ms; }
+  /* Lo que está esperando respira; nada más se mueve solo. */
+  .ns-breathe,
+  .ns-pulse-soft { animation: ns-breathe 1.8s var(--ease-in-out) infinite; }
 
   /* Esqueleto de carga: el gris del campo con un brillo que pasa
      por encima. El brillo es un hijo que se mueve con transform,
@@ -227,37 +181,18 @@
     animation: ns-shimmer 1.4s var(--ease-in-out) infinite;
   }
 
-  /* Punto "en vivo" con su onda. */
+  /* Punto de estado, quieto. */
   .ns-live-dot {
-    position: relative;
     display: inline-block;
     width: 8px;
     height: 8px;
     border-radius: 999px;
-    background: var(--ns-success);
+    background: var(--ns-success-solid);
   }
 
-  .ns-live-dot::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: inherit;
-    animation: ns-pulse-ring 2.4s var(--ease-out) infinite;
-  }
-
-  /* Respuesta al toque: se hunde apenas y vuelve. */
-  .ns-press {
-    transition: transform var(--dur-1) var(--ease-spring);
-  }
-
-  .ns-press:active {
-    transform: scale(0.97);
-  }
-
-  .ns-haptic:active {
-    animation: ns-press var(--dur-2) var(--ease-spring);
-  }
+  /* Respuesta al toque: se atenúa mientras el dedo está apoyado. */
+  .ns-press:active,
+  .ns-haptic:active { opacity: 0.6; }
 }
 
 /* ---------- Respeto por "reducir movimiento" ----------
@@ -272,24 +207,4 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* El campo ambiental deriva muy despacio: casi no se ve moverse,
-   pero el vidrio que tiene encima cambia de color y se siente vivo. */
-@keyframes ns-ambient {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  33%  { transform: translate3d(2.5%, -1.8%, 0) rotate(4deg) scale(1.04); }
-  66%  { transform: translate3d(-2%, 2.2%, 0) rotate(-3deg) scale(1.02); }
-  100% { transform: translate3d(1.2%, 1%, 0) rotate(2deg) scale(1.05); }
-}
-
-/* Deriva de las gotas de color detrás del vidrio del login. */
-@keyframes ns-orb-a {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(48px, 36px, 0) scale(1.12); }
-}
-
-@keyframes ns-orb-b {
-  from { transform: translate3d(0, 0, 0) scale(1.06); }
-  to   { transform: translate3d(-56px, -30px, 0) scale(0.94); }
 }

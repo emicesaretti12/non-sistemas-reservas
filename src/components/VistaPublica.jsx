@@ -8,6 +8,7 @@ import { ocupaHorario, duracionTurno, parseFecha, seSolapan, verificarDisponibil
 import { useToast } from './Toast'
 import { usePersistentState } from '../hooks/usePersistentState'
 import { leerCliente, recordarCliente, recordarTurno, proximoTurnoEn, cuandoEs } from '../utils/misTurnos'
+import { numero, pesos } from '../utils/formato'
 
 const TRES_DIAS = 3 * 24 * 60 * 60 * 1000
 const esCarrito = (c) => Boolean(c) && typeof c === 'object' && !Array.isArray(c)
@@ -501,7 +502,7 @@ export default function VistaPublica() {
 
   // Los precios del catálogo ya usaban toLocaleString pero los de los
   // servicios salían crudos ("$8000" en vez de "$8.000") en la misma pantalla.
-  const precio = (valor) => `$${Number(valor || 0).toLocaleString('es-AR')}`
+  const precio = pesos
 
   // Sólo embebemos mapas de Google (el campo lo escribe el dueño del negocio).
   const mapaUrlSegura = mapaEmbedUrl(negocio.mapa_url, negocio.direccion)
@@ -545,9 +546,9 @@ export default function VistaPublica() {
     
     Object.entries(carrito).forEach(([pid, qty]) => {
       const p = catalogo.find(x => x.id === pid)
-      if (p) msg += `• ${p.nombre} x${qty} — $${(p.precio * qty).toLocaleString()}\n`
+      if (p) msg += `• ${p.nombre} x${qty} — $${numero(p.precio * qty)}\n`
     })
-    msg += `\n💰 *Total: $${totalCarrito.toLocaleString()}*`
+    msg += `\n💰 *Total: $${numero(totalCarrito)}*`
     if (clienteCheckout.notas) msg += `\n\n📝 *Notas:* ${clienteCheckout.notas}`
     
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank')
@@ -681,26 +682,6 @@ export default function VistaPublica() {
                </button>
              )}
            </div>
-         )}
-
-         {/* PROGRESS BAR — Más compacto */}
-         {paso < 5 && (
-           <nav className="ns-progress-nav">
-              <div className="flex items-center justify-between mb-1.5 md:mb-2 px-1">
-                 <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--ns-primary)' }}>Progreso de reserva</span>
-                 <span className="text-[9px] md:text-[10px] font-bold" style={{ color: 'var(--ns-text)' }}>{requiereStaff ? paso : paso - 1} / {requiereStaff ? 4 : 3}</span>
-              </div>
-              <div className="flex gap-1 md:gap-1.5">
-                 {(requiereStaff ? [1,2,3,4] : [1,3,4]).map(p => (
-                   <div key={p} className="h-1 md:h-1.5 flex-1 rounded-full overflow-hidden relative" style={{ background: 'var(--ns-border)' }}>
-                      <div className="absolute inset-y-0 left-0 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]" style={{ 
-                        width: paso >= p ? '100%' : '0%', 
-                        backgroundColor: 'var(--ns-primary)' 
-                      }}></div>
-                   </div>
-                 ))}
-              </div>
-           </nav>
          )}
 
          {/* CONTENEDOR DE PASOS */}
@@ -1356,7 +1337,7 @@ export default function VistaPublica() {
                                  <span className="w-6 text-center text-[11px] font-bold">{qty}</span>
                                  <button onClick={() => addToCart(pid)} className="w-7 h-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: accent }}>+</button>
                                </div>
-                               <span className="text-sm font-bold" style={{ color: 'var(--ns-text)' }}>${(p.precio * qty).toLocaleString()}</span>
+                               <span className="text-sm font-bold" style={{ color: 'var(--ns-text)' }}>${numero(p.precio * qty)}</span>
                              </div>
                            </div>
                          </div>

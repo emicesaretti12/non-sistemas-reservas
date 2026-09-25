@@ -110,7 +110,7 @@ const SUGERENCIAS = {
 function LivePreview({ data }) {
   const color = colorSeguro(data.color)
   return (
-    <div className="flex-1 overflow-y-auto" style={{ background: 'var(--ns-bg)', fontFamily: '"Inter Tight", system-ui, sans-serif' }}>
+    <div className="flex-1 overflow-y-auto" style={{ background: 'var(--ns-bg)', fontFamily: 'var(--font-sans)' }}>
       {/* Portada con el acento elegido */}
       <motion.div layout className="h-44 relative" style={{ background: `linear-gradient(135deg, ${COLOR_MARCA} 0%, ${color} 150%)` }}>
         <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(circle, #FFFFFF 1px, transparent 1px)', backgroundSize: '11px 11px' }} />

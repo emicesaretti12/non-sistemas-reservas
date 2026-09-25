@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../supabaseClient'
 import { getVocabulario, mayusculaInicial } from '../utils/vocabulario'
@@ -8,6 +8,7 @@ import { useToast } from './Toast'
 import { haptic } from '../utils/haptics'
 import { IconRobot } from './NoniIcons'
 import { usePersistentState } from '../hooks/usePersistentState'
+import { fecha, hora, numero } from '../utils/formato'
 
 const TURNO_VACIO = { cliente_nombre: '', cliente_telefono: '', empleado_id: '', servicio_id: '', hora: '09:00' }
 const DOCE_HORAS = 12 * 60 * 60 * 1000
@@ -139,8 +140,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
 
   function enviarRecordatorio(t) {
     const tDate = safeParseDate(t.fecha_hora)
-    const horaStr  = tDate ? tDate.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : ''
-    const fechaStr = tDate ? tDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
+    const horaStr  = tDate ? hora(tDate) : ''
+    const fechaStr = tDate ? fecha(tDate, { weekday: 'long', day: 'numeric', month: 'long' }) : ''
     const negocioNombre = negocio?.nombre || 'nuestro local'
     const msg = encodeURIComponent(
       `Hola ${t.cliente_nombre}! Te recordamos tu turno para el ${fechaStr} a las ${horaStr} en ${negocioNombre}. ¡Te esperamos!`
@@ -216,6 +217,21 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     if (!win) toast.info('Permití las ventanas emergentes si querés agendarlo en Google Calendar.')
   }
 
+  // Turnos por día, contados en una sola pasada. Antes cada día del
+  // calendario recorría la lista entera: 30 días × todos los turnos en cada
+  // render de la agenda.
+  const turnosPorDia = useMemo(() => {
+    const mapa = new Map()
+    for (const t of todosLosTurnos) {
+      if (t.estado === 'cancelado') continue
+      const tDate = parseFecha(t.fecha_hora)
+      if (!tDate) continue
+      const clave = `${tDate.getFullYear()}-${tDate.getMonth()}-${tDate.getDate()}`
+      mapa.set(clave, (mapa.get(clave) || 0) + 1)
+    }
+    return mapa
+  }, [todosLosTurnos])
+
   /* ═══════════════════════════════════════════
      CALENDAR — Light theme, brand colors
      ═══════════════════════════════════════════ */
@@ -224,6 +240,9 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const month = fechaActual.getMonth()
     const primerDia = new Date(year, month, 1).getDay()
     const diasEnMes = new Date(year, month + 1, 0).getDate()
+    const nombreMes = fecha(fechaActual, { month: 'long' })
+    const hoyTexto = new Date().toDateString()
+    const elegidoTexto = fechaActual.toDateString()
 
     const nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     const blanks = Array.from({ length: primerDia }).map((_, i) => (
@@ -233,17 +252,11 @@ export default function Turnos({ negocioId, rubro, negocio }) {
     const days = Array.from({ length: diasEnMes }).map((_, i) => {
       const dayNum = i + 1
       const d = new Date(year, month, dayNum)
-      const isSelected = d.toDateString() === fechaActual.toDateString()
-      const isToday = d.toDateString() === new Date().toDateString()
+      const isSelected = d.toDateString() === elegidoTexto
+      const isToday = d.toDateString() === hoyTexto
 
-      const turnosEseDia = todosLosTurnos.filter(t => {
-        if (t.estado === 'cancelado') return false
-        const tDate = safeParseDate(t.fecha_hora)
-        if (!tDate) return false
-        return tDate.getFullYear() === year && tDate.getMonth() === month && tDate.getDate() === dayNum
-      })
-      const contador = turnosEseDia.length
-      const etiquetaDia = `${dayNum} de ${d.toLocaleDateString('es-ES', { month: 'long' })}` +
+      const contador = turnosPorDia.get(`${year}-${month}-${dayNum}`) || 0
+      const etiquetaDia = `${dayNum} de ${nombreMes}` +
         (contador ? ` · ${contador} ${contador === 1 ? 'turno' : 'turnos'}` : ' · sin turnos')
 
       return (
@@ -253,7 +266,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           aria-label={etiquetaDia}
           aria-current={isToday ? 'date' : undefined}
           title={etiquetaDia}
-          className="ns-cal-day h-11 md:h-12 flex flex-col items-center justify-center gap-1 rounded-[12px] transition-colors duration-150"
+          className="ns-cal-day h-11 md:h-12 flex flex-col items-center justify-center gap-1 rounded-full"
           style={isSelected
             ? {
                 background: 'var(--ns-primary)',
@@ -298,7 +311,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.6" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
           <h3 className="font-display text-base md:text-lg font-bold tracking-tight" style={{ color: 'var(--ns-text)' }}>
-            {mayusculaInicial(new Date(year, month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }))}
+            {mayusculaInicial(fecha(new Date(year, month, 1), { month: 'long', year: 'numeric' }))}
           </h3>
           <button
             onClick={() => { haptic(); setFechaActual(new Date(year, month + 1, 1)) }}
@@ -309,10 +322,10 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           </button>
         </div>
 
-        <div className="ui-well !p-3 md:!p-4">
+        <div>
           <div className="grid grid-cols-7 gap-1 mb-1 text-center">
             {nombresDias.map(n => (
-              <div key={n} className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: 'var(--ns-text-faint)' }}>{n}</div>
+              <div key={n} className="text-[12px] font-semibold" style={{ color: 'var(--ns-text-faint)' }}>{n}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -423,8 +436,8 @@ export default function Turnos({ negocioId, rubro, negocio }) {
    */
   const renderTurnoCard = (t) => {
     const fechaTurno = safeParseDate(t.fecha_hora) || new Date(t.fecha_hora)
-    const horaLocal = fechaTurno.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
-    const fechaAmigable = fechaTurno.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+    const horaLocal = hora(fechaTurno)
+    const fechaAmigable = fecha(fechaTurno, { weekday: 'long', day: 'numeric', month: 'long' })
     const esResuelto = t.estado === 'completado' || t.estado === 'no_show' || t.estado === 'cancelado'
     const esFuturo = fechaTurno > new Date()
     const tituloAccesible = `${t.cliente_nombre} · ${fechaAmigable} a las ${horaLocal}${esFuturo ? '' : ' (ya pasó)'}`
@@ -497,7 +510,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
               {t.empleados ? t.empleados.nombre.split(' ')[0] : vocab.fallbackStaff}
             </span>
             {t.servicios?.precio > 0 && (
-              <span className="ui-chip tabular-nums">${Number(t.servicios.precio).toLocaleString('es-AR')}</span>
+              <span className="ui-chip tabular-nums">${numero(t.servicios.precio)}</span>
             )}
             {t.notas && <span className="ui-chip ui-chip--quiet truncate max-w-[220px]">{t.notas}</span>}
           </div>
@@ -529,7 +542,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 title={t.recordatorio_enviado ? 'Recordatorio ya enviado' : 'Recordar por WhatsApp'}
                 aria-label="Recordar por WhatsApp"
               >
-                <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
               </button>
               <button onClick={() => dispararGoogleCalendar(t, t.servicios, t.empleados)} className="ui-icon-btn" title="Agendar en Google Calendar" aria-label="Agendar en Google Calendar">
                 <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z" /></svg>
@@ -561,7 +574,6 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           <div>
             <h1 className="ui-head__title">Agenda</h1>
             <div className="flex items-center gap-2 mt-2">
-              <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
               <p className="ui-eyebrow">{todosLosTurnos.length} {vocab.citasRegistradas.toLowerCase()}</p>
             </div>
           </div>
@@ -603,7 +615,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
               className={filtroEmpleado === 'todos' ? 'is-active' : ''}
               aria-pressed={filtroEmpleado === 'todos'}
             >
-              {filtroEmpleado === 'todos' && <Lente grupo="agenda-equipo" />}
+              {filtroEmpleado === 'todos' && <Lente />}
               {vocab.filtroTodos}
             </button>
             {empleados.map(e => (
@@ -613,7 +625,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 className={`flex items-center gap-2 ${filtroEmpleado === e.id ? 'is-active' : ''}`}
                 aria-pressed={filtroEmpleado === e.id}
               >
-                {filtroEmpleado === e.id && <Lente grupo="agenda-equipo" />}
+                {filtroEmpleado === e.id && <Lente />}
                 <span className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ boxShadow: 'var(--ui-shadow-sm)' }}>
                   {e.foto_url
                     ? <img src={e.foto_url} alt="" className="object-cover h-full w-full" />
@@ -639,14 +651,13 @@ export default function Turnos({ negocioId, rubro, negocio }) {
           return (
             <div className="space-y-4">
               <div className="flex items-center gap-2.5">
-                <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
                 <h3 className="ui-eyebrow">Próximos {vocab.turnos}</h3>
               </div>
               <div className="grid gap-3">
                 {proximos.map(t => {
                   const tDate = safeParseDate(t.fecha_hora)
-                  const horaStr = tDate.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
-                  const fechaStr = tDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
+                  const horaStr = hora(tDate)
+                  const fechaStr = fecha(tDate, { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '')
                   const esHoy = tDate.toDateString() === new Date().toDateString()
                   return (
                     <div key={t.id} className="ui-tile !flex-row items-center gap-4 !py-3.5">
@@ -669,7 +680,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                         className="nh-wa-btn shrink-0"
                         title="Escribir por WhatsApp"
                       >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
                       </a>
                     </div>
                   )
@@ -788,7 +799,6 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
                   <h3 className="ui-eyebrow">Cupos disponibles</h3>
                 </div>
                 <span className="nh-count-badge">
@@ -875,14 +885,14 @@ export default function Turnos({ negocioId, rubro, negocio }) {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label={`Turnos del ${fechaActual.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`}
+            aria-label={`Turnos del ${fecha(fechaActual, { day: 'numeric', month: 'long' })}`}
           >
             <div className="ui-sheet__handle sm:hidden" />
 
             <div className="px-5 sm:px-6 pt-3 sm:pt-6 pb-4 flex justify-between items-center shrink-0">
               <div>
                 <h2 className="ui-head__title text-2xl sm:text-3xl">
-                  {fechaActual.getDate()} de {fechaActual.toLocaleDateString('es-ES', { month: 'long' })}
+                  {fechaActual.getDate()} de {fecha(fechaActual, { month: 'long' })}
                 </h2>
                 <p className="ui-eyebrow mt-1.5">{turnosVigentes.length} {vocab.citasAsignadas}</p>
               </div>
@@ -980,7 +990,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                 <div>
                   <h2 className="ui-head__title text-2xl md:text-3xl">{vocab.nuevaCita}</h2>
                   <p className="ui-eyebrow mt-1.5">
-                    {fechaActual.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    {fecha(fechaActual, { weekday: 'long', day: 'numeric', month: 'long' })}
                   </p>
                   {hayBorrador && (
                     <p className="mt-2 flex items-center gap-2 text-[12px] font-medium text-[#6B7686]">
@@ -1045,7 +1055,7 @@ export default function Turnos({ negocioId, rubro, negocio }) {
                     <option value="">{vocab.seleccionarServicio}</option>
                     {servicios.map(s => (
                       <option key={s.id} value={s.id}>
-                        {s.nombre}{s.precio > 0 ? ` · $${Number(s.precio).toLocaleString('es-AR')}` : ''}
+                        {s.nombre}{s.precio > 0 ? ` · $${numero(s.precio)}` : ''}
                       </option>
                     ))}
                   </select>

@@ -4,6 +4,7 @@ import { useToast } from './Toast'
 import { useConfirm } from '../contexts/ConfirmContext'
 import { haptic } from '../utils/haptics'
 import Lente from './ui/Lente'
+import { pesos } from '../utils/formato'
 
 /**
  * Catálogo público: la vidriera de productos que ven los clientes en la
@@ -22,7 +23,7 @@ import Lente from './ui/Lente'
 const CATEGORIAS_BASE = ['General', 'Destacados', 'Nuevos', 'Ofertas', 'Accesorios', 'Otros']
 const VACIO = { nombre: '', descripcion: '', categoria: 'General', precio: '', imagen_url: '', activo: true }
 
-const formatoPrecio = (v) => `$${Number(v || 0).toLocaleString('es-AR')}`
+const formatoPrecio = pesos
 
 // La tabla no existe en la base (no se corrió sql/legacy/sql_catalogo.sql).
 const faltaTabla = (error) =>
@@ -266,13 +267,11 @@ export default function CatalogoPublico({ negocioId, publicLink }) {
   return (
     <div className="flex flex-col gap-5 ns-tab-content-enter" data-testid="catalogo-publico">
       {/* Cabecera */}
-      <header className="ui-card p-5 md:p-7">
-        <div className="flex items-start justify-between gap-4">
+      <header className="ns-cabecera ns-cabecera--bloque">
+        <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="ui-eyebrow" style={{ color: 'var(--ns-primary)' }}>Vidriera pública</p>
-            <h2 className="ui-head__title mt-1">Catálogo</h2>
+            <h2 className="ui-head__title">Catálogo</h2>
             <div className="flex items-center gap-2 mt-2">
-              <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
               <p className="ui-eyebrow">
                 {visibles} {visibles === 1 ? 'visible' : 'visibles'}
                 {ocultos > 0 ? ` · ${ocultos} ${ocultos === 1 ? 'oculto' : 'ocultos'}` : ''}
@@ -325,7 +324,7 @@ export default function CatalogoPublico({ negocioId, publicLink }) {
               <div className="ui-segment w-max">
                 {['todos', ...categorias].map((c) => (
                   <button key={c} onClick={() => setFiltro(c)} className={filtro === c ? 'is-active' : ''} aria-pressed={filtro === c}>
-                    {filtro === c && <Lente grupo="catalogo-categoria" />}
+                    {filtro === c && <Lente />}
                     {c === 'todos' ? 'Todos' : c}
                   </button>
                 ))}

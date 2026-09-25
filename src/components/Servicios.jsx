@@ -5,6 +5,7 @@ import { useToast } from './Toast'
 import { haptic } from '../utils/haptics'
 import { useConfirm } from '../contexts/ConfirmContext'
 import { IconRobot, IconCelebrate } from './NoniIcons'
+import { numero } from '../utils/formato'
 
 export default function Servicios({ negocioId, rubro }) {
   const vocab = getVocabulario(rubro)
@@ -167,11 +168,10 @@ export default function Servicios({ negocioId, rubro }) {
       )}
 
       {/* Encabezado */}
-      <header className="ui-card p-5 md:p-7 flex items-center justify-between gap-4">
+      <header className="ns-cabecera">
         <div className="min-w-0">
           <h2 className="ui-head__title">{vocab.servicioPlural}</h2>
           <div className="flex items-center gap-2 mt-2">
-            <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
             <p className="ui-eyebrow">{servicios.length} {vocab.servicios} activos</p>
           </div>
         </div>
@@ -234,7 +234,7 @@ export default function Servicios({ negocioId, rubro }) {
                   </span>
                 </div>
                 <span className="font-display text-xl md:text-2xl font-bold tracking-tight leading-none tabular-nums shrink-0 pt-0.5" style={{ color: 'var(--ns-primary)' }}>
-                  ${Number(srv.precio || 0).toLocaleString('es-AR')}
+                  ${numero(srv.precio)}
                 </span>
               </div>
 

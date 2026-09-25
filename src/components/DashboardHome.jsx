@@ -4,6 +4,7 @@ import { ocupaHorario, precioTurno, normalizarHorarios } from '../utils/reservas
 import { haptic } from '../utils/haptics'
 import { mayusculaInicial } from '../utils/vocabulario'
 import Contador from './ui/Contador'
+import { fecha, hora } from '../utils/formato'
 
 /**
  * DashboardHome — el resumen del día: lo que viene, lo que falta y cómo va la semana.
@@ -14,14 +15,7 @@ import Contador from './ui/Contador'
 const DIAS_MAP = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
 const DIAS_LABEL = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
-function saludo() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Buenos días'
-  if (h < 19) return 'Buenas tardes'
-  return 'Buenas noches'
-}
-
-const fmtHora = (d) => new Date(d).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+const fmtHora = hora
 
 export default function DashboardHome({
   negocio,
@@ -197,7 +191,7 @@ export default function DashboardHome({
 
   const maxSem = Math.max(...distribucionSemanal, 1)
   const hoyIdx = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1
-  const fechaLarga = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+  const fechaLarga = fecha(ahora, { weekday: 'long', day: 'numeric', month: 'long' })
 
   if (loading) {
     // Esqueleto en vez de un spinner suelto: se ve la forma de lo que viene
@@ -234,44 +228,40 @@ export default function DashboardHome({
   return (
     <div className="flex flex-col gap-4 md:gap-5" data-testid="dashboard-home">
 
-      {/* ═══════════ SALUDO ═══════════ */}
-      <header className="ui-card p-5 md:p-8 overflow-hidden relative" data-testid="home-hero">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-5">
-          <div className="flex items-center gap-4 min-w-0">
-            <span className="ui-pod ui-pod--lg overflow-hidden p-0">
-              {negocio?.logo_url
-                ? <img src={negocio.logo_url} alt="" className="w-full h-full object-cover" />
-                : <span className="font-display text-2xl font-bold">{negocio?.nombre?.charAt(0) || 'N'}</span>}
-            </span>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
-                <span className="ui-eyebrow">{saludo()}</span>
-              </div>
-              <h1 className="font-display text-2xl md:text-4xl font-bold tracking-tight leading-none truncate" style={{ color: 'var(--ns-text)' }}>
-                {negocio?.nombre || 'Tu negocio'}
-              </h1>
-              <p className="text-[11px] font-semibold mt-1.5" style={{ color: 'var(--ns-text-muted)' }}>{mayusculaInicial(fechaLarga)}</p>
-            </div>
+      {/* ═══════════ SALUDO ═══════════
+          Como Salud o Música: la fecha chica arriba, el título grande y la
+          foto del negocio a la derecha, que lleva a Ajustes. */}
+      <header className="ns-cabecera ns-cabecera--bloque" data-testid="home-hero">
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="ui-eyebrow font-semibold">{mayusculaInicial(fechaLarga)}</p>
+            <h1 className="ui-head__title truncate block">{negocio?.nombre || 'Tu negocio'}</h1>
           </div>
-
-          <div className="flex items-center gap-2 md:ml-auto shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => { haptic(); window.open(publicLink, '_blank') }}
               className="ui-icon-btn"
               title="Ver mi app pública"
+              aria-label="Ver mi app pública"
               data-testid="home-view-app"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-[18px] h-[18px]"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-[18px] h-[18px]" aria-hidden="true"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
-            <button onClick={() => { haptic(); onNavigate?.('ajustes') }} className="ui-icon-btn" title="Ajustes">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-[18px] h-[18px]"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" /></svg>
+            <button
+              onClick={() => { haptic(); onNavigate?.('ajustes') }}
+              className="ui-avatar ui-avatar--brand overflow-hidden"
+              title="Ajustes del negocio"
+              aria-label="Ajustes del negocio"
+            >
+              {negocio?.logo_url
+                ? <img src={negocio.logo_url} alt="" className="w-full h-full object-cover" />
+                : <span>{negocio?.nombre?.charAt(0) || 'N'}</span>}
             </button>
           </div>
         </div>
 
         {showInstallBtn && (
-          <div className="ui-well mt-5 flex items-center justify-between gap-4 !py-3.5">
+          <div className="ui-card !p-3.5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <span className="ui-pod ui-pod--sm">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-4 h-4"><path d="M12 18v-6m0 0l-3 3m3-3l3 3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -281,7 +271,7 @@ export default function DashboardHome({
                 <p className="text-[11px] font-medium truncate" style={{ color: 'var(--ns-text-muted)' }}>Queda en tu pantalla de inicio, como cualquier app.</p>
               </div>
             </div>
-            <button onClick={handleInstallClick} className="ui-btn ui-btn--primary ui-btn--quiet shrink-0">Instalar</button>
+            <button onClick={handleInstallClick} className="ui-btn ui-btn--quiet shrink-0">Instalar</button>
           </div>
         )}
       </header>
@@ -314,9 +304,8 @@ export default function DashboardHome({
       {proximaCita && (
         <section className="ui-card p-5 md:p-6" data-testid="home-next-appointment">
           <div className="flex items-center gap-4">
-            <span className="ui-pod ui-pod--brand ui-pod--lg flex-col leading-none">
-              <span className="font-display text-xl font-bold">{fmtHora(proximaCita.fecha_hora).split(':')[0]}</span>
-              <span className="text-[10px] font-bold opacity-80">:{fmtHora(proximaCita.fecha_hora).split(':')[1]}</span>
+            <span className="ui-pod ui-pod--brand ui-pod--lg">
+              <span className="text-[15px] font-semibold tabular-nums">{fmtHora(proximaCita.fecha_hora)}</span>
             </span>
 
             <div className="flex-1 min-w-0">
@@ -336,7 +325,7 @@ export default function DashboardHome({
               title={proximaCita.recordatorio_enviado ? 'Recordatorio enviado' : 'Recordar por WhatsApp'}
               data-testid="home-remind-next"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
             </button>
           </div>
         </section>
@@ -397,7 +386,7 @@ export default function DashboardHome({
                     title={t.recordatorio_enviado ? 'Recordatorio enviado' : 'Recordar por WhatsApp'}
                     data-testid={`home-remind-${t.id}`}
                   >
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
                   </button>
                 </div>
               )

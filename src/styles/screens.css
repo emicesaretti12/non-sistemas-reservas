@@ -13,10 +13,10 @@
     position: sticky;
     top: 0;
     z-index: 40;
-    background: var(--ns-glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: inset 0 -1px 0 var(--ns-line), 0 1px 12px rgba(16, 24, 40, 0.04);
+    background: var(--ns-bar);
+    backdrop-filter: var(--ns-bar-blur);
+    -webkit-backdrop-filter: var(--ns-bar-blur);
+    box-shadow: 0 0.5px 0 var(--ns-separator);
     padding-top: var(--sat);
   }
 
@@ -35,19 +35,28 @@
     animation: ns-fade-up var(--dur-3) var(--ease-out) backwards;
   }
 
+  /* Cabecera de sección: el título grande de iOS, directo sobre el
+     fondo, con su acción a la derecha. Sin tarjeta alrededor. */
+  .ns-cabecera,
   .ns-section-header {
-    position: relative;
-    padding: 20px 22px;
-    border-radius: var(--ns-radius-xl);
-    background: var(--ns-surface);
-    box-shadow: var(--ui-shadow);
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 4px 4px 2px;
+  }
+
+  .ns-cabecera--bloque,
+  .ns-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
   }
 
   /* ═══════════════ TARJETAS ═══════════════ */
 
-  /* Las tarjetas heredadas de cada pantalla también son vidrio: el
-     mismo relleno con brillo arriba y el mismo borde de luz. */
+  /* Las tarjetas heredadas de cada pantalla son las mismas tarjetas
+     blancas y planas del sistema. */
   .nh-card,
   .ns-stat-card,
   .ns-settings-card,
@@ -61,27 +70,8 @@
   .ns-feature-pro,
   .ns-stat-landing {
     position: relative;
-    background: var(--glass-sheen), var(--glass);
-    border-radius: var(--ns-radius-xl);
-    box-shadow: var(--ui-shadow);
-    transition:
-      box-shadow var(--dur-3) var(--ease-out),
-      transform var(--dur-4) var(--ease-liquid);
-  }
-
-  :where(.nh-card, .ns-stat-card, .ns-settings-card, .ns-cliente-card, .ns-client-card,
-         .ns-public-form-card, .ns-public-summary-card, .ns-public-identity-card,
-         .ns-public-product-card, .ns-testimonial, .ns-stat-landing)::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--glass-edge);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
+    background: var(--ns-paper);
+    border-radius: var(--ns-radius-lg);
   }
 
   .ns-stat-card,
@@ -103,10 +93,9 @@
 
   .ns-settings-card-header h4 {
     margin: 0;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
     color: var(--ns-text-muted);
   }
 
@@ -134,23 +123,11 @@
     align-items: center;
     gap: 12px;
     padding: 14px;
-  }
-
-  @media (hover: hover) {
-    .ns-cliente-card:hover,
-    .ns-client-card:hover,
-    .ns-stat-card:hover,
-    .ns-testimonial:hover,
-    .ns-feature-pro:hover {
-      box-shadow: var(--ui-shadow-lg);
-      transform: translateY(-2px);
-    }
-  }
-
-  .ns-cliente-card:active,
-  .ns-client-card:active {
-    box-shadow: var(--ui-pressed);
-    transform: scale(0.99);
+    /* Con cientos de clientes, las filas fuera de pantalla no se
+       calculan ni se pintan hasta que te acercás a ellas. */
+    min-width: 0;
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 104px;
   }
 
   .ns-cliente-avatar,
@@ -171,7 +148,7 @@
     width: 44px;
     height: 44px;
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 700;
   }
 
   .ns-stat-mini {
@@ -204,27 +181,25 @@
   @media (hover: hover) {
     .nh-metric:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-2px);
     }
   }
 
   .nh-metric:active {
     box-shadow: var(--ui-pressed);
-    transform: scale(0.97);
+    opacity: 0.6;
   }
 
   .nh-metric-label {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
     color: var(--ns-text-muted);
   }
 
   .nh-metric-value {
     font-family: var(--font-display);
     font-size: 27px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
@@ -236,7 +211,7 @@
   }
 
   .nh-metric-foot {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--ns-text-muted);
   }
@@ -258,9 +233,8 @@
   .nh-section-title {
     margin: 0;
     font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0;
     color: var(--ns-text);
   }
 
@@ -274,30 +248,19 @@
   .nh-link {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     min-height: 36px;
-    padding: 7px 11px;
+    padding: 0 4px;
     border: 0;
-    border-radius: var(--ns-radius-xs);
     background: transparent;
-    color: var(--ns-text-muted);
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    color: var(--ns-primary);
+    font-size: 0.9375rem;
+    font-weight: 400;
     cursor: pointer;
-    transition:
-      color var(--dur-2) var(--ease-out),
-      background var(--dur-2) var(--ease-out),
-      box-shadow var(--dur-2) var(--ease-out);
   }
 
   @media (hover: hover) {
-    .nh-link:hover {
-      color: var(--ns-primary);
-      background: var(--ns-surface);
-      box-shadow: var(--ui-shadow-sm);
-    }
+    .nh-link:hover { opacity: 0.7; }
   }
 
   .nh-next {
@@ -343,27 +306,25 @@
   @media (hover: hover) {
     .nh-slot:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-2px);
     }
   }
 
   .nh-slot:active {
     box-shadow: var(--ui-pressed);
-    transform: scale(0.95);
+    opacity: 0.6;
   }
 
   .nh-slot-time {
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--ns-text);
   }
 
   .nh-slot-sub {
-    font-size: 8.5px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     color: var(--ns-text-muted);
   }
 
@@ -372,10 +333,9 @@
     border-radius: 999px;
     background: var(--ns-primary-bg);
     color: var(--ns-primary);
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
   }
 
   .nh-action {
@@ -397,13 +357,12 @@
   @media (hover: hover) {
     .nh-action:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-3px);
     }
   }
 
   .nh-action:active {
     box-shadow: var(--ui-pressed);
-    transform: scale(0.94);
+    opacity: 0.6;
   }
 
   .nh-action-ic {
@@ -419,17 +378,11 @@
     transition: transform var(--dur-2) var(--ease-spring);
   }
 
-  @media (hover: hover) {
-    .nh-action:hover .nh-action-ic {
-      transform: scale(1.06);
-    }
-  }
 
   .nh-action-label {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
     text-align: center;
     color: var(--ns-text-secondary);
   }
@@ -439,13 +392,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border: 0;
-    border-radius: var(--ns-radius-sm);
-    background: var(--ns-surface);
-    color: var(--ns-primary);
-    box-shadow: var(--ui-shadow-sm);
+    border-radius: 999px;
+    background: var(--ns-fill);
+    color: var(--ns-success-solid);
     cursor: pointer;
     transition:
       box-shadow var(--dur-2) var(--ease-out),
@@ -457,19 +409,12 @@
   .nh-wa-btn--sm {
     width: 36px;
     height: 36px;
-    border-radius: var(--ns-radius-xs);
   }
 
-  @media (hover: hover) {
-    .nh-wa-btn:hover {
-      background: var(--ns-primary);
-      color: var(--ns-paper);
-      box-shadow: var(--ui-brand);
-    }
-  }
+  .nh-wa-btn svg { width: 20px; height: 20px; }
 
   .nh-wa-btn:active {
-    transform: scale(0.9);
+    opacity: 0.6;
     box-shadow: var(--ui-pressed);
   }
 
@@ -518,7 +463,6 @@
     .btn-modern-dark:hover,
     .btn-plastilina-primary:hover {
       box-shadow: var(--ui-brand-lg);
-      transform: translateY(-2px);
     }
   }
 
@@ -528,7 +472,7 @@
   .btn-modern-dark:active,
   .btn-plastilina-primary:active {
     box-shadow: var(--ui-brand-pressed);
-    transform: scale(0.97);
+    opacity: 0.6;
   }
 
   .ns-btn-primary:disabled,
@@ -572,7 +516,6 @@
     .ns-cta-wa:hover,
     .btn-plastilina-secondary:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-2px);
     }
   }
 
@@ -581,42 +524,25 @@
   .ns-cta-wa:active,
   .btn-plastilina-secondary:active {
     box-shadow: var(--ui-pressed);
-    transform: scale(0.97);
+    opacity: 0.6;
   }
 
   .ns-export-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    min-height: 40px;
-    padding: 9px 13px;
+    gap: 5px;
+    min-height: 36px;
+    padding: 0 12px;
     border: 0;
-    border-radius: var(--ns-radius-xs);
-    background: var(--ns-surface);
-    color: var(--ns-text-secondary);
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    box-shadow: var(--ui-shadow-sm);
+    border-radius: 999px;
+    background: var(--ns-fill);
+    color: var(--ns-primary);
+    font-size: 0.8125rem;
+    font-weight: 600;
     cursor: pointer;
-    transition:
-      box-shadow var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out),
-      transform var(--dur-2) var(--ease-spring);
   }
 
-  @media (hover: hover) {
-    .ns-export-btn:hover {
-      color: var(--ns-primary);
-      box-shadow: var(--ui-shadow);
-    }
-  }
-
-  .ns-export-btn:active {
-    box-shadow: var(--ui-pressed);
-    transform: scale(0.95);
-  }
+  .ns-export-btn:active { opacity: 0.55; }
 
   .ns-shimmer-btn {
     position: relative;
@@ -642,10 +568,10 @@
     bottom: 0;
     z-index: 60;
     padding: 12px 16px calc(12px + var(--sab));
-    background: var(--ns-glass-bg-strong);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: inset 0 1px 0 var(--ns-line), 0 -6px 24px rgba(16, 24, 40, 0.06);
+    background: var(--ns-bar);
+    backdrop-filter: var(--ns-bar-blur);
+    -webkit-backdrop-filter: var(--ns-bar-blur);
+    box-shadow: 0 -0.5px 0 var(--ns-separator);
   }
 
   .ns-fab-mobile {
@@ -668,7 +594,7 @@
   }
 
   .ns-fab-mobile:active {
-    transform: scale(0.92);
+    opacity: 0.6;
     box-shadow: var(--ui-brand-pressed);
   }
 
@@ -756,10 +682,9 @@
     border-radius: var(--ns-radius-xs);
     background: transparent;
     color: var(--ns-text-muted);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
     cursor: pointer;
     transition:
       background var(--dur-2) var(--ease-out),
@@ -769,7 +694,7 @@
   }
 
   .ns-period-btn:active {
-    transform: scale(0.95);
+    opacity: 0.6;
   }
 
   .ns-period-btn.active {
@@ -863,7 +788,7 @@
   .ns-toast-title {
     margin: 0 0 2px;
     font-size: 12.5px;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.01em;
   }
 
@@ -925,11 +850,7 @@
     animation: ns-spin 0.75s linear infinite;
   }
 
-  .ns-glass {
-    background: var(--ns-glass-bg);
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-  }
+  .ns-glass { background: var(--ns-paper); }
 
   .ns-card-lift {
     transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
@@ -937,7 +858,6 @@
 
   @media (hover: hover) {
     .ns-card-lift:hover {
-      transform: translateY(-3px);
       box-shadow: var(--ui-shadow-lg);
     }
   }
@@ -954,10 +874,9 @@
     border-radius: 999px;
     background: var(--ns-primary-bg);
     color: var(--ns-primary);
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
   }
 
   .ns-progress-bar {
@@ -975,24 +894,22 @@
     transition: width var(--dur-5) var(--ease-out);
   }
 
-  .ns-notif-bell {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border: 0;
-    border-radius: var(--ns-radius-sm);
-    background: var(--ns-surface);
-    color: var(--ns-text-secondary);
-    box-shadow: var(--ui-shadow-sm);
-    cursor: pointer;
-    transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
-  }
-
-  .ns-notif-bell:active {
-    transform: scale(0.92);
-    box-shadow: var(--ui-pressed);
+  /* La insignia de la campana: cuántas sin leer. */
+  .ns-notif-bell__badge {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--ns-primary);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--ns-bg);
   }
 }
 

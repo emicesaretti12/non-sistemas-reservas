@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
 import { normalizar } from '../utils/asistente'
+import { numero } from '../utils/formato'
 
 /**
  * GLOBAL SEARCH — Omnibar iOS-style con datos reales de Supabase.
@@ -154,7 +155,7 @@ export default function GlobalSearch({
         .forEach(s => matched.push({
           type: 'servicio',
           label: s.nombre,
-          desc: `$${(s.precio || 0).toLocaleString()} · ${(s.duracion_minutos || 0)} min`,
+          desc: `$${numero(s.precio)} · ${(s.duracion_minutos || 0)} min`,
           icon: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
           tab: 'servicios',
           data: s,

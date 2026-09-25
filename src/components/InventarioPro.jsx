@@ -6,6 +6,7 @@ import Contador from './ui/Contador'
 import Lente from './ui/Lente'
 import { useConfirm } from '../contexts/ConfirmContext'
 import { usePersistentState } from '../hooks/usePersistentState'
+import { numero as formatoNumero } from '../utils/formato'
 
 const CATEGORIAS = ['General', 'Insumos', 'Productos', 'Herramientas', 'Limpieza', 'Otros']
 
@@ -258,11 +259,10 @@ export default function InventarioPro({ negocioId, onNavigate }) {
   return (
     <div className="space-y-6 md:space-y-8 pb-20">
       {/* Header */}
-      <header className="ui-card p-5 md:p-7 flex items-center justify-between gap-4">
+      <header className="ns-cabecera">
         <div className="min-w-0">
           <h2 className="ui-head__title">Inventario</h2>
           <div className="flex items-center gap-2 mt-2">
-            <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
             <p className="ui-eyebrow">{items.length} productos cargados</p>
           </div>
         </div>
@@ -336,7 +336,7 @@ export default function InventarioPro({ negocioId, onNavigate }) {
                 className={filtro === cat ? 'is-active' : ''}
                 aria-pressed={filtro === cat}
               >
-                {filtro === cat && <Lente grupo="inventario-categoria" />}
+                {filtro === cat && <Lente />}
                 {cat === 'todos' ? 'Todos' : cat}
               </button>
             ))}
@@ -346,14 +346,8 @@ export default function InventarioPro({ negocioId, onNavigate }) {
 
       {/* Lista de Productos */}
       <div className="space-y-3">
-        <AnimatePresence mode="popLayout">
-          {itemsFiltrados.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="ui-card"
-            >
+        {itemsFiltrados.length === 0 ? (
+            <div className="ui-card">
               <div className="ui-empty">
                 <span className="ui-pod ui-pod--sunken ui-pod--lg">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -366,17 +360,13 @@ export default function InventarioPro({ negocioId, onNavigate }) {
                 </p>
                 <button onClick={() => setModalAbierto(true)} className="ui-btn ui-btn--primary mt-1">Nuevo producto</button>
               </div>
-            </motion.div>
+            </div>
           ) : (
-            itemsFiltrados.map((item, idx) => {
+            itemsFiltrados.map((item) => {
               const nivel = getNivelStock(item)
               return (
-                <motion.div
+                <div
                   key={item.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ delay: idx * 0.05 }}
                   className="ui-tile"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -403,7 +393,7 @@ export default function InventarioPro({ negocioId, onNavigate }) {
                         {item.unidad}
                       </p>
                       <p className="text-[13px] font-bold mt-2 tabular-nums" style={{ color: 'var(--ns-text-secondary)' }}>
-                        ${(item.cantidad * item.precio_venta).toLocaleString('es-AR')}
+                        ${formatoNumero(item.cantidad * item.precio_venta)}
                       </p>
                     </div>
                   </div>
@@ -419,11 +409,10 @@ export default function InventarioPro({ negocioId, onNavigate }) {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
                   </div>
-                </motion.div>
+                </div>
               )
             })
           )}
-        </AnimatePresence>
       </div>
 
       {/* Modal Producto */}

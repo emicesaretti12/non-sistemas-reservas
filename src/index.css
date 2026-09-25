@@ -7,30 +7,25 @@
 @import "./styles/screens.css";
 @import "./styles/views.css";
 @import "./styles/native.css";
+@import "./styles/tipografia.css";
 @import "./styles/movil.css";
 
 /* ============================================================
-   NONI — LIQUID GLASS
+   NONI
 
-   Paleta de la referencia, medida píxel por píxel:
+   Paleta de la referencia:
      · #E9EEF4  lienzo        gris azulado
-     · #FFFFFF  superficie    el vidrio claro
-     · #252C35  barra lateral el vidrio oscuro
+     · #FFFFFF  superficie    tarjetas y hojas
+     · #252C35  barra lateral
      · #1D212A  tinta         texto principal
      · #007AFF  acción        el azul del sistema
      · #259C5B  confirmado    · #E09112 pendiente · #8B5CF6 destacado
 
-   El material manda. Todo lo que es interfaz es vidrio: deja pasar
-   el color del fondo, lo desenfoca y lo satura, y tiene un borde
-   que agarra la luz. Para que el vidrio se lea tiene que haber algo
-   vivo detrás, así que el lienzo deja de ser un gris plano y pasa a
-   ser un campo de color de la misma paleta, desenfocado y en
-   movimiento lento.
-
-   Tres capas y nada más:
-     1. el fondo ambiental — color, nunca contenido;
-     2. el contenido — tarjetas de vidrio claro;
-     3. los controles — flotan encima, con desenfoque real.
+   El idioma es el de las apps de Apple: lienzo plano, tarjetas
+   blancas sin sombra, un azul sólido para actuar y los grises
+   translúcidos del sistema para todo lo demás. El desenfoque queda
+   sólo para las dos barras que tienen contenido pasando por debajo
+   (la de arriba y el dock).
    ============================================================ */
 
 /* ------------------------------------------------------------
@@ -80,19 +75,19 @@
 
   /* Tipografía — la pila nativa de Apple primero, así el panel
      usa San Francisco en Mac y iPhone sin descargar nada. */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter Tight", system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Sombras: en este sistema casi no se ven. Sirven para separar
-     una capa de la siguiente, no para dar volumen. */
-  --shadow-2xs: 0 1px 2px rgba(20, 30, 70, 0.05);
-  --shadow-xs: 0 1px 2px rgba(20, 30, 70, 0.06), 0 2px 8px -2px rgba(35, 52, 110, 0.08);
-  --shadow-sm: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(20, 30, 70, 0.05), 0 6px 16px -6px rgba(35, 52, 110, 0.16);
-  --shadow-md: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(20, 30, 70, 0.05), 0 12px 28px -10px rgba(35, 52, 110, 0.2);
-  --shadow-lg: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 8px rgba(20, 30, 70, 0.05), 0 22px 46px -16px rgba(35, 52, 110, 0.26);
-  --shadow-xl: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 16px rgba(20, 30, 70, 0.06), 0 34px 70px -22px rgba(20, 30, 70, 0.34);
-  --shadow-2xl: 0 44px 90px -24px rgba(20, 30, 70, 0.42);
+  /* Sombras: casi no se ven. Sólo separan lo que flota (menús,
+     hojas, diálogos) de lo que queda debajo. */
+  --shadow-2xs: 0 1px 1px rgba(0, 0, 0, 0.03);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.14);
+  --shadow-2xl: 0 24px 60px rgba(0, 0, 0, 0.18);
 }
 
 :root {
@@ -103,68 +98,57 @@
   --ns-sidebar: #252C35;
   --ns-brand: #007AFF;
 
-  /* ── Campo ambiental ──────────────────────────────────────────
-     Los cuatro acentos de la paleta, muy diluidos, sobre el
-     lienzo. Es lo que el vidrio deja ver y refracta. */
-  --ns-ambient-base: linear-gradient(165deg, #EDF2FA 0%, #E6ECF5 46%, #DFE6F1 100%);
-  --ns-ambient-blue: rgba(0, 122, 255, 0.52);
-  --ns-ambient-violet: rgba(139, 92, 246, 0.42);
-  --ns-ambient-teal: rgba(14, 156, 156, 0.36);
-  --ns-ambient-amber: rgba(224, 145, 18, 0.26);
+  /* ── Material ─────────────────────────────────────────────────
+     Los nombres de la etapa de vidrio siguen existiendo (hay estilos
+     en línea que los usan), pero ahora son superficies opacas: el
+     vidrio no deja pasar nada, no tiene brillo ni borde de luz. */
+  --glass-thin: rgba(255, 255, 255, 0.72);
+  --glass: #FFFFFF;
+  --glass-thick: #FFFFFF;
+  --glass-solid: #FFFFFF;
+  --glass-dark: #252C35;
+  --glass-dark-thick: #1D212A;
+  --glass-blur: none;
+  --glass-blur-strong: none;
+  --glass-sheen: linear-gradient(transparent, transparent);
+  --glass-rim: 0 0 0 0 transparent;
+  --glass-rim-dark: 0 0 0 0 transparent;
+  --glass-edge: linear-gradient(transparent, transparent);
+  --glass-edge-dark: linear-gradient(transparent, transparent);
 
-  /* ── Vidrio ───────────────────────────────────────────────────
-     Rellenos translúcidos en tres espesores. El borde de luz va
-     como sombra interior, así cualquier elemento que use estos
-     tokens —incluso con estilo en línea— se ve como vidrio. */
-  --glass-thin: rgba(255, 255, 255, 0.36);
-  --glass: rgba(255, 255, 255, 0.5);
-  --glass-thick: rgba(255, 255, 255, 0.68);
-  --glass-solid: rgba(255, 255, 255, 0.9);
-  --glass-dark: rgba(37, 44, 53, 0.62);
-  --glass-dark-thick: rgba(30, 36, 45, 0.86);
-  --glass-blur: blur(26px) saturate(185%);
-  --glass-blur-strong: blur(40px) saturate(190%);
-  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 46%);
-  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 0 0 1px rgba(255, 255, 255, 0.52);
-  --glass-rim-dark: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-  /* Borde especular: más brillante arriba a la izquierda, donde
-     pega la luz, y con un rebote más tenue abajo a la derecha. */
-  --glass-edge: linear-gradient(145deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(255, 255, 255, 0.42) 20%,
-      rgba(255, 255, 255, 0.06) 46%,
-      rgba(255, 255, 255, 0.22) 74%,
-      rgba(255, 255, 255, 0.78) 100%);
-  --glass-edge-dark: linear-gradient(145deg,
-      rgba(255, 255, 255, 0.36) 0%,
-      rgba(255, 255, 255, 0.08) 34%,
-      rgba(255, 255, 255, 0.02) 60%,
-      rgba(255, 255, 255, 0.18) 100%);
+  /* El material de las barras: lo único translúcido y desenfocado. */
+  --ns-bar: rgba(233, 238, 244, 0.82);
+  --ns-bar-blur: blur(20px) saturate(180%);
 
-  /* ── Superficies ──────────────────────────────────────────────
-     La superficie ES vidrio: los estilos en línea que ya usan
-     `var(--ns-surface)` se vuelven translúcidos sin tocarlos. */
+  /* ── Superficies ───────────────────────────────────────────── */
   --ns-bg: var(--ns-canvas);
-  --ns-surface: var(--glass);
-  --ns-surface-elevated: var(--glass-thick);
-  --ns-surface-hover: rgba(255, 255, 255, 0.8);
-  --ns-surface-solid: var(--glass-solid);
-  --ns-sunken: rgba(118, 128, 152, 0.11);
+  --ns-surface: #FFFFFF;
+  --ns-surface-elevated: #FFFFFF;
+  --ns-surface-hover: #F7F9FB;
+  --ns-surface-solid: #FFFFFF;
+  --ns-sunken: rgba(118, 128, 152, 0.1);
   --ns-accent: rgba(118, 128, 152, 0.16);
   --ns-accent-bg: rgba(118, 128, 152, 0.08);
 
-  /* Barra lateral de vidrio oscuro */
-  --ns-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --ns-sidebar-active: rgba(255, 255, 255, 0.13);
-  --ns-sidebar-line: rgba(255, 255, 255, 0.09);
-  --ns-sidebar-text: rgba(255, 255, 255, 0.74);
-  --ns-sidebar-muted: rgba(255, 255, 255, 0.44);
+  /* Rellenos del sistema (botones grises, campos, segmentados) y el
+     gris de una fila apretada. */
+  --ns-fill: rgba(118, 124, 140, 0.12);
+  --ns-fill-strong: rgba(118, 124, 140, 0.18);
+  --ns-pressed: #E4E8EE;
+  --ns-separator: rgba(60, 60, 67, 0.18);
+
+  /* Barra lateral */
+  --ns-sidebar-hover: rgba(255, 255, 255, 0.07);
+  --ns-sidebar-active: rgba(255, 255, 255, 0.12);
+  --ns-sidebar-line: rgba(255, 255, 255, 0.08);
+  --ns-sidebar-text: rgba(255, 255, 255, 0.78);
+  --ns-sidebar-muted: rgba(255, 255, 255, 0.46);
 
   /* ── Tinta ────────────────────────────────────────────────── */
   --ns-text: #1D212A;
   --ns-text-secondary: #454F5E;
-  --ns-text-muted: #66718A;
-  --ns-text-faint: #8F9AAE;
+  --ns-text-muted: #6B7385;
+  --ns-text-faint: #9098A8;
   --ns-ink-faint: #C3CCDA;
 
   /* ── Líneas ───────────────────────────────────────────────── */
@@ -203,74 +187,47 @@
   --ns-teal: #0B8585;
   --ns-teal-bg: rgba(14, 156, 156, 0.13);
 
-  /* ── Degradados ─────────────────────────────────────────────
-     El azul del botón principal es vidrio teñido: más claro
-     arriba, donde refleja, y más profundo abajo. */
-  --ns-gradient-1: linear-gradient(180deg, #3D9BFF 0%, #0A7CFF 48%, #0066E6 100%);
-  --ns-gradient-deep: linear-gradient(180deg, #2E8FFF 0%, #006EF0 50%, #005AD1 100%);
-  --ns-gradient-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 100%);
-  --ns-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.56) 100%);
-  --ns-gradient-hero: linear-gradient(160deg, rgba(0, 122, 255, 0.16), rgba(139, 92, 246, 0.12));
-  --ns-gradient-dark: linear-gradient(180deg, rgba(46, 54, 67, 0.66) 0%, rgba(30, 36, 45, 0.78) 100%);
+  /* ── Rellenos de marca ───────────────────────────────────────
+     Siguen siendo "degradados" para no romper los `background:` que
+     los usan, pero son un solo color: el azul del sistema. */
+  --ns-gradient-1: linear-gradient(#007AFF, #007AFF);
+  --ns-gradient-deep: linear-gradient(#0062D6, #0062D6);
+  --ns-gradient-soft: linear-gradient(#FFFFFF, #FFFFFF);
+  --ns-gradient-card: linear-gradient(#FFFFFF, #FFFFFF);
+  --ns-gradient-hero: linear-gradient(rgba(0, 122, 255, 0.08), rgba(0, 122, 255, 0.08));
+  --ns-gradient-dark: linear-gradient(#252C35, #252C35);
 
-  /* ── Elevación ──────────────────────────────────────────────
-     Cada nivel trae su borde de luz. Las sombras tienen un tinte
-     azul apenas: sobre un fondo de color, una sombra gris pura se
-     ve sucia. */
-  --ui-hairline: var(--glass-rim);
-  --ui-shadow-sm:
-    var(--glass-rim),
-    0 1px 2px rgba(20, 30, 70, 0.05),
-    0 6px 18px -8px rgba(35, 52, 110, 0.18);
-  --ui-shadow:
-    var(--glass-rim),
-    0 1px 2px rgba(20, 30, 70, 0.05),
-    0 14px 34px -12px rgba(35, 52, 110, 0.22);
-  --ui-shadow-lg:
-    var(--glass-rim),
-    0 2px 6px rgba(20, 30, 70, 0.06),
-    0 24px 52px -18px rgba(35, 52, 110, 0.3);
-  --ui-shadow-xl:
-    var(--glass-rim),
-    0 8px 20px -6px rgba(20, 30, 70, 0.14),
-    0 40px 90px -28px rgba(20, 30, 70, 0.42);
+  /* ── Elevación ───────────────────────────────────────────────
+     Las tarjetas no llevan sombra. Estas son para lo que flota. */
+  --ui-hairline: 0 0 0 0 transparent;
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ui-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --ui-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --ui-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.18);
 
-  /* Campos: relleno de sistema, sin borde duro. */
-  --ui-field: inset 0 0 0 1px rgba(118, 128, 152, 0.1);
-  --ui-field-sm: inset 0 0 0 1px rgba(118, 128, 152, 0.08);
-  --ui-field-deep: inset 0 0 0 1px rgba(118, 128, 152, 0.2);
-  --ui-field-focus: inset 0 0 0 1px rgba(0, 122, 255, 0.62), 0 0 0 4px rgba(0, 122, 255, 0.16);
-  --ui-pressed: inset 0 1px 3px rgba(20, 30, 70, 0.12), inset 0 0 0 1px rgba(118, 128, 152, 0.14);
+  /* Campos: relleno gris, sin borde. Al enfocar, el anillo azul. */
+  --ui-field: 0 0 0 0 transparent;
+  --ui-field-sm: 0 0 0 0 transparent;
+  --ui-field-deep: 0 0 0 0 transparent;
+  --ui-field-focus: 0 0 0 2px rgba(0, 122, 255, 0.55);
+  --ui-pressed: 0 0 0 0 transparent;
 
-  /* Vidrio azul del botón principal */
-  --ui-brand-sm:
-    inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    inset 0 -1px 0 rgba(0, 40, 120, 0.2),
-    0 4px 12px -4px rgba(0, 122, 255, 0.5);
-  --ui-brand:
-    inset 0 1px 0 rgba(255, 255, 255, 0.46),
-    inset 0 -1px 0 rgba(0, 40, 120, 0.22),
-    0 2px 4px rgba(0, 80, 200, 0.18),
-    0 10px 26px -8px rgba(0, 122, 255, 0.62);
-  --ui-brand-lg:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 40, 120, 0.22),
-    0 3px 6px rgba(0, 80, 200, 0.2),
-    0 18px 40px -12px rgba(0, 122, 255, 0.7);
-  --ui-brand-pressed:
-    inset 0 2px 6px rgba(0, 40, 120, 0.36),
-    inset 0 0 0 1px rgba(0, 40, 120, 0.14);
+  /* El botón azul no lleva sombra de color. */
+  --ui-brand-sm: 0 0 0 0 transparent;
+  --ui-brand: 0 0 0 0 transparent;
+  --ui-brand-lg: 0 0 0 0 transparent;
+  --ui-brand-pressed: 0 0 0 0 transparent;
 
   /* Alias de compatibilidad */
   --ui-surface: var(--ns-surface);
-  --ui-light: rgba(255, 255, 255, 0.9);
-  --ui-shadow-soft: rgba(35, 52, 110, 0.12);
+  --ui-light: #FFFFFF;
+  --ui-shadow-soft: rgba(0, 0, 0, 0.06);
   --ui-flat: none;
 
   /* ── Barras translúcidas ──────────────────────────────────── */
-  --ns-glass-bg: rgba(255, 255, 255, 0.58);
-  --ns-glass-bg-strong: rgba(255, 255, 255, 0.74);
-  --ns-glass-border: rgba(255, 255, 255, 0.6);
+  --ns-glass-bg: #FFFFFF;
+  --ns-glass-bg-strong: #FFFFFF;
+  --ns-glass-border: rgba(60, 60, 67, 0.12);
   --ns-glass-blur: var(--glass-blur);
   --ns-glass-dark: var(--glass-dark);
 
@@ -289,12 +246,12 @@
      margen que los separa: así las curvas quedan paralelas, que
      es lo que hace que el vidrio se vea tallado de una pieza. */
   --ns-radius-xs: 8px;
-  --ns-radius-sm: 11px;
-  --ns-radius-md: 14px;
-  --ns-radius-lg: 20px;
-  --ns-radius-xl: 26px;
-  --ns-radius-2xl: 30px;
-  --ns-radius-3xl: 36px;
+  --ns-radius-sm: 10px;
+  --ns-radius-md: 12px;
+  --ns-radius-lg: 18px;
+  --ns-radius-xl: 22px;
+  --ns-radius-2xl: 26px;
+  --ns-radius-3xl: 30px;
 
   /* ── Escala de mezcla (nombres heredados) ─────────────────── */
   --ns-mix-02: rgba(255, 255, 255, 0.78);

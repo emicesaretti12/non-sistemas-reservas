@@ -60,34 +60,15 @@
     background: radial-gradient(circle, rgba(14, 156, 156, 0.4) 0%, rgba(14, 156, 156, 0) 68%);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .ns-login-orb-1 { animation: ns-orb-a 22s var(--ease-in-out) infinite alternate; }
-    .ns-login-orb-2 { animation: ns-orb-b 26s var(--ease-in-out) infinite alternate; }
-    .ns-login-orb-3 { animation: ns-orb-a 18s var(--ease-in-out) infinite alternate-reverse; }
-  }
+  /* Fondo liso, como la pantalla de inicio de sesión de una app de
+     Apple: sin manchas de color que floten detrás del formulario. */
+  .ns-login-orb { display: none; }
 
   .ns-login-card {
     position: relative;
     padding: 30px 24px;
     border-radius: var(--ns-radius-3xl);
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.58);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
-    box-shadow: var(--ui-shadow-xl);
-    animation: ns-pop-in var(--dur-5) var(--ease-liquid) backwards;
-  }
-
-  .ns-login-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--glass-edge);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
+    background: var(--ns-paper);
   }
 
   @media (min-width: 768px) {
@@ -130,13 +111,12 @@
   @media (hover: hover) {
     .ns-login-social-btn:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-1px);
     }
   }
 
   .ns-login-social-btn:active {
     box-shadow: var(--ui-pressed);
-    transform: scale(0.97);
+    opacity: 0.6;
   }
 
   .ns-login-social-btn:disabled {
@@ -158,9 +138,8 @@
     background: var(--ns-gradient-1);
     color: var(--ns-paper);
     font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0;
     box-shadow: var(--ui-brand);
     cursor: pointer;
     overflow: hidden;
@@ -170,13 +149,12 @@
   @media (hover: hover) {
     .ns-login-submit-btn:hover {
       box-shadow: var(--ui-brand-lg);
-      transform: translateY(-2px);
     }
   }
 
   .ns-login-submit-btn:active {
     box-shadow: var(--ui-brand-pressed);
-    transform: scale(0.98);
+    opacity: 0.6;
   }
 
   .ns-login-submit-btn:disabled {
@@ -221,11 +199,6 @@
     transition: transform var(--dur-3) var(--ease-spring);
   }
 
-  @media (hover: hover) {
-    .ns-public-logo:hover {
-      transform: scale(1.05) rotate(-2deg);
-    }
-  }
 
   .ns-public-logo img,
   .ns-public-logo > div {
@@ -235,18 +208,6 @@
     border-radius: calc(var(--ns-radius-md) - 5px);
   }
 
-  .ns-progress-nav {
-    position: sticky;
-    top: calc(8px + var(--sat));
-    z-index: 40;
-    margin: 14px 0 10px;
-    padding: 9px 12px;
-    border-radius: var(--ns-radius-md);
-    background: var(--ns-glass-bg-strong);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: var(--ui-shadow-sm);
-  }
 
   .ns-public-service-item {
     display: flex;
@@ -274,7 +235,7 @@
   }
 
   .ns-public-service-item:active {
-    transform: scale(0.985);
+    opacity: 0.6;
   }
 
   .ns-public-service-ic {
@@ -283,11 +244,6 @@
     transition: transform var(--dur-3) var(--ease-spring);
   }
 
-  @media (hover: hover) {
-    .ns-public-service-item:hover .ns-public-service-ic {
-      transform: scale(1.07);
-    }
-  }
 
   .ns-public-employee-card {
     display: flex;
@@ -306,13 +262,12 @@
   @media (hover: hover) {
     .ns-public-employee-card:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-3px);
     }
   }
 
   .ns-public-employee-card:active {
     box-shadow: var(--ui-pressed);
-    transform: scale(0.95);
+    opacity: 0.6;
   }
 
   .ns-public-form-card,
@@ -356,29 +311,22 @@
   @media (hover: hover) {
     .ns-public-product-card:hover {
       box-shadow: var(--ui-shadow-lg);
-      transform: translateY(-3px);
     }
   }
 
   .ns-public-product-card:active {
-    transform: scale(0.985);
+    opacity: 0.6;
   }
 
   .ns-public-product-card img {
     transition: transform 0.6s var(--ease-out);
   }
 
-  @media (hover: hover) {
-    .ns-public-product-card:hover img {
-      transform: scale(1.05);
-    }
-  }
 
   /* Franja de horarios: pastillas moldeadas. */
   @media (hover: hover) {
     .brand-date-hover:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-2px);
     }
   }
 
@@ -483,12 +431,11 @@
   @media (hover: hover) {
     .ns-template-card:hover {
       box-shadow: var(--ui-shadow);
-      transform: translateY(-3px);
     }
   }
 
   .ns-template-card:active {
-    transform: scale(0.97);
+    opacity: 0.6;
   }
 
   .ns-template-card.selected {
@@ -568,7 +515,7 @@
   }
 
   .ui-onbrand-btn:active:not(:disabled) {
-    transform: scale(0.98);
+    opacity: 0.6;
     background: var(--ns-primary-dark);
     box-shadow: var(--ui-brand-pressed);
   }
@@ -641,57 +588,28 @@
     }
   }
 
-  .ns-cal-day:active {
-    transform: scale(0.94);
-  }
+  .ns-cal-day:active { opacity: 0.6; }
 }
 
 /* ============================================================
-   VIDRIO DE LA APP PÚBLICA
-   Las tarjetas y hojas que antes eran blanco opaco.
+   TARJETAS Y HOJAS DE LA APP PÚBLICA
    ============================================================ */
 @layer components {
   .ns-glass-card {
     position: relative;
-    background: var(--glass-sheen), var(--glass);
-    box-shadow: var(--ui-shadow);
-    transition: transform var(--dur-4) var(--ease-liquid), box-shadow var(--dur-3) var(--ease-out);
+    background: var(--ns-paper);
   }
 
-  @media (hover: hover) {
-    .ns-glass-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--ui-shadow-lg);
-    }
-  }
-
-  /* Lo que se abre encima del contenido lleva desenfoque real. */
   .ns-glass-sheet {
-    background: var(--glass-sheen), rgba(255, 255, 255, 0.86);
-    -webkit-backdrop-filter: var(--glass-blur-strong);
-    backdrop-filter: var(--glass-blur-strong);
+    background: var(--ns-paper);
     box-shadow: var(--ui-shadow-xl);
   }
 
   .ns-glass-bar {
-    background: rgba(255, 255, 255, 0.72);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 var(--ns-line);
-  }
-
-  :where(.ns-glass-card, .ns-glass-sheet)::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--glass-edge);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
+    background: var(--ns-bar);
+    -webkit-backdrop-filter: var(--ns-bar-blur);
+    backdrop-filter: var(--ns-bar-blur);
+    box-shadow: 0 -0.5px 0 var(--ns-separator);
   }
 }
 
@@ -706,13 +624,7 @@
     position: relative;
     isolation: isolate;
     color: #FFFFFF;
-    background:
-      radial-gradient(55% 45% at 12% 8%, rgba(0, 122, 255, 0.5), transparent 70%),
-      radial-gradient(45% 40% at 92% 18%, rgba(139, 92, 246, 0.4), transparent 70%),
-      radial-gradient(50% 45% at 78% 96%, rgba(14, 156, 156, 0.3), transparent 72%),
-      radial-gradient(40% 35% at 10% 92%, rgba(224, 145, 18, 0.16), transparent 72%),
-      linear-gradient(180deg, #1C222B 0%, #252C35 100%);
-    background-attachment: fixed;
+    background: #1F252E;
   }
 }
 

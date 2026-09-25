@@ -227,11 +227,10 @@ export default function Empleados({ negocioId, rubro }) {
         </div>
       )}
 
-      <header className="ui-card p-5 md:p-7 flex items-center justify-between gap-4">
+      <header className="ns-cabecera">
         <div className="min-w-0">
           <h2 className="ui-head__title">{vocab.empleadoPlural}</h2>
           <div className="flex items-center gap-2 mt-2">
-            <span className="ns-live-dot" style={{ width: 7, height: 7 }} />
             <p className="ui-eyebrow">
               {especialistas.filter(e => (e.estado || 'activo') === 'activo').length} de {especialistas.length} activos
             </p>
@@ -287,12 +286,12 @@ export default function Empleados({ negocioId, rubro }) {
               <article
                 key={esp.id}
                 className="ui-tile !flex-row items-center gap-4"
-                style={inactivo ? { background: 'var(--ns-sunken)', boxShadow: 'var(--ui-field-sm)' } : undefined}
+                style={inactivo ? { opacity: 0.6 } : undefined}
               >
-                <span className="ui-pod ui-pod--lg overflow-hidden p-0">
+                <span className="ui-avatar ui-avatar--grande overflow-hidden">
                   {esp.foto_url
                     ? <img src={esp.foto_url} className="w-full h-full object-cover" alt="" />
-                    : <span className="font-display text-2xl font-bold">{esp.nombre.charAt(0)}</span>}
+                    : <span>{esp.nombre.charAt(0)}</span>}
                 </span>
 
                 <div className="flex-1 min-w-0">

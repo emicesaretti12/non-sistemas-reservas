@@ -86,13 +86,13 @@ svg {
    navegador no aparece y desaparece moviendo todo, y nada se corre
    al abrir el teclado. */
 @media (max-width: 1023px) {
-  html:has(.noni-shell--app),
-  html:has(.noni-shell--app) body {
+  html.ns-modo-app,
+  html.ns-modo-app body {
     height: 100%;
     overflow: hidden;
   }
 
-  html:has(.noni-shell--app) #root {
+  html.ns-modo-app #root {
     height: 100%;
     min-height: 0;
   }
@@ -111,9 +111,9 @@ svg {
 
   .noni-shell--app .noni-topbar {
     position: absolute;
-    top: calc(8px + var(--sat));
-    left: 10px;
-    right: 10px;
+    top: 0;
+    left: 0;
+    right: 0;
     margin: 0;
   }
 
@@ -126,8 +126,8 @@ svg {
     /* El contenido rebota dentro de su lugar (como una lista de iOS)
        sin arrastrar la página ni las barras. */
     overscroll-behavior-y: contain;
-    padding-top: calc(var(--sat) + 66px);
-    scroll-padding-top: calc(var(--sat) + 84px);
+    padding-top: calc(var(--sat) + 52px);
+    scroll-padding-top: calc(var(--sat) + 64px);
     scroll-padding-bottom: calc(96px + var(--sab));
   }
 

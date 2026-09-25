@@ -86,7 +86,7 @@ export default function ActualizarClave() {
     return (
       <div
         className="min-h-dvh w-full flex items-center justify-center px-6 py-12"
-        style={{ background: 'var(--ns-bg)', color: 'var(--ns-text)', fontFamily: '"Inter Tight", "Inter", sans-serif' }}
+        style={{ background: 'var(--ns-bg)', color: 'var(--ns-text)', fontFamily: 'var(--font-sans)' }}
         data-testid="reset-link-invalido"
       >
         <div className="ui-card max-w-sm w-full text-center p-9">
@@ -115,7 +115,7 @@ export default function ActualizarClave() {
       style={{
         background: 'var(--ns-bg)',
         color: 'var(--ns-text)',
-        fontFamily: '"Inter Tight", "Inter", sans-serif',
+        fontFamily: 'var(--font-sans)',
       }}
       data-testid="actualizar-clave-screen"
     >
@@ -130,7 +130,7 @@ export default function ActualizarClave() {
               >
                 <span
                   className="text-white font-bold text-[17px] tracking-tight"
-                  style={{ fontFamily: '"Fraunces", serif', fontStyle: 'italic' }}
+                  style={{ fontFamily: 'var(--font-display)' }}
                 >
                   N
                 </span>
@@ -148,7 +148,7 @@ export default function ActualizarClave() {
                 className="text-[9px] font-semibold uppercase tracking-[0.08em] mt-1"
                 style={{
                   color: 'var(--ns-text-muted)',
-                  fontFamily: '"JetBrains Mono", monospace',
+                  fontFamily: 'var(--font-sans)',
                 }}
               >
                 Sistema de reservas
@@ -163,7 +163,7 @@ export default function ActualizarClave() {
             <span
               className="text-[10px] font-bold uppercase tracking-[0.09em]"
               style={{
-                fontFamily: '"JetBrains Mono", monospace',
+                fontFamily: 'var(--font-sans)',
                 color: 'var(--ns-primary)',
               }}
             >
@@ -174,7 +174,7 @@ export default function ActualizarClave() {
 
           <h1
             className="text-[40px] sm:text-[48px] leading-[1.05] tracking-[-0.025em] font-light"
-            style={{ fontFamily: '"Fraunces", serif', color: 'var(--ns-text)' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--ns-text)' }}
           >
             Nueva <em className="italic font-semibold" style={{ color: 'var(--ns-primary)' }}>clave.</em>
           </h1>
@@ -221,7 +221,7 @@ export default function ActualizarClave() {
             <label
               htmlFor="new-password"
               className="block text-[11px] font-bold uppercase tracking-[0.08em] mb-2"
-              style={{ fontFamily: '"JetBrains Mono", monospace', color: 'var(--ns-text-secondary)' }}
+              style={{ fontFamily: 'var(--font-sans)', color: 'var(--ns-text-secondary)' }}
             >
               Nueva contraseña
             </label>
@@ -296,7 +296,7 @@ export default function ActualizarClave() {
             <label
               htmlFor="confirm-password"
               className="block text-[11px] font-bold uppercase tracking-[0.08em] mb-2"
-              style={{ fontFamily: '"JetBrains Mono", monospace', color: 'var(--ns-text-secondary)' }}
+              style={{ fontFamily: 'var(--font-sans)', color: 'var(--ns-text-secondary)' }}
             >
               Confirmar contraseña
             </label>
@@ -341,7 +341,7 @@ export default function ActualizarClave() {
           style={{
             borderColor: 'var(--ns-border)',
             color: 'var(--ns-text-muted)',
-            fontFamily: '"JetBrains Mono", monospace',
+            fontFamily: 'var(--font-sans)',
           }}
         >
           <span>Cifrado · TLS 1.3</span>

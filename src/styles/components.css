@@ -1,164 +1,93 @@
 /* ============================================================
-   PRIMITIVAS DE VIDRIO
+   PRIMITIVAS
 
-   Todo lo que es interfaz se arma con tres ingredientes:
+   El idioma de las apps de Apple, sin adornos:
 
-   · un relleno translúcido que deja pasar el color del fondo,
-   · un borde de luz —un píxel que agarra el brillo arriba a la
-     izquierda y rebota tenue abajo a la derecha—,
-   · una sombra con tinte azul que lo despega del campo.
+   · superficies blancas y planas sobre el lienzo gris, como las
+     listas agrupadas de Ajustes: se separan por color, no por
+     sombra ni por bordes brillantes;
+   · un solo azul para la acción, sólido; lo secundario es un
+     relleno gris del sistema con el texto en azul;
+   · al tocar, lo tocado se atenúa al instante y vuelve al soltar.
+     Nada rebota, nada se agranda, nada brilla.
 
-   Las tarjetas de contenido NO llevan backdrop-filter: están
-   sobre el campo ambiental, que ya es suave, y el desenfoque no
-   cambiaría nada salvo el costo de pintar al hacer scroll. El
-   desenfoque real queda para lo que flota encima de contenido:
-   barras, dock, hojas, menús.
+   Nada de esto usa máscaras, desenfoques ni degradés: son las
+   propiedades que más cuesta pintar, y con cientos de tarjetas y
+   botones en pantalla eran lo que hacía que el scroll y los
+   toques se sintieran pesados.
    ============================================================ */
 
 @layer components {
 
-  /* ═══════════════ BORDE ESPECULAR ═══════════════
-     Un anillo de un píxel pintado con un degradé y recortado con
-     máscara: el centro queda transparente y sólo se ve el borde. */
-  :where(.ui-card, .ui-tile, .ui-list, .ui-glass, .ui-raised, .ui-raised-lg, .ui-well--glass)::before,
-  :where(.ui-btn:not(.ui-btn--ghost):not(.ui-btn--quiet), .ui-icon-btn, .ui-pod--brand, .ui-avatar--brand)::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--glass-edge);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-    pointer-events: none;
-  }
-
-  /* En lo azul el borde es más tenue: el brillo ya lo da el relleno. */
-  :where(.ui-btn--primary, .ui-pod--brand, .ui-avatar--brand)::before {
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.24));
-  }
-
   /* ═══════════════ SUPERFICIES ═══════════════ */
 
   .ui-surface {
-    background: var(--glass);
+    background: var(--ns-paper);
     border-radius: var(--ns-radius-lg);
   }
 
-  .ui-glass {
-    position: relative;
-    background: var(--glass-sheen), var(--glass);
-    border-radius: var(--ns-radius-xl);
-    box-shadow: var(--ui-shadow);
-  }
-
-  /* Vidrio que flota sobre contenido: con desenfoque de verdad. */
-  .ui-glass--float {
-    background: var(--glass-sheen), var(--glass-thick);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-  }
-
-  .ui-glass--dark {
-    background: var(--ns-gradient-dark);
-    color: #FFFFFF;
-    box-shadow: var(--glass-rim-dark), 0 20px 50px -20px rgba(15, 20, 40, 0.5);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-  }
-
-  .ui-glass--dark::before { background: var(--glass-edge-dark); }
-
-  .ui-raised-sm {
-    background: var(--glass);
-    border-radius: var(--ns-radius-md);
-    box-shadow: var(--ui-shadow-sm);
-  }
-
-  .ui-raised {
-    position: relative;
-    background: var(--glass-sheen), var(--glass);
-    border-radius: var(--ns-radius-lg);
-    box-shadow: var(--ui-shadow);
-  }
-
+  .ui-glass,
+  .ui-raised,
+  .ui-raised-sm,
   .ui-raised-lg {
     position: relative;
-    background: var(--glass-sheen), var(--glass-thick);
-    border-radius: var(--ns-radius-xl);
+    background: var(--ns-paper);
+    border-radius: var(--ns-radius-lg);
+  }
+
+  .ui-raised-lg { border-radius: var(--ns-radius-xl); }
+
+  /* Lo que flota sobre el contenido (menús, paneles) sí se despega. */
+  .ui-glass--float {
     box-shadow: var(--ui-shadow-lg);
   }
 
-  .ui-inset-sm {
-    background: var(--ns-sunken);
-    border-radius: var(--ns-radius-sm);
-    box-shadow: var(--ui-field-sm);
+  .ui-glass--dark {
+    background: var(--ns-sidebar);
+    color: #FFFFFF;
   }
 
+  .ui-inset-sm,
   .ui-inset {
     background: var(--ns-sunken);
-    border-radius: var(--ns-radius-md);
-    box-shadow: var(--ui-field);
+    border-radius: var(--ns-radius-sm);
   }
 
-  /* Grupo: una bandeja apenas más oscura que el vidrio que la
-     contiene, para juntar piezas relacionadas. */
+  .ui-inset { border-radius: var(--ns-radius-md); }
+
+  /* Grupo: una bandeja gris para juntar piezas relacionadas. */
   .ui-well {
     position: relative;
     padding: 12px;
-    border-radius: var(--ns-radius-xl);
-    background: var(--ns-accent-bg);
-    box-shadow: var(--ui-field-sm);
-  }
-
-  .ui-well--deep {
+    border-radius: var(--ns-radius-lg);
     background: var(--ns-sunken);
-    box-shadow: var(--ui-field);
   }
 
-  .ui-well--glass {
-    background: var(--glass-thin);
-    box-shadow: var(--glass-rim);
-  }
+  .ui-well--deep { background: var(--ns-accent); }
+  .ui-well--glass { background: var(--ns-paper); }
 
   /* ═══════════════ TARJETA ═══════════════ */
 
   .ui-card {
     position: relative;
-    padding: 20px;
-    border-radius: var(--ns-radius-xl);
-    background: var(--glass-sheen), var(--glass);
-    box-shadow: var(--ui-shadow);
-    transition:
-      transform var(--dur-4) var(--ease-liquid),
-      box-shadow var(--dur-3) var(--ease-out),
-      background-color var(--dur-3) var(--ease-out);
+    padding: 18px;
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-paper);
   }
 
   @media (min-width: 768px) {
-    .ui-card { padding: 24px; }
+    .ui-card { padding: 22px; }
   }
 
-  .ui-card--interactive { cursor: pointer; }
-
-  @media (hover: hover) {
-    .ui-card--interactive:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--ui-shadow-lg);
-    }
+  .ui-card--interactive {
+    cursor: pointer;
+    transition: background-color var(--dur-1) linear;
   }
 
-  .ui-card--interactive:active {
-    transform: translateY(0) scale(0.992);
-    transition-duration: var(--dur-1);
-  }
+  .ui-card--interactive:active { background: var(--ns-pressed); }
 
   /* ═══════════════ BALDOSA ═══════════════
-     La tarjeta chica de una grilla. Con un tinte opcional: una luz
-     de color en la esquina que dice de qué es la métrica sin
-     escribirlo, como los bordes de color de la referencia. */
+     La tarjeta chica de una grilla (métricas, accesos). */
 
   /* Es columna flexible: quince pantallas la usan así y le cambian la
      dirección con `!flex-row` cuando la quieren en fila. */
@@ -167,153 +96,97 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 16px;
+    padding: 14px 16px;
     border-radius: var(--ns-radius-lg);
-    background: var(--glass-sheen), var(--glass);
-    box-shadow: var(--ui-shadow-sm);
+    background: var(--ns-paper);
     overflow: hidden;
-    isolation: isolate;
-    transition:
-      transform var(--dur-4) var(--ease-liquid),
-      box-shadow var(--dur-3) var(--ease-out);
   }
 
-  .ui-tile > * { position: relative; z-index: 1; }
-
   .ui-tile--interactive,
-  button.ui-tile { cursor: pointer; text-align: left; }
-
-  @media (hover: hover) {
-    .ui-tile--interactive:hover,
-    button.ui-tile:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--ui-shadow);
-    }
+  button.ui-tile {
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--dur-1) linear;
   }
 
   .ui-tile--interactive:active,
-  button.ui-tile:active {
-    transform: scale(0.985);
-    transition-duration: var(--dur-1);
-  }
+  button.ui-tile:active { background: var(--ns-pressed); }
 
+  /* Los tintes quedan como nombres: la métrica se distingue por el
+     color de su ícono, no por una mancha de color en la esquina. */
   .ui-tile--blue,
   .ui-tile--green,
   .ui-tile--amber,
   .ui-tile--violet,
-  .ui-tile--teal {
-    background:
-      radial-gradient(120% 90% at 100% 0%, var(--tile-tint), transparent 62%),
-      var(--glass-sheen),
-      var(--glass);
-  }
-
-  .ui-tile--blue   { --tile-tint: rgba(0, 122, 255, 0.2); }
-  .ui-tile--green  { --tile-tint: rgba(37, 156, 91, 0.2); }
-  .ui-tile--amber  { --tile-tint: rgba(224, 145, 18, 0.2); }
-  .ui-tile--violet { --tile-tint: rgba(139, 92, 246, 0.2); }
-  .ui-tile--teal   { --tile-tint: rgba(14, 156, 156, 0.2); }
+  .ui-tile--teal { background: var(--ns-paper); }
 
   /* ═══════════════ BOTONES ═══════════════
-     Cápsulas. El claro es vidrio; el principal es vidrio teñido de
-     azul, con el reflejo arriba y la sombra de color abajo. Al
-     soltarlo vuelve con el resorte: por eso se siente líquido. */
+     Cápsulas, como los botones de iOS. Tocar atenúa; no hay escala
+     ni resorte, así el botón queda firme bajo el dedo. */
 
   .ui-btn {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 42px;
+    gap: 7px;
+    min-height: 44px;
     padding: 0 18px;
     border: 0;
     border-radius: 999px;
-    background: var(--glass-sheen), var(--glass-thick);
-    color: var(--ns-text);
+    background: var(--ns-fill);
+    color: var(--ns-primary);
     font-family: inherit;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 600;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.01em;
     white-space: nowrap;
     cursor: pointer;
-    box-shadow: var(--ui-shadow-sm);
     -webkit-tap-highlight-color: transparent;
-    transition:
-      transform var(--dur-4) var(--ease-liquid),
-      box-shadow var(--dur-2) var(--ease-out),
-      background-color var(--dur-2) var(--ease-out),
-      filter var(--dur-2) var(--ease-out),
-      opacity var(--dur-2) var(--ease-out);
+    transition: opacity var(--dur-2) linear, background-color var(--dur-2) linear;
   }
 
-  .ui-btn > * { position: relative; z-index: 1; }
-
   @media (hover: hover) {
-    .ui-btn:hover:not(:disabled) {
-      background: var(--glass-sheen), rgba(255, 255, 255, 0.9);
-      box-shadow: var(--ui-shadow);
-    }
+    .ui-btn:hover:not(:disabled) { background: var(--ns-fill-strong); }
   }
 
   .ui-btn:active:not(:disabled) {
-    transform: scale(0.96);
-    transition-duration: var(--dur-1);
-    filter: brightness(1.04);
+    opacity: 0.55;
+    transition-duration: 0ms;
   }
 
   .ui-btn:disabled {
-    opacity: 0.42;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   .ui-btn--primary {
-    background: var(--ns-gradient-1);
+    background: var(--ns-primary);
     color: #FFFFFF;
-    box-shadow: var(--ui-brand);
-    text-shadow: 0 1px 1px rgba(0, 40, 120, 0.25);
   }
 
   @media (hover: hover) {
-    .ui-btn--primary:hover:not(:disabled) {
-      background: var(--ns-gradient-deep);
-      box-shadow: var(--ui-brand-lg);
-      filter: saturate(1.06);
-    }
+    .ui-btn--primary:hover:not(:disabled) { background: var(--ns-primary-dark); }
   }
 
-  .ui-btn--primary:active:not(:disabled) {
-    box-shadow: var(--ui-brand-pressed);
-    filter: brightness(0.97);
-  }
-
-  /* Secundaria teñida: el azul diluido en el vidrio. */
+  /* Secundaria teñida: el azul diluido. */
   .ui-btn--quiet {
     background: var(--ns-primary-bg);
-    color: var(--ns-primary-dark);
-    box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.1);
+    color: var(--ns-primary);
   }
 
   @media (hover: hover) {
-    .ui-btn--quiet:hover:not(:disabled) {
-      background: var(--ns-primary-bg-hover);
-      box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18);
-    }
+    .ui-btn--quiet:hover:not(:disabled) { background: var(--ns-primary-bg-hover); }
   }
 
-  /* Terciaria: sólo texto hasta que la tocás. */
+  /* Sin fondo: sólo el texto en azul, como "Cancelar" en una hoja. */
   .ui-btn--ghost {
     background: transparent;
-    color: var(--ns-text-secondary);
-    box-shadow: none;
+    color: var(--ns-primary);
   }
 
   @media (hover: hover) {
-    .ui-btn--ghost:hover:not(:disabled) {
-      background: var(--ns-sunken);
-      color: var(--ns-text);
-      box-shadow: none;
-    }
+    .ui-btn--ghost:hover:not(:disabled) { background: var(--ns-fill); }
   }
 
   .ui-btn--block {
@@ -326,18 +199,13 @@
   .ui-btn--danger {
     background: var(--ns-danger-bg);
     color: var(--ns-danger);
-    box-shadow: inset 0 0 0 1px var(--ns-danger-line);
   }
 
   @media (hover: hover) {
-    .ui-btn--danger:hover:not(:disabled) {
-      background: linear-gradient(180deg, #F0666A 0%, #E5484D 50%, #D23A3F 100%);
-      color: #FFFFFF;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 24px -8px rgba(229, 72, 77, 0.6);
-    }
+    .ui-btn--danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.18); }
   }
 
-  /* Botón de sólo ícono: una lenteja de vidrio. */
+  /* Botón de sólo ícono: un círculo gris con el ícono en azul. */
   .ui-icon-btn {
     position: relative;
     display: inline-flex;
@@ -348,72 +216,54 @@
     flex: 0 0 auto;
     border: 0;
     border-radius: 999px;
-    background: var(--glass-sheen), var(--glass-thick);
-    color: var(--ns-text-secondary);
+    background: var(--ns-fill);
+    color: var(--ns-primary);
     cursor: pointer;
-    box-shadow: var(--ui-shadow-sm);
     -webkit-tap-highlight-color: transparent;
-    transition:
-      transform var(--dur-4) var(--ease-liquid),
-      background-color var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out),
-      box-shadow var(--dur-2) var(--ease-out);
+    transition: opacity var(--dur-2) linear, background-color var(--dur-2) linear;
   }
 
-  .ui-icon-btn > * { position: relative; z-index: 1; }
-
   @media (hover: hover) {
-    .ui-icon-btn:hover {
-      color: var(--ns-text);
-      box-shadow: var(--ui-shadow);
-    }
+    .ui-icon-btn:hover { background: var(--ns-fill-strong); }
   }
 
   .ui-icon-btn:active {
-    transform: scale(0.9);
-    transition-duration: var(--dur-1);
+    opacity: 0.55;
+    transition-duration: 0ms;
   }
 
   .ui-icon-btn--active {
-    background: var(--ns-primary-bg-hover);
+    background: var(--ns-primary-bg);
     color: var(--ns-primary);
   }
 
-  /* ═══════════════ CAMPOS ═══════════════ */
+  /* ═══════════════ CAMPOS ═══════════════
+     El relleno gris de los campos de iOS, sin borde. */
 
   .ui-field {
     display: block;
     width: 100%;
     min-height: 44px;
-    padding: 11px 15px;
+    padding: 11px 14px;
     border: 0;
-    border-radius: var(--ns-radius-md);
-    background: var(--ns-sunken);
+    border-radius: 12px;
+    background: var(--ns-fill);
     color: var(--ns-text);
     font-family: inherit;
-    font-size: 0.9375rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 400;
     letter-spacing: -0.01em;
-    box-shadow: var(--ui-field);
     outline: none;
-    transition:
-      background-color var(--dur-2) var(--ease-out),
-      box-shadow var(--dur-2) var(--ease-out);
+    transition: box-shadow var(--dur-2) linear, background-color var(--dur-2) linear;
   }
 
   .ui-field::placeholder {
     color: var(--ns-text-faint);
-    font-weight: 450;
-  }
-
-  @media (hover: hover) {
-    .ui-field:hover:not(:disabled):not(:focus) {
-      background: rgba(118, 128, 152, 0.15);
-    }
+    font-weight: 400;
   }
 
   .ui-field:focus {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--ns-paper);
     box-shadow: var(--ui-field-focus);
   }
 
@@ -425,17 +275,16 @@
   .ui-field-group {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 4px 8px 4px 15px;
-    border-radius: var(--ns-radius-md);
-    background: var(--ns-sunken);
+    gap: 8px;
+    padding: 4px 8px 4px 12px;
+    border-radius: 12px;
+    background: var(--ns-fill);
     color: var(--ns-text-muted);
-    box-shadow: var(--ui-field);
-    transition: background-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+    transition: box-shadow var(--dur-2) linear, background-color var(--dur-2) linear;
   }
 
   .ui-field-group:focus-within {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--ns-paper);
     box-shadow: var(--ui-field-focus);
   }
 
@@ -447,24 +296,22 @@
     background: transparent;
     color: var(--ns-text);
     font: inherit;
-    font-size: 0.9375rem;
-    font-weight: 500;
+    font-size: 1rem;
     outline: none;
   }
 
-  /* Interruptor del sistema: el pomo salta con el resorte. */
+  /* Interruptor de iOS. */
   .ui-switch {
     position: relative;
     flex: 0 0 auto;
-    width: 52px;
-    height: 32px;
+    width: 51px;
+    height: 31px;
     border: 0;
     padding: 0;
     border-radius: 999px;
-    background: rgba(118, 128, 152, 0.28);
+    background: rgba(120, 120, 128, 0.16);
     cursor: pointer;
-    box-shadow: inset 0 1px 2px rgba(20, 30, 70, 0.12);
-    transition: background-color var(--dur-3) var(--ease-out);
+    transition: background-color 250ms ease;
   }
 
   .ui-switch::after {
@@ -472,81 +319,64 @@
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 28px;
-    height: 28px;
+    width: 27px;
+    height: 27px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F4F6FA 100%);
-    box-shadow: 0 3px 8px rgba(20, 30, 70, 0.2), 0 1px 1px rgba(20, 30, 70, 0.1), inset 0 -1px 0 rgba(20, 30, 70, 0.04);
-    transition: transform var(--dur-4) var(--ease-bounce), width var(--dur-2) var(--ease-out);
+    background: #FFFFFF;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
+    transition: translate 250ms var(--ease-out);
   }
 
-  .ui-switch:active::after { width: 33px; }
-  .ui-switch.is-on:active::after { transform: translateX(15px); }
-
-  .ui-switch.is-on {
-    background: linear-gradient(180deg, #34B06C 0%, #259C5B 100%);
-  }
-
-  .ui-switch.is-on::after { transform: translateX(20px); }
+  .ui-switch.is-on { background: var(--ns-success-solid); }
+  .ui-switch.is-on::after { translate: 20px 0; }
 
   /* ═══════════════ SEGMENTADO ═══════════════
-     La opción elegida no se pinta: se le pone encima una lente de
-     vidrio que viaja de una opción a otra (ver ui/Lente.jsx). */
+     El control segmentado de iOS: una bandeja gris y la opción
+     elegida en blanco. */
 
   .ui-segment {
     position: relative;
     display: inline-flex;
-    gap: 2px;
-    padding: 3px;
+    gap: 0;
+    padding: 2px;
     border-radius: 999px;
-    background: var(--ns-sunken);
-    box-shadow: var(--ui-field-sm);
+    background: var(--ns-fill);
   }
 
   .ui-segment > button {
     position: relative;
     isolation: isolate;
     flex: 1;
-    min-height: 38px;
-    padding: 0 15px;
+    min-height: 36px;
+    padding: 0 14px;
     border: 0;
     border-radius: 999px;
     background: transparent;
-    color: var(--ns-text-muted);
+    color: var(--ns-text);
     font-family: inherit;
     font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: -0.008em;
+    font-weight: 500;
+    letter-spacing: -0.006em;
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: color var(--dur-2) var(--ease-out);
   }
 
-  @media (hover: hover) {
-    .ui-segment > button:hover { color: var(--ns-text-secondary); }
-  }
-  .ui-segment > button.is-active { color: var(--ns-text); }
+  .ui-segment > button.is-active { font-weight: 600; }
 
   /* Si la opción activa no trae lente (código viejo), se pinta sola. */
   .ui-segment > button.is-active:not(:has(.ui-lens)) {
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 1px 3px rgba(20, 30, 70, 0.12), 0 3px 10px -2px rgba(20, 30, 70, 0.1), inset 0 1px 0 #FFFFFF;
+    background: #FFFFFF;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
   }
 
-  /* La lente. Se posiciona sobre la opción activa y framer-motion la
-     hace viajar a la siguiente cuando cambia. */
   .ui-lens {
     position: absolute;
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.86) 100%);
-    box-shadow:
-      0 1px 3px rgba(20, 30, 70, 0.12),
-      0 4px 12px -2px rgba(20, 30, 70, 0.12),
-      inset 0 1px 0 #FFFFFF,
-      inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    background: #FFFFFF;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
     pointer-events: none;
   }
 
@@ -555,112 +385,80 @@
   .ui-chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
+    gap: 5px;
+    padding: 3px 9px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--ns-fill);
     color: var(--ns-text-secondary);
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: -0.004em;
+    letter-spacing: 0;
     white-space: nowrap;
-    box-shadow: inset 0 0 0 1px rgba(118, 128, 152, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   .ui-chip--solid {
     background: var(--ns-success-bg);
     color: var(--ns-success);
-    box-shadow: inset 0 0 0 1px var(--ns-success-line);
   }
 
   .ui-chip--outline {
     background: var(--ns-warning-bg);
     color: var(--ns-warning);
-    box-shadow: inset 0 0 0 1px var(--ns-warning-line);
   }
 
   .ui-chip--soft {
     background: var(--ns-primary-bg);
-    color: var(--ns-primary-dark);
-    box-shadow: inset 0 0 0 1px var(--ns-primary-line);
+    color: var(--ns-primary);
   }
 
   .ui-chip--quiet {
-    background: var(--ns-sunken);
+    background: var(--ns-fill);
     color: var(--ns-text-muted);
-    box-shadow: none;
   }
 
   .ui-chip--danger {
     background: var(--ns-danger-bg);
     color: var(--ns-danger);
-    box-shadow: inset 0 0 0 1px var(--ns-danger-line);
   }
 
   .ui-chip--cancelled {
     background: var(--ns-danger-bg);
     color: var(--ns-danger);
-    box-shadow: inset 0 0 0 1px var(--ns-danger-line);
     text-decoration: line-through;
     text-decoration-thickness: 1.5px;
   }
 
-  /* ═══════════════ ÍCONOS EN CÁPSULA ═══════════════
-     Vidrio teñido: el color del ícono se diluye en el relleno. */
+  /* ═══════════════ ÍCONOS EN CUADRO ═══════════════
+     Como los íconos de Ajustes: un cuadro de color sólido con el
+     ícono en blanco. */
 
   .ui-pod {
     position: relative;
     display: grid;
     place-items: center;
     flex: 0 0 auto;
-    width: 42px;
-    height: 42px;
-    border-radius: var(--ns-radius-md);
-    background: linear-gradient(180deg, rgba(0, 122, 255, 0.18) 0%, rgba(0, 122, 255, 0.09) 100%);
-    color: var(--ns-primary);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(0, 122, 255, 0.12);
-    transition: transform var(--dur-4) var(--ease-liquid);
-  }
-
-  .ui-pod--sm { width: 32px; height: 32px; border-radius: var(--ns-radius-sm); }
-  .ui-pod--lg { width: 54px; height: 54px; border-radius: 18px; }
-
-  .ui-pod--green {
-    background: linear-gradient(180deg, rgba(37, 156, 91, 0.2), rgba(37, 156, 91, 0.1));
-    color: var(--ns-success);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(37, 156, 91, 0.14);
-  }
-
-  .ui-pod--amber {
-    background: linear-gradient(180deg, rgba(224, 145, 18, 0.22), rgba(224, 145, 18, 0.1));
-    color: var(--ns-warning);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(224, 145, 18, 0.16);
-  }
-
-  .ui-pod--violet {
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
-    color: var(--ns-highlight);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(139, 92, 246, 0.14);
-  }
-
-  .ui-pod--teal {
-    background: linear-gradient(180deg, rgba(14, 156, 156, 0.2), rgba(14, 156, 156, 0.1));
-    color: var(--ns-teal);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(14, 156, 156, 0.14);
-  }
-
-  .ui-pod--brand {
-    background: var(--ns-gradient-1);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--ns-primary);
     color: #FFFFFF;
-    box-shadow: var(--ui-brand-sm);
   }
+
+  .ui-pod--sm { width: 30px; height: 30px; border-radius: 8px; }
+  .ui-pod--lg { width: 52px; height: 52px; border-radius: 13px; }
+
+  .ui-pod--green  { background: var(--ns-success-solid); color: #FFFFFF; }
+  .ui-pod--amber  { background: var(--ns-warning-solid); color: #FFFFFF; }
+  .ui-pod--violet { background: var(--ns-highlight-solid); color: #FFFFFF; }
+  .ui-pod--teal   { background: #0E9C9C; color: #FFFFFF; }
+  .ui-pod--brand  { background: var(--ns-primary); color: #FFFFFF; }
 
   .ui-pod--sunken {
-    background: var(--ns-sunken);
+    background: var(--ns-fill);
     color: var(--ns-text-muted);
-    box-shadow: var(--ui-field-sm);
   }
 
+  /* Avatar de Contactos: el círculo gris con las iniciales. */
   .ui-avatar {
     position: relative;
     display: grid;
@@ -669,69 +467,71 @@
     width: 40px;
     height: 40px;
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
-    color: var(--ns-text-secondary);
-    font-weight: 650;
+    background: linear-gradient(180deg, #A9B0BD 0%, #868D9A 100%);
+    color: #FFFFFF;
+    font-weight: 600;
     font-size: 0.9375rem;
-    letter-spacing: -0.01em;
-    box-shadow: var(--ui-shadow-sm);
+    letter-spacing: 0;
   }
 
-  .ui-avatar--brand {
-    background: var(--ns-gradient-1);
-    color: #FFFFFF;
-    box-shadow: var(--ui-brand-sm);
+  .ui-avatar--brand { background: var(--ns-primary); }
+
+  .ui-avatar--grande {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
   }
 
   /* ═══════════════ LISTAS ═══════════════ */
 
   .ui-list {
     position: relative;
-    border-radius: var(--ns-radius-xl);
-    background: var(--glass-sheen), var(--glass);
-    box-shadow: var(--ui-shadow);
+    border-radius: var(--ns-radius-lg);
+    background: var(--ns-paper);
     overflow: hidden;
   }
 
   .ui-list__row {
     position: relative;
-    z-index: 1;
     display: flex;
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 14px 18px;
+    min-height: 48px;
+    padding: 11px 16px;
     text-align: left;
     background: transparent;
-    transition: background-color var(--dur-2) var(--ease-out);
   }
 
-  /* El separador arranca después del ícono, como en iOS. */
-  .ui-list__row + .ui-list__row {
-    box-shadow: inset 60px 0 0 -59px transparent, inset 0 1px 0 var(--ns-line);
+  /* El separador arranca después del margen, como en iOS. */
+  .ui-list__row + .ui-list__row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 0;
+    height: 0.5px;
+    background: var(--ns-separator);
   }
 
   .ui-list__row--interactive { cursor: pointer; }
-  @media (hover: hover) {
-    .ui-list__row--interactive:hover { background: rgba(255, 255, 255, 0.4); }
-  }
-  .ui-list__row--interactive:active { background: var(--ns-sunken); }
+  .ui-list__row--interactive:active { background: var(--ns-pressed); }
 
   /* ═══════════════ TEXTO ═══════════════ */
 
   .ui-eyebrow {
     display: block;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: -0.004em;
     color: var(--ns-text-muted);
   }
 
   .ui-title {
     font-family: var(--font-display);
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    letter-spacing: -0.022em;
+    letter-spacing: -0.02em;
     color: var(--ns-text);
   }
 
@@ -740,7 +540,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   /* Título grande, como la cabecera de una app de iOS. */
@@ -749,85 +549,75 @@
     align-items: center;
     gap: 10px;
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: 2.125rem;
     font-weight: 700;
-    letter-spacing: -0.028em;
-    line-height: 1.08;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
     color: var(--ns-text);
-  }
-
-  @media (min-width: 768px) {
-    .ui-head__title { font-size: 2.125rem; }
   }
 
   .ui-metric {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
     color: var(--ns-text);
     font-variant-numeric: tabular-nums;
   }
 
   .ui-stat__label {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: -0.004em;
+    font-size: 0.8125rem;
+    font-weight: 500;
     color: var(--ns-text-muted);
   }
 
   .ui-stat__value {
     display: block;
-    margin-top: 6px;
+    margin-top: 4px;
     font-family: var(--font-display);
-    font-size: 1.875rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
     color: var(--ns-text);
     font-variant-numeric: tabular-nums;
-    line-height: 1.05;
+    line-height: 1.1;
   }
 
   .ui-stat__foot {
     display: block;
-    margin-top: 5px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--ns-text-faint);
+    margin-top: 4px;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--ns-text-muted);
   }
 
   .ui-tip {
-    margin-top: 7px;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    font-weight: 450;
+    margin-top: 6px;
+    font-size: 0.8125rem;
+    line-height: 1.45;
     color: var(--ns-text-muted);
   }
 
   .ui-divider {
-    height: 1px;
-    background: var(--ns-line);
+    height: 0.5px;
+    background: var(--ns-separator);
   }
 
-  .ns-gradient-text {
-    background: linear-gradient(120deg, #007AFF 0%, #5B6CFF 55%, #8B5CF6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+  /* Quedó de la etapa anterior: ya no es un degradé, es el azul. */
+  .ns-gradient-text { color: var(--ns-primary); }
 
   /* ═══════════════ ESTADO VACÍO ═══════════════ */
 
   .ui-empty {
-    padding: 34px 22px;
+    padding: 32px 20px;
     text-align: center;
   }
 
   .ui-empty__title {
     font-family: var(--font-display);
     font-size: 1.0625rem;
-    font-weight: 650;
+    font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--ns-text);
   }
@@ -835,27 +625,25 @@
   .ui-empty__text {
     max-width: 36ch;
     margin: 6px auto 16px;
-    font-size: 0.875rem;
-    line-height: 1.55;
+    font-size: 0.9375rem;
+    line-height: 1.45;
     color: var(--ns-text-muted);
   }
 
   /* ═══════════════ PROGRESO ═══════════════ */
 
   .ui-progress {
-    height: 7px;
+    height: 6px;
     border-radius: 999px;
-    background: var(--ns-sunken);
-    box-shadow: inset 0 1px 2px rgba(20, 30, 70, 0.08);
+    background: var(--ns-fill);
     overflow: hidden;
   }
 
   .ui-progress__fill {
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #4DA2FF 0%, #007AFF 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 0 12px rgba(0, 122, 255, 0.35);
-    transition: width var(--dur-5) var(--ease-liquid);
+    background: var(--ns-primary);
+    transition: width var(--dur-4) var(--ease-out);
   }
 
   .ui-progress--indeterminate .ui-progress__fill {
@@ -863,21 +651,14 @@
     animation: ns-slide 1.25s var(--ease-in-out) infinite;
   }
 
-  /* Barra de gráfico: una columna de vidrio azul. */
+  /* Barra de gráfico. */
   .ui-bar {
-    border-radius: 8px 8px 5px 5px;
-    background: linear-gradient(180deg, #4DA2FF 0%, #007AFF 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 14px -6px rgba(0, 122, 255, 0.55);
-    transition:
-      height var(--dur-5) var(--ease-liquid),
-      opacity var(--dur-2) var(--ease-out),
-      filter var(--dur-2) var(--ease-out);
+    border-radius: 6px 6px 3px 3px;
+    background: var(--ns-primary);
+    transition: height var(--dur-4) var(--ease-out), opacity var(--dur-2) linear;
   }
 
-  .ui-bar--quiet {
-    background: linear-gradient(180deg, rgba(118, 128, 152, 0.32), rgba(118, 128, 152, 0.2));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  }
+  .ui-bar--quiet { background: var(--ns-fill-strong); }
 
   /* ═══════════════ ESPERA ═══════════════ */
 
@@ -885,62 +666,14 @@
     width: 20px;
     height: 20px;
     border-radius: 999px;
-    border: 2.5px solid rgba(118, 128, 152, 0.22);
-    border-top-color: var(--ns-primary);
-    animation: ns-spin 0.7s linear infinite;
+    border: 2.5px solid rgba(120, 120, 128, 0.2);
+    border-top-color: var(--ns-text-muted);
+    animation: ns-spin 0.8s linear infinite;
   }
 
   .ui-spinner--sm {
     width: 15px;
     height: 15px;
     border-width: 2px;
-  }
-
-  /* ═══════════════ LUZ Y ONDA AL TOCAR ═══════════════
-     Lo inserta useRippleGlobal dentro del elemento tocado. El contenedor
-     recorta con el radio del botón; la luz sigue al dedo mientras está
-     apoyado y la onda sale una vez desde el punto de contacto. */
-
-  .ui-ripple {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ui-ripple__clip {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    border-radius: inherit;
-    overflow: hidden;
-    pointer-events: none;
-    background: radial-gradient(
-      140px circle at var(--luz-x, 50%) var(--luz-y, 50%),
-      rgba(255, 255, 255, 0.62),
-      rgba(255, 255, 255, 0.2) 35%,
-      rgba(255, 255, 255, 0) 70%
-    );
-    opacity: 1;
-    transition: opacity var(--dur-2) var(--ease-out);
-  }
-
-  @starting-style {
-    .ui-ripple__clip { opacity: 0; }
-  }
-
-  .ui-ripple__clip.is-out {
-    opacity: 0;
-    transition-duration: var(--dur-4);
-  }
-
-  .ui-ripple__wave {
-    position: absolute;
-    border-radius: 999px;
-    transform: scale(0.08);
-    /* El toque en el vidrio no deja una mancha: deja un destello, con
-       el centro blanco y el borde apenas azul para que se vea también
-       sobre el vidrio claro. */
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(0, 122, 255, 0.12) 42%, rgba(0, 122, 255, 0) 68%);
-    pointer-events: none;
-    animation: ns-ripple 0.56s var(--ease-out) forwards;
   }
 }
